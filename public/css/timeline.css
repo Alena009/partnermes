@@ -1,0 +1,113 @@
+.dhx_cal_event_line .dhx_event_resize {
+ padding-bottom:1px;
+ width:5px;
+ display:none
+}
+.dhx_cal_event_line .dhx_event_resize {
+    cursor:w-resize;
+    cursor:ew-resize;
+    background-color:grey;
+    background:grey;
+    width: 5px;
+    position:absolute;
+    top:0;
+    height:100%
+}
+
+.dhx_cal_data table .dhx_cal_event_line, .dhx_cal_event_line {
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    word-break: keep-all;
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 3px;
+}
+
+.dhx_grid_event {
+    background: transparent  !important;
+}
+.dhx_grid_event_selected{
+    color: black !important;
+    background: #c6dee9  !important;
+}
+.dhx_grid_area tr.dhx_grid_event:nth-child(2n){
+    background: rgb(237, 237, 237)  !important;
+}
+
+
+.dhx_matrix_scell .dhx_scell_level5 {
+    padding-left: 80px;
+}
+.dhx_matrix_scell .dhx_scell_level6 {
+    padding-left: 95px;
+}
+.dhx_matrix_scell .dhx_scell_level7 {
+    padding-left: 110px;
+}
+.dhx_matrix_scell .dhx_scell_level8 {
+    padding-left: 115px;
+}
+.dhx_matrix_scell .dhx_scell_level9 {
+    padding-left: 130px;
+}
+.dhx_matrix_scell .dhx_scell_level10 {
+    padding-left: 145px;
+}
+
+.dhx_matrix_scell.folder .dhx_scell_name {
+    float: left;
+    width: 85%;
+    color: #0288d1;
+    text-transform: uppercase;
+    text-align: left;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dhx_minical_icon {
+    cursor: pointer;
+    background-color: none;
+    background-image: url(imgs_dhx_material/arrow_left.svg);
+    background-position: center center;
+    background-repeat: no-repeat;
+    right: 210px !important;
+    top: 10px  !important;
+    left: auto !important;
+    width: 40px !important;
+    height: 40px !important;
+    background-position: center center;
+    border: 1px solid transparent;
+    border-radius: 5px 0 0 5px;
+}
+
+.dhx_cal_ltext.doubleEditor {
+    position: relative;
+    top: -2px;
+    height:80px;
+    margin: 0 0 0 117px;
+}
+
+.dhx_cal_ltext.doubleEditor{
+    line-height: 40px;
+}
+
+.dhx_cal_ltext.doubleEditor input{
+    width: 100%;
+    padding: 2px;
+    box-sizing: border-box;
+    height: 30px;
+    margin:  0;
+    text-overflow: ellipsis;
+}
+
+.dhx_cal_ltext.doubleEditor input:first-child {
+     width: 271px;
+     top: -2px;
+     margin:  0;
+}
+
+.dhxsidebar_base_dhx_web div.dhxsidebar_cont div.dhx_cell_sidebar div.dhx_cell_toolbar_def {
+    padding: 0;
+}

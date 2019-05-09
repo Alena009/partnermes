@@ -1,0 +1,32 @@
+.dhxform_obj_dhx_web div.dhxform_label{
+    font-family: Tahoma,Helvetica;
+    font-size: 32px;
+    color: #000;
+    overflow-x: hidden;
+    overflow: hidden;
+    white-space: nowrap;
+
+}
+.dhxform_obj_dhx_web, div.dhxcombo_dhx_web {
+    font-size: 32px !important;
+    line-height: 32px !important;
+    font-family: Tahoma,Helvetica;
+}
+div.dhxcombo_dhx_web {
+    height:40px;
+}
+input.dhxcombo_input {
+    font-size: 32px !important;
+    line-height: 32px !important;
+    height:38px;
+}
+div.dhxcombo_dhx_web input.dhxcombo_input{
+    height: 38px;
+    font-size: 32px !important;
+}
+
+
+.dhxform_obj_dhx_web div.dhxform_btn{
+    height: 50px;
+    padding: auto;
+}

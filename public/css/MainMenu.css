@@ -1,0 +1,22 @@
+.x-btn.MainMenu{
+	border-radius: 0px;
+	border:none;
+	height:22px;
+	padding: 0;
+	font:normal 11px arial,tahoma, helvetica, sans-serif;
+}
+.x-btn.MainMenu.x-btn-inner{
+    color:#002;    
+}
+.x-btn.MainMenu.x-menu-icon-separator,
+.x-btn.MainMenu.x-btn-icon-el{
+	display:none;
+}
+.x-btn.MainMenu.x-btn-menu-active,
+.x-btn.MainMenu.x-btn-over,
+.x-btn.MainMenu.x-btn-menu-active .x-btn-inner,
+.x-btn.MainMenu.x-btn-over .x-btn-inner{
+	border:none;
+	color: #FFF;
+	background: #02009F;
+} 

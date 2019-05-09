@@ -1,0 +1,24 @@
+div.gridbox_dhx_web.gridbox table.hdr td div.hdrcell {
+    width: auto;
+    padding-left: 2px;
+}
+div.gridbox_dhx_web.gridbox table.hdr td {
+    padding: 2px 0 2px 0;
+    background-color: rgb(61, 160, 227);
+    line-height: 14px;
+    color:white;
+    font-weight: bold;
+}
+div.gridbox_dhx_web.gridbox table.hdr .hdrcell.filter * {
+    font-size: 10px;
+}
+div.gridbox_dhx_web.gridbox .xhdr,
+div.gridbox_dhx_web.gridbox table.hdr tr
+{
+    background-color: rgb(61, 160, 227);
+}
+div.gridbox_dhx_web.gridbox table.hdr * {
+    background-color: rgb(61, 160, 227);;
+}
+div.gridbox_dhx_web.gridbox table.hdr td{
+}

@@ -1,0 +1,53 @@
+.x-grid-with-row-lines .x-grid-item.x-grid-item-selected {
+    border-style: solid;
+    border-color: #f2e3b2;
+}
+.x-grid-item .row-ruck .x-grid-cell{
+	background-color: rgba(242, 218, 240, 0.8);
+}
+
+.x-grid-item-alt .row-ruck .x-grid-cell{
+	background-color: rgba(242, 218, 240, 0.6);
+}
+
+.storno .x-grid-cell{
+	color:red;
+}
+.row-truc .x-grid-cell{
+	background-color: rgba(180,240,180, 0.6);
+	
+}
+.row-tabg .x-grid-cell{
+	background-color: rgba(240,180,180, 0.6);
+	text-decoration: line-through;
+	color: #888888;
+}
+.dowyslania .x-grid-cell{
+	font-weight: bold;
+	
+}
+
+.x-tip {
+    width: auto !important;
+}
+
+.x-tip-body {
+    width: auto !important;
+}
+
+.x-tip-body span {
+    width: auto !important;
+}
+
+.x-grid-row-summary .x-grid-cell, .x-grid-row-summary .x-grid-rowwrap, .x-grid-row-summary .x-grid-cell-rowbody {
+    border-top-color: #000000; !important;
+    background-color: #888 !important;
+    color: #FFFFFF !important;
+	font-weight:bold; !important;
+}
+
+.x-grid-cell-inner, .x-selectable {
+    -moz-user-select: text !important;
+    -khtml-user-select: text !important;
+    -webkit-user-select: text !important;
+}

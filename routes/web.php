@@ -14,3 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::post('/logged', 'Auth\LoginController@isLogged');
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

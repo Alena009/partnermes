@@ -43,8 +43,8 @@ function appInit() {
 	mainToolbar.attachEvent("onClick", function(id) {
 		console.log('mainToolbar.onClick',arguments);
 		if (id='logoout'){
-			ajaxGet('login/logout',function(){
-				location.reload();
+			ajaxPost('logout','',function(){                            
+                            location.reload();
 			});
 		}
 	});
@@ -85,10 +85,10 @@ function loginFormShow(callback2={}){
 		w1.button("park").hide();
 		w1.button("close").disable();
 		w1.show();
-		w1.centerOnScreen();
+		w1.centerOnScreen();                
 		var loginFormData = [
 			{type: "settings", position: "label-left", labelWidth: 75, inputWidth: 150},
-			{type: "block", blockOffset: 30, offsetTop: 5, width: "auto", list: [
+			{type: "block", blockOffset: 30, offsetTop: 5, width: "auto", list: [                                
 				{type: "input", label: "Login", name: "login", value: "", offsetTop: 5},
 				{type: "password", label: "Hasło", name: "password", value: ""},
 				{type: "button", name: "submit", value: "Zaloguj", offsetTop: 5, offsetLeft: 72}
@@ -101,12 +101,13 @@ function loginFormShow(callback2={}){
 		loginForm.callback = callback2;
 		loginForm.weryfikuj = function(id){
 			var data = loginForm.getFormData();
-			dhx.ajax.post("login/validate","login="+data.login+"&password="+data.password,function(r){
-				var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
-				if (data.success===true){
+                        var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');                                                        
+			dhx.ajax.post("login","login="+data.login+"&password="+data.password+"&_token="+csrf_token,function(r){                            
+				var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;                                
+				if (data.success===true){                                    
 					w1.hide();
 					if (loginForm.callback.success && isFunction(loginForm.callback.success)){
-						loginForm.callback['success']();
+						loginForm.callback['success']();                                                
 					}else{
 						if (loginForm.callback && isFunction(loginForm.callback)){
 							loginForm.callback();
@@ -136,8 +137,9 @@ function loginFormShow(callback2={}){
 }
 
 function logged(){
-	dhx.ajax.post("api/login/logged",function(r){
-		var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
+    var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+	dhx.ajax.post("logged","_token="+csrf_token,function(r){
+		var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;                
 		if (data.success===true){
 			console.log('Zalogowany');
 			appInit();
@@ -209,12 +211,12 @@ function ajaxPost(url,params,callback){
 				var data = (window.JSON && JSON.parse("["+str+"]")) ? JSON.parse("["+str+"]") : false;
 				var success = (data && data[0] && data[0].success) ? (data[0].success) : false;
 
-				if (data && success){
-					if (callback && callback.success){
+				if (data && success){                                    
+					if (callback && callback.success){                                            
 						callback['success'](data);
-					}else if (callback){
+					}else if (callback){                                            
 						callback(data);
-					}else{
+					}else{                                            
 						return data;
 					}
 				}else if (data && !success && data.code==402){

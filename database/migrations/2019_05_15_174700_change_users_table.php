@@ -28,7 +28,7 @@ class ChangeUsersTable extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {           
             $table->dropColumn('kod');
             $table->dropColumnt('firstname');
             $table->dropColumn('lastname');

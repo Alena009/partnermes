@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
@@ -17,8 +18,12 @@ class LoginController extends Controller
     | to conveniently provide its functionality to your applications.
     |
     */
-
-    use AuthenticatesUsers;
+  
+    use AuthenticatesUsers 
+    {
+        login as private userLogin;
+        logout as private userLogout;
+    }
 
     /**
      * Where to redirect users after login.
@@ -35,5 +40,65 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+    
+    /**
+     * Change default authentification field from "email" to "login"
+     */
+    public function username()
+    {
+        return 'login';
+    }
+    
+    /**
+     * Is user logged?
+     * 
+     */
+    public function isLogged()
+    {
+        if (\Auth::check())
+        {
+            echo json_encode(array(
+                "success"	=> true
+            ));
+        } else {
+            echo json_encode(array(
+                "success"	=> false
+            ));            
+        }
+    }
+    
+    /**
+     * Rewrite logout() method from AuthenticatesUsers.
+     * Response in JSON-format is needed for front-end.
+     * 
+     */
+    function logout(Request $request)
+    {
+        $this->userLogout($request);
+                
+        return $this->loggedOut($request) ?: 
+                json_encode(array(
+                    'success' => true                    
+                )); 
+    }
+    
+    /**
+     * Rewrite login() method from AuthenticatesUsers.
+     * @param Request $request
+     * @return redirect(if success) or json(if false)
+     */
+    function login(Request $request) {        
+        if(\Auth::attempt(['login'=>$request['login'],'password'=>$request['password']])) 
+        {
+            return json_encode(array(
+            "success"	=> true
+        )); 
+        } else {
+            echo json_encode(array(
+                    "success"	=> false,
+                    "message"	=> "Hasło i/lub login błędne"
+            ));              
+        }        
     }
 }

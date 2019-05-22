@@ -13,18 +13,18 @@ function pracownicyInit(cell) {
 		console.log(pracownicyLayout.listAutoSizes());
 		pracownicyLayout.setAutoSize("a");
 		var grupyTree = pracownicyLayout.cells("a").attachTreeView({
-			skin: "dhx_terrace",  // string, optional, treeview's skin
+			skin: "dhx_terrace",    // string, optional, treeview's skin
 			iconset: "font_awesome", // string, optional, sets the font-awesome icons
 			multiselect: false,           // boolean, optional, enables multiselect
 			checkboxes: true,           // boolean, optional, enables checkboxes
 			dnd: true,           // boolean, optional, enables drag-and-drop
 			context_menu: true,           // boolean, optional, enables context menu
-			json: 'pracownicy/grupyTree',
+			json: 'workers_group',
 		});
 		grupyTree.attachEvent("onBeforeDrag",function(id){
 			console.log("grupyTree.onBeforeDrag", arguments);
 			return true;
-		});		
+		});
 		grupyTree.attachEvent("onDragOver",function(id){
 			console.log("grupyTree.onDragOver", arguments);
 			return true;
@@ -41,14 +41,14 @@ function pracownicyInit(cell) {
 			pracownicyGrid.clearAll();
 			pracownicyGrid.zaladuj(id);
 			return true;
-		});	
+		});
 
 		grupyTree.attachEvent("onCheck",function(id){
 			var grupy=grupyTree.getAllChecked();
 			pracownicyGrid.clearAll();
 			pracownicyGrid.zaladuj(grupy);
 			return true;
-		});	
+		});
 		pracownicyGrid = pracownicyLayout.cells("b").attachGrid({
 			image_path:'codebase/imgs/',
 			columns: [{
@@ -80,10 +80,10 @@ function pracownicyInit(cell) {
 		pracownicyGrid.zaladuj = function(i){
 			var ids = Array();
 			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-			var new_data = ajaxPost("pracownicy/list/",'grupy='+ids.join('|'),function(data){
+			var new_data = ajaxGet("workers/"+i,'',function(data){
 				if (data[0] && data[0].rows)
 					pracownicyGrid.parse(data[0], "json");
-			});			
+			});
 		}
 		grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar({
 			iconset: "awesome",
@@ -119,13 +119,13 @@ function pracownicyInit(cell) {
 						height:200,
 						center:true,
 						onClose:function(){
-							
+
 						}
 					});
 					console.log(pracownicyLayout);
-					grupyForm = pracownicyLayout.cells('w1').attachForm(grupyFormData, true);		
+					grupyForm = pracownicyLayout.cells('w1').attachForm(grupyFormData, true);
 					grupyForm.bind(grupyTree);
-		
+
 				};break;
 				case 'Edit':{
 					console.log('Zmien grupe');
@@ -149,7 +149,7 @@ function pracownicyInit(cell) {
 				{id: "Edit", type: "button", img: "fa fa-edit"},
 				{id: "Del", type: "button", img: "fa fa-minus-square"}
 			]
-		});		
+		});
 		// pracownicyGrid.attachEvent("onRowSelect", pracownicyFillForm);
 		// pracownicyGrid.attachEvent("onRowInserted", pracownicyGridBold);
 		//
@@ -173,7 +173,7 @@ function pracownicyInit(cell) {
 		// 	console.log(JSON.stringify(grupy));
 		// 	//console.log(base64Encode(JSON.stringify(grupy)));
 		// 	console.log(args);
-		// });	
+		// });
 	}
 
 	pracownicyGrid.zaladuj(0);

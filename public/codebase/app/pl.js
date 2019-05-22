@@ -11,7 +11,7 @@ window.dhx4.dateStrings = {
         monthShortName : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
         dayFullName : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
         dayShortName : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
-    }    
+    }
 };
 
 dhtmlXCalendarObject.prototype.lang = "pl";
@@ -39,5 +39,6 @@ dhtmlXCalendarObject.prototype.langData = {
         weekname : "w",
         today : "Today",
         clear : "Clear"
-    }    
+    }
 };
+

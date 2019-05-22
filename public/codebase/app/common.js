@@ -5,7 +5,7 @@ var A = {
 	server: "server/",
 	cache: true,
 	modules: {
-		dhtmlx: ["dhtmlx",
+		dhtmlx: ["dhtmlx.debug",
 //				"sources/dhtmlxCombo/codebase/dhtmlxcombo",
 				"sources/dhtmlxScheduler/codebase/dhtmlxscheduler",
 				"sources/dhtmlxScheduler/codebase/dhtmlxscheduler_timeline",

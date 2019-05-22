@@ -13,15 +13,19 @@
     <link rel="stylesheet" type="text/css" href="codebase/css/common.css" />
     <link rel="stylesheet" type="text/css" href="codebase/css/loader.css" />
     <link rel="stylesheet" type="text/css" href="codebase/dhtmlx/skins/web/dhtmlx.css" />
-    <link rel="stylesheet" type="text/css"
-        href="codebase/dhtmlx/sources/dhtmlxScheduler/codebase/dhtmlxscheduler_material.css" />
-    <link rel="stylesheet" type="text/css" href="css/timeline.css" />
-    <link rel="stylesheet" type="text/css" href="css/zlecenia.css" />
-    <link rel="stylesheet" type="text/css" href="codebase/fonts/font_roboto/roboto.css" />
-    <link rel="stylesheet" type="text/css" href="codebase/fonts/font_awesome/css/font-awesome.min.css" />
     <script type="text/javascript" src="codebase/require/require.js"></script>
     <script type="text/javascript" src="codebase/app/loader.js"></script>
-    <script type="text/javascript" src="codebase/app/common.js"></script>
+    @if (Auth::check())
+        <link rel="stylesheet" type="text/css"
+            href="codebase/dhtmlx/sources/dhtmlxScheduler/codebase/dhtmlxscheduler_material.css" />
+        <link rel="stylesheet" type="text/css" href="css/timeline.css" />
+        <link rel="stylesheet" type="text/css" href="css/zlecenia.css" />
+        <link rel="stylesheet" type="text/css" href="codebase/fonts/font_roboto/roboto.css" />
+        <link rel="stylesheet" type="text/css" href="codebase/fonts/font_awesome/css/font-awesome.min.css" />
+        <script type="text/javascript" src="codebase/app/common.js"></script>
+    @else
+        <script type="text/javascript" src="codebase/app/login.js"></script>
+    @endif
     <style>
         div#vp {
             border: 1px solid #cecece;
@@ -38,6 +42,4 @@
 </head>
 
 <body>
-    <form id="loginForm" action="api/login/validate" method="POST">
-    </form>
 </body>

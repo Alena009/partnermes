@@ -15,7 +15,7 @@ function hideLoader() {
 	} else {
 		unloadLoader();
 	}
-	
+
 }
 function unloadLoader(e) {
 	if (A.loader.tr.transProp != false) {

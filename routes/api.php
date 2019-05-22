@@ -13,10 +13,10 @@ use Illuminate\Http\Request;
 |
 */
 
+Route::resource('/workers', 'WorkersController');
 Route::group([
     'middleware' => ['auth:api']
 ], function () {
-    Route::resource('/workers', 'WorkersController');
     Route::get('/user', function (Request $request) {
         return $request->user();
     });

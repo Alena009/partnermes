@@ -101,7 +101,7 @@ function loginFormShow(callback2={}){
 		loginForm.callback = callback2;
 		loginForm.weryfikuj = function(id){
 			var data = loginForm.getFormData();
-                        var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 			dhx.ajax.post("login","login="+data.login+"&password="+data.password+"&_token="+csrf_token,function(r){
 				var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
 				if (data.success===true){
@@ -178,7 +178,10 @@ function isFunction(functionToCheck) {
 }
 
 function ajaxGet(url,params,callback){
-	dhx.ajax.get(url+"?"+params,
+	console.log('ajaxGet');
+	console.log(params);
+    var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+	dhx.ajax.get(url+"?"+"_token="+csrf_token+"&"+params,
 		function(loader, data, xhr){
 			var evs;
 			if (loader.xmlDoc.status == 200) {
@@ -212,7 +215,10 @@ function ajaxGet(url,params,callback){
 	,params);
 }
 function ajaxPost(url,params,callback){
-	console.log(typeof(params));
+	console.log('ajaxPost');
+	console.log(params);
+    var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+	//dhx.ajax.get(url+"?"+"_token="+csrf_token+"&"+params);
 	dhx.ajax.post(url,params,
 		function(loader, data, xhr){
 			var evs;

@@ -12,15 +12,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class BaseRepository
 {
     use SoftDeletes;
-    use FilterTrait;
-    use PaginatorTrait;
-    
+    //use FilterTrait;
+    //use PaginatorTrait;
+
     protected $app;
     protected $model;
 
     protected $defaultOrderBy;
     protected $primaryOrderBy;
-    protected $orderBy;    
+    protected $orderBy;
 
     public function __construct(Application $app)
     {
@@ -71,7 +71,7 @@ class BaseRepository
                     $my_query->whereNull($key);
                 }else{
                     $my_query->whereIn($key, $values);
-                }                
+                }
             }
             if (strtolower($key) == 'limit') {
                 $limit = (int) $value;
@@ -101,20 +101,20 @@ class BaseRepository
                         $columns= $this->model->getFillable();
                         foreach ($columns as $ff){
                             $type = \DB::getSchemaBuilder()->getColumnType($this->model->getTable(), $ff);
-                            if ($type =='string') $my_query->orWhere($ff, $like, $f['value'] . '%');                      
-                            else if ($type =='integer' && is_int($f['value'])) $my_query->Where($ff,"=",$f['value']);                     
+                            if ($type =='string') $my_query->orWhere($ff, $like, $f['value'] . '%');
+                            else if ($type =='integer' && is_int($f['value'])) $my_query->Where($ff,"=",$f['value']);
                         }
                     }else{
                         //\Log::debug(['f'=>$f]);
                         $type = \DB::getSchemaBuilder()->getColumnType($this->model->getTable(), $f['property']);
                         //\Log::debug(['type'=>$type]);
-                        if ($type =='string') $my_query->orWhere($f['property'], $like, $f['value'] . '%');                      
-                        else if ($type =='integer'  && is_int($f['value'])) $my_query->Where($f['property'],"=",$f['value']);                      
+                        if ($type =='string') $my_query->orWhere($f['property'], $like, $f['value'] . '%');
+                        else if ($type =='integer'  && is_int($f['value'])) $my_query->Where($f['property'],"=",$f['value']);
                     }
                 }
             }
             //where('book_name', 'LIKE', '%' . $input . '%')
-            //->orWhere('another_column', 'LIKE', '%' . $input . '%')            
+            //->orWhere('another_column', 'LIKE', '%' . $input . '%')
         }
 
         $return['total'] = $my_query->get()->count();
@@ -149,10 +149,10 @@ class BaseRepository
         $relationships = $withRelations ? $this->model->getRelationships() : false;
         if (is_array($relationships)) {
             return $this->model::with($relationships)->findOrFail($id, $columns);
-        }        
+        }
         return $this->model->findOrFail($id, $columns);
     }
-    
+
     public function findAll($field,$value)
     {
         $relationships = $this->model->getRelationships();
@@ -164,12 +164,12 @@ class BaseRepository
                 });
             }
             return $data->get();
-        }        
+        }
         return $this->model->findOrFail($id, $columns);
-    }    
+    }
 
     public function create(array $attributes)
-    {   
+    {
         $model = $this->model->create($attributes);
         $id = $model->getKey();
         // $relationships = $this->model->getRelationships();
@@ -241,12 +241,12 @@ class BaseRepository
     {
         return $this->defaultOrderBy;
     }
-    
+
     public function getRelationType($classname,$method){
         $obj = new $classname;
         $type = get_class($obj->{$method}());
         return $type;
-    }    
+    }
     public function setOrderBy($orderBy)
     {
         $this->orderBy = $orderBy;
@@ -256,7 +256,7 @@ class BaseRepository
     protected function getOrderBy()
     {
         $defaultOrderBy = $this->defaultOrderBy ? $this->defaultOrderBy : $this->model->getPrimaryKey();
-        $orderBy = $this->orderBy ? $this->orderBy : $defaultOrderBy; 
+        $orderBy = $this->orderBy ? $this->orderBy : $defaultOrderBy;
 
         //dodaje sortowanie "unikatowe" np. ORDER BY name, user_id;
         $primaryOrderBy = $this->primaryOrderBy ? $this->primaryOrderBy : $this->model->getPrimaryKey();

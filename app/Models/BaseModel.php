@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 class BaseModel extends Model
 {
-    use SoftDeletes;
+    //use SoftDeletes;
     protected $table = '';
     protected $fillable = [];
     protected $relationships = [];
@@ -19,7 +19,7 @@ class BaseModel extends Model
     public function getFields(){
         return $this->fillable;
     }
-    
+
     public function getRelationships(){
         return $this->relationships;
     }
@@ -31,7 +31,7 @@ class BaseModel extends Model
     public function getText(){
         return $this->textField;
     }
-    
+
     public function getPrimaryKey(){
         return $this->primaryKey;
     }
@@ -46,5 +46,5 @@ class BaseModel extends Model
     //         ->join($pivot, $pivot . '.' . $pivotKey, '=', $table . '.' . $secondKey)
     //         ->select($table . '.*')
     //         ->where($pivot . '.' . $firstKey, '=', $this->id);
-    // }    
+    // }
 }

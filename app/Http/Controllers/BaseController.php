@@ -11,7 +11,7 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class BaseController extends Controller
 {
-    use FilterTrait;
+    //use FilterTrait;
 
     protected $repository;
     protected $requestName;
@@ -30,8 +30,8 @@ class BaseController extends Controller
     protected function getRepository()
     {
         return $this->repository;
-    } 
-    
+    }
+
     protected function setRequestName($requestName)
     {
         $this->requestName = $requestName;
@@ -72,7 +72,7 @@ class BaseController extends Controller
         // return $this->repository
         // ->pushAppliedFilters($this->getAppliedFilters())
         // ->setOrderBy($this->getAppliedOrderBy())
-        // ->paginate();        
+        // ->paginate();
         return $this->repository->all($request);
     }
 
@@ -109,7 +109,7 @@ class BaseController extends Controller
             return ['success' => false, 'id' => $id,'msg'=>$this->repository->errors(),'class'=>__CLASS__,'method' => __METHOD__];
         }
     }
-    
+
     public function show(Request $request,$id){
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
         $request = \App::make('App\Http\Requests\\'.$requestName);
@@ -120,8 +120,8 @@ class BaseController extends Controller
     public function options(Request $request){
         return ['options'=>$this->repository->options(),'class'=>__CLASS__,'method' => __METHOD__];
     }
-    
-    
+
+
     protected function getViewDirectory()
     {
         return $this->getRouteName();
@@ -133,5 +133,5 @@ class BaseController extends Controller
     protected function getRouteName()
     {
         return array_get(explode('.', Route::currentRouteName()), 0);
-    }    
+    }
 }

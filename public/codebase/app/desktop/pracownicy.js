@@ -19,7 +19,7 @@ function pracownicyInit(cell) {
 			checkboxes: true,           // boolean, optional, enables checkboxes
 			dnd: true,           // boolean, optional, enables drag-and-drop
 			context_menu: true,           // boolean, optional, enables context menu
-			json: 'workers_group',
+			json: 'api/workers_group',
 		});
 		grupyTree.attachEvent("onBeforeDrag",function(id){
 			console.log("grupyTree.onBeforeDrag", arguments);
@@ -80,9 +80,10 @@ function pracownicyInit(cell) {
 		pracownicyGrid.zaladuj = function(i){
 			var ids = Array();
 			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-			var new_data = ajaxGet("workers/"+i,'',function(data){
-				if (data[0] && data[0].rows)
-					pracownicyGrid.parse(data[0], "json");
+			var new_data = ajaxGet("api/workers",'',function(data){
+                console.log(data)
+				if (data[0] && data[0].data)
+					pracownicyGrid.parse(data[0].data, "json");
 			});
 		}
 		grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar({
@@ -135,7 +136,6 @@ function pracownicyInit(cell) {
 				};break;
 			}
 		});
-
 
 		pracownicyGridToolBar = pracownicyLayout.cells("b").attachToolbar({
 			iconset: "awesome",

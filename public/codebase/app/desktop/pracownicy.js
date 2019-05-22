@@ -10,7 +10,7 @@ function pracownicyInit(cell) {
 		pracownicyLayout.cells("a").hideHeader();
 		pracownicyLayout.cells("b").hideHeader();
 		pracownicyLayout.cells("a").setWidth(280);
-		console.log(pracownicyLayout.listAutoSizes());
+		//console.log(pracownicyLayout.listAutoSizes());
 		pracownicyLayout.setAutoSize("a");
 		var grupyTree = pracownicyLayout.cells("a").attachTreeView({
 			skin: "dhx_terrace",    // string, optional, treeview's skin
@@ -19,7 +19,7 @@ function pracownicyInit(cell) {
 			checkboxes: true,           // boolean, optional, enables checkboxes
 			dnd: true,           // boolean, optional, enables drag-and-drop
 			context_menu: true,           // boolean, optional, enables context menu
-			json: 'api/workers_group',
+			//json: 'api/workers_group',
 		});
 		grupyTree.attachEvent("onBeforeDrag",function(id){
 			console.log("grupyTree.onBeforeDrag", arguments);
@@ -52,40 +52,54 @@ function pracownicyInit(cell) {
 		pracownicyGrid = pracownicyLayout.cells("b").attachGrid({
 			image_path:'codebase/imgs/',
 			columns: [{
-				label: "Nazwisko",
-				width: 250,
+                label: _("Nazwisko"),
+                width: 250,
+                id: "lastname",
 				type: "ed",
 				sort: "str",
 				align: "left"
 			},{
-				label: "Imię",
+				label: _("Imię"),
+                id: "firstname",
 				width: 100,
 				type: "ed",
 				sort: "str",
 				align: "left"
 			},{
-				label: "Kod",
+				label: _("Kod"),
+                id: "kod",
 				width: 100,
-				type: "edtxt",
+				type: "ed",
 				sort: "int",
 				align: "right"
 			},{
-				label: "Stanowisko",
+				label: _("Język"),
+                id: "language",
 				type: "ed",
 				sort: "str",
 				align: "left"
 			}],
 			multiselect: true
-		});
+        });
+        //pracownicyGrid.setColumnIds("lastname,firstname,kod,language");
 		pracownicyGrid.zaladuj = function(i){
 			var ids = Array();
 			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
 			var new_data = ajaxGet("api/workers",'',function(data){
-                console.log(data)
-				if (data[0] && data[0].data)
-					pracownicyGrid.parse(data[0].data, "json");
+				if (data[0] && data[0].success){
+					pracownicyGrid.parse((data[0].data), "js");
+                }
 			});
-		}
+        }
+		var dpPracownicyGrid = new dataProcessor("api/workers",'js');
+		dpPracownicyGrid.init(pracownicyGrid);
+		dpPracownicyGrid.enableDataNames(true);
+		dpPracownicyGrid.setTransactionMode("REST");
+		dpPracownicyGrid.enablePartialDataSend(true);
+		dpPracownicyGrid.enableDebug(true);
+        dpPracownicyGrid.setUpdateMode("row", true);
+
+
 		grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar({
 			iconset: "awesome",
 			items: [

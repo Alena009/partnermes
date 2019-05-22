@@ -136,6 +136,7 @@ class BaseRepository
         if (config('app.debug')) $return['sql'] = $my_query->toSql();
         $data = $my_query->get()->toArray();
         $return['data'] = $data;
+        $return['success'] = true;
         return $return;
     }
 

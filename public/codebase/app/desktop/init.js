@@ -178,8 +178,8 @@ function isFunction(functionToCheck) {
 }
 
 function ajaxGet(url,params,callback){
-	console.log('ajaxGet');
-	console.log(params);
+	// console.log('ajaxGet');
+	// console.log(params);
     var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 	dhx.ajax.get(url+"?"+"_token="+csrf_token+"&"+params,
 		function(loader, data, xhr){
@@ -215,8 +215,8 @@ function ajaxGet(url,params,callback){
 	,params);
 }
 function ajaxPost(url,params,callback){
-	console.log('ajaxPost');
-	console.log(params);
+	// console.log('ajaxPost');
+	// console.log(params);
     var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 	//dhx.ajax.get(url+"?"+"_token="+csrf_token+"&"+params);
 	dhx.ajax.post(url,params,
@@ -289,4 +289,10 @@ function ajaxPut(url,params,callback){
 
 function _(txt=''){
     return txt;
+}
+
+function parseDataForGrid(json){
+    console.log('parseDataForGrid',json);
+
+    return data;
 }

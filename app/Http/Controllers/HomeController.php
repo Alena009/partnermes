@@ -23,8 +23,6 @@ class HomeController extends Controller
      */
     public function index()
     {        	
-        return json_encode(array(
-            "success"	=> true
-        ));                        
+        return response()->json(["success" => true]);                        
     }
 }

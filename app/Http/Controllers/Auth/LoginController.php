@@ -30,7 +30,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -56,16 +56,12 @@ class LoginController extends Controller
      */
     public function isLogged()
     {
-        if (\Auth::check())
+        if (!\Auth::check())
         {
-            echo json_encode(array(
-                "success"	=> true
-            ));
-        } else {
-            echo json_encode(array(
-                "success"	=> false
-            ));            
+            return response()->json(["success" => false]);                                   
         }
+        
+        return response()->json(["success" => true]);                        
     }
     
     /**
@@ -77,10 +73,7 @@ class LoginController extends Controller
     {
         $this->userLogout($request);
                 
-        return $this->loggedOut($request) ?: 
-                json_encode(array(
-                    'success' => true                    
-                )); 
+        return $this->loggedOut($request) ?: response()->json(["success" => true]);                         
     }
     
     /**
@@ -89,16 +82,14 @@ class LoginController extends Controller
      * @return redirect(if success) or json(if false)
      */
     function login(Request $request) {        
-        if(\Auth::attempt(['login'=>$request['login'],'password'=>$request['password']])) 
+        if(!\Auth::attempt(['login'=>$request['login'],'password'=>$request['password']])) 
         {
-            return json_encode(array(
-            "success"	=> true
-        )); 
-        } else {
-            echo json_encode(array(
-                    "success"	=> false,
-                    "message"	=> "Hasło i/lub login błędne"
-            ));              
-        }        
+            return response()->json([
+                        "success"	=> false,
+                        "message"	=> "Hasło i/lub login błędne"        
+                    ]);              
+        }
+
+        return response()->json(["success" => true]);                                
     }
 }

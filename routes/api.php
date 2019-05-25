@@ -16,8 +16,12 @@ use Illuminate\Http\Request;
 Route::resource('/workers', 'WorkersController');
 Route::group([
     'middleware' => ['auth:api']
-], function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+        ], function () {
+//    Route::get('/user', function (Request $request) {
+//        return $request->user();
+//    });
+    Route::post('/user', 'API\UserController@userDetails');
 });
+
+Route::post('login', 'API\UserController@login');
+Route::post('register', 'API\UserController@register');

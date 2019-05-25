@@ -30,7 +30,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/';
+    protected $redirectTo = '/home';
 
     /**
      * Create a new controller instance.
@@ -81,15 +81,14 @@ class LoginController extends Controller
      * @param Request $request
      * @return redirect(if success) or json(if false)
      */
-    function login(Request $request) {        
-        if(!\Auth::attempt(['login'=>$request['login'],'password'=>$request['password']])) 
-        {
-            return response()->json([
-                        "success"	=> false,
-                        "message"	=> "Hasło i/lub login błędne"        
-                    ]);              
+    function login(Request $request) 
+    {        
+        if (\Auth::attempt(['login' => $request['login'], 'password' => $request['password']])) {
+            return response()->json(["success" => true]);
         }
-
-        return response()->json(["success" => true]);                                
+        return response()->json([
+                    "success" => false,
+                    "message" => "Hasło i/lub login błędne"
+        ]);
     }
 }

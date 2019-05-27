@@ -22,8 +22,8 @@ class UserController extends Controller
     {
         if (Auth::attempt(['login' => request('login'), 'password' => request('password')])) {
             $user = Auth::user();
-            $success['token'] = $user->createToken('MyApp')->accessToken;
-            return response()->json(['success' => $success], $this->successStatus);
+            $token = $user->createToken('MyApp')->accessToken;
+            return response()->json(['success' => true, 'token' => $token], $this->successStatus);
         } else {
             return response()->json(['error' => 'Unauthorised'], 401);
         }
@@ -66,5 +66,18 @@ class UserController extends Controller
     {
         $user = Auth::user();        
         return response()->json(['success' => $user], $this->successStatus);
+    }
+    
+    /**
+     * 
+     */
+    public function logout(Request $request)
+    {
+        $value = $request->bearerToken();
+        $id = (new Parser())->parse($value)->getHeader('jti');
+        $token = $request->user()->tokens->find($id);
+        $token->revoke();
+
+        return response()->json(['success' => 'You have been successfully logged out!'], $this->successStatus);
     }
 }

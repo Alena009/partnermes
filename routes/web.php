@@ -20,3 +20,13 @@ Route::post('/logged', 'Auth\LoginController@isLogged');
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::group([
+    'middleware' => ['auth']
+        ], function () {
+            Route::post('/departaments/new', 'DepartamentController@createNewDep');
+            Route::get('/departaments/{locale}', 'DepartamentController@departaments');
+            Route::get('/departaments', 'DepartamentController@departaments'); 
+            Route::get('/orders/{locale}', 'OrderController@orders');
+            Route::get('/orders', 'OrderController@orers');            
+});

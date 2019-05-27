@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::resource('/workers', 'WorkersController');
 Route::group([
     'middleware' => ['auth:api']
         ], function () {
@@ -21,6 +20,9 @@ Route::group([
 //        return $request->user();
 //    });
     Route::post('/user', 'API\UserController@userDetails');
+    Route::get('/departaments/{locale}', 'DepartamentController@departaments');
+    Route::resource('/departaments', 'DepartamentController');   
+    Route::resource('/workers', 'WorkersController');
 });
 
 Route::post('login', 'API\UserController@login');

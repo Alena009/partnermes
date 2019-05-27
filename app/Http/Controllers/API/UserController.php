@@ -43,7 +43,8 @@ class UserController extends Controller
                     'kod' => 'required',
                     'firstname' => 'required',
                     'lastname' => 'required',
-                    'login' => 'required'
+                    'login' => 'required',
+                    'is_worker' => 'required'
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 401);

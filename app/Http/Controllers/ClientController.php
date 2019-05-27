@@ -8,7 +8,7 @@ use App\Repositories\ClientRepository;
 
 class ClientController extends BaseController
 {
-    private $rep = ClientRepository;
+    private $rep;
     
     public function __construct(ClientRepository $rep)
     {

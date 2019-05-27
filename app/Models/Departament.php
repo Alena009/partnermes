@@ -6,6 +6,8 @@ use \App\Models\BaseModel;
 
 class Departament extends BaseModel
 {
+    use \Dimsav\Translatable\Translatable;
+    
     protected $table = 'departaments';
     
     protected $fillable = [

@@ -6,6 +6,8 @@ use \App\Models\BaseModel;
 
 class Permission extends BaseModel
 {
+    use \Dimsav\Translatable\Translatable; 
+    
     protected $table = "permissions";
     
     protected $fillable = [

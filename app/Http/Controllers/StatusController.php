@@ -8,7 +8,7 @@ use App\Repositories\StatusRepository;
 
 class StatusController extends BaseController
 {
-    private $rep = StatusRepository;
+    private $rep;
     
     public function __construct(StatusRepository $rep)
     {

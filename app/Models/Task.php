@@ -6,6 +6,8 @@ use \App\Models\BaseModel;
 
 class Task extends BaseModel
 {
+    use \Dimsav\Translatable\Translatable;
+    
     protected $table = "tasks";
     
     protected $fillable = [

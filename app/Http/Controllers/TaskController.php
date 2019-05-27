@@ -8,7 +8,7 @@ use App\Repositories\TaskRepository;
 
 class TaskController extends BaseController
 {
-    private $rep = TaskRepository;
+    private $rep;
     
     public function __construct(TaskRepository $rep)
     {

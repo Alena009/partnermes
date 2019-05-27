@@ -8,7 +8,7 @@ use App\Repositories\DepartamentRepository;
 
 class DepartamentController extends BaseController
 {
-    private $rep = DepartamentRepository;
+    private $rep;
     
     public function __construct(DepartamentRepository $rep)
     {

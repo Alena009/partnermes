@@ -6,6 +6,8 @@ use \App\Models\BaseModel;
 
 class Client extends BaseModel
 {
+    use \Dimsav\Translatable\Translatable; 
+    
     protected $table = "clients";
     
     protected $fillable = [

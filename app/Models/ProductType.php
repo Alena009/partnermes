@@ -6,6 +6,8 @@ use \App\Models\BaseModel;
 
 class ProductType extends BaseModel
 {
+    use \Dimsav\Translatable\Translatable; 
+    
     protected $table = "product_types";
     
     protected $fillable = [

@@ -9,7 +9,7 @@ use App\Repositories\OrderRepository;
 
 class OrderController extends BaseController
 {    
-    private $rep = OrderRepository;
+    private $rep;
     
     public function __construct(OrderRepository $rep)
     {

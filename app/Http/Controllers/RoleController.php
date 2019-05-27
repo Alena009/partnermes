@@ -8,7 +8,7 @@ use App\Repositories\RoleRepository;
 
 class RoleController extends BaseController
 {
-    private $rep = RoleRepository;
+    private $rep;
     
     public function __construct(RoleRepository $rep)
     {

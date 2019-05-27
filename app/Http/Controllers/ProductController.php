@@ -8,7 +8,7 @@ use App\Repositories\ProductRepository;
 
 class ProductController extends BaseController
 {
-    private $rep = ProductRepository;
+    private $rep;
     
     public function __construct(ProductRepository $rep)
     {

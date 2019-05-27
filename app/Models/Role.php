@@ -6,6 +6,8 @@ use \App\Models\BaseModel;
 
 class Role extends Model
 {
+    use \Dimsav\Translatable\Translatable;
+    
     protected $table = "roles";
     
     protected $fillable = [

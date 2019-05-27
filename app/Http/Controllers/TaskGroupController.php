@@ -9,7 +9,7 @@ use App\Repositories\TaskGroupRepository;
 
 class TaskGroupController extends BaseController
 {
-    private $rep = TaskGroupRepository;
+    private $rep;
     
     public function __construct(TaskGroupRepository $rep)
     {

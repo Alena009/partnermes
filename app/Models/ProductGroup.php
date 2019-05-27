@@ -6,6 +6,8 @@ use \App\Models\BaseModel;
 
 class ProductGroup extends BaseModel
 {
+    use \Dimsav\Translatable\Translatable; 
+    
     protected $table = 'product_groups';
     
     protected $fillable = [

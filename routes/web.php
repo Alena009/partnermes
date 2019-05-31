@@ -23,10 +23,9 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::group([
     'middleware' => ['auth']
-        ], function () {
-            Route::post('/departaments/new', 'DepartamentController@createNewDep');
+        ], function () {  
             Route::get('/departaments/{locale}', 'DepartamentController@departaments');
-            Route::get('/departaments', 'DepartamentController@departaments'); 
+            Route::resource('/departaments', 'DepartamentController');           
             Route::get('/orders/{locale}', 'OrderController@orders');
             Route::get('/orders', 'OrderController@orers');            
 });

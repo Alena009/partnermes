@@ -11,16 +11,26 @@ function pracownicyInit(cell) {
 		pracownicyLayout.cells("b").hideHeader();
 		pracownicyLayout.cells("a").setWidth(280);
 		//console.log(pracownicyLayout.listAutoSizes());
-		pracownicyLayout.setAutoSize("a");
+		pracownicyLayout.setAutoSize("a");               
 		var grupyTree = pracownicyLayout.cells("a").attachTreeView({
-			skin: "dhx_terrace",    // string, optional, treeview's skin
+			skin: "dhx_skyblue",    // string, optional, treeview's skin
 			iconset: "font_awesome", // string, optional, sets the font-awesome icons
 			multiselect: false,           // boolean, optional, enables multiselect
 			checkboxes: true,           // boolean, optional, enables checkboxes
 			dnd: true,           // boolean, optional, enables drag-and-drop
 			context_menu: true,           // boolean, optional, enables context menu
-			//json: 'api/workers_group',
+			//json: [{id: 1, name: "Produkcja", kids: []}, {id: 2, name: "jkjkjklj"}]
 		});
+                
+		grupyTree.rebuild = function(){
+                    var treeStruct = ajaxGet("api/departaments", '', function(data) {                    
+                        if (data[0] && data[0].success){      
+                            grupyTree.clearAll();
+                            grupyTree.loadStruct(data[0].data);                           
+                        }                    
+                    });                       
+                };                
+                grupyTree.rebuild();
 		grupyTree.attachEvent("onBeforeDrag",function(id){
 			console.log("grupyTree.onBeforeDrag", arguments);
 			return true;
@@ -37,14 +47,16 @@ function pracownicyInit(cell) {
 			console.log("grupyTree.onDrop", arguments);
 			return true;
 		});
-		grupyTree.attachEvent("onSelect",function(id){
+		grupyTree.attachEvent("onSelect",function(id, mode){  
+                    if (mode) {
 			pracownicyGrid.clearAll();
 			pracownicyGrid.zaladuj(id);
-			return true;
+			return true;                        
+                    }
 		});
 
 		grupyTree.attachEvent("onCheck",function(id){
-			var grupy=grupyTree.getAllChecked();
+			var grupy=grupyTree.getAllChecked();                                            
 			pracownicyGrid.clearAll();
 			pracownicyGrid.zaladuj(grupy);
 			return true;
@@ -84,14 +96,14 @@ function pracownicyInit(cell) {
         //pracownicyGrid.setColumnIds("lastname,firstname,kod,language");
 		pracownicyGrid.zaladuj = function(i){
 			var ids = Array();
-			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-			var new_data = ajaxGet("api/workers",'',function(data){
+			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;                        
+			var new_data = ajaxGet("api/workerslist/" + i, '', function(data){                                     
 				if (data[0] && data[0].success){
-					pracownicyGrid.parse((data[0].data), "js");
+                                    pracownicyGrid.parse((data[0].data), "js");
+                                }
+			});                        
                 }
-			});
-        }
-		var dpPracownicyGrid = new dataProcessor("api/workers",'js');
+		var dpPracownicyGrid = new dataProcessor("api/workerslist",'js');
 		dpPracownicyGrid.init(pracownicyGrid);
 		dpPracownicyGrid.enableDataNames(true);
 		dpPracownicyGrid.setTransactionMode("REST");
@@ -111,42 +123,77 @@ function pracownicyInit(cell) {
 			]
 		});
 		grupyFormData = [
-			{type:"fieldset",  offsetTop:0, label:"Nowa grupa", width:253, list:[
-				{type:"input",  name:"parent_grupa",    label:"Grupa nadrzędna",  	offsetTop:13, 	labelWidth:60},
-				{type:"input",  name:"grupa",    		label:"Nazwa grupy",     	offsetTop:13, 	labelWidth:60},
-				{type:"input",  name:"upr",    			label:"Uprawnienie",    	offsetTop:7,	labelWidth:60},
-				{type:"button", name:"save",    		value:"Zapisz",   			offsetTop:18},
-				{type:"button", name:"cancel",     		value:"Anuluj",   			offsetTop:18}
+			{type:"fieldset",  offsetTop:0, label:"Nowa grupa", width:253, list:[                                
+				{type:"combo",  name:"parent_id",       label:"Grupa nadrzędna",        options: [{text: "None", value: "0"}], inputWidth: 150},                                
+				{type:"input",  name:"pl",    	label:"Nazwa grupy",     	offsetTop:13, 	labelWidth:80},
+                                {type:"input",  name:"en",    	label:"Group name (EN)",     	offsetTop:13, 	labelWidth:80},
+				{type:"input",  name:"upr",    		label:"Uprawnienie",    	offsetTop:7,	labelWidth:80},
+				{type:"button", name:"save",    	value:"Zapisz",   		offsetTop:18},
+				{type:"button", name:"cancel",     	value:"Anuluj",   		offsetTop:18}
 			]}
 		];
 
-		grupyTreeToolBar.attachEvent("onClick", function(id) {
+		grupyTreeToolBar.attachEvent("onClick", function(id) {                        
 			console.log('mainToolbar.onClick',arguments);
 			switch (id){
 				case 'Add':{
 					console.log('Dodaj grupe');
-					var parent = grupyTree.getSelectedId();
-					w1 = pracownicyLayout.dhxWins.createWindow({
-						id:"w1",
-						left:20,
-						top:30,
-						width:300,
-						height:200,
-						center:true,
-						onClose:function(){
+                                        var dhxWins= new dhtmlXWindows();
+                                        w1 = dhxWins.createWindow({
+                                                id:"w1",
+                                                left:20,
+                                                top:30,
+                                                width:300,
+                                                height:350,
+                                                center:true,
+                                                onClose:function(){
 
-						}
-					});
-					console.log(pracownicyLayout);
-					grupyForm = pracownicyLayout.cells('w1').attachForm(grupyFormData, true);
-					grupyForm.bind(grupyTree);
+                                                }
+                                        });                                       
+                                        //initializing form for add/edit/delete departaments
+                                        var grupyForm = dhxWins.window("w1").attachForm(grupyFormData, true);
+                                        //get combobox from form 
+                                        var dhxCombo = grupyForm.getCombo("parent_id");
+                                        //loading listrecords for combobox
+                                        var tree = ajaxGet("api/departaments", '', function(data) {                    
+                                            dhxCombo.addOption(data[0].data);
+                                        });                                        
+					var parent = grupyTree.getSelectedId();                                   
+   
+                                        //attaching events on form buttons click
+                                        grupyForm.attachEvent("onButtonClick", function(name){
+                                            switch (name){
+                                                case 'save':{   
+                                                        var parameters = {
+                                                            parent_id: dhxCombo.getSelectedValue(),
+                                                            pl: grupyForm.getItemValue('pl'),
+                                                            en: grupyForm.getItemValue('en')
+                                                        };
+                                                        $.post("api/departaments", parameters, function(data){
+                                                            console.log(data);
+                                                            grupyTree.addItem(data.id, data.name, data.parent_id); // id, text, pId
 
+                                                        });
+                                                };break;
+                                                case 'cancel':{
+                                                    grupyForm.clear();
+                                                };break;
+                                            }
+                                        });
+					//grupyForm.bind(tree);
 				};break;
 				case 'Edit':{
 					console.log('Zmien grupe');
+                                        dhxCombo.load({data:[{parent_id:"1"}]});
 				};break;
 				case 'Del':{
 					console.log('Usun grupe');
+                                        var id = grupyTree.getSelectedId();
+                                        if (id) {
+                                            ajaxDelete("api/departaments/" + id,'', function() {
+                                                grupyTree.deleteItem(id);                                                    
+                                            });      
+                                        }
 				};break;
 			}
 		});

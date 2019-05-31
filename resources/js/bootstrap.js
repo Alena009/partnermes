@@ -20,6 +20,7 @@ try {
  */
 
 window.axios = require('axios');
+window.Jquery = require('jquery');
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 

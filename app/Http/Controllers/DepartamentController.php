@@ -24,6 +24,7 @@ class DepartamentController extends BaseController
         app()->setLocale($locale);
 
         $departaments = \App\Models\Departament::all();
+        //$departaments = $this->index();
         
         return response()->json($departaments);
     }
@@ -31,18 +32,91 @@ class DepartamentController extends BaseController
     /**
      * create new departament with translations
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
         $departament = new \App\Models\Departament();
-        $departament->parent_id = $request['parent_id'];        
-        $departament->save();
+        $departament->parent_id = $request['parent_id'];                
+        $departament->save();        
 
-        foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-            $departament->translateOrNew($locale)->name = "Title {$locale}";            
+        foreach (['pl', 'en'] as $locale) {
+            $departament->translateOrNew($locale)->name = $request[$locale];            
         }
 
         $departament->save();
 
-        return true;
+        return response()->json($departament);
+    }
+    
+    /**
+     * Get list of departaments for tree view on front-end
+     * 
+     * @return json 
+     */
+    public function departamentsTree()
+    {
+        $Departaments = $this->repository->getDepartamentsRootNodes();
+        
+        foreach ($Departaments as $Departament) {             
+            $kids = array();
+            if(count($Departament->kids)) {                
+                $kids = $this->kidTree($Departament);
+            } 
+            $item = [
+                'items' => $kids, 
+                'id' => $Departament['id'], 
+                'text' => $Departament['name'], 
+                'value' => $Departament['id']
+            ];
+            $tree[] = $item;
+        }              
+        
+        $result = ['data' => $tree, 'success' => true];
+        
+        return response()->json($result);
+    }
+    
+    /**
+     * Get list of child departaments for departament-parent
+     * 
+     * @param object $Departament
+     * @return array of kids
+     */
+    public function kidTree($Departament)
+    {
+        foreach ($Departament->kids as $arr) {
+            if (count($arr->kids)) {
+                $kids['items'][] = $this->kidView($arr);
+            } else {
+                $kids[]['text'] = $arr->name;
+            }
+        }
+        
+        return $kids;
+    }
+    
+    public function workersList($departamentsIds = 0)
+    {      
+        $workerModel = new \App\Models\User();
+//        $Departaments = $this->repository->getDepartamentsByIds($departamentsIds);
+//                
+//        foreach ($Departaments as $Departament) {
+//            $workers[] = $Departament->workers;          
+//        }
+//        
+//        return $workers;
+        if ($departamentsIds) {
+            $departamentsIds = explode(',', $departamentsIds);
+            $workerDepartament = new \App\Models\WorkerDepartament();
+            $workersIds = $workerDepartament::whereIn('departament_id', $departamentsIds)->pluck('user_id');
+                   
+            $workers = $workerModel::find($workersIds);            
+        } else {
+           $workers =  $workerModel::all();
+        }
+
+        $result = ['data' => $workers, 'success' => true];
+        
+        return response()->json($result);
+        
     }
 }

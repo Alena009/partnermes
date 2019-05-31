@@ -22,7 +22,10 @@ Route::group([
     Route::post('/user', 'API\UserController@userDetails');
     Route::get('/departaments/{locale}', 'DepartamentController@departaments');
     Route::resource('/departaments', 'DepartamentController');   
-    Route::resource('/workers', 'WorkersController');
+    Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
+    Route::get('/workerslist', 'DepartamentController@workersList');
+    Route::resource('/workers', 'WorkersController');    
+    Route::get('/departaments', 'DepartamentController@departamentsTree');
 });
 
 Route::post('login', 'API\UserController@login');

@@ -74,5 +74,5 @@ class RegisterController extends Controller
             'lastname' => $data['lastname'],
             'login' => $data['login'],
         ]);
-    }    
+    } 
 }

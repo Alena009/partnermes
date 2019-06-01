@@ -44,7 +44,7 @@ function appInit() {
 		console.log('mainToolbar.onClick',arguments);
 		if (id='logoout'){
 			ajaxPost('logout','',function(){
-                location.reload();
+                            location.reload();
 			});
 		}
 	});
@@ -105,6 +105,9 @@ function loginFormShow(callback2={}){
 			dhx.ajax.post("login","login="+data.login+"&password="+data.password+"&_token="+csrf_token,function(r){
 				var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
 				if (data.success===true){
+                                    localStorage.setItem('token',data.token);
+                                    console.log(data);
+                                    
 					w1.hide();
 					if (loginForm.callback.success && isFunction(loginForm.callback.success)){
 						loginForm.callback['success']();
@@ -143,9 +146,10 @@ function loginFormShow(callback2={}){
 function logged(){
     var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 	dhx.ajax.post("logged","_token="+csrf_token,function(r){
+        //ajaxPost("logged",'',function(r){
 		var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
 		if (data.success===true){
-			console.log('Zalogowany');
+			console.log('Zalogowany');                        
 			appInit();
 			//window.dhx4.attachEvent("onload", loginFormShow);
 			this.isLogged = !0;
@@ -180,10 +184,11 @@ function isFunction(functionToCheck) {
 function ajaxQuery(method, url, params, callback) {
     
     var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    
-    var headers = {
-        'Authorization' : 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjFmYjdkMWFkMWI1ZjMxMThjNDBiMTFlY2QwMTE0MTc1OTVlNWVlZTZlNTBlMTQ5NWRmNDhiMzg0Mzg0OTZiY2IwMDg1ZTI3NzU1M2Q5ZDA5In0.eyJhdWQiOiIxIiwianRpIjoiMWZiN2QxYWQxYjVmMzExOGM0MGIxMWVjZDAxMTQxNzU5NWU1ZWVlNmU1MGUxNDk1ZGY0OGIzODQzODQ5NmJjYjAwODVlMjc3NTUzZDlkMDkiLCJpYXQiOjE1NTkwMjY0NTYsIm5iZiI6MTU1OTAyNjQ1NiwiZXhwIjoxNTc0OTI0MDUwLCJzdWIiOiIyIiwic2NvcGVzIjpbXX0.HA_Xq3zBYxYM7HqLvoybCn7w8JrdzZJynTPoGkLwvzJ5x4Uw32hfdJdC7wpWT4edNuBV0nEJu_EUN9icpov5tsGCK_s-NjQDWJH_oCNR7bRn5pO2gOzFTxXYRlWJfXZGgUS4XNMAgeU1J-IFwMPndJmUIHV44-iGRXk2uPS9xTMfMDR-R6cgUwRaZt-BUvSxJMlZY15-s-L3VRmm4W4nhhGyu0caQxHNQuzBxMkg86MW4RVV-sRiWfRpD_xpUkXP3O1TuYwtGIcOYPvpDiVcSrm7MzjKX7xOhC3hWgIDdU4dacK2U7yEly1DpRY17FGxuZv3u8LpnlaRVdn751bkovLFGeE5fcG6_JiacVQ0NHfEr5wFr0dc7fgJ6NcIIw3WiUcQkbMli8ukCGvlpG5enz5iFBTxJWyejRqkB0BTLkT1nQSrCKTN4MX9Ie3JM6_uDZ6S7odgY5urvKG-y057yGV_hnV4hbkwpPVXZhUXNBSJnq3y7XArk_ccQfl6sypNEJr7Nloij17O1wQHh0Vnadb8APdEJ1RmAN7Jj3pL2_3psZSgoKvHVbEJdPMiFvZhf4iwlZ3fPMhJFkGtnPDo2MXJwrdNEMDZvEBW0xtX0BWOmRc_Qr304eAd5Nmej2vXxoHWHGb_cW_F7E9_4GKstypyn5EW2nTvKxOQc1L1zRo',
-        'X-CSRF-TOKEN': csrf_token
+
+    var headers = {        
+        'Authorization': localStorage.getItem('token'),
+        'X-CSRF-TOKEN': csrf_token,
+        'Content-Type': 'application/json'
     };    
     
     var afterCall = function(loader, data, xhr){

@@ -84,7 +84,9 @@ class LoginController extends Controller
     function login(Request $request) 
     {        
         if (\Auth::attempt(['login' => $request['login'], 'password' => $request['password']])) {
-            return response()->json(["success" => true]);
+            $user = \Auth::user();
+            $token = $user->createToken('MyApp')->accessToken;
+            return response()->json(["success" => true, "token" => $token]);
         }
         return response()->json([
                     "success" => false,

@@ -34,7 +34,7 @@ class UserController extends Controller
      * 
      * @return \Illuminate\Http\Response 
      */
-    public function register(Request $request) 
+    public function store(Request $request) 
     {
         $validator = Validator::make($request->all(), [
                     'name' => 'required',
@@ -63,10 +63,10 @@ class UserController extends Controller
      * 
      * @return \Illuminate\Http\Response 
      */
-    public function userDetails() 
+    public function show() 
     {
         $user = Auth::user();        
-        return response()->json(['success' => $user], $this->successStatus);
+        return response()->json(['success' => true, 'data' => $user], $this->successStatus);
     }
     
     /**

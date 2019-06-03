@@ -19,12 +19,13 @@ Route::group([
 //    Route::get('/user', function (Request $request) {
 //        return $request->user();
 //    });
-    Route::post('/user', 'API\UserController@userDetails');
-    Route::get('/departaments/{locale}', 'DepartamentController@departaments');
+    Route::resource('/users', 'API\UserController');
+    Route::get('/departaments/all/{locale}', 'DepartamentController@departaments');    
+    Route::get('/departaments/{id}/{locale}', 'DepartamentController@departaments');    
     Route::resource('/departaments', 'DepartamentController');   
     Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
     Route::get('/workerslist', 'DepartamentController@workersList');
-    Route::resource('/workers', 'WorkersController');    
+    //Route::resource('/users', 'WorkersController');    
     Route::get('/departaments', 'DepartamentController@departamentsTree');
 });
 

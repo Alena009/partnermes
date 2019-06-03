@@ -63,7 +63,6 @@ function appUnload() {
 }
 
 function loginFormShow(callback2={}){
-
 	if (w1 != undefined){
 		w1.show();
 		loginForm.clear();
@@ -144,24 +143,24 @@ function loginFormShow(callback2={}){
 }
 
 function logged(){
-    var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-	dhx.ajax.post("logged","_token="+csrf_token,function(r){
-        //ajaxPost("logged",'',function(r){
-		var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
+    //var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+	//dhx.ajax.post("logged","_token="+csrf_token,function(r){
+        ajaxPost("logged",'',function(data){
+		//var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
 		if (data.success===true){
 			console.log('Zalogowany');                        
 			appInit();
 			//window.dhx4.attachEvent("onload", loginFormShow);
 			this.isLogged = !0;
 		}else{
-			loginFormShow(
-                {
-                    'success':function(){
-                        location.reload();
-                    },
-                }
-            );
-			this.isLogged = !1;
+                    loginFormShow(
+                        {
+                            'success':function(){
+                                location.reload();
+                            },
+                        }
+                    );
+                    this.isLogged = !1;
 		}
 	});
 	return this.isLogged;
@@ -181,27 +180,47 @@ function isFunction(functionToCheck) {
 	return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
 }
 
-function ajaxQuery(method, url, params, callback) {
-    
-    var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+
+//axios.defaults.headers.common['X-CSRF-TOKEN']  =  document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+//axios.defaults.headers.common['Authorization'] =  localStorage.getItem('token');    
+
+function ajaxPost(url, params, callback) {
+    axiosQuery('post', url, params, callback);
+}
+
+function ajaxGet(url, params, callback) {
+    axiosQuery('get', url, params, callback);
+}
+
+function ajaxDelete(url, params, callback) {
+    axiosQuery('delete', url, params, callback);
+}
+
+function axiosQuery(method, url, params, callback) {
+    var api_token = localStorage.getItem('token');
+    
     var headers = {        
-        'Authorization': localStorage.getItem('token'),
-        'X-CSRF-TOKEN': csrf_token,
-        'Content-Type': 'application/json'
-    };    
-    
-    var afterCall = function(loader, data, xhr){
-			var evs;
-			if (loader.xmlDoc.status == 200) {
-				var str = loader.xmlDoc.responseText;
-				var data = (window.JSON && JSON.parse("["+str+"]")) ? JSON.parse("["+str+"]") : false;
-				var success = (data && data[0] && data[0].success) ? (data[0].success) : false;
+        'Authorization': api_token
+    };
 
-				if (data && success){
-					if (callback && callback.success){
+    axios.request({
+        method: method,
+        url: url,
+        data: params, 
+        headers: headers   
+    })
+    .then(function(response){			
+                var data = response.data;                
+			if (response.status == 200) {
+				//var str = data;
+				//var data = (window.JSON && JSON.parse("["+str+"]")) ? JSON.parse("["+str+"]") : false;
+				var success = (data.success) ? (data.success) : false;
+
+				if (success){
+					if (callback && callback.success){                                            
 						callback['success'](data);
-					}else if (callback){
+					}else if (callback){                                            
 						callback(data);
 					}else{
 						return data;
@@ -220,33 +239,79 @@ function ajaxQuery(method, url, params, callback) {
 			} else {
 				alert("ERROR!!! \n \n System Error code: " + loader.xmlDoc.status);
 			}
-		};    
-    
-    return dhx.ajax.query({
-        method: method,
-        url: url,
-        data: params,
-        async:true,
-        callback: afterCall,
-        headers: headers
-    });    
+		})
+    .catch(function (error) {
+        console.log(error);
+    });
 }
 
-function ajaxGet(url, params, callback){                
-    ajaxQuery("GET", url, params, callback);
-}
 
-function ajaxPost(url, params, callback){   
-    ajaxQuery("POST", url, params, callback);
-}
-
-function ajaxDelete(url, params, callback){
-    ajaxQuery("DELETE", url, params, callback);
-}
-
-function ajaxPut(url,params,callback){
-    ajaxQuery("PUT", url, params, callback);
-}
+//function ajaxQuery(method, url, params, callback) {
+//    
+//    var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+//
+//    var headers = {        
+//        'Authorization': localStorage.getItem('token'),
+//        'X-CSRF-TOKEN': csrf_token,
+//        'Content-Type': 'application/json'
+//    };    
+//    
+//    var afterCall = function(loader, data, xhr){
+//			var evs;
+//			if (loader.xmlDoc.status == 200) {
+//				var str = loader.xmlDoc.responseText;
+//				var data = (window.JSON && JSON.parse("["+str+"]")) ? JSON.parse("["+str+"]") : false;
+//				var success = (data && data[0] && data[0].success) ? (data[0].success) : false;
+//
+//				if (data && success){
+//					if (callback && callback.success){
+//						callback['success'](data);
+//					}else if (callback){
+//						callback(data);
+//					}else{
+//						return data;
+//					}
+//				}else if (data && !success && data.code==402){
+//					loginFormShow();
+//				}else{
+//					if (callback && callback.failure){
+//						callback['failure'](data);
+//					}else if (callback){
+//						callback(data);
+//					}else{
+//						return false;
+//					}
+//				}
+//			} else {
+//				alert("ERROR!!! \n \n System Error code: " + loader.xmlDoc.status);
+//			}
+//		};    
+//    
+//    return dhx.ajax.query({
+//        method: method,
+//        url: url,
+//        data: params,
+//        async:true,
+//        callback: afterCall,
+//        headers: headers
+//    });    
+//}
+//
+//function ajaxGet(url, params, callback){                
+//    ajaxQuery("GET", url, params, callback);
+//}
+//
+//function ajaxPost(url, params, callback){   
+//    ajaxQuery("POST", url, params, callback);
+//}
+//
+//function ajaxDelete(url, params, callback){
+//    ajaxQuery("DELETE", url, params, callback);
+//}
+//
+//function ajaxPut(url,params,callback){
+//    ajaxQuery("PUT", url, params, callback);
+//}
 
 function _(txt=''){
     return txt;

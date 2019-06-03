@@ -19,11 +19,15 @@ class DepartamentController extends BaseController
     /**
      * get departaments list with translations
      */
-    public function departaments($locale = 'pl')
+    public function departaments($id = 0, $locale = 'pl')
     {
         app()->setLocale($locale);
 
-        $departaments = \App\Models\Departament::all();
+        if ($id) {
+            $departaments = \App\Models\Departament::find($id);
+        } else {
+            $departaments = \App\Models\Departament::all();
+        }
         //$departaments = $this->index();
         
         return response()->json($departaments);

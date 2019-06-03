@@ -7,8 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Validator;
+use App\Repositories\UserRepository;
 
-class UserController extends Controller 
+class UserController extends BaseController 
 {
 
     public $successStatus = 200;
@@ -70,7 +71,7 @@ class UserController extends Controller
     }
     
     /**
-     * 
+     * Logout with revoking token
      */
     public function logout(Request $request)
     {
@@ -80,5 +81,13 @@ class UserController extends Controller
         $token->revoke();
 
         return response()->json(['success' => 'You have been successfully logged out!'], $this->successStatus);
+    }
+    
+    /**
+     * 
+     */
+    public function edit(Request $request, $id)
+    {
+        return response()->json(['success' => true]);
     }
 }

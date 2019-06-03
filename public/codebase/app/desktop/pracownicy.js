@@ -6,11 +6,11 @@ function pracownicyInit(cell) {
 
 	if (pracownicyLayout == null) {
 		// init layout
-		var pracownicyLayout = cell.attachLayout("2U");
+		var pracownicyLayout = cell.attachLayout("3W");
 		pracownicyLayout.cells("a").hideHeader();
 		pracownicyLayout.cells("b").hideHeader();
-                //pracownicyLayout.cells("c").hideHeader();
-                //pracownicyLayout.cells("c").collapse();
+                pracownicyLayout.cells("c").hideHeader();
+                pracownicyLayout.cells("c").collapse();
 		pracownicyLayout.cells("a").setWidth(280);
 		//console.log(pracownicyLayout.listAutoSizes());
 		pracownicyLayout.setAutoSize("a");   
@@ -240,33 +240,18 @@ function pracownicyInit(cell) {
 				{id: "Del", type: "button", img: "fa fa-minus-square"}
 			]
 		});
+                
                 //adding events to the toolbar on the pracownicy grid
                 pracownicyGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
 		        case 'Add':{
                             console.log('adding mode');
                             //creating view for form add/edit
-                            pracownicyLayout.cells("b").showView("form");
-                            //creating pracownicy form
-                            var pracownicyForm = pracownicyLayout.cells("b").attachForm(pracownicyFormStruct);
-                            //get combobox from form 
-                            var dhxComboDepartaments = pracownicyForm.getCombo("departament");
-                            //loading listrecords for combobox
-                            ajaxGet("api/departaments", '', function(data) {                    
-                                dhxComboDepartaments.addOption(data.data);
-                            });
-                            dhxComboDepartaments.enable(false);
-                            
-                            pracownicyForm.attachEvent("onChange", function(name, value, state){
-                                if (name = 'is_worker') {
-                                    dhxComboDepartaments.enable(state);
-                                    pracownicyForm.setRequired("departament", state);                                    
-                                }
-                            });
-                            //binding with grid
-                            pracownicyForm.bind(pracownicyGrid);
+                            //pracownicyLayout.cells("b").showView("form");
                             //clearing fields form
+                            pracownicyForm.unlock();
                             pracownicyForm.clear();
+                            pracownicyLayout.cells("c").expand();
                             pracownicyForm.attachEvent("onButtonClick", function(name){
                                 switch (name){
                                     case 'save':{                                                           
@@ -275,29 +260,26 @@ function pracownicyInit(cell) {
                                             });
                                     };break;
                                     case 'cancel':{
-                                        pracownicyLayout.cells("b").showView("def");
+                                        //pracownicyLayout.cells("c").collapse;
                                     };break;
                                 }
-                            });
+                            }); 
                         };break;
                         case 'Edit':{
                             console.log('edit mode');
-                            //creating view for form add/edit
-                            pracownicyLayout.cells("b").showView("form");
-                            //creating pracownicy form
-                            var pracownicyForm = pracownicyLayout.cells("b").attachForm(pracownicyFormStruct);
-                            //binding with grid
-                            pracownicyForm.bind(pracownicyGrid);                            
+                            pracownicyForm.unlock();
+                            pracownicyForm.bind(pracownicyGrid);
+                            pracownicyLayout.cells("c").expand();
                             pracownicyForm.attachEvent("onButtonClick", function(name){
                                 switch (name){
-                                    case 'save':{                                                           
-                                            ajaxPost("api/users", pracownicyForm.getFormData(), function(data){                                                            
+                                    case 'save':{ 
+                                            var $id = pracownicyGrid.getSelectedRowId();
+                                            ajaxPost("api/users/" + $id + "/edit", pracownicyForm.getFormData(), function(data){                                                            
                                                 console.log(data);
                                             });
                                     };break;
                                     case 'cancel':{
-                                        //return to the grid with list of pracownikow
-                                        pracownicyLayout.cells("b").showView("def");
+                                        pracownicyForm.updateValues();
                                     };break;
                                 }
                             });                           
@@ -315,38 +297,86 @@ function pracownicyInit(cell) {
                 });     
                 
                 pracownicyFormStruct = [
-                    {type:"fieldset",  offsetTop:0, label:"Pracownik", width:600, list:[
-                        {type: "input",    name: "kod",      label: _("Kod"),       labelAlign: "left", required: true},
-		 	{type: "input",    name: "firstname",label: _("First name"),labelAlign: "left", required: true},
-                        {type: "input",    name: "lastname", label: _("Last name"), labelAlign: "left", required: true},
-                        {type: "input",    name: "name",     label: _("Name"),      labelAlign: "left", required: true},
-                        {type: "input",    name: "login",    label: _("Login"),     labelAlign: "left", required: true},
-                        {type: "password", name: "password", label: _("Password"),  labelAlign: "left", required: true},
-		 	{type: "input",    name: "email",    label: _("E-mail"),    labelAlign: "left", required: true},
-		 	{type: "input",    name: "phone",    label: _("Phone"),     labelAlign: "left"},		 	                        
-                        {type: "input",    name: "lang",     label: _("Language"),  labelAlign: "left"},
-{type: "combo", label: _("User role"), name: "role", options:[
-        {text: "AAC", value: "AAC"},
-        {text: "AC3", value: "AC3", selected: true},
-        {text: "MP3", value: "MP3"},
-        {text: "FLAC", value: "FLAC"}
-    ]},   
-                        {type:"checkbox",  name: "is_worker",  label: _("Is a worker"), checked: true,  required: true},
-                        {type: "combo",    name: "departament",label: _("Departament"), options:[]},                         
+                    {type:"fieldset",  offsetTop:0, label:"Pracownik", width:460, list:[
+                        {type: "input",    name: "kod",        label: _("Kod"),       labelAlign: "left",                required: true},
+		 	{type: "input",    name: "firstname",  label: _("First name"),labelAlign: "left",                required: true},
+                        {type: "input",    name: "lastname",   label: _("Last name"), labelAlign: "left",                required: true},
+                        {type: "input",    name: "name",       label: _("Name"),      labelAlign: "left",                required: true},
+                        {type: "input",    name: "login",      label: _("Login"),     labelAlign: "left",                required: true},
+                        {type: "password", name: "password",   label: _("Password"),  labelAlign: "left",                required: true},
+		 	{type: "input",    name: "email",      label: _("E-mail"),    labelAlign: "left",                required: true},
+		 	{type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},		 	                        
+                        {type: "input",    name: "lang",       label: _("Language"),  labelAlign: "left"},
+                        {type: "combo",    name: "role",       label: _("User role"), options:[],  required: true, readonly: true},
+                        {type: "label",                        label: _("Is worker")},
+                        {type: "radio",    name: "is_worker",  label: _("Yes"), value: 1,  checked: true},
+                        {type: "radio",    name: "is_worker",  label: _("No"),  value: 0},
+                        {type: "combo",    name: "departament",label: _("Departament"), options:[{text: "--", value: 0}],required: true, readonly: true},                         
                         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
-		 	{type: "container",name: "photo",    label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65, position: "absolute"},
-                        {type:"button",    name:"save",    value:_("Zapisz"), offsetTop:18},
-			{type:"button",    name:"cancel",  value:_("Anuluj"), offsetTop:18}
+                        {type: "block",    inputWidth: 200,    className: "myBlock", list:[
+                            {type: "button",   name: "save",       value:_("Zapisz"), offsetTop:18},
+                            {type: "newcolumn"},
+			    {type: "button",   name: "cancel",     value:_("Anuluj"), offsetTop:18}
+                        ]},
+                        {type: "newcolumn"},
+		 	{type: "image",    name: "user_photo", imageWidth: 126, imageHeight: 126, inputWidth: 130, inputHeight: 130 }
+                        //{type: "container",name: "photo",      label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65, position: "absolute"},
+
                     ]}
 		]; 
                 
+                pracownikToolBar = pracownicyLayout.cells("c").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Pracownik")},
+				{type: "spacer"},				
+				{id: "Hide", type: "button", img: "fa fa-arrow-right"}
+			]
+		});
+                pracownikToolBar.attachEvent("onClick", function(id) { 
+                    if (id == 'Hide') {
+                        pracownicyLayout.cells("c").collapse();
+                    }                    
+                });
+                //creating pracownicy form
+                var pracownicyForm = pracownicyLayout.cells("c").attachForm(pracownicyFormStruct);
+
+                //departaments combo
+                var dhxComboDepartaments = pracownicyForm.getCombo("departament");                            
+                ajaxGet("api/departaments", '', function(data) {                    
+                    dhxComboDepartaments.addOption(data.data);
+                });                            
+
+                //users roles combo
+                var dhxComboRoles = pracownicyForm.getCombo("role");
+                ajaxGet("api/roles", '', function(data) {                    
+                    dhxComboRoles.addOption(data.data);
+                });           
+
+                //events on pracownicy form 
+                pracownicyForm.attachEvent("onChange", function(name, value, state){
+                    if (name == 'is_worker') {
+                        console.log(name, value);
+                        dhxComboDepartaments.enable(value);
+                        pracownicyForm.setRequired("departament", value);                                    
+                    }
+                });
+                                           
+                //pracownicyForm.checkItem('is_worker');
+                //binding with grid
+                pracownicyForm.bind(pracownicyGrid);
+                //pracownicyForm.lock();
                 
+                                 
                 //pracownicyGrid.makeFilter(searchElem, 0);
                 //pracownicyGrid.makeFilter(searchElem, 1);
                 //pracownicyGrid.makeFilter(searchElem, 2);
                                  
 
-                 //pracownicyGrid.attachEvent("onRowSelect", pracownicyFillForm);
+                pracownicyGrid.attachEvent("onRowSelect", function() {
+                    //pracownicyForm.lock();
+                    pracownicyLayout.cells("c").expand();
+                });
                  //pracownicyGrid.attachEvent("onRowClick", createPracownicyForm());
 		 //pracownicyGrid.attachEvent("onRowInserted", pracownicyGridBold);
 		

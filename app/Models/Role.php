@@ -4,7 +4,7 @@ namespace App\Models;
 
 use \App\Models\BaseModel;
 
-class Role extends Model
+class Role extends BaseModel
 {
     use \Dimsav\Translatable\Translatable;
     

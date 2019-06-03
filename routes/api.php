@@ -19,6 +19,7 @@ Route::group([
 //    Route::get('/user', function (Request $request) {
 //        return $request->user();
 //    });
+    Route::resource('/roles', 'RoleController');
     Route::resource('/users', 'API\UserController');
     Route::get('/departaments/all/{locale}', 'DepartamentController@departaments');    
     Route::get('/departaments/{id}/{locale}', 'DepartamentController@departaments');    
@@ -27,6 +28,7 @@ Route::group([
     Route::get('/workerslist', 'DepartamentController@workersList');
     //Route::resource('/users', 'WorkersController');    
     Route::get('/departaments', 'DepartamentController@departamentsTree');
+    Route::get('/roles', 'RoleController@roles');
 });
 
 Route::post('login', 'API\UserController@login');

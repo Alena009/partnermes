@@ -23,9 +23,20 @@ class RoleController extends BaseController
     {
         app()->setLocale($locale);
 
-        $roles = \App\Models\Role::all();
+        $roles = $this->repository->getModel()::all();               
         
-        return response()->json($roles);        
+        foreach ($roles as $role) {             
+            $item = [               
+                'id' => $role['id'], 
+                'text' => $role['name'], 
+                'value' => $role['id']
+            ];
+            $result[] = $item;
+        }              
+        
+        $result = ['data' => $result, 'success' => true];
+        
+        return response()->json($result);      
     }
 
     /**

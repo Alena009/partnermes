@@ -54,6 +54,7 @@ function pracownicyInit(cell) {
                     if (mode) {
 			pracownicyGrid.clearAll();
 			pracownicyGrid.zaladuj(id);
+                        console.log(id);
 			return true;                        
                     }
 		});
@@ -65,25 +66,60 @@ function pracownicyInit(cell) {
 			return true;
 		});
 		var pracownicyGrid = pracownicyLayout.cells("b").attachGrid({
-			image_path:'codebase/imgs/',
-			columns: [{
+                    image_path:'codebase/imgs/',
+	            columns: [{
                             label: _("Nazwisko"),
-                            width: 250,
+                            width: 100,
                             id: "lastname",
-                                            type: "ed", sort: "str", align: "left"
-                                    },{
-                                            label: _("Imię"),
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Imię"),
                             id: "firstname",
-                                            width: 100, type: "ed", sort: "str", align: "left"
-                                    },{
-                                            label: _("Kod"),
+                            width: 100, 
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Kod"),
                             id: "kod",
-                                            width: 100, type: "ed", sort: "int", align: "right"
-                                    },{
-                                            label: _("Język"),
+                            width: 100, 
+                            type: "ed", 
+                            sort: "int", 
+                            align: "right"
+                        },
+                        {
+                            label: _("Język"),
                             id: "language",
-                                            type: "ed", sort: "str",	align: "left"
-			}],
+                            type: "ed", 
+                            sort: "str",	
+                            align: "left"
+			},
+                        {
+                            label: _("Login"),
+                            id: "login",
+                            type: "ed", 
+                            sort: "str",	
+                            align: "left"
+                        }, 
+                        {
+                            label: _("Role"),
+                            id: "role",
+                            type: "ed", 
+                            sort: "str",	
+                            align: "left"
+                        },
+                        {
+                            label: _("Departament"),
+                            id: "departament",
+                            type: "ed", 
+                            sort: "str",	
+                            align: "left"
+                        }
+                    ],
 			multiselect: true
                 });                        
 		pracownicyGrid.zaladuj = function(i){
@@ -279,7 +315,8 @@ function pracownicyInit(cell) {
                                             });
                                     };break;
                                     case 'cancel':{
-                                        pracownicyForm.updateValues();
+                                        pracownicyForm.updateValues();                   
+
                                     };break;
                                 }
                             });                           
@@ -297,7 +334,7 @@ function pracownicyInit(cell) {
                 });     
                 
                 pracownicyFormStruct = [
-                    {type:"fieldset",  offsetTop:0, label:"Pracownik", width:460, list:[
+                    {type:"fieldset",  offsetTop:0, width:450, list:[
                         {type: "input",    name: "kod",        label: _("Kod"),       labelAlign: "left",                required: true},
 		 	{type: "input",    name: "firstname",  label: _("First name"),labelAlign: "left",                required: true},
                         {type: "input",    name: "lastname",   label: _("Last name"), labelAlign: "left",                required: true},
@@ -333,11 +370,12 @@ function pracownicyInit(cell) {
 				{id: "Hide", type: "button", img: "fa fa-arrow-right"}
 			]
 		});
+                //hide cell with form with inforation about worker
                 pracownikToolBar.attachEvent("onClick", function(id) { 
                     if (id == 'Hide') {
                         pracownicyLayout.cells("c").collapse();
                     }                    
-                });
+                });               
                 //creating pracownicy form
                 var pracownicyForm = pracownicyLayout.cells("c").attachForm(pracownicyFormStruct);
 
@@ -373,8 +411,7 @@ function pracownicyInit(cell) {
                 //pracownicyGrid.makeFilter(searchElem, 2);
                                  
 
-                pracownicyGrid.attachEvent("onRowSelect", function() {
-                    //pracownicyForm.lock();
+                pracownicyGrid.attachEvent("onRowSelect", function() {                    
                     pracownicyLayout.cells("c").expand();
                 });
                  //pracownicyGrid.attachEvent("onRowClick", createPracownicyForm());
@@ -417,5 +454,8 @@ function pracownicyGridBold(r, index) {
 }
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {
-	if (id == "pracownicy") pracownicyInit(cell);
+	if (id == "pracownicy") {
+            window.history.pushState({'page_id': id}, null, '#pracownicy');
+            pracownicyInit(cell);      
+        }       
 });

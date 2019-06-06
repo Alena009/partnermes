@@ -11,7 +11,7 @@ class Order extends BaseModel
     protected $table = "orders";
     
     protected $fillable = [
-        'kod', 'name', 'client_id'
+        'kod', 'client_id', 'date_start', 'date_end'
     ];
     
     /* fields for translating */    

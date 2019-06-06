@@ -11,12 +11,12 @@ function appInit() {
 		width: 140,
 		template: "tiles",
 		items: [
-			{id: "timeline", text: "Timeline", icon: "timeline.png"},
-			{id: "zlecenia", text: "Zlecenia", icon: "list.png"},
+			{id: "timeline",   text: "Timeline",   icon: "timeline.png"},
+			{id: "zlecenia",   text: "Zlecenia",   icon: "list.png"},
 			{id: "pracownicy", text: "Pracownicy", icon: "contacts.png"},
-			{id: "projects", text: "Projects", icon: "projects.png"},
-			{id: "events",   text: "Events",   icon: "events.png"  },
-			{id: "settings", text: "Settings", icon: "settings.png"}
+			{id: "projects",   text: "Projects",   icon: "projects.png"},
+			{id: "events",     text: "Events",     icon: "events.png"  },
+			{id: "settings",   text: "Settings",   icon: "settings.png"}
 		]
 	});
 
@@ -49,6 +49,7 @@ function appInit() {
 		}
 	});
 	mainSidebar.cells("pracownicy").setActive(true);
+        return;
 	//window.dhx4.callEvent("onSelect","projects");
 	//debugger;
 	//window.dhx4.callEvent("onSidebarSelect", ['projects', mainSidebar.cells('projects')]);
@@ -142,8 +143,7 @@ function loginFormShow(callback2={}){
 	}
 }
 
-function logged(){
-    //var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+function logged(){    
 	//dhx.ajax.post("logged","_token="+csrf_token,function(r){
         ajaxPost("logged",'',function(data){
 		//var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
@@ -178,12 +178,7 @@ logged();
 
 function isFunction(functionToCheck) {
 	return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
-}
-
-
-
-//axios.defaults.headers.common['X-CSRF-TOKEN']  =  document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-//axios.defaults.headers.common['Authorization'] =  localStorage.getItem('token');    
+}  
 
 function ajaxPost(url, params, callback) {
     axiosQuery('post', url, params, callback);
@@ -197,7 +192,7 @@ function ajaxDelete(url, params, callback) {
     axiosQuery('delete', url, params, callback);
 }
 
-function axiosQuery(method, url, params, callback) {
+function axiosQuery(method, url, params, callback) {      
     var api_token = localStorage.getItem('token');
     
     var headers = {        
@@ -296,22 +291,6 @@ function axiosQuery(method, url, params, callback) {
 //        headers: headers
 //    });    
 //}
-//
-//function ajaxGet(url, params, callback){                
-//    ajaxQuery("GET", url, params, callback);
-//}
-//
-//function ajaxPost(url, params, callback){   
-//    ajaxQuery("POST", url, params, callback);
-//}
-//
-//function ajaxDelete(url, params, callback){
-//    ajaxQuery("DELETE", url, params, callback);
-//}
-//
-//function ajaxPut(url,params,callback){
-//    ajaxQuery("PUT", url, params, callback);
-//}
 
 function _(txt=''){
     return txt;
@@ -322,3 +301,18 @@ function parseDataForGrid(json){
 
     return data;
 }
+//Check, does browser support historyApi
+function historyApi() {
+    return histAPI=!!(window.history && history.pushState);
+}
+
+window.onhashchange = function() { 
+    var hash = location.hash;
+    if (hash) {
+        hash = hash.substring(1);
+        console.log(hash);
+        window.mainSidebar.cells(hash).setActive(true);
+    }
+};
+
+

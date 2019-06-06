@@ -22,7 +22,7 @@
         <link rel="stylesheet" type="text/css" href="css/zlecenia.css" />
         <link rel="stylesheet" type="text/css" href="codebase/fonts/font_roboto/roboto.css" />
         <link rel="stylesheet" type="text/css" href="codebase/fonts/font_awesome/css/font-awesome.min.css" />
-        <script type="text/javascript" src="codebase/app/common.js"></script>
+        <script type="text/javascript" src="codebase/app/common.js?ver<?php echo date('Y-m-d H:i:s');?>"></script>
     @else
         <script type="text/javascript" src="codebase/app/login.js"></script>
     @endif

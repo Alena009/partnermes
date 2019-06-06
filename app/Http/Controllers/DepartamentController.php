@@ -98,21 +98,21 @@ class DepartamentController extends BaseController
         return $kids;
     }
     
+    /**
+     * Getting workers list for each departament by departamnets ids
+     * @param array $departamentsIds
+     * @return array $workers
+     */
     public function workersList($departamentsIds = 0)
     {      
         $workerModel = new \App\Models\User();
-//        $Departaments = $this->repository->getDepartamentsByIds($departamentsIds);
-//                
-//        foreach ($Departaments as $Departament) {
-//            $workers[] = $Departament->workers;          
-//        }
-//        
-//        return $workers;
-        if ($departamentsIds) {
+        
+        if ($departamentsIds) {            
             $departamentsIds = explode(',', $departamentsIds);
             $workerDepartament = new \App\Models\WorkerDepartament();
+            //getting array of users ids from workers-departaments table
             $workersIds = $workerDepartament::whereIn('departament_id', $departamentsIds)->pluck('user_id');
-                   
+            //getting workers from directory       
             $workers = $workerModel::find($workersIds);            
         } else {
            $workers =  $workerModel::all();

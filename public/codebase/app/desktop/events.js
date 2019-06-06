@@ -45,6 +45,10 @@ function eventsInit(cell) {
 	
 }
 
-window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
-	if (id == "events") eventsInit(cell);
+window.dhx4.attachEvent("onSidebarSelect", function(id, cell){    
+	if (id == "events") {            
+            //eventsInit(cell);
+            window.history.pushState({ 'page_id': id, 'user_id': 5 }, null, '#events');
+            
+        }        
 });

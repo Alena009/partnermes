@@ -2,7 +2,7 @@ var zleceniaGrid;
 var zleceniaLayout;
 var zleceniaForm;
 
-function zleceniaInit(cell) {
+function zleceniaInit(cell) {   
 
 	if (zleceniaLayout == null) {
 		// init layout
@@ -304,5 +304,8 @@ function zleceniaInit(cell) {
 }
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {
-	if (id == "zlecenia") zleceniaInit(cell);
+	if (id == "zlecenia") {           
+            window.history.pushState({'page_id': id}, null, '#zlecenia');
+            //zleceniaInit(cell);
+        }        
 });

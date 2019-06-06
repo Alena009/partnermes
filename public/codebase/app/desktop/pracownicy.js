@@ -152,9 +152,7 @@ function pracownicyInit(cell) {
 		grupyFormData = [
 			{type:"fieldset",  offsetTop:0, label:"Nowa grupa", width:253, list:[                                
 				{type:"combo",  name:"parent_id",       label:"Grupa nadrzędna",        options: [{text: "None", value: "0"}], inputWidth: 150},                                
-				{type:"input",  name:"pl",    	label:"Nazwa grupy",     	offsetTop:13, 	labelWidth:80},                                
-                                {type:"input",  name:"en",    	label:"Group name",     	offsetTop:13, 	labelWidth:80},                                
-				{type:"input",  name:"upr",    		label:"Uprawnienie",    	offsetTop:7,	labelWidth:80},
+				{type:"input",  name:"name",    	label:"Nazwa grupy",     	offsetTop:13, 	labelWidth:80},                                                                				
 				{type:"button", name:"save",    	value:"Zapisz",   		offsetTop:18},
 				{type:"button", name:"cancel",     	value:"Anuluj",   		offsetTop:18}
 			]}
@@ -224,8 +222,8 @@ function pracownicyInit(cell) {
                                         
                                         var id = grupyTree.getSelectedId();   
                                         ajaxGet("api/departaments/" + id, '', function(data) {   
-                                            console.log(data.data.translations);
-                                            grupyForm.setFormData(data.data.translations);                          
+                                            console.log(data.data);
+                                            grupyForm.setFormData(data.data);                          
                                             
                                         });                         
                                         

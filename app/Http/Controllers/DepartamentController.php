@@ -58,7 +58,7 @@ class DepartamentController extends BaseController
      */
     public function departamentsTree()
     {
-        $Departaments = $this->repository->getDepartamentsRootNodes();
+        $Departaments = $this->repository->getDepartamentsRootNodes();     
         
         foreach ($Departaments as $Departament) {             
             $kids = array();
@@ -87,12 +87,21 @@ class DepartamentController extends BaseController
      */
     public function kidTree($Departament)
     {
+        $kids = [];  
+        $kid = [];
+        
         foreach ($Departament->kids as $arr) {
-            if (count($arr->kids)) {
-                $kids['items'][] = $this->kidView($arr);
-            } else {
-                $kids[]['text'] = $arr->name;
-            }
+            $kid = [                     
+                    'id' => $arr['id'], 
+                    'text' => $arr['name'], 
+                    'value' => $arr['id']
+                ];                
+            
+            if (count($arr->kids)) {                   
+                $kid['items'] = $this->kidTree($arr);
+            }      
+            
+            $kids[] = $kid;
         }
         
         return $kids;

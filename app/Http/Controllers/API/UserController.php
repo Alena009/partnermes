@@ -8,8 +8,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Validator;
 use App\Repositories\UserRepository;
+use Intervention\Image\Facades\Image as ImageInt;
 
-class UserController extends BaseController 
+
+class UserController extends \App\Http\Controllers\BaseController
 {
 
     public $successStatus = 200;
@@ -56,7 +58,20 @@ class UserController extends BaseController
         $success['token'] = $user->createToken('MyApp')->accessToken;
         $success['name'] = $user->name;
         
-        return response()->json(['success' => $success], $this->successStatus);
+    //if ($request->hasFile('upload_photo')) {
+        $image = $request->file('upload_photo');
+        $name = time().'.'.$image->getClientOriginalExtension();
+        $destinationPath = public_path('uploads');
+        $image->move($destinationPath, $name);
+        
+       //$data = $name;
+        
+
+        
+    //}
+    $data = dd($request->all());
+        
+        return response()->json(['success' => $success, 'data' => $data]);
     }
 
     /**
@@ -64,11 +79,12 @@ class UserController extends BaseController
      * 
      * @return \Illuminate\Http\Response 
      */
-    public function show() 
-    {
-        $user = Auth::user();        
-        return response()->json(['success' => true, 'data' => $user], $this->successStatus);
-    }
+//    public function show() 
+//    {
+//        $user = Auth::user();  
+//        
+//        return response()->json(['success' => true, 'data' => $user], $this->successStatus);
+//    }
     
     /**
      * Logout with revoking token
@@ -84,10 +100,31 @@ class UserController extends BaseController
     }
     
     /**
-     * 
+     * Editing information about user
      */
     public function edit(Request $request, $id)
-    {
-        return response()->json(['success' => true]);
+    {        
+        $user = User::find($id);
+        
+        if ($user->fill($request->all())->save()) {
+            return response()->json(['success' => true, 'data' => $user]);
+        } else {
+            return response()->json(['success' => false, 'data' => []]);
+        }        
+    }
+    
+    /*
+     * Show avatar
+     */
+    public function avatar($userId)
+    {    
+        $imgPath = "uploads/avatars/empty_user.jpg";
+        $filename = "uploads/avatars/" . $userId . ".jpg";
+        
+        if (file_exists($filename)) {
+            $imgPath = $filename;        
+        }       
+
+        return response()->json(['success' => true, 'data' => $imgPath]);
     }
 }

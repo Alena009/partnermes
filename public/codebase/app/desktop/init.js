@@ -199,12 +199,19 @@ function axiosQuery(method, url, params, callback) {
         'Authorization': api_token
     };
 
-    axios.request({
+    var requestBody = {
         method: method,
-        url: url,
-        data: params, 
+        url: url,     
         headers: headers   
-    })
+    };
+    
+    if (method == 'get') {
+        requestBody.params = params;        
+    } else {
+        requestBody.data = params;
+    };
+    
+    axios.request(requestBody)
     .then(function(response){			
                 var data = response.data;                
 			if (response.status == 200) {
@@ -306,6 +313,9 @@ function historyApi() {
     return histAPI=!!(window.history && history.pushState);
 }
 
+/*
+ * function listen changes of hash forr hash navigation
+ */
 window.onhashchange = function() { 
     var hash = location.hash;
     if (hash) {

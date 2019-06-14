@@ -10,7 +10,7 @@ function pracownicyInit(cell) {
 		pracownicyLayout.cells("a").hideHeader();
 		pracownicyLayout.cells("b").hideHeader();
                 pracownicyLayout.cells("c").hideHeader();
-                pracownicyLayout.cells("c").collapse();
+                //pracownicyLayout.cells("c").collapse();
 		pracownicyLayout.cells("a").setWidth(280);
 		//console.log(pracownicyLayout.listAutoSizes());
 		pracownicyLayout.setAutoSize("a");   
@@ -26,7 +26,7 @@ function pracownicyInit(cell) {
 		});
                 
 		grupyTree.build = function(){
-                    var treeStruct = ajaxGet("api/departaments", '', function(data) {                    
+                    var treeStruct = ajaxGet("api/departamentstree", '', function(data) {                    
                         if (data && data.success){      
                             grupyTree.clearAll();                            
                             grupyTree.loadStruct(data.data);                           
@@ -48,6 +48,13 @@ function pracownicyInit(cell) {
 		});
 		grupyTree.attachEvent("onDrop",function(id){
 			console.log("grupyTree.onDrop", arguments);
+                        var parent_id = arguments[1];
+                        parent_id = (parent_id) ? parent_id+'' : 0;
+                        var data = {
+                            id: id,
+                            parent_id: parent_id
+                        };                        
+                        updateDepartament(id, data);
 			return true;
 		});
 		grupyTree.attachEvent("onSelect",function(id, mode){  
@@ -90,35 +97,22 @@ function pracownicyInit(cell) {
                             type: "ed", 
                             sort: "int", 
                             align: "right"
-                        },
-                        {
-                            label: _("Język"),
-                            id: "language",
-                            type: "ed", 
-                            sort: "str",	
-                            align: "left"
-			},
+                        },                          
                         {
                             label: _("Login"),
                             id: "login",
                             type: "ed", 
                             sort: "str",	
                             align: "left"
-                        }, 
-                        {
-                            label: _("Role"),
-                            id: "role",
-                            type: "ed", 
-                            sort: "str",	
-                            align: "left"
                         },
                         {
-                            label: _("Departament"),
-                            id: "departament",
+                            label: _("E-mail"),
+                            id: "email",
+                            width: 100, 
                             type: "ed", 
-                            sort: "str",	
+                            sort: "str", 
                             align: "left"
-                        }
+                        }                        
                     ],
 			multiselect: true
                 });                        
@@ -127,18 +121,28 @@ function pracownicyInit(cell) {
 			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;                        
 			var new_data = ajaxGet("api/workerslist/" + i, '', function(data){                                     
 				if (data && data.success){
+                                    console.log(data.data);
                                     pracownicyGrid.parse((data.data), "js");
                                 }
 			});                        
                 }
-		var dpPracownicyGrid = new dataProcessor("api/workerslist",'js');
+		var dpPracownicyGrid = new dataProcessor("api/users", "js");                
 		dpPracownicyGrid.init(pracownicyGrid);
 		dpPracownicyGrid.enableDataNames(true);
 		dpPracownicyGrid.setTransactionMode("REST");
 		dpPracownicyGrid.enablePartialDataSend(true);
 		dpPracownicyGrid.enableDebug(true);
                 dpPracownicyGrid.setUpdateMode("row", true);
-
+                dpPracownicyGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                    console.log(data);
+                    data.id = id;
+                    updateGridRecord(id, data);
+                });
+                function updateGridRecord(id, data) {    
+                    ajaxGet("api/users/" + id + "/edit", data, function(data){                                                            
+                        console.log(data);
+                    });
+                }
 		grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar({
 			iconset: "awesome",
 			items: [
@@ -149,97 +153,100 @@ function pracownicyInit(cell) {
 				{id: "Del", type: "button", img: "fa fa-minus-square"}
 			]
 		});
-		grupyFormData = [
-			{type:"fieldset",  offsetTop:0, label:"Nowa grupa", width:253, list:[                                
+		grupyFormAddData = [
+			{type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
 				{type:"combo",  name:"parent_id",       label:"Grupa nadrzędna",        options: [{text: "None", value: "0"}], inputWidth: 150},                                
 				{type:"input",  name:"name",    	label:"Nazwa grupy",     	offsetTop:13, 	labelWidth:80},                                                                				
 				{type:"button", name:"save",    	value:"Zapisz",   		offsetTop:18},
 				{type:"button", name:"cancel",     	value:"Anuluj",   		offsetTop:18}
 			]}
 		];
+		grupyFormEditData = [
+			{type:"fieldset",  offsetTop:0, label:_("Grupa"), width:253, list:[                                			
+				{type:"input",  name:"name",    	label:"Nazwa grupy",     	offsetTop:13, 	labelWidth:80},                                                                				
+				{type:"button", name:"save",    	value:"Zapisz",   		offsetTop:18},
+				{type:"button", name:"cancel",     	value:"Anuluj",   		offsetTop:18}
+			]}
+		];                
 //                
 //                var dpGrupyTree = new dataProcessor("api/departaments", "js");
 //                dpGrupyTree.init(grupyTree);
 //                dpGrupyTree.setTransactionMode("REST");
                 
-                function createDepartamentForm(){
-                    var dhxWins= new dhtmlXWindows();
-                                        w1 = dhxWins.createWindow({
-                                                id:"w1",
-                                                left:20,
-                                                top:30,
-                                                width:300,
-                                                height:350,
-                                                center:true,
-                                                onClose:function(){
+                function createWindowWithForm(formStruct, height, width){
+                    var dhxWins = new dhtmlXWindows();
+                    w1 = dhxWins.createWindow({
+                            id:"w1",
+                            left:20,
+                            top:30,
+                            width: width,
+                            height: height,
+                            center:true,
+                            caption: _("Dodaj lub zmien grupe"),
+                            header: true,
+                            onClose:function(){
 
-                                                }
-                                        });
-                    //initializing form for add/edit/delete departaments
-                    var grupyForm = dhxWins.window("w1").attachForm(grupyFormData, true);          
-                    
-                    return grupyForm;
-                } 
+                            }
+                    });
+                    //initializing form 
+                    return dhxWins.window("w1").attachForm(formStruct, true);         
+                }                                         
+               
                 
 		grupyTreeToolBar.attachEvent("onClick", function(id) {                        
 			console.log('mainToolbar.onClick',arguments);
 			switch (id){
 				case 'Add':{
 					console.log('Dodaj grupe');                                                                               
-                                        var grupyForm = createDepartamentForm();
-                                        //get combobox from form 
-                                        var dhxCombo = grupyForm.getCombo("parent_id");
-                                        //loading listrecords for combobox
+                                        var grupyForm = createWindowWithForm(grupyFormAddData, 300, 350);
+                                        var dhxCombo = grupyForm.getCombo("parent_id");                             
                                         ajaxGet("api/departaments", '', function(data) {                    
-                                            dhxCombo.addOption(data.data);
+                                                dhxCombo.addOption(data.data);
                                         });
-                                                                                
-					var parent = grupyTree.getSelectedId();   
                                         //attaching events on form buttons click
                                         grupyForm.attachEvent("onButtonClick", function(name){
                                             switch (name){
                                                 case 'save':{                                                           
                                                         ajaxPost("api/departaments", grupyForm.getFormData(), function(data){                                                            
-                                                            grupyTree.addItem(data.id, data.name, data.parent_id); // id, text, pId
+                                                            grupyTree.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
                                                         });
                                                 };break;
                                                 case 'cancel':{
-                                                    grupyForm.clear();
+                                                    //grupyForm.clear();
                                                 };break;
                                             }
                                         });
 					//grupyForm.bind(tree);
 				};break;
-				case 'Edit':{
-					console.log('Zmien grupe');
-                                        var grupyForm = createDepartamentForm();
-                                        //get combobox from form 
-                                        var dhxCombo = grupyForm.getCombo("parent_id");
-                                        //loading listrecords for combobox
-                                        ajaxGet("api/departaments", '', function(data) {                    
-                                            dhxCombo.addOption(data.data);
-                                        });
+				case 'Edit':{                                        				
+                                        var id = grupyTree.getSelectedId(); 
                                         
-                                        var id = grupyTree.getSelectedId();   
-                                        ajaxGet("api/departaments/" + id, '', function(data) {   
-                                            console.log(data.data);
-                                            grupyForm.setFormData(data.data);                          
-                                            
-                                        });                         
-                                        
-                                        
-                                        grupyForm.attachEvent("onButtonClick", function(name){
-                                            switch (name){
-                                                case 'save':{                                                           
-                                                        ajaxPost("api/departaments", grupyForm.getFormData(), function(data){                                                            
-                                                            grupyTree.addItem(data.id, data.name, data.parent_id); // id, text, pId
+                                        if (id) {                                            
+                                            var data = {
+                                                id: id,
+                                                name: grupyTree.getItemText(id)
+                                            };
+                                            var grupyForm = createWindowWithForm(grupyFormEditData, 300, 350);                                                                                       
+                                            grupyForm.setFormData(data);                                                                                                                   
+                                            grupyForm.attachEvent("onButtonClick", function(name){
+                                                switch (name){
+                                                    case 'save':{                     
+                                                        console.log(grupyForm.getFormData());     
+                                                        ajaxGet("api/departaments/" + id +"/edit", grupyForm.getFormData(), function(data) {                                                                                                        
+                                                            if (data.success) {
+                                                                console.log(data.data);                                             
+                                                                grupyTree.setItemText(id, data.data.name);
+                                                            }   
                                                         });
-                                                };break;
-                                                case 'cancel':{
-                                                    grupyForm.clear();                                                    
-                                                };break;
-                                            }
-                                        });
+                                                    };break;
+                                                    case 'cancel':{
+                                                        //grupyForm.clear();                                                    
+                                                        dhxCombo.selectOption(3);                                            
+                                                        
+                                                    };break;
+                                                }
+                                            });
+                                        }                                     
 				};break;
 				case 'Del':{
 					console.log('Usun grupe');
@@ -269,6 +276,8 @@ function pracownicyInit(cell) {
 				{id: "Find", type: "button", img: "fa fa-search"},
 				{type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
 				{type: "separator", id: "sep2"},
+                                {id: "Cog", type: "button", img: "fa fa-cog "},
+                                {type: "separator", id: "sep3"},
 				{id: "Add", type: "button", img: "fa fa-plus-square "},
 				{id: "Edit", type: "button", img: "fa fa-edit"},
 				{id: "Del", type: "button", img: "fa fa-minus-square"}
@@ -282,8 +291,7 @@ function pracownicyInit(cell) {
                             console.log('adding mode');
                             //creating view for form add/edit
                             //pracownicyLayout.cells("b").showView("form");
-                            //clearing fields form
-                            pracownicyForm.unlock();
+                            //clearing fields form                            
                             pracownicyForm.clear();
                             pracownicyLayout.cells("c").expand();
                             pracownicyForm.attachEvent("onButtonClick", function(name){
@@ -300,17 +308,16 @@ function pracownicyInit(cell) {
                             }); 
                         };break;
                         case 'Edit':{
-                            console.log('edit mode');
-                            pracownicyForm.unlock();
-                            pracownicyForm.bind(pracownicyGrid);
-                            pracownicyLayout.cells("c").expand();
+                            console.log('edit mode');                            
+                            //pracownicyForm.bind(pracownicyGrid);
+                            //pracownicyLayout.cells("c").expand();
                             pracownicyForm.attachEvent("onButtonClick", function(name){
                                 switch (name){
                                     case 'save':{ 
-                                            var $id = pracownicyGrid.getSelectedRowId();
-                                            ajaxPost("api/users/" + $id + "/edit", pracownicyForm.getFormData(), function(data){                                                            
-                                                console.log(data);
-                                            });
+                                            var id = pracownicyGrid.getSelectedRowId();
+//                                            ajaxPost("api/users/" + id + "/edit", pracownicyForm.getFormData(), function(data){                                                            
+//                                                console.log(data);
+//                                            });
                                     };break;
                                     case 'cancel':{
                                         pracownicyForm.updateValues();                   
@@ -328,11 +335,121 @@ function pracownicyInit(cell) {
                             console.log(searchText);
                             pracownicyGrid.filterBy(1, searchText);                                    
                         };break;
+                        case 'Cog': {
+                            var departamentID = grupyTree.getSelectedId();
+                            if (departamentID) {
+                                var dhxWins = new dhtmlXWindows();
+                                w1 = dhxWins.createWindow({
+                                        id:"w1",
+                                        left:20,
+                                        top:30,
+                                        width: 500,
+                                        height: 500,
+                                        center:true,
+                                        caption: _("Dolanczyc pracownikow do departamentu"),
+                                        header: true,                                        
+                                        onClose:function(){
+
+                                        }
+                                });                                
+//                                var toolbar = dhxWins.window("w1").attachToolbar({
+//                                    iconset: "awesome",
+//                                    items: [
+//                                            {type: "text", id: "title", text: _("Pracownicy")},
+//                                            {type: "spacer"},
+//                                            {id: "Save", type: "button", img: "fa fa-save "},
+//                                            {id: "Cancel", type: "button", img: "fa fa-undo"}                                            
+//                                    ]
+//                                });
+//                                toolbar.attachEvent("onClick", function(id) {
+//                                    switch (id) {
+//                                        case "Save": {
+//                                                                                            
+//                                        }; break;
+//                                        case "Cancel": {
+//                                                
+//                                        }; break;    
+//                                    } 
+//                                });
+                                
+                                var usersGrid = dhxWins.window("w1").attachGrid({
+                                    image_path:'codebase/imgs/',
+                                    columns: [
+                                        {
+                                            label: _("Dolaczone"),
+                                            width: 60,
+                                            id: "in_departament",
+                                            type: "ch",                                             
+                                            align: "left"
+                                        },
+                                        {
+                                            label: _("Nazwisko"),
+                                            width: 100,
+                                            id: "lastname",
+                                            type: "ed", 
+                                            sort: "str", 
+                                            align: "left"
+                                        },
+                                        {
+                                            label: _("Imię"),
+                                            id: "firstname",
+                                            width: 100, 
+                                            type: "ed", 
+                                            sort: "str", 
+                                            align: "left"
+                                        },
+                                        {
+                                            label: _("Kod"),
+                                            id: "kod",
+                                            width: 100, 
+                                            type: "ed", 
+                                            sort: "int", 
+                                            align: "right"
+                                        }                       
+                                    ]                                       
+                                }); 
+                                usersGrid.attachEvent("onCheck", function(rId,cInd,state){
+                                    var data = {
+                                            departament_id: departamentID,
+                                            user_id: rId
+                                        };
+                                    if (state) {                                                                            
+                                        ajaxPost("api/workerdep", data, '');
+                                    } else {
+                                        ajaxGet("api/workerdep/del", data, '');
+                                    }
+                                    pracownicyGrid.zaladuj(departamentID);                                   
+                                });
+                                ajaxGet("api/workerslist/", '', function(data){                                     
+                                    if (data && data.success){ 
+                                        //remember array of all workers
+                                        var allUsers = data.data;
+                                        //asking array of workers for choosen departament
+                                        ajaxGet("api/workerslist/" + departamentID, '', function(data2){
+                                            //remember array of workers in departament
+                                            var departamentUsers = data2.data;
+                                            //for every worker from all workers array we are checking:
+                                            //does this worker is in choosen departament, if he is - then we
+                                            //do marking "in_departament" for him
+                                            allUsers.forEach(function(element){
+                                                if (departamentUsers.find(x => x.id === element.id)) {
+                                                    element.in_departament = true;
+                                                }
+                                            }); 
+                                            usersGrid.parse((allUsers), "js");
+                                        });
+                                    }
+                                });
+                                
+                            }
+                        };break;
                     }
                 });     
                 
-                pracownicyFormStruct = [
-                    {type:"fieldset",  offsetTop:0, width:450, list:[
+                pracownicyFormStruct = [         
+                        {type: "file", name: "upload_photo", hidden: true},
+                        {type: "container", name: "photo", label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65},
+                        //{type: "image", name: "photo", imageWidth: 126, imageHeight: 126, url: "../public/uploads/avatars/empty_user.jpg"},    
                         {type: "input",    name: "kod",        label: _("Kod"),       labelAlign: "left",                required: true},
 		 	{type: "input",    name: "firstname",  label: _("First name"),labelAlign: "left",                required: true},
                         {type: "input",    name: "lastname",   label: _("Last name"), labelAlign: "left",                required: true},
@@ -340,24 +457,18 @@ function pracownicyInit(cell) {
                         {type: "input",    name: "login",      label: _("Login"),     labelAlign: "left",                required: true},
                         {type: "password", name: "password",   label: _("Password"),  labelAlign: "left",                required: true},
 		 	{type: "input",    name: "email",      label: _("E-mail"),    labelAlign: "left",                required: true},
-		 	{type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},		 	                        
-                        {type: "input",    name: "lang",       label: _("Language"),  labelAlign: "left"},
-                        {type: "combo",    name: "role",       label: _("User role"), options:[],  required: true, readonly: true},
+		 	{type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},		 	                                                
+                        //{type: "combo",    name: "role",       label: _("User role"), options:[],  required: true, readonly: true},
                         {type: "label",                        label: _("Is worker")},
                         {type: "radio",    name: "is_worker",  label: _("Yes"), value: 1,  checked: true},
                         {type: "radio",    name: "is_worker",  label: _("No"),  value: 0},
-                        {type: "combo",    name: "departament",label: _("Departament"), options:[{text: "--", value: 0}],required: true, readonly: true},                         
+                        //{type: "combo",    name: "departament",label: _("Departament"), options:[{text: "--", value: 0}],required: true, readonly: true},                         
                         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
                         {type: "block",    inputWidth: 200,    className: "myBlock", list:[
                             {type: "button",   name: "save",       value:_("Zapisz"), offsetTop:18},
                             {type: "newcolumn"},
 			    {type: "button",   name: "cancel",     value:_("Anuluj"), offsetTop:18}
-                        ]},
-                        {type: "newcolumn"},
-		 	{type: "image",    name: "user_photo", imageWidth: 126, imageHeight: 126, inputWidth: 130, inputHeight: 130 }
-                        //{type: "container",name: "photo",      label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65, position: "absolute"},
-
-                    ]}
+                        ]}                  
 		]; 
                 
                 pracownikToolBar = pracownicyLayout.cells("c").attachToolbar({
@@ -375,48 +486,82 @@ function pracownicyInit(cell) {
                     }                    
                 });               
                 //creating pracownicy form
-                var pracownicyForm = pracownicyLayout.cells("c").attachForm(pracownicyFormStruct);
-
-                //departaments combo
-                var dhxComboDepartaments = pracownicyForm.getCombo("departament");                            
-                ajaxGet("api/departaments", '', function(data) {                    
-                    dhxComboDepartaments.addOption(data.data);
-                });                            
-
-                //users roles combo
-                var dhxComboRoles = pracownicyForm.getCombo("role");
-                ajaxGet("api/roles", '', function(data) {                    
-                    dhxComboRoles.addOption(data.data);
-                });           
-
+                var pracownicyForm = pracownicyLayout.cells("c").attachForm(pracownicyFormStruct);                        
+                
                 //events on pracownicy form 
                 pracownicyForm.attachEvent("onChange", function(name, value, state){
                     if (name == 'is_worker') {
-                        console.log(name, value);
-                        dhxComboDepartaments.enable(value);
+                        console.log(name, value);                       
                         pracownicyForm.setRequired("departament", value);                                    
-                    }
-                });
-                                           
-                //pracownicyForm.checkItem('is_worker');
+                    }                    
+                });                                           
+                
                 //binding with grid
                 pracownicyForm.bind(pracownicyGrid);
-                //pracownicyForm.lock();
+                pracownicyForm.attachEvent("onButtonClick", function(name){
+                    switch (name){
+                        case 'save':{                                                           
+                                ajaxPost("api/users", pracownicyForm.getFormData(), function(data){                                                            
+                                    //grupyTree.addItem(data.id, data.name, data.parent_id); 
+                                });
+                        };break;
+                        case 'cancel':{
+                            //pracownicyLayout.cells("c").collapse;
+                        };break;
+                    }
+                });                
                 
-                                 
+                pracownicyForm.fillForm = function(id = 0) {                    
+                    ajaxGet('api/users/avatar/' + id, '', function(data) {
+                        var url = data.data;
+                        pracownicyForm.getContainer("photo").innerHTML = "<img src='" + url + "' border='0' class='form_photo'>";                        
+                    });
+                };
+                pracownicyForm.fillForm(); 
+                
                 //pracownicyGrid.makeFilter(searchElem, 0);
                 //pracownicyGrid.makeFilter(searchElem, 1);
-                //pracownicyGrid.makeFilter(searchElem, 2);
-                                 
+                //pracownicyGrid.makeFilter(searchElem, 2);                                 
 
-                pracownicyGrid.attachEvent("onRowSelect", function() {                    
-                    pracownicyLayout.cells("c").expand();
+                pracownicyGrid.attachEvent("onRowSelect", function() { 
+                    var selectedId = pracownicyGrid.getSelectedRowId(); 
+                    pracownicyForm.fillForm(selectedId);  
+                    
+                    var saveButton = pracownicyForm.getItem("save");
+                    saveButton.attachEvent("eventName", function(){
+                        ajaxPost("api/users", pracownicyForm.getFormData(), function(data){
+                            console.log(data);
+                        });
+                    });
                 });
-                 //pracownicyGrid.attachEvent("onRowClick", createPracownicyForm());
-		 //pracownicyGrid.attachEvent("onRowInserted", pracownicyGridBold);
-		
-		 // attach form
-		 
+                
+		//Listen when onClick event for container "photo" in pracownicyForm occurs
+                var container = pracownicyForm.getContainer("photo");
+                if (window.addEventListener) {
+                    container.addEventListener("click",onContentClick,false);
+                } else {
+                    container.attachEvent("onclick",onContentClick);
+                }
+
+                //Avatar loading
+                function onContentClick() {
+                    console.log('click');
+                    var input = pracownicyForm.getInput("upload_photo");                    
+                    input.onchange = e => { 
+                        var file = e.target.files[0]; 
+                        console.log(file.name);
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            pracownicyForm.getContainer("photo").innerHTML = "<img src='" + e.target.result + "' border='0' class='form_photo'>";                                                                                
+                        };
+                        reader.onerror = function(event) {
+                            console.error(_("File can`t be read! ") + event.target.error.code);
+                        };
+                        reader.readAsDataURL(file);                          
+                    };                    
+                    input.click();                                         
+                };
+                 
 		 pracownicyGrid.attachEvent("onXLS", function(){
 		 	console.log("pracownicyGrid.onXLS", arguments);
 		 	var grupy=grupyTree.getAllChecked();
@@ -449,6 +594,14 @@ function pracownicyFillForm(id) {
 function pracownicyGridBold(r, index) {
 	pracownicyGrid.setCellTextStyle(pracownicyGrid.getRowId(index), pracownicyGrid.getColIndexById("name"), "font-weight:bold;border-left-width:0px;");
 	pracownicyGrid.setCellTextStyle(pracownicyGrid.getRowId(index), pracownicyGrid.getColIndexById("photo"), "border-right-width:0px;");
+}
+
+function updateDepartament(id, data) {
+    console.log(data);
+    ajaxGet("api/departaments/" + id + "/edit?", data, function(data){                                                            
+    //grupyTree.addItem(data.id, data.name, data.parent_id); // id, text, pId
+        console.log(data);
+    });    
 }
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {

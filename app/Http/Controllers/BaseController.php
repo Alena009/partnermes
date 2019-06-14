@@ -89,8 +89,8 @@ class BaseController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
-    {
+    public function edit(Request $request, $id)
+    {        
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
         $request = \App::make('App\Http\Requests\\'.$requestName);
 

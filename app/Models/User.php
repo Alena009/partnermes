@@ -37,4 +37,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    
+    /*
+     * User have roles (for tree view on front-end)
+     */
+    public function roles()
+    {
+        return $this->belongsToMany('App\Models\Role', 'users_roles', 'role_id', 'id');
+    }  
 }

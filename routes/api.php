@@ -20,15 +20,24 @@ Route::group([
 //        return $request->user();
 //    });
     Route::resource('/roles', 'RoleController');
-    Route::resource('/users', 'API\UserController');
-    Route::get('/departaments/all/{locale}', 'DepartamentController@departaments');    
-    Route::get('/departaments/{id}/{locale}', 'DepartamentController@departaments');    
-    Route::resource('/departaments', 'DepartamentController');   
-    Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
-    Route::get('/workerslist', 'DepartamentController@workersList');
-    //Route::resource('/users', 'WorkersController');    
-    Route::get('/departaments', 'DepartamentController@departamentsTree');
     Route::get('/roles', 'RoleController@roles');
+    //Route::get('/roles/{role}/permissions', 'RoleController@permissions');
+    Route::get('/users/avatar/{userId}', 'API\UserController@avatar');
+    Route::resource('/users', 'API\UserController');
+    //Route::get('/usersrolestree', 'RoleController@getUsersRolesTree');
+    Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
+    Route::get('/workerslist', 'DepartamentController@workersList');            
+    Route::resource('/departaments', 'DepartamentController');       
+    Route::get('/departamentstree', 'DepartamentController@departamentsTree');
+    
+    Route::get('/workerdep/del', 'WorkerDepartamentController@deleteRel');
+    Route::resource('/workerdep', 'WorkerDepartamentController');
+    
+    
+    
+    //Route::get('/departaments/all/{locale}', 'DepartamentController@departaments');    
+    //Route::get('/departaments/{id}/{locale}', 'DepartamentController@departaments');  
+    
 });
 
 Route::post('login', 'API\UserController@login');

@@ -55,5 +55,56 @@ class RoleController extends BaseController
         $role->save();
 
         return true;
-    }    
+    }  
+
+    public function getUsersRolesTree()
+    {
+        $roles = [];
+        $result = [];
+        $userModel = new \App\Models\User(); 
+        
+        $roles = $this->repository->getModel()::all();               
+        
+        foreach ($roles as $role) { 
+            $role['value'] = $role['id'];
+            $role['text'] = $role['name'];                   
+
+            
+            $result[] = $role;
+        }     
+        
+        $result = ['data' => $result, 'success' => true];
+        
+        return response()->json($result);
+    } 
+
+    public function show(Request $request, $id)
+    {
+        $permissions = [];
+        
+        $data = $this->repository->find($id);
+        
+        $permissions = $data->permissions;
+        if (count($permissions)) {
+            foreach ($permissions as $permission) {
+                $permission['value'] = \App\Models\RolePermission::where('role_id', $id)
+                        ->where('permission_id', $permission->id)
+                        ->pluck('value')[0];
+            }
+        }
+        
+        return ['success'=>$data?true:false,'data'=>$data];
+    }
+    
+//    public function getPermissions($role)
+//    {
+//        $permissions = $role->permissions;
+//        if (count($permissions)) {
+//            foreach ($permissions as $permission) {
+//                \App\Models\Permission::find($permission->id);
+//            }
+//        }
+//    }
+
 }
+

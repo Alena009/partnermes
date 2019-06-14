@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="codebase/css/loader.css" />
     <link rel="stylesheet" type="text/css" href="codebase/dhtmlx/skins/web/dhtmlx.css" />
     <script type="text/javascript" src="codebase/require/require.js"></script>
-    <script type="text/javascript" src="codebase/app/loader.js"></script>        
+    <script type="text/javascript" src="codebase/app/loader.js"></script>            
     @if (Auth::check())
         <link rel="stylesheet" type="text/css"
             href="codebase/dhtmlx/sources/dhtmlxScheduler/codebase/dhtmlxscheduler_material.css" />

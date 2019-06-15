@@ -43,7 +43,7 @@ function appInit() {
 	mainToolbar.attachEvent("onClick", function(id) {
 		console.log('mainToolbar.onClick',arguments);
 		if (id='logoout'){
-			ajaxPost('logout','',function(){
+			ajaxPost('api/logout','',function(){
                             location.reload();
 			});
 		}
@@ -100,10 +100,9 @@ function loginFormShow(callback2={}){
 		loginFormDP.init(loginForm);
 		loginForm.callback = callback2;
 		loginForm.weryfikuj = function(id){
-			var data = loginForm.getFormData();
-            var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-			dhx.ajax.post("login","login="+data.login+"&password="+data.password+"&_token="+csrf_token,function(r){
-				var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
+			var data = loginForm.getFormData();                        
+			ajaxPost("api/login","login="+data.login+"&password="+data.password,function(data){
+				
 				if (data.success===true){
                                     localStorage.setItem('token',data.token);
                                     console.log(data);
@@ -145,7 +144,7 @@ function loginFormShow(callback2={}){
 
 function logged(){    
 	//dhx.ajax.post("logged","_token="+csrf_token,function(r){
-        ajaxPost("logged",'',function(data){
+        ajaxPost("api/logged",'',function(data){
 		//var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
 		if (data.success===true){
 			console.log('Zalogowany');                        
@@ -180,8 +179,8 @@ function isFunction(functionToCheck) {
 	return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
 }  
 
-function ajaxPost(url, params, callback) {
-    axiosQuery('post', url, params, callback);
+function ajaxPost(url, params, callback, headers = {}) {
+    axiosQuery('post', url, params, callback, headers);
 }
 
 function ajaxGet(url, params, callback) {
@@ -192,13 +191,16 @@ function ajaxDelete(url, params, callback) {
     axiosQuery('delete', url, params, callback);
 }
 
-function axiosQuery(method, url, params, callback) {      
-    var api_token = localStorage.getItem('token');
+function axiosQuery(method, url, params, callback, inputHeaders = {}) {      
+    var api_token = localStorage.token;
     
-    var headers = {        
-        'Authorization': api_token
-    };
+//    var headers = {        
+//        'Authorization': api_token        
+//    };
 
+var headers = inputHeaders;
+headers.Authorization = 'Bearer ' + api_token;
+   
     var requestBody = {
         method: method,
         url: url,     

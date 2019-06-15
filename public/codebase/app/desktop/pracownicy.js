@@ -9,8 +9,7 @@ function pracownicyInit(cell) {
 		var pracownicyLayout = cell.attachLayout("3W");
 		pracownicyLayout.cells("a").hideHeader();
 		pracownicyLayout.cells("b").hideHeader();
-                pracownicyLayout.cells("c").hideHeader();
-                //pracownicyLayout.cells("c").collapse();
+                pracownicyLayout.cells("c").hideHeader();                
 		pracownicyLayout.cells("a").setWidth(280);
 		//console.log(pracownicyLayout.listAutoSizes());
 		pracownicyLayout.setAutoSize("a");   
@@ -191,8 +190,7 @@ function pracownicyInit(cell) {
                     //initializing form 
                     return dhxWins.window("w1").attachForm(formStruct, true);         
                 }                                         
-               
-                
+                               
 		grupyTreeToolBar.attachEvent("onClick", function(id) {                        
 			console.log('mainToolbar.onClick',arguments);
 			switch (id){
@@ -288,46 +286,43 @@ function pracownicyInit(cell) {
                 pracownicyGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
 		        case 'Add':{
-                            console.log('adding mode');
-                            //creating view for form add/edit
-                            //pracownicyLayout.cells("b").showView("form");
-                            //clearing fields form                            
+                            console.log('adding mode');                         
                             pracownicyForm.clear();
                             pracownicyLayout.cells("c").expand();
                             pracownicyForm.attachEvent("onButtonClick", function(name){
                                 switch (name){
                                     case 'save':{                                                           
-                                            ajaxPost("api/users", pracownicyForm.getFormData(), function(data){                                                            
-                                                //grupyTree.addItem(data.id, data.name, data.parent_id); 
-                                            });
+                                        saveNewUser(pracownicyForm.getFormData()); 
+                                        pracownicyGrid.zaladuj();
                                     };break;
                                     case 'cancel':{
-                                        //pracownicyLayout.cells("c").collapse;
+                                        pracownicyForm.updateValues();                   
                                     };break;
                                 }
                             }); 
                         };break;
                         case 'Edit':{
                             console.log('edit mode');                            
-                            //pracownicyForm.bind(pracownicyGrid);
-                            //pracownicyLayout.cells("c").expand();
                             pracownicyForm.attachEvent("onButtonClick", function(name){
                                 switch (name){
                                     case 'save':{ 
-                                            var id = pracownicyGrid.getSelectedRowId();
-//                                            ajaxPost("api/users/" + id + "/edit", pracownicyForm.getFormData(), function(data){                                                            
-//                                                console.log(data);
-//                                            });
+                                        var userId = pracownicyGrid.getSelectedRowId();
+                                        updateUser(userId, pracownicyForm.getFormData());
                                     };break;
                                     case 'cancel':{
                                         pracownicyForm.updateValues();                   
-
                                     };break;
                                 }
                             });                           
                         };break;
                         case 'Del':{
-                            
+                            //delete user
+                            var id = pracownicyGrid.getSelectedRowId();
+                            ajaxDelete("api/users/" + id, '', function(data) {
+                                if (data.success) {
+                                    pracownicyGrid.deleteRow(id);
+                                }
+                            });
                         };break; 
                         case 'Find': {                            
                             //console.log(searchElem);
@@ -352,25 +347,6 @@ function pracownicyInit(cell) {
 
                                         }
                                 });                                
-//                                var toolbar = dhxWins.window("w1").attachToolbar({
-//                                    iconset: "awesome",
-//                                    items: [
-//                                            {type: "text", id: "title", text: _("Pracownicy")},
-//                                            {type: "spacer"},
-//                                            {id: "Save", type: "button", img: "fa fa-save "},
-//                                            {id: "Cancel", type: "button", img: "fa fa-undo"}                                            
-//                                    ]
-//                                });
-//                                toolbar.attachEvent("onClick", function(id) {
-//                                    switch (id) {
-//                                        case "Save": {
-//                                                                                            
-//                                        }; break;
-//                                        case "Cancel": {
-//                                                
-//                                        }; break;    
-//                                    } 
-//                                });
                                 
                                 var usersGrid = dhxWins.window("w1").attachGrid({
                                     image_path:'codebase/imgs/',
@@ -485,25 +461,22 @@ function pracownicyInit(cell) {
                         pracownicyLayout.cells("c").collapse();
                     }                    
                 });               
-                //creating pracownicy form
+                
                 var pracownicyForm = pracownicyLayout.cells("c").attachForm(pracownicyFormStruct);                        
                 
-                //events on pracownicy form 
+                pracownicyForm.bind(pracownicyGrid);
+                
                 pracownicyForm.attachEvent("onChange", function(name, value, state){
                     if (name == 'is_worker') {
                         console.log(name, value);                       
                         pracownicyForm.setRequired("departament", value);                                    
                     }                    
-                });                                           
-                
-                //binding with grid
-                pracownicyForm.bind(pracownicyGrid);
+                });                                                        
+                                
                 pracownicyForm.attachEvent("onButtonClick", function(name){
                     switch (name){
                         case 'save':{                                                           
-                                ajaxPost("api/users", pracownicyForm.getFormData(), function(data){                                                            
-                                    //grupyTree.addItem(data.id, data.name, data.parent_id); 
-                                });
+                            saveNewUser(pracownicyForm.getFormData());
                         };break;
                         case 'cancel':{
                             //pracownicyLayout.cells("c").collapse;
@@ -511,13 +484,14 @@ function pracownicyInit(cell) {
                     }
                 });                
                 
-                pracownicyForm.fillForm = function(id = 0) {                    
+                pracownicyForm.fillAvatar = function(id = 0) {                    
                     ajaxGet('api/users/avatar/' + id, '', function(data) {
                         var url = data.data;
                         pracownicyForm.getContainer("photo").innerHTML = "<img src='" + url + "' border='0' class='form_photo'>";                        
                     });
                 };
-                pracownicyForm.fillForm(); 
+                
+                pracownicyForm.fillAvatar(); 
                 
                 //pracownicyGrid.makeFilter(searchElem, 0);
                 //pracownicyGrid.makeFilter(searchElem, 1);
@@ -525,14 +499,7 @@ function pracownicyInit(cell) {
 
                 pracownicyGrid.attachEvent("onRowSelect", function() { 
                     var selectedId = pracownicyGrid.getSelectedRowId(); 
-                    pracownicyForm.fillForm(selectedId);  
-                    
-                    var saveButton = pracownicyForm.getItem("save");
-                    saveButton.attachEvent("eventName", function(){
-                        ajaxPost("api/users", pracownicyForm.getFormData(), function(data){
-                            console.log(data);
-                        });
-                    });
+                    pracownicyForm.fillAvatar(selectedId);  
                 });
                 
 		//Listen when onClick event for container "photo" in pracownicyForm occurs
@@ -543,13 +510,12 @@ function pracownicyInit(cell) {
                     container.attachEvent("onclick",onContentClick);
                 }
 
-                //Avatar loading
+                //Avatar loading for view
                 function onContentClick() {
                     console.log('click');
                     var input = pracownicyForm.getInput("upload_photo");                    
                     input.onchange = e => { 
                         var file = e.target.files[0]; 
-                        console.log(file.name);
                         var reader = new FileReader();
                         reader.onload = function (e) {
                             pracownicyForm.getContainer("photo").innerHTML = "<img src='" + e.target.result + "' border='0' class='form_photo'>";                                                                                
@@ -561,6 +527,34 @@ function pracownicyInit(cell) {
                     };                    
                     input.click();                                         
                 };
+                
+                function saveNewUser(data) {                    
+                    userOperation("api/users", data);                   
+                }
+                
+                function updateUser(userId, data) {
+                    var query = "api/users/" + userId + "/edit";
+                    
+                    userOperation(query, data);                   
+                }
+                 
+                function userOperation(query, data) {
+                    var input = pracownicyForm.getInput("upload_photo");                    
+                    var file = input.files[0];
+                    data = pracownicyForm.getFormData();
+                    
+                    ajaxPost(query, data, function(data){                                                            
+                        if (data.success) {
+                            if (file) {
+                                var headers = {'Content-Type': 'multipart/form-data; charset=utf-8; boundary=' + Math.random().toString().substr(2)};
+                                var formData = new FormData();
+                                var id = data.data.id;
+                                formData.append("image", file);                        
+                                ajaxPost('api/users/avatar/load/' + id, formData, function(data) {console.log(data)}, headers);                      
+                            };       
+                        }
+                    });                     
+                }
                  
 		 pracownicyGrid.attachEvent("onXLS", function(){
 		 	console.log("pracownicyGrid.onXLS", arguments);

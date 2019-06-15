@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Validator;
@@ -14,7 +13,7 @@ use Intervention\Image\Facades\Image as ImageInt;
 class UserController extends \App\Http\Controllers\BaseController
 {
 
-    public $successStatus = 200;
+    public $successStatus = 200;    
 
     /**
      * login api 
@@ -38,7 +37,7 @@ class UserController extends \App\Http\Controllers\BaseController
      * @return \Illuminate\Http\Response 
      */
     public function store(Request $request) 
-    {
+    {              
         $validator = Validator::make($request->all(), [
                     'name' => 'required',
                     'email' => 'required|email',
@@ -50,7 +49,7 @@ class UserController extends \App\Http\Controllers\BaseController
                     'is_worker' => 'required'
         ]);
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 401);
+            return response()->json(['error' => $validator->errors()], 402);
         }
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
@@ -58,21 +57,51 @@ class UserController extends \App\Http\Controllers\BaseController
         $success['token'] = $user->createToken('MyApp')->accessToken;
         $success['name'] = $user->name;
         
-    //if ($request->hasFile('upload_photo')) {
-        $image = $request->file('upload_photo');
-        $name = time().'.'.$image->getClientOriginalExtension();
-        $destinationPath = public_path('uploads');
-        $image->move($destinationPath, $name);
-        
-       //$data = $name;
-        
-
-        
-    //}
-    $data = dd($request->all());
-        
-        return response()->json(['success' => $success, 'data' => $data]);
+        return response()->json(['success' => $success, 'data' => $user]);
     }
+
+    /**
+     * Loading users avatars
+     * 
+     * @param Request $request
+     * @param int $userId
+     * @return json response
+     */
+    public function loadAvatar(Request $request, $userId) 
+    {     
+        $path = public_path('uploads/avatars');
+        
+        if ($request->hasFile('image')) {
+            $file = $request->file('image'); 
+            $filename = $path . '/' . $userId . '.' . $file->getClientOriginalExtension();
+            if (file_exists($filename)) { 
+                unlink($filename);
+                if (!file_exists($filename)) {
+                    $success = $this->loadFile($file, $path, $userId);
+                }
+            } else  {
+                $success = $this->loadFile($file, $path, $userId);
+            }
+        }   
+        
+        return response()->json(['success' => $success]);        
+    }
+    
+    /**
+     * Function for loading files to the public path
+     * 
+     * @param type $file
+     * @param string $path
+     * @param string $name
+     * @return bool
+     */
+    function loadFile($file, $path, $name) 
+    {       
+        $name = $name.'.'.$file->getClientOriginalExtension();
+        $destinationPath = $path;
+        return $file->move($destinationPath, $name);                    
+    }
+
 
     /**
      * details api 
@@ -127,4 +156,14 @@ class UserController extends \App\Http\Controllers\BaseController
 
         return response()->json(['success' => true, 'data' => $imgPath]);
     }
+    
+    public function destroy($id, array $parameters = null)
+    {
+        $user = User::find($id);
+        if ($user->delete()) {
+            return ['success' => true,'class'=>__CLASS__,'method' => __METHOD__];
+        }else{
+            return ['success' => false, 'id' => $id,'msg'=>$this->repository->errors(),'class'=>__CLASS__,'method' => __METHOD__];
+        }
+    }    
 }

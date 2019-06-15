@@ -23,6 +23,7 @@ Route::group([
     Route::get('/roles', 'RoleController@roles');
     //Route::get('/roles/{role}/permissions', 'RoleController@permissions');
     Route::get('/users/avatar/{userId}', 'API\UserController@avatar');
+    Route::post('/users/avatar/load/{userId}', 'API\UserController@loadAvatar');
     Route::resource('/users', 'API\UserController');
     //Route::get('/usersrolestree', 'RoleController@getUsersRolesTree');
     Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
@@ -42,3 +43,7 @@ Route::group([
 
 Route::post('login', 'API\UserController@login');
 Route::post('register', 'API\UserController@register');
+Route::post('/logout', 'Auth\LoginController@logout');
+
+
+Route::post('/logged', 'Auth\LoginController@isLogged');

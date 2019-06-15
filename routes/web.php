@@ -14,18 +14,5 @@
 Route::get('/', function () {
     return view('welcome');
 });
-
-Route::post('/logged', 'Auth\LoginController@isLogged');
-
-Auth::routes();
-
+//Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
-
-Route::group([
-    'middleware' => ['auth']
-        ], function () {  
-            Route::get('/departaments/{locale}', 'DepartamentController@departaments');
-            Route::resource('/departaments', 'DepartamentController');           
-            Route::get('/orders/{locale}', 'OrderController@orders');
-            Route::get('/orders', 'OrderController@orers');            
-});

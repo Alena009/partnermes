@@ -19,15 +19,32 @@ Route::group([
 //    Route::get('/user', function (Request $request) {
 //        return $request->user();
 //    });
+    
+    //roles
     Route::resource('/roles', 'RoleController');
     Route::get('/roles', 'RoleController@roles');
-    //Route::get('/roles/{role}/permissions', 'RoleController@permissions');
+    Route::get('/roles/{roleId}/permissions', 'RoleController@listPermissions');
+    Route::get('/roles/{roleId}/users', 'RoleController@listUsers');
+    
+    //user-role
+    Route::get('/usersroles/del', 'UserRoleController@deleteByRoleAndUserId');
+    Route::resource('/usersroles', 'UserRoleController');
+    
+    //role-permission
+    Route::get('/rolespermissions/del', 'RolePermissionController@deleteByRoleAndPermissionId');
+    Route::resource('/rolespermissions', 'RolePermissionController');
+    
+    //permissions
+    Route::resource('/permissions', 'PermissionController');
+    
+    //users
     Route::get('/users/avatar/{userId}', 'API\UserController@avatar');
     Route::post('/users/avatar/load/{userId}', 'API\UserController@loadAvatar');
     Route::resource('/users', 'API\UserController');
     //Route::get('/usersrolestree', 'RoleController@getUsersRolesTree');
     Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
     Route::get('/workerslist', 'DepartamentController@workersList');            
+    //departaments
     Route::resource('/departaments', 'DepartamentController');       
     Route::get('/departamentstree', 'DepartamentController@departamentsTree');
     

@@ -20,7 +20,8 @@ class Role extends BaseModel
     /*
      * Role have users (for tree view on front-end)
      */
-    public function users() {
+    public function users() 
+    {
         //return $this->hasMany("App\Models\UserRole", 'role_id', 'id') ;
         return $this->belongsToMany("App\Models\User", 'users_roles', 'role_id', 'user_id');
     }

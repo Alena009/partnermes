@@ -41,8 +41,8 @@ class User extends Authenticatable
     /*
      * User have roles (for tree view on front-end)
      */
-    public function roles()
+    public function role()
     {
-        return $this->belongsToMany('App\Models\Role', 'users_roles', 'role_id', 'id');
+        return $this->belongsToMany('App\Models\Role', 'users_roles', 'user_id', 'role_id');
     }  
 }

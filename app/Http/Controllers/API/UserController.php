@@ -55,7 +55,7 @@ class UserController extends \App\Http\Controllers\BaseController
         $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
         $success['token'] = $user->createToken('MyApp')->accessToken;
-        $success['name'] = $user->name;
+        $success['name'] = $user->name;        
         
         return response()->json(['success' => $success, 'data' => $user]);
     }
@@ -165,5 +165,7 @@ class UserController extends \App\Http\Controllers\BaseController
         }else{
             return ['success' => false, 'id' => $id,'msg'=>$this->repository->errors(),'class'=>__CLASS__,'method' => __METHOD__];
         }
-    }    
+    }
+
+        
 }

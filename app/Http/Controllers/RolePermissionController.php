@@ -4,22 +4,22 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Repositories\UserRoleRepository;
+use App\Repositories\RolePermissionRepository;
 
-class UserRoleController extends BaseController
+class RolePermissionController extends BaseController
 {
     private $rep;
     
-    public function __construct(UserRoleRepository $rep)
+    public function __construct(RolePermissionRepository $rep)
     {
         parent:: __construct();
         $this->setRepository($rep);
     }
     
-    public function deleteByRoleAndUserId(Request $request)
+    public function deleteByRoleAndPermissionId(Request $request)
     {
-        $record = \App\Models\UserRole::where('role_id', $request->role_id)
-                    ->where('user_id', $request->user_id);
+        $record = \App\Models\RolePermission::where('role_id', $request->role_id)
+                    ->where('permission_id', $request->permission_id);
         if ($record->delete()) {
             return ['success' => true,'class'=>__CLASS__,'method' => __METHOD__];
         }else{

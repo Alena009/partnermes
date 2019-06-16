@@ -57,26 +57,26 @@ class RoleController extends BaseController
         return true;
     }  
 
-    public function getUsersRolesTree()
-    {
-        $roles = [];
-        $result = [];
-        $userModel = new \App\Models\User(); 
-        
-        $roles = $this->repository->getModel()::all();               
-        
-        foreach ($roles as $role) { 
-            $role['value'] = $role['id'];
-            $role['text'] = $role['name'];                   
-
-            
-            $result[] = $role;
-        }     
-        
-        $result = ['data' => $result, 'success' => true];
-        
-        return response()->json($result);
-    } 
+//    public function getUsersRolesTree()
+//    {
+//        $roles = [];
+//        $result = [];
+//        $userModel = new \App\Models\User(); 
+//        
+//        $roles = $this->repository->getModel()::all();               
+//        
+//        foreach ($roles as $role) { 
+//            $role['value'] = $role['id'];
+//            $role['text'] = $role['name'];                   
+//
+//            
+//            $result[] = $role;
+//        }     
+//        
+//        $result = ['data' => $result, 'success' => true];
+//        
+//        return response()->json($result);
+//    } 
 
     public function show(Request $request, $id)
     {
@@ -96,15 +96,57 @@ class RoleController extends BaseController
         return ['success'=>$data?true:false,'data'=>$data];
     }
     
-//    public function getPermissions($role)
-//    {
-//        $permissions = $role->permissions;
-//        if (count($permissions)) {
-//            foreach ($permissions as $permission) {
-//                \App\Models\Permission::find($permission->id);
+    /**
+     * List of permissions by role
+     * 
+     * @param integer $roleId
+     * @return response
+     */
+    public function listPermissions($roleId)
+    {
+        $data = [];
+        
+        if (!$roleId) {
+            $data = \App\Models\Permission::all();
+        } else {
+            $role = $this->repository->getModel()::find($roleId);        
+            $data = $role->permissions;
+            foreach ($data as $permission) {
+                $permission['value'] = \App\Models\RolePermission::where('role_id', $roleId)
+                    ->where('permission_id', $permission->id)
+                    ->pluck('value')[0];
+            }
+        }              
+        
+        return ['success'=>$data?true:false,'data'=>$data];
+    }
+    
+    /**
+     * List users by roles
+     * 
+     * @param int $roleId
+     * @return response
+     */
+    public function listUsers($roleId)
+    {
+        $data = [];
+        
+        if (!$roleId) {
+            $data = \App\Models\User::all();
+        } else {
+            $role = $this->repository->getModel()::find($roleId);        
+            $data = $role->users;
+        }
+        
+//        foreach ($data as $user) {
+//            $role = $user->role;
+//            if ($role != []) {
+//                $user['role_name'] = $role[0]['name'];
 //            }
 //        }
-//    }
+        
+        return ['success'=>$data?true:false,'data'=>$data];
+    }    
 
 }
 

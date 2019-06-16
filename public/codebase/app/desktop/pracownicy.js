@@ -217,8 +217,7 @@ function pracownicyInit(cell) {
 					//grupyForm.bind(tree);
 				};break;
 				case 'Edit':{                                        				
-                                        var id = grupyTree.getSelectedId(); 
-                                        
+                                        var id = grupyTree.getSelectedId();                                        
                                         if (id) {                                            
                                             var data = {
                                                 id: id,
@@ -239,7 +238,7 @@ function pracownicyInit(cell) {
                                                     };break;
                                                     case 'cancel':{
                                                         //grupyForm.clear();                                                    
-                                                        dhxCombo.selectOption(3);                                            
+                                                        //dhxCombo.selectOption(3);                                            
                                                         
                                                     };break;
                                                 }

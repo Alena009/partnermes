@@ -319,7 +319,7 @@ function pracownicyInit(cell) {
                             var id = pracownicyGrid.getSelectedRowId();
                             ajaxDelete("api/users/" + id, '', function(data) {
                                 if (data.success) {
-                                    pracownicyGrid.deleteRow(id);
+                                    pracownicyGrid.deleteSelectedRows();
                                 }
                             });
                         };break; 

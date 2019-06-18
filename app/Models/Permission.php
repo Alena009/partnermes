@@ -10,6 +10,11 @@ class Permission extends BaseModel
     
     protected $table = "permissions";
     
+    protected $fillable = [
+        'name',
+        'description'
+    ];
+    
     /* fields for translating */    
     public $translatedAttributes = ['name', 'description'];
     

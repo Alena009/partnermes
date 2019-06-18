@@ -168,6 +168,7 @@ return [
         Laravel\Passport\PassportServiceProvider::class,
         Dimsav\Translatable\TranslatableServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
+        Barryvdh\Debugbar\ServiceProvider::class,
         /*
          * Application Service Providers...
          */

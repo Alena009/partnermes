@@ -42,4 +42,9 @@ class Role extends BaseModel
     {
         return $this->hasMany("App\Models\RolePermission", 'role_id', 'id') ;
     }
+    
+    public function getName()
+    {
+        return $this->name;
+    }
 }

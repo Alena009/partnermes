@@ -31,7 +31,9 @@ Route::group([
     Route::resource('/usersroles', 'UserRoleController');
     
     //role-permission
-    Route::get('/rolespermissions/del', 'RolePermissionController@deleteByRoleAndPermissionId');
+    Route::get('/rolespermissions/edit', 'RolePermissionController@editByRoleAndPermissionId');    
+    Route::post('/rolespermissions/fillRole/{roleId}', 'RolePermissionController@addPermissionsForNewRole');
+    Route::post('/rolespermissions/addToRoles/{permissionId}', 'RolePermissionController@addNewPermissionToRoles');
     Route::resource('/rolespermissions', 'RolePermissionController');
     
     //permissions

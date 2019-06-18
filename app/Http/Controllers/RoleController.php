@@ -22,6 +22,9 @@ class RoleController extends BaseController
     public function roles($locale = 'pl')
     {
         app()->setLocale($locale);
+        
+        $roles = [];
+        $result = [];
 
         $roles = $this->repository->getModel()::all();               
         
@@ -42,41 +45,25 @@ class RoleController extends BaseController
     /**
      * create new role with translations
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
+        $result = [];
+        
         $role = new \App\Models\Role();
-        $role->name = $request['name'];        
+        $locale = app()->getLocale();
         $role->save();
+        
+        $role->translateOrNew($locale)->name = $request['name'];            
+        $success = $role->save();
+        
+        $result = ['data' => $role, 'success' => $success];
+        
+//        foreach (['en', 'nl', 'fr', 'de'] as $locale) {
+//            $role->translateOrNew($locale)->name = "Title {$locale}";                        
+//        }    
 
-        foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-            $role->translateOrNew($locale)->name = "Title {$locale}";                        
-        }
-
-        $role->save();
-
-        return true;
+        return response()->json($result);
     }  
-
-//    public function getUsersRolesTree()
-//    {
-//        $roles = [];
-//        $result = [];
-//        $userModel = new \App\Models\User(); 
-//        
-//        $roles = $this->repository->getModel()::all();               
-//        
-//        foreach ($roles as $role) { 
-//            $role['value'] = $role['id'];
-//            $role['text'] = $role['name'];                   
-//
-//            
-//            $result[] = $role;
-//        }     
-//        
-//        $result = ['data' => $result, 'success' => true];
-//        
-//        return response()->json($result);
-//    } 
 
     public function show(Request $request, $id)
     {
@@ -105,16 +92,14 @@ class RoleController extends BaseController
     public function listPermissions($roleId)
     {
         $data = [];
+        $data = \App\Models\Permission::all();
         
-        if (!$roleId) {
-            $data = \App\Models\Permission::all();
-        } else {
-            $role = $this->repository->getModel()::find($roleId);        
-            $data = $role->permissions;
+        if ($roleId) {       
+            $role = $this->repository->getModel()::find($roleId);
             foreach ($data as $permission) {
                 $permission['value'] = \App\Models\RolePermission::where('role_id', $roleId)
-                    ->where('permission_id', $permission->id)
-                    ->pluck('value')[0];
+                        ->where('permission_id', $permission->id)
+                        ->pluck('value')[0];
             }
         }              
         
@@ -138,12 +123,14 @@ class RoleController extends BaseController
             $data = $role->users;
         }
         
-//        foreach ($data as $user) {
-//            $role = $user->role;
-//            if ($role != []) {
-//                $user['role_name'] = $role[0]['name'];
-//            }
-//        }
+        foreach ($data as $d) {            
+            $role = $d->role;
+            if (!$role->isEmpty()) {
+                $d['role_name'] = $role[0]->name;
+            } else {
+                $d['role_name'] = "";
+            }
+        }
         
         return ['success'=>$data?true:false,'data'=>$data];
     }    

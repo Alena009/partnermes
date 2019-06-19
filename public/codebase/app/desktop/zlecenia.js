@@ -306,6 +306,6 @@ function zleceniaInit(cell) {
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {
 	if (id == "zlecenia") {           
             window.history.pushState({'page_id': id}, null, '#zlecenia');
-            //zleceniaInit(cell);
+            leceniaInit(cell);
         }        
 });

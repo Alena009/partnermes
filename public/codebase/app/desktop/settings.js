@@ -297,15 +297,7 @@ function settingsInit(cell) {
                                             id: "in_departament",
                                             type: "ch",                                             
                                             align: "left"
-                                        },                                        
-                                        {
-                                            label: _("Kod"),
-                                            id: "kod",
-                                            width: 100, 
-                                            type: "ed", 
-                                            sort: "int", 
-                                            align: "right"
-                                        },
+                                        },                                                                                
                                         {
                                             label: _("Nazwisko"),
                                             width: 100,

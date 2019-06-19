@@ -19,13 +19,17 @@ class TaskController extends BaseController
     /**
      * Get tasks list with translations
      */
-    public function tasks($locale = 'pl')
+    public function index($locale = 'pl')
     {
         app()->setLocale($locale);
 
         $tasks = \App\Models\Task::all();
         
-        return response()->json($tasks);        
+        if ($tasks) {
+            $success = true;    
+        }
+        
+        return response()->json(['success' => $success, 'data' => $tasks]);        
     }
 
     /**
@@ -50,5 +54,5 @@ class TaskController extends BaseController
         $task->save();
 
         return true;
-    }    
+    } 
 }

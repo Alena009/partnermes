@@ -15,5 +15,13 @@ class TaskGroup extends BaseModel
     ];
     
     /* fields for translating */    
-    public $translatedAttributes = ['name'];    
+    public $translatedAttributes = ['name'];
+    
+    /*
+     * Group have kids (for tree view on front-end)
+     */
+    public function kids() 
+    {
+        return $this->hasMany($this, 'parent_id', 'id') ;
+    }    
 }

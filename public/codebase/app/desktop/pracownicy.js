@@ -14,14 +14,14 @@ function pracownicyInit(cell) {
 		    pracownicyLayout.setAutoSize("a");   
                 
 		var grupyTree = pracownicyLayout.cells("a").attachTreeView({
-			skin: "dhx_skyblue",    // string, optional, treeview's skin
+			skin: "dhx_web",    // string, optional, treeview's skin
 			iconset: "font_awesome", // string, optional, sets the font-awesome icons
 			multiselect: false,           // boolean, optional, enables multiselect
 			checkboxes: true,           // boolean, optional, enables checkboxes
 			dnd: true,           // boolean, optional, enables drag-and-drop
 			context_menu: true,           // boolean, optional, enables context menu
 			//json: [{id: 1, name: "Produkcja", kids: []}, {id: 2, name: "jkjkjklj"}]
-		});                
+		});                  
 		    grupyTree.build = function(){
                     var treeStruct = ajaxGet("api/departamentstree", '', function(data) {                    
                         if (data && data.success){      

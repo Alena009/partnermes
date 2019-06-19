@@ -111,7 +111,7 @@ class DepartamentController extends BaseController
                     'text' => $arr['name'], 
                     'value' => $arr['id']
                 ];                
-            
+            //if kid has his own kids - use recursion
             if (count($arr->kids)) {                   
                 $kid['items'] = $this->kidTree($arr);
             }      
@@ -146,4 +146,5 @@ class DepartamentController extends BaseController
         return response()->json($result);
         
     }
+
 }

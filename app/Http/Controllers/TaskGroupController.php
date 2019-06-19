@@ -46,5 +46,58 @@ class TaskGroupController extends BaseController
         $task_group->save();
 
         return true;
-    }       
+    } 
+    
+    public function groupsTasksTree()
+    {
+        $tasksGroups = $this->repository->getTasksGroupsRootNodes();   
+        $tree = [];
+        
+        foreach ($tasksGroups as $group) {             
+            $kids = array();
+            if(count($group->kids)) {                
+                $kids = $this->kidTree($group);
+            } 
+            $item = [
+                'item' => $kids, 
+                'id' => $group['id'], 
+                'text' => $group['name'], 
+                'value' => $group['id']
+            ];
+
+            $tree[] = $item;
+        }              
+        
+        $result = ['data' => $tree, 'success' => true];
+        
+        return response()->json($result);
+    } 
+    
+    /**
+     * Get list of child groups for group-parent
+     * 
+     * @param object $group
+     * @return array of kids
+     */
+    public function kidTree($group)
+    {
+        $kids = [];  
+        $kid = [];
+        
+        foreach ($group->kids as $arr) {
+            $kid = [                     
+                    'id' => $arr['id'], 
+                    'text' => $arr['name'], 
+                    'value' => $arr['id']
+                ];                
+            //if kid has his own kids - use recursion
+            if (count($arr->kids)) {                   
+                $kid['items'] = $this->kidTree($arr);
+            }      
+            
+            $kids[] = $kid;
+        }
+        
+        return $kids;
+    }    
 }

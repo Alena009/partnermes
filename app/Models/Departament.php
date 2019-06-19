@@ -20,15 +20,16 @@ class Departament extends BaseModel
     /*
      * Departaments have kids (for tree view on front-end)
      */
-    public function kids() {
+    public function kids() 
+    {
         return $this->hasMany($this, 'parent_id', 'id') ;
     }    
     
      /*
       * Relation for getting workers list for departament
       */
-    public function workers() {  
-        
-        return $this->hasMany("App\Models\WorkerDepartament", 'departament_id', 'id') ;
+    public function workers() 
+    {  
+        return $this->belongsToMany("App\Models\User", "worker_departaments", 'departament_id', 'user_id') ;
     }      
 }

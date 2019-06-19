@@ -43,20 +43,25 @@ Route::group([
     Route::get('/users/avatar/{userId}', 'API\UserController@avatar');
     Route::post('/users/avatar/load/{userId}', 'API\UserController@loadAvatar');
     Route::resource('/users', 'API\UserController');
-    //Route::get('/usersrolestree', 'RoleController@getUsersRolesTree');
-    Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
-    Route::get('/workerslist', 'DepartamentController@workersList');            
+    
+           
+    
     //departaments
     Route::resource('/departaments', 'DepartamentController');       
     Route::get('/departamentstree', 'DepartamentController@departamentsTree');
-    
+    //workerslist
+    Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
+    Route::get('/workerslist', 'DepartamentController@workersList'); 
+
+    //worker-departament    
     Route::get('/workerdep/del', 'WorkerDepartamentController@deleteRel');
-    Route::resource('/workerdep', 'WorkerDepartamentController');
-    
-    
+    Route::resource('/workerdep', 'WorkerDepartamentController');    
     
     //Route::get('/departaments/all/{locale}', 'DepartamentController@departaments');    
     //Route::get('/departaments/{id}/{locale}', 'DepartamentController@departaments');  
+    
+    Route::get('/zlecenia/grupytree', 'TaskGroupController@groupsTasksTree');    
+    Route::resource('/zlecenia', 'TaskController');    
     
 });
 

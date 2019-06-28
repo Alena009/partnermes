@@ -39,11 +39,20 @@ function zleceniaInit(cell) {
 			switch (btn){
 				case 'Add':{
 					var id = grupyTree.getSelectedItemId(),
-						parent = grupyTree.getParentId(id) || 0;
+			                parent = grupyTree.getParentId(id) || 0;
 						
 					grupyTree.insertNewItem(id || parent,'_new',"nowa grupa");
 					grupyTree.selectItem('_new');
 					grupyTree.editItem('_new');
+//                                        grupyTree.attachEvent("onEdit", function(state=2, id, tree, value){
+//                                            var s;
+//                                            if (state == 2){
+//                                                s = value;
+//                                                
+//                                            }
+//                                            console.log(s);
+//                                            grupyTree.setItemText('_new', s);
+//                                        });
 				};break;
 				case 'Edit':{
 					var id = grupyTree.getSelectedItemId(),
@@ -68,7 +77,7 @@ function zleceniaInit(cell) {
 				};break;
 			}
 		});		
-		grupyTree.attachEvent("onSelect",function(id){
+		grupyTree.attachEvent("onCheck",function(id){
 			var ids = grupyTree.getAllChecked();
 			ids = ids.split(',');
 			ids[ids.length]=id;
@@ -76,7 +85,7 @@ function zleceniaInit(cell) {
 			zleceniaGrid.zaladuj(ids.join('|'));
 			return true;
 		});
-		grupyTree.attachEvent("onCheck",function(){
+		grupyTree.attachEvent("onSelect",function(){
 			var id=grupyTree.getSelectedItemId(), 
 				ids = grupyTree.getAllChecked();
 			ids = ids.split(',');
@@ -85,35 +94,37 @@ function zleceniaInit(cell) {
 			zleceniaGrid.zaladuj(ids.join('|'));
 			return true;
 		});							
-		var dpGrupyTree = new dataProcessor("zlecenia/grupy/id/");
-		dpGrupyTree.init(grupyTree);
-		dpGrupyTree.setTransactionMode("REST");
-		dpGrupyTree.attachEvent("onBeforeUpdate", function(id, state, data){
-			//console.log(arguments);//your code here
-			if (data.tr_id=='_new' && (data.tr_text=="nowa grupa" || data.tr_text=='') && state=='inserted')
-				return false;
-			else{
-				return true;
-			}
-		});
-
-		dpGrupyTree.attachEvent("onAfterUpdate", function(id, action, tid, response){
-			console.log('onAfterUpdate',arguments);
-			if (response.action!='error'){
-				if (id!=response.id && action=='inserted')  grupyTree.changeItemId(id,response.id);
-			}
-			
-		});
-
-		dpGrupyTree.defineAction("error",function(tag){
-			console.log('defineAction.error',tag);
-			alert(tag.error);
-			return false;
-		});
+//		var dpGrupyTree = new dataProcessor("api/taskgroup");
+//		dpGrupyTree.init(grupyTree);
+//		dpGrupyTree.setTransactionM);
+//		dpGrupyTree.attachEvent("onBeforeUpdate", function(id, state, data){
+//			//console.log(arguments);//your code here
+//			if (data.tr_id=='_new' && (data.tr_text=="nowa grupa" || data.tr_text=='') && state=='inserted')
+//				return false;
+//			else{
+//				return true;
+//			}
+//		});
+//
+//
+//
+//		dpGrupyTree.attachEvent("onAfterUpdate", function(id, action, tid, response){
+//			console.log('onAfterUpdate',arguments);
+//			if (response.action!='error'){
+//				if (id!=response.id && action=='inserted')  grupyTree.changeItemId(id,response.id);
+//			}
+//			
+//		});
+//
+//		dpGrupyTree.defineAction("error",function(tag){
+//			console.log('defineAction.error',tag);
+//			alert(tag.error);
+//			return false;
+//		});
 		grupyTree.zaladuj = function(i=null){
 			var ids = Array();
 			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-			var new_data = ajaxGet("api/zlecenia/grupytree",i!=null ? 'parent='+ids.join('|'): '',function(data){
+			var new_data = ajaxGet("api/taskgroups/grupytree",i!=null ? 'parent='+ids.join('|'): '',function(data){
 				if (data.data && data.success){
 					var d = data.data;
                                         console.log(d);
@@ -212,6 +223,7 @@ function zleceniaInit(cell) {
 			}],
 			multiselect: true
 		});
+                
 		//combo = zleceniaGrid.getColumnCombo(1);
 		//combo.enableFilteringMode(true);
 		//combo.load("produkty/all");
@@ -234,10 +246,12 @@ function zleceniaInit(cell) {
 			var new_data = ajaxGet("api/zlecenia",'grupy='+ids.join('|'),function(data){
 				if (data.data && data.success){
 					var d = data.data;
-                    zleceniaGrid.parse(d, "js");
-                }
-            });			
-		}
+                                        zleceniaGrid.parse(d, "js");
+                                    }
+                                });			
+		};
+                
+                
 
 		var dpZleceniaGrid = new dataProcessor("zlecenia/zlecenie/",'json');
 		dpZleceniaGrid.init(zleceniaGrid);
@@ -267,24 +281,24 @@ function zleceniaInit(cell) {
 			console.log(btn);
 			switch (btn){
 				case 'Add':{
-					//zleceniaGrid.setActive(true);
-					//zleceniaGrid.selectCell(1,0);
-					// var rowId=zleceniaGrid.uid();
-					// zleceniaGrid.setActive(true);
-					// zleceniaGrid.addRow(rowId,["","","","",""],0);
-					// zleceniaGrid.editCell(rowId,1);
-					// console.log(zleceniaGrid.getSelectedCellIndex()+'x'+zleceniaGrid.getSelectedRowId());
+					zleceniaGrid.setActive(true);
+					zleceniaGrid.selectCell(1,0);
+					 var rowId=zleceniaGrid.uid();
+					 zleceniaGrid.setActive(true);
+					 zleceniaGrid.addRow(rowId,["","","","",""],0);
+					 zleceniaGrid.editCell(rowId,1);
+					 console.log(zleceniaGrid.getSelectedCellIndex()+'x'+zleceniaGrid.getSelectedRowId());
 					(arguments[0]||window.event).cancelBubble=true;
-					//zleceniaGrid.selectRow(2);
+					zleceniaGrid.selectRow(2);
 					zleceniaGrid.selectCell(2,4,false,true);
 					zleceniaGrid.editCell();
-					//zleceniaGrid.cells(1,0).setBgColor('red'); 
-					//myGrid.selectCell(rowIndex,cellIndex);
-					//myGrid.editCell();	
-					//console.log(zleceniaGrid.getRowId(0));
-					//zleceniaGrid.forEachCell(1,function(cellObj,ind){
-					//	console.log('forEachCell',arguments);	
-					//});
+					zleceniaGrid.cells(1,0).setBgColor('red'); 
+//					myGrid.selectCell(rowIndex,cellIndex);
+//					myGrid.editCell();	
+					console.log(zleceniaGrid.getRowId(0));
+					zleceniaGrid.forEachCell(1,function(cellObj,ind){
+						console.log('forEachCell',arguments);	
+					});
 					console.log(zleceniaGrid.getSelectedCellIndex()+'x'+zleceniaGrid.getSelectedRowId());
 				};break;
 				case 'Edit':{

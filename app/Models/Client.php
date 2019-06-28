@@ -16,4 +16,9 @@ class Client extends BaseModel
     
     /* fields for translating */    
     public $translatedAttributes = ['name', 'address', 'country', 'contacts'];
+    
+    public function orders()
+    {
+        return $this->hasMany('App\Models\Order');
+    }
 }

@@ -19,32 +19,34 @@ class ProductTypeController extends BaseController
     /**
      * Get product types list with translations
      */
-    public function prodcutTypes($locale = 'pl')
+    public function index($locale = 'pl')
     {
         app()->setLocale($locale);
 
-        $productTypes = \App\Models\ProductType::all();
+        $productTypes = \App\Models\ProductType::all();      
         
-        return response()->json($productTypes);        
+        return response()->json(['success' => true, 'data' => $productTypes]);        
     }
 
     /**
      * create new product type with translations
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
+        $productType = [];
+        $result = [];
+        $locale = app()->getLocale();
+        
         $productType = new \App\Models\ProductType();
-        $productType->name = $request['name'];        
-        $productType->description = $request['description'];
+        $productType->save();
+        
+        $productType->translateOrNew($locale)->name = $request['name'];            
+        $productType->translateOrNew($locale)->description = $request['description'];            
+        
         $productType->save();
 
-        foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-            $productType->translateOrNew($locale)->name = "Title {$locale}";            
-            $productType->translateOrNew($locale)->description = "Title {$locale}";            
-        }
+        $result = ['data' => $productType, 'success' => true];
 
-        $productType->save();
-
-        return true;
+        return response()->json($result);
     }    
 }

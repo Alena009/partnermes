@@ -20,13 +20,21 @@ class OrderController extends BaseController
     /**
      * Get orders list with translations
      */
-    public function orders($locale = 'pl')
+    public function index($locale = 'pl')
     {
+        $result = [];
         app()->setLocale($locale);
 
-        $orders = \App\Models\Order::all();
+        $orders = \App\Models\Order::all();       
         
-        return response()->json($orders);        
+        foreach ($orders as $order) {
+            $order['client'] = $order->client;
+            //$order['status'] = $order->status;
+        }    
+        
+        $result = ['data' => $orders, 'success' => true];
+        
+        return response()->json($result);        
     }
 
     /**
@@ -51,5 +59,37 @@ class OrderController extends BaseController
         $order->save();
 
         return true;
-    }    
+    } 
+    
+    /**
+     * Returns history of orders statuses
+     * 
+     * @param integer $orderId
+     * @return json
+     */
+    public function history($orderId)
+    {
+        $order = [];
+        $history = [];
+        
+        $order = \App\Models\Order::find($orderId);
+        $history = $order->history;      
+
+        return response()->json(['data' => $history, 'success' => true]);
+    }
+    
+    public function positions($orderId)
+    {
+        $order = [];
+        $positions = [];
+        
+        $order = \App\Models\Order::find($orderId);
+        $positions = $order->positions;     
+        foreach ($positions as $position) {
+            $product = $position->product;
+            $position['product_name'] = $product->name;
+        }
+
+        return response()->json(['data' => $positions, 'success' => true]);        
+    }
 }

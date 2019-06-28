@@ -134,4 +134,51 @@ class BaseController extends Controller
     {
         return array_get(explode('.', Route::currentRouteName()), 0);
     }
+    
+    public function buildTree() {
+        $model = $this->repository->getModel();
+        $parents = $model::where('parent_id', '=', 0)->get('id', 'name');   
+        $tree = [];
+        
+        foreach ($parents as $parent) {             
+            $kids = array();
+            if(count($parent->kids)) {                
+                $kids = $this->kidTree($parent);
+            } 
+            $item = [
+                'item' => $kids, 
+                'id' => $parent['id'], 
+                'text' => $parent['name'], 
+                'value' => $parent['id']
+            ];
+
+            $tree[] = $item;
+        }              
+        
+        $result = ['data' => $tree, 'success' => true];
+        
+        return response()->json($result);        
+    }
+    
+    protected function kidTree($item)
+    {
+        $kids = [];  
+        $kid = [];
+        
+        foreach ($item->kids as $arr) {
+            $kid = [                     
+                    'id' => $arr['id'], 
+                    'text' => $arr['name'], 
+                    'value' => $arr['id']
+                ];                
+            //if kid has his own kids - use recursion
+            if (count($arr->kids)) {                   
+                $kid['items'] = $this->kidTree($arr);
+            }      
+            
+            $kids[] = $kid;
+        }
+        
+        return $kids;
+    }     
 }

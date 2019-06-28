@@ -15,5 +15,10 @@ class ProductGroup extends BaseModel
     ];
     
     /* fields for translating */    
-    public $translatedAttributes = ['name'];    
+    public $translatedAttributes = ['name'];  
+    
+    public function kids() 
+    {
+        return $this->hasMany($this, 'parent_id', 'id') ;
+    }     
 }

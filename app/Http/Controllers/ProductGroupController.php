@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Repositories\ProductGroupRepository;
 
-class ProductGroupController extends Controller
+class ProductGroupController extends BaseController
 {
     private $rep;
     
@@ -19,31 +19,36 @@ class ProductGroupController extends Controller
     /**
      * get products groups list with translations
      */
-    public function departaments($locale = 'pl')
+    public function index($locale = 'pl')
     {
         app()->setLocale($locale);
 
         $productsGroups = \App\Models\ProductGroup::all();
-        
-        return response()->json($productsGroups);
+                
+        return response()->json(['success' => true, 'data' => $productsGroups]);        
     }
     
     /**
      * create new product group with translations
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
+        $productGroup = [];
+        $result = [];
+        $locale = app()->getLocale();
+        
         $productGroup = new \App\Models\ProductGroup();
-        $productGroup->parent_id = $request['parent_id'];        
-        $productGroup->name = $request['name'];        
+        $productGroup->parent_id = $request['parent_id'];               
         $productGroup->save();
 
-        foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-            $productGroup->translateOrNew($locale)->name = "Title {$locale}";            
-        }
+        //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
+        $productGroup->translateOrNew($locale)->name = $request['name'];             
+        //}
 
         $productGroup->save();
+        
+        $result = ['data' => $productGroup, 'success' => true];
 
-        return true;
+        return response()->json($result);
     }
 }

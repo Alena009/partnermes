@@ -6,21 +6,28 @@ function settingsInit(cell) {
 	
 	if (settingsLayout == null) {
 		
-		// init layout
-		var settingsLayout = cell.attachLayout("1C");                
-		    settingsLayout.cells("a").hideHeader();
-                
-                var mainTabbar = settingsLayout.cells("a").attachTabbar();
-		    mainTabbar.addTab("a1", _("Role"), null, null, true);
-                    mainTabbar.addTab("a2", _("Produkty"));                    
-                    mainTabbar.addTab("a3", _("Grupy zlecen"));
-		    mainTabbar.addTab("a4", _("Jezyk"));
-                
-                var rolesLayout = mainTabbar.tabs("a1").attachLayout("3W");
-                    rolesLayout.cells("a").hideHeader();
-                    rolesLayout.cells("b").hideHeader();                
-                    rolesLayout.cells("c").hideHeader();                                
-                    rolesLayout.setAutoSize("a", "a;b;c");
+            // init layout
+            var settingsLayout = cell.attachLayout("1C");                
+                settingsLayout.cells("a").hideHeader();
+
+            var mainTabbar = settingsLayout.cells("a").attachTabbar();
+                mainTabbar.addTab("a1", _("Role"), null, null, true);
+                mainTabbar.addTab("a2", _("Produkty"));                    
+                mainTabbar.addTab("a3", _("Grupy zlecen"));
+                mainTabbar.addTab("a4", _("Jezyk"));
+            //Tabs
+            var rolesLayout = mainTabbar.tabs("a1").attachLayout("3W");
+                rolesLayout.cells("a").hideHeader();
+                rolesLayout.cells("b").hideHeader();                
+                rolesLayout.cells("c").hideHeader();                                
+                rolesLayout.setAutoSize("a", "a;b;c");
+
+            var productsLayout = mainTabbar.tabs("a2").attachLayout("5U");
+                productsLayout.cells("a").hideHeader();
+                productsLayout.cells("b").hideHeader();                
+                productsLayout.cells("c").hideHeader();                                
+                productsLayout.cells("d").hideHeader();                                                    
+                productsLayout.cells("e").hideHeader();                                                    
                 
                 var rolesToolBar = rolesLayout.cells("a").attachToolbar({
 			iconset: "awesome",
@@ -57,6 +64,66 @@ function settingsInit(cell) {
                                 {id: "Redo", type: "button", img: "fa fa-reply"}
 			]
 		});    
+                var productTypesToolBar = productsLayout.cells("a").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Typ produktu")},
+				{type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Redo", type: "button", img: "fa fa-reply"}
+			]                    
+                });
+                var productGroupsToolBar = productsLayout.cells("b").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Grupa produktu")},
+				{type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Redo", type: "button", img: "fa fa-reply"}
+			]                    
+                });                
+                var productsToolBar = productsLayout.cells("c").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Produkty")},
+				{type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Redo", type: "button", img: "fa fa-reply"}
+			]                    
+                });                
+                var productToolBar = productsLayout.cells("e").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Produkt")},
+				{type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Redo", type: "button", img: "fa fa-reply"}
+			]                    
+                });
+                var componentsToolBar = productsLayout.cells("d").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Components")},
+				{type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Redo", type: "button", img: "fa fa-reply"}
+			]                    
+                });                
                 
                 var rolesTree = rolesLayout.cells("a").attachTreeView({
                     skin: "dhx_skyblue",    // string, optional, treeview's skin
@@ -66,24 +133,24 @@ function settingsInit(cell) {
 			//dnd: true,           // boolean, optional, enables drag-and-drop
 			context_menu: true,  
                 });                
-                rolesTree.load = function(){ 
+                    rolesTree.load = function(){ 
                     ajaxGet("api/roles", '', function(data) {                    
                             if (data && data.success){                            
                                 rolesTree.loadStruct(data.data);                           
                             }                    
+                        });
+                    };
+                    rolesTree.load();                
+                    rolesTree.attachEvent("onSelect",function(id, mode){  
+                        if (mode) {
+                            usersGrid.clearAll();
+                            permissionsGrid.clearAll();			
+                            usersGrid.fill(id);
+                            permissionsGrid.fill(id);			
+                            console.log(id);
+                            return true;                        
+                        }
                     });
-                };
-                rolesTree.load();                
-                rolesTree.attachEvent("onSelect",function(id, mode){  
-                    if (mode) {
-			usersGrid.clearAll();
-                        permissionsGrid.clearAll();			
-                        usersGrid.fill(id);
-                        permissionsGrid.fill(id);			
-                        console.log(id);
-			return true;                        
-                    }
-		});
                 
                 var usersGrid = rolesLayout.cells("b").attachGrid({
                     image_path:'codebase/imgs/',
@@ -114,9 +181,8 @@ function settingsInit(cell) {
                         }                        
                     ],
 			multiselect: true
-                });  
-                
-                usersGrid.fill = function(id) {
+                });               
+                    usersGrid.fill = function(id) {
                     ajaxGet("api/roles/" + id + "/users", '', function(data){                                     
 			if (data && data.success){
                             usersGrid.clearAll();
@@ -124,7 +190,7 @@ function settingsInit(cell) {
                         }
 		    });
                 };               
-                usersGrid.fill(0);      
+                    usersGrid.fill(0);      
                 var searchElem = usersToolBar.getInput('szukaj');
                                  usersGrid.makeFilter(searchElem, 0, true);
                                  usersGrid.makeFilter(searchElem, 1, true);                                 
@@ -155,9 +221,8 @@ function settingsInit(cell) {
                         }                        
                     ],
 			multiselect: true
-                });  
-                
-                permissionsGrid.fill = function(id) {
+                });                
+                    permissionsGrid.fill = function(id) {
                     ajaxGet("api/roles/" + id + "/permissions", '', function(data){                                     
 			if (data && data.success){
                             permissionsGrid.clearAll();
@@ -165,9 +230,8 @@ function settingsInit(cell) {
                         }
 		    });
                 };                
-                permissionsGrid.fill(0);                
-                
-                permissionsGrid.attachEvent("onCheck", function(rId,cInd,state){
+                    permissionsGrid.fill(0);               
+                    permissionsGrid.attachEvent("onCheck", function(rId,cInd,state){
                     var roleId = rolesTree.getSelectedId();
                     if (roleId) {
                         var data = {
@@ -267,8 +331,7 @@ function settingsInit(cell) {
                              
                         };break;                     
                     };
-                });
-                
+                });                
                 usersToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
 		        case 'Cog':{                                
@@ -371,8 +434,7 @@ function settingsInit(cell) {
                                 permissionsGrid.fill(0);
                         };break; 
                     }
-                });
-                
+                });                
                 permissionsToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
 		        case 'Add':{
@@ -458,6 +520,189 @@ function settingsInit(cell) {
                         };break;
                     }
                 });
+                //----//
+                
+                /**
+                 * 
+                 * Products tab
+                 * 
+                 * 
+                 */
+                
+                var productTypeGrid = productsLayout.cells("a").attachGrid({
+                    image_path:'codebase/imgs/',
+	            columns: [                        
+                        {
+                            label: _("Nazwa"),
+                            width: 100,
+                            id: "name",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Opis"),
+                            width: 100,
+                            id: "description",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        }                        
+                    ],
+			multiselect: true
+                });                
+                    productTypeGrid.fill = function(){						
+                            var new_data = ajaxGet("api/prodtypes", '', function(data){                                     
+                                    if (data && data.success){                                    
+                                        productTypeGrid.parse((data.data), "js");
+                                    }
+                            });                        
+                    };                
+                    productTypeGrid.fill();
+                var dpProductTypeGrid = new dataProcessor("api/prodtypes", "js");                
+		    dpProductTypeGrid.init(productTypeGrid);
+		    dpProductTypeGrid.enableDataNames(true);
+		    dpProductTypeGrid.setTransactionMode("REST");
+		    dpProductTypeGrid.enablePartialDataSend(true);
+		    dpProductTypeGrid.enableDebug(true);
+                    dpProductTypeGrid.setUpdateMode("row", true);
+                    dpProductTypeGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                        console.log(data);
+                        data.id = id;
+                        ajaxGet("api/prodtypes/" + id + "/edit", data, function(data){                                                            
+                            console.log(data);
+                        });
+                    });
+                    
+                var productGroupTree = productsLayout.cells("b").attachTree();
+                    productGroupTree.setImagePath("codebase/imgs/dhxtree_web/");		                    
+                    productGroupTree.enableDragAndDrop(true);
+                    productGroupTree.setDragBehavior('complex');                    
+                    productGroupTree.enableItemEditor(true);
+                    productGroupTree.enableCheckBoxes(true);                    
+                    productGroupTree.enableTreeImages(true);
+                    productGroupTree.enableTreeLines(true);
+                    productGroupTree.fill = function(i=null){
+                            var ids = Array();
+                            ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
+                            ajaxGet("api/prodgroups/grupytree",i!=null ? 'parent='+ids.join('|'): '',function(data){
+                                    if (data.data && data.success){                                            
+                                            productGroupTree.parse({id:0, item:data.data}, "json");                                            
+                                    }
+                            });			
+                    };
+                    productGroupTree.fill();
+                               
+                productTypesToolBar.attachEvent("onClick", function(id) { 
+                    switch (id){
+		        case 'Add':{
+                            var form = createWindowWithForm(permissionForm, 300, 300);
+                            form.attachEvent("onButtonClick", function(name){
+                                switch (name){
+                                    case 'save':{                                                           
+                                        ajaxPost("api/prodtypes", form.getFormData(), function(data){ 
+                                            if (data.success) {                                                
+                                                productTypeGrid.fill();
+                                            }
+                                        });
+                                    };break;
+                                    case 'cancel':{
+                                        form.clear();    
+                                    };break;
+                                }
+                            });
+                        };break;
+		        case 'Del':{
+                            var id = productTypeGrid.getSelectedRowId();;
+                            if (id) {
+                                dhtmlx.confirm({
+                                    title:_("Ostrożność"),                                    
+                                    text:_("Czy na pewno chcesz usunąć?"),
+                                    callback: function(result){
+                                        if (result) {
+                                            ajaxDelete("api/prodtypes/" + id,'', function(data) {
+                                                if (data.success) {
+                                                    productTypeGrid.deleteSelectedRows();                                            
+                                                } else {
+                                                    dhtmlx.alert({
+                                                        title:_("Błąd!"),
+                                                        type:"alert-error",
+                                                        text:data.message
+                                                    });
+                                                }
+                                            });                                              
+                                        }
+                                    }
+                                });   
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    type:"alert",
+                                    text:_("Wybierz co chcesz usunąć!")
+                                });
+                            }
+                             
+                        };break;                     
+                    };
+                });                
+                                
+                productGroupsToolBar.attachEvent("onClick", function(id) {
+                    switch (id) {
+                        case 'Add':{
+                                var id = productGroupTree.getSelectedItemId(),
+				parent = productGroupTree.getParentId(id) || 0;                                   
+                                
+				var form = createWindowWithForm(permissionForm, 300, 300);
+                                var data = {
+                                    'parent_id': parent                                    
+                                };
+                                form.attachEvent("onButtonClick", function(name){
+                                    switch (name){
+                                        case 'save':{ 
+                                            Object.assign(data, form.getFormData());
+                                            ajaxPost("api/prodgroups", data, function(data){ 
+                                                if (data.success) {                                                
+                                                    productGroupTree.insertNewItem(id || parent,data.data.id,data.data.name);
+//					            productGroupTree.selectItem('_new');
+//					            productGroupTree.editItem('_new');
+                                                }
+                                            });
+                                        };break;
+                                        case 'cancel':{
+                                            form.clear();    
+                                        };break;
+                                    }
+                                });		
+					
+                                                                
+                        };break;                        
+                        case 'Edit':{
+					var id = productGroupTree.getSelectedItemId(),
+						parent = productGroupTree.getParentId(id) || 0;
+						if(id){
+							productGroupTree.focusItem(id);
+							productGroupTree.editItem(id);
+						}
+                        };break;
+                        case 'Del':{
+                                var id = productGroupTree.getSelectedItemId(),
+                                        parent = productGroupTree.getParentId(id) || 0;
+                                        if(id){							
+                                                var ch = productGroupTree.getSubItems(id);
+                                                productGroupTree.deleteItem(id,true);
+                                                ch = ch.split(',');
+                                                for (k=0;k<ch.length;k++){
+                                                        i=ch[k];
+                                                        productGroupTree.moveItem(i,'item_child',parent);
+                                                };
+                                        }
+                        };break;                        
+                    };
+                });
+                
+                productGroupTree.attachEvent("onEdit", function(state, id, tree, value){
+                    console.log('onEdit', arguments);
+                });
                 
                 //form for work with roles
                 function createWindowWithForm(formStruct, height, width){
@@ -480,21 +725,23 @@ function settingsInit(cell) {
                 }  
                 
                 var roleForm = [
-                    {type:"fieldset",  offsetTop:0, label:_("Role"), width:253, list:[                                			
-                            {type:"input",  name:"name",   label:_("Nazwa role"), offsetTop:13, labelWidth:80},                                                                				                            
+                    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
+                            {type:"input",  name:"name",   label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				                            
                             {type:"button", name:"save",   value:_("Zapisz"),     offsetTop:18},
                             {type:"button", name:"cancel", value:_("Anuluj"),     offsetTop:18}
                     ]}
 		];
                 
                 var permissionForm = [
-                    {type:"fieldset",  offsetTop:0, label:_("Uprawnienie"), width:253, list:[                                			
-                            {type:"input",  name:"name",        label:_("Nazwa uprawnienia"), offsetTop:13, labelWidth:100},                                                                				                            
-                            {type:"input",  name:"description", label:_("Opis uprawnienia"), offsetTop:13, labelWidth:100},                                                                				                            
+                    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
+                            {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:100},                                                                				                            
+                            {type:"input",  name:"description", label:_("Opis"), offsetTop:13, labelWidth:100},                                                                				                            
                             {type:"button", name:"save",        value:_("Zapisz"),     offsetTop:18},
                             {type:"button", name:"cancel",      value:_("Anuluj"),     offsetTop:18}
                     ]}
-		];  
+		]; 
+                
+                
                 
 //                var new_data = ajaxGet("api/workerslist/" + i, '', function(data){                                     
 //				if (data && data.success){

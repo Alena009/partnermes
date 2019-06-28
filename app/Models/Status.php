@@ -8,7 +8,7 @@ class Status extends BaseModel
 {
     use \Dimsav\Translatable\Translatable; 
     
-    protected $table = "roles";
+    protected $table = "statuses";
     
     protected $fillable = [
         'name'

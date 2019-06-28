@@ -21,6 +21,8 @@ class TaskController extends BaseController
      */
     public function index($locale = 'pl')
     {
+        $tasks = [];
+        
         app()->setLocale($locale);
 
         $tasks = \App\Models\Task::all();
@@ -39,7 +41,7 @@ class TaskController extends BaseController
     {
         $task = new \App\Models\Order();
         $task->kod = $request['kod'];        
-        $task->name = $request['name'];        
+        //$task->name = $request['name'];        
         $task->for_order = $request['for_order']; 
         $task->amount_start = $request['amount_start'];
         $task->amount_stop = $request['amount_stop'];

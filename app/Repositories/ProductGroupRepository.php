@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-class DepartamentRepository extends BaseRepository
+class ProductGroupRepository extends BaseRepository
 {
     protected function model()
     {

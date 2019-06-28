@@ -141,10 +141,10 @@ function timelineInit(cell) {
 		};
 		scheduler.attachEvent("onEventSave",function(id,ev,is_new){
 			console.log(arguments);
-			if (!ev.zlecenie) {
-				alert("Text must not be empty");
-				return false;
-			}
+//			if (!ev.zlecenie) {
+//				alert("Text must not be empty");
+//				return false;
+//			}
 			return true;
 		})		
 		scheduler.config.lightbox.sections=[	
@@ -258,6 +258,7 @@ function timelineInit(cell) {
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 	if (id == "timeline"){
+                window.history.pushState({'page_id': id}, null, '#timeline');
 		timelineInit(cell);
 	}
 });

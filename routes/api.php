@@ -60,21 +60,27 @@ Route::group([
     //Route::get('/departaments/all/{locale}', 'DepartamentController@departaments');    
     //Route::get('/departaments/{id}/{locale}', 'DepartamentController@departaments');  
     
+//tasks groups
     Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
     Route::resource('/taskgroup', 'TaskGroupController');
-    
+    //zlecenia
     Route::resource('/zlecenia', 'TaskController');  
-    
+    //product types
     Route::resource('/prodtypes', 'ProductTypeController'); 
-    
+    //products
+    Route::resource('/products', 'ProductController'); 
+    //operations
     Route::resource('/operations', 'OperationController'); 
-    
+    //product groups
     Route::get('/prodgroups/grupytree', 'ProductGroupController@buildTree');    
     Route::resource('/prodgroups', 'ProductGroupController');  
-
+    //orders
     Route::get('/orders/history/{orderId}', 'OrderController@history');
     Route::get('/orders/positions/{orderId}', 'OrderController@positions');
-    Route::resource('/orders', 'OrderController');  
+    Route::resource('/orders', 'OrderController');
+    //orders positions
+    //Route::get('/positions/{orderId}', 'OrderController@positions');
+    Route::resource('/positions', 'OrderPositionController');  
 });
 
 Route::post('login', 'API\UserController@login');

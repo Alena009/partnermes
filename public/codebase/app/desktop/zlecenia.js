@@ -122,39 +122,52 @@ function zleceniaInit(cell) {
 //			return false;
 //		});
 		grupyTree.zaladuj = function(i=null){
-			var ids = Array();
-			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-			var new_data = ajaxGet("api/taskgroups/grupytree",i!=null ? 'parent='+ids.join('|'): '',function(data){
-				if (data.data && data.success){
-					var d = data.data;
-                                        console.log(d);
-					grupyTree.parse({id:0, item:data.data}, "json");
-					//parse(d,'json');
-                }
-            });			
-		};
+                    var ids = Array();
+                    ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
+                    var new_data = ajaxGet("api/taskgroups/grupytree",i!=null ? 'parent='+ids.join('|'): '',function(data){
+                            if (data.data && data.success){
+                                    var d = data.data;
+                                    console.log(d);
+                                    grupyTree.parse({id:0, item:data.data}, "json");
+                                    //parse(d,'json');
+                            }
+                    });			
+                };
 
 		var zleceniaGrid = zleceniaLayout.cells("b").attachGrid({
 			image_path:'codebase/imgs/',
 			columns: [{
-				label: "Zlecenie",
-				id:'zlecenie',
-				width: 320,
-				type: "edtxt",
+				label: "Na zamowienie",
+				id:'for_order',
+				width: 60,
+				type: "ch",
+				sort: "str"				
+			},{
+				label: "Zamowienie",
+				id:'order',
+				width: 200,
+				type: "co",
 				sort: "str",
 				align: "left"
 			},{
 				label: "Produkt",
 				id:'produkt',
 				width: 200,
-				type: "combo",
+				type: "co",
 				sort: "str",
 				align: "left"
 			},{
 				label: "Produkt KOD",
 				id:'produktKod',
 				width: 200,
-				type: "ro",
+				type: "co",
+				sort: "str",
+				align: "left"
+			},{
+				label: "Zlecenie",
+				id:'zlecenie',
+				width: 320,
+				type: "edtxt",
 				sort: "str",
 				align: "left"
 			},{
@@ -224,7 +237,24 @@ function zleceniaInit(cell) {
 			multiselect: true
 		});
                 
-		//combo = zleceniaGrid.getColumnCombo(1);
+                var ordersCombo = zleceniaGrid.getCombo(1);
+		var productsCombo = zleceniaGrid.getCombo(2);
+                
+                ajaxGet("api/orders", '', function(data) {
+                    if (data.success && data.data) {
+                        data.data.forEach(function(order){
+                            ordersCombo.put(order.id, order.name);
+                        });
+                    }
+                });
+                
+                ajaxGet("api/products", '', function(data) {
+                    if (data.success && data.data) {
+                        data.data.forEach(function(product){
+                            productsCombo.put(product.id, product.name);
+                        });
+                    }
+                });
 		//combo.enableFilteringMode(true);
 		//combo.load("produkty/all");
 		zleceniaGrid.setDateFormat("%Y-%m-%d","%Y-%m-%d");
@@ -233,12 +263,12 @@ function zleceniaInit(cell) {
 		//zleceniaGrid.setColTypes('edtxt','combo','ro','edtxt','edn','edtxt');
 		//zleceniaGrid.setSubTree(treeGrupy, 2);
 		zleceniaGrid.attachHeader("#text_filter,#select_filter,#text_filter,#text_search,#select_filter,#numeric_filter,#text_search,#text_search,#text_search,#text_search,#text_search,#text_search");
-		zleceniaGrid.setColumnIds("zlecenie,produkt,produktKod,kod,zamkniete,szt,data_dodania,data_zamkniecia,data_wysylki,plan_start,plan_stop,opis");
+		//zleceniaGrid.setColumnIds("zlecenie,produkt,produktKod,kod,zamkniete,szt,data_dodania,data_zamkniecia,data_wysylki,plan_start,plan_stop,opis");
 		zleceniaGrid.setColValidators(["NotEmpty","","","NotEmpty","","ValidInteger"]);
 		zleceniaGrid.enableMultiselect(true); 
+                zleceniaGrid.enableMultiline(true);
 		zleceniaGrid.enableEditEvents(false,true,true);
 		//grupyTree = createGrupyTree(zleceniaLayout.cells("a"),zleceniaGrid);
-
 
 		zleceniaGrid.zaladuj = function(i){
 			var ids = Array();
@@ -251,15 +281,15 @@ function zleceniaInit(cell) {
                                 });			
 		};
                 
-                
+              
 
-		var dpZleceniaGrid = new dataProcessor("zlecenia/zlecenie/",'json');
-		dpZleceniaGrid.init(zleceniaGrid);
-		dpZleceniaGrid.enableDataNames(true);
-		dpZleceniaGrid.setTransactionMode("REST");
-		dpZleceniaGrid.enablePartialDataSend(true);
-		dpZleceniaGrid.enableDebug(true);
-		dpZleceniaGrid.setUpdateMode("row", true);
+//		var dpZleceniaGrid = new dataProcessor("zlecenia/zlecenie/",'json');
+//		dpZleceniaGrid.init(zleceniaGrid);
+//		dpZleceniaGrid.enableDataNames(true);
+//		dpZleceniaGrid.setTransactionMode("REST");
+//		dpZleceniaGrid.enablePartialDataSend(true);
+//		dpZleceniaGrid.enableDebug(true);
+//		dpZleceniaGrid.setUpdateMode("row", true);
 		zleceniaGrid.attachEvent("onFilterStart", function(indexes,values){
 			console.log(arguments);
 			return true;
@@ -281,25 +311,212 @@ function zleceniaInit(cell) {
 			console.log(btn);
 			switch (btn){
 				case 'Add':{
-					zleceniaGrid.setActive(true);
-					zleceniaGrid.selectCell(1,0);
-					 var rowId=zleceniaGrid.uid();
-					 zleceniaGrid.setActive(true);
-					 zleceniaGrid.addRow(rowId,["","","","",""],0);
-					 zleceniaGrid.editCell(rowId,1);
-					 console.log(zleceniaGrid.getSelectedCellIndex()+'x'+zleceniaGrid.getSelectedRowId());
-					(arguments[0]||window.event).cancelBubble=true;
-					zleceniaGrid.selectRow(2);
-					zleceniaGrid.selectCell(2,4,false,true);
-					zleceniaGrid.editCell();
-					zleceniaGrid.cells(1,0).setBgColor('red'); 
-//					myGrid.selectCell(rowIndex,cellIndex);
-//					myGrid.editCell();	
-					console.log(zleceniaGrid.getRowId(0));
-					zleceniaGrid.forEachCell(1,function(cellObj,ind){
-						console.log('forEachCell',arguments);	
-					});
-					console.log(zleceniaGrid.getSelectedCellIndex()+'x'+zleceniaGrid.getSelectedRowId());
+                                        var window = createWindow(500, 500);
+                                        window.maximize();
+                                        var newZlecenieLayout = window.attachLayout("3W");
+                                            newZlecenieLayout.cells("a").hideHeader();
+                                            newZlecenieLayout.cells("b").hideHeader();                                        
+                                            newZlecenieLayout.cells("c").hideHeader(); 
+                                            newZlecenieLayout.cells("a").setWidth(200);
+                                            newZlecenieLayout.setAutoSize("a;b;c");
+                                        var grupy = newZlecenieLayout.cells("a").attachTree();
+                                            grupy.setImagePath("codebase/imgs/dhxtree_web/");		
+                                            grupy.enableCheckBoxes(true);
+                                            grupy.enableTreeImages(true);
+                                            grupy.enableTreeLines(true);                                   
+ 
+                                        ajaxGet("api/taskgroups/grupytree",'',function(data){
+                                                if (data.data && data.success){
+                                                        grupy.parse({id:0, item:data.data}, "json");
+                                                        //parse(d,'json');
+                                            }
+                                        });			
+
+                                        var ordersPositionsGrid = newZlecenieLayout.cells("b").attachGrid({
+                                            image_path:'codebase/imgs/',
+                                            columns: [{
+                                                    label: _("Zamowienie"),
+                                                    width: 50,
+                                                    id: "order_kod",
+                                                    type: "ed", 
+                                                    sort: "str", 
+                                                    align: "left"
+                                                },
+                                                {
+                                                    label: _("Nazwa zamowienia"),
+                                                    width: 100,
+                                                    id: "order_name",
+                                                    type: "ed", 
+                                                    sort: "str", 
+                                                    align: "left"
+                                                },                                                                                                  
+                                                {
+                                                    label: _("Produkt"),
+                                                    id: "product_name",
+                                                    type: "ed", 
+                                                    sort: "str",	
+                                                    align: "left"
+                                                },
+                                                {
+                                                    label: _("Produkt Kod"),
+                                                    id: "product_kod",
+                                                    width: 50, 
+                                                    type: "ed", 
+                                                    sort: "str", 
+                                                    align: "left"
+                                                },
+                                                {
+                                                    label: _("Ilosc"),
+                                                    id: "amount_stop",
+                                                    width: 50, 
+                                                    type: "ed", 
+                                                    sort: "str", 
+                                                    align: "left"
+                                                },
+                                                {
+                                                    label: _("Data dostawy"),
+                                                    id: "date_delivery",
+                                                    width: 100, 
+                                                    type: "ed", 
+                                                    sort: "str", 
+                                                    align: "left"
+                                                }                         
+                                            ],
+                                                multiselect: true
+                                        });
+                                        //ordersPositionsGrid.attachHeader("#text_filter,#select_filter,#text_filter,#text_search,#select_filter,#numeric_filter,#text_search,#text_search,#text_search,#text_search,#text_search,#text_search");
+                                        ordersPositionsGrid.attachHeader("#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter");
+                                        ordersPositionsGrid.fill = function(forOrder = true) {
+                                            var url = "api/positions";
+                                            if (!forOrder) {
+                                                url = "api/products";
+                                            }
+                                            ajaxGet(url, "", function(data){
+                                                if (data.success && data.data) {
+                                                    ordersPositionsGrid.parse((data.data), "js");
+                                                }
+                                            });
+                                        };
+                                        ordersPositionsGrid.fill();
+                                        ordersPositionsGrid.getFilterElement(2)._filter = function(){
+                                            var input = this.value; // gets the text of the filter input
+                                            input = input.trim();
+                                            input = input.toLowerCase();
+                                            input = input.split(' ');
+                                            return function(value, id){
+                                                //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
+                                                    var val = ordersPositionsGrid.cells(id, 2).getValue(); // gets the value of the current                                                    
+                                                    var searchStr = '';
+                                                    for (var i = 0; i < input.length; i++) {
+                                                        searchStr = searchStr + input[i] + "(.+)";                                                                
+                                                        //var searchStr = /^zz(.+)np(.+)/ig;
+                                                    }
+                                                    var regExp = new RegExp("^" + searchStr, "ig");      
+                                                    console.log(regExp);
+                                                    if (val.toLowerCase().match(regExp)){                                                             
+                                                        return true;
+                                                    }                                                    
+                                                //}
+                                                return false;
+                                            };
+                                        };
+                                        var zlecenieForm = newZlecenieLayout.cells("c").attachForm(taskForm);
+                                        zlecenieForm.bind(ordersPositionsGrid); 
+                                        //var productCombo = zlecenieForm.getcombo("order_kod");
+                                        zlecenieForm.attachEvent("onChange", function(name, value, state){
+                                            if (name == 'for_order') {
+                                                ordersPositionsGrid.clearAll();
+                                                ordersPositionsGrid.fill(value);
+                                                if (value) {                                                    
+                                                    zlecenieForm.showItem("order_kod");
+                                                    zlecenieForm.showItem("order_name");
+                                                    zlecenieForm.showItem("kod");
+                                                    zlecenieForm.showItem("date_delivery");                                                                                                        
+                                                } else {                                                             
+                                                    zlecenieForm.setItemValue("amount", "");
+                                                    zlecenieForm.hideItem("order_kod");
+                                                    zlecenieForm.hideItem("order_name");
+                                                    zlecenieForm.hideItem("kod");
+                                                    zlecenieForm.hideItem("date_delivery");                                                                                                        
+                                                }
+                                                //pracownicyForm.setRequired("departament", value);                                    
+                                            }                    
+                                        });
+                                        zlecenieForm.attachEvent("onButtonClick", function(name){
+                                            switch (name){
+                                                case 'save':{ 
+                                                        var taskGroup = grupy.getSelectedItemId();
+                                                        if (taskGroup) {
+                                                            var data = zlecenieForm.getFormData();
+                                                            data.amount_start = 1;
+                                                            data.task_group_id = taskGroup;
+                                                            console.log(data);
+                                                            ajaxPost("api/zlecenia", data, function(data){                                                            
+                                                                //grupyTree.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
+                                                            });
+                                                        } else {
+                                                            dhtmlx.alert({
+                                                                title:_("Wiadomość"),
+                                                                type:"alert",
+                                                                text:_("Wybierz grupe zlecen!")
+                                                            });
+                                                        };                         
+                                                        
+                                                };break;
+                                                case 'cancel':{
+                                                    zlecenieForm.clear();
+                                                };break;
+                                            }
+                                        });                              
+                                        
+                                        
+//                                        var zlecenieForm = createWindowWithForm(taskForm, 350, 350);
+//                                        var ordersCombo = zlecenieForm.getCombo("orders");
+//                                        var positionsCombo = zlecenieForm.getCombo("positions");
+//                                        var amountInput = zlecenieForm.getInput('amount');
+//                                        
+//                                        
+//                                        ordersCombo.enableFilteringMode(true);
+//                                        ajaxGet("api/orders", '', function(data) {
+//                                            if (data.success && data.data) {                                            
+//                                                some(data.data);                                                
+//                                                //ordersCombo.addOption(data.data);                                                
+//                                                
+//                                                
+//                                            }
+//                                        });
+//                                        var orders = resultq;
+//                                        console.log(orders);
+//                                        ordersCombo.attachEvent("onChange", function(value, text){                                            
+//                                            ajaxGet("api/orders/positions/" + value, "", function(data){
+//                                                if (data.success && data.data) { 
+//                                                    positionsCombo.addOption(data.data);                                                  
+//                                                }
+//                                            });
+//                                        });
+                                        
+                                        
+                                        
+                                        
+//					zleceniaGrid.setActive(true);
+//					zleceniaGrid.selectCell(1,0);
+//                                        var rowId=zleceniaGrid.uid();
+//   				        zleceniaGrid.setActive(true);
+//					 zleceniaGrid.addRow(rowId,["","","","",""],0);
+//					 zleceniaGrid.editCell(rowId,1);
+//					 console.log(zleceniaGrid.getSelectedCellIndex()+'x'+zleceniaGrid.getSelectedRowId());
+//					(arguments[0]||window.event).cancelBubble=true;
+//					zleceniaGrid.selectRow(2);
+//					zleceniaGrid.selectCell(2,4,false,true);
+//					zleceniaGrid.editCell();
+//					zleceniaGrid.cells(1,0).setBgColor('red'); 
+////					myGrid.selectCell(rowIndex,cellIndex);
+////					myGrid.editCell();	
+//					console.log(zleceniaGrid.getRowId(0));
+//					zleceniaGrid.forEachCell(1,function(cellObj,ind){
+//						console.log('forEachCell',arguments);	
+//					});
+//					console.log(zleceniaGrid.getSelectedCellIndex()+'x'+zleceniaGrid.getSelectedRowId());
 				};break;
 				case 'Edit':{
 					};break;
@@ -312,11 +529,63 @@ function zleceniaInit(cell) {
 			//console.log(zleceniaGrid.getSelectedCellIndex()+'x'+zleceniaGrid.getSelectedRowId());
 			return true;
 		});
+                
+                
+                var taskForm = [  
+                        {type: "label",                        label: _("Zlecenie na zamowienie"), labelWidth: 150},
+                        {type: "radio",    name: "for_order",  label: _("Tak"), value: 1,  checked: true},
+                        {type: "radio",    name: "for_order",  label: _("Nie"),  value: 0},                        
+                        {type: "input",    name: "order_kod",       label: _("Zamowienie"),       labelAlign: "left", readonly:true},                        
+                        {type: "input",    name: "order_name",      label: _("Zamowienie nazwa"), labelAlign: "left", readonly:true},                        
+                        {type: "input",    name: "product_kod",     label: _("Produkt"),          labelAlign: "left", readonly:true},                        
+                        {type: "input",    name: "product_name",    label: _("Produkt nazwa"),    labelAlign: "left", readonly:true},                                             
+                        {type: "input",    name: "amount_stop",     label: _("Ilosc"),            labelAlign: "left"},
+                        {type: "input",    name: "date_delivery",   label: _("Data dostawy"),     labelAlign: "left", readonly:true},
+                        {type: "input",    name: "name",            label: _("Zlecenie"),         labelAlign: "left"},                        
+                        {type: "input",    name: "kod",             label: _("Zlecenie kod"),     labelAlign: "left"},                        
+                        {type: "input",    name: "plan_date_start", label: _("Data start"),       labelAlign: "left"},
+                        {type: "input",    name: "plan_date_stop",  label: _("Data end"),         labelAlign: "left"}, 
+                        {type: "hidden",   name: "order_position_id"},
+                        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
+                        {type: "block",    name: "buttonblock",inputWidth: 200,    className: "myBlock", list:[
+                            {type: "button",   name: "save",   value:_("Zapisz"), offsetTop:18},
+                            {type: "newcolumn"},
+			    {type: "button",   name: "cancel", value:_("Anuluj"), offsetTop:18}
+                        ]}                  
+		];  
+                
+                function createWindow(height, width){
+                    var dhxWins = new dhtmlXWindows();
+                    return w1 = dhxWins.createWindow({
+                            id:"w1",
+                            left:20,
+                            top:30,
+                            width: width,
+                            height: height,
+                            center:true,
+                            caption: _("Dodaj zlecenie"),
+                            header: true,
+                            onClose:function(){
+
+                            }
+                    });
+                    //initializing form 
+                    //return dhxWins.window("w1").attachForm(formStruct, true);         
+                } 
+                
+                function some(data) {                    
+                    
+                    result = data;
+                    alert(result);
+                }
+                
 
 	}
 	grupyTree.zaladuj();
 	zleceniaGrid.zaladuj(0);
 }
+
+var result;
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {
 	if (id == "zlecenia") {           

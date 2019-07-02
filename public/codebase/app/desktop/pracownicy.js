@@ -473,8 +473,8 @@ function pracownicyInit(cell) {
 		 	{type: "input",    name: "email",      label: _("E-mail"),    labelAlign: "left"},
 		 	{type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},		 	                                                                        
                         {type: "label",                        label: _("Is worker")},
-                        {type: "radio",    name: "is_worker",  label: _("Yes"), value: 1,  checked: true},
-                        {type: "radio",    name: "is_worker",  label: _("No"),  value: 0},                        
+                        {type: "radio",    name: "is_worker",  label: _("Tak"), value: 1,  checked: true},
+                        {type: "radio",    name: "is_worker",  label: _("Nie"),  value: 0},                        
                         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
                         {type: "block",    name: "buttonblock",inputWidth: 200,    className: "myBlock", list:[
                             {type: "button",   name: "save",   value:_("Zapisz"), offsetTop:18},

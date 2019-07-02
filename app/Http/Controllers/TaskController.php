@@ -37,24 +37,28 @@ class TaskController extends BaseController
     /**
      * create new task with translations
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
-        $task = new \App\Models\Order();
+        $success = false;
+        
+        $task = new \App\Models\Task();
         $task->kod = $request['kod'];        
         //$task->name = $request['name'];        
         $task->for_order = $request['for_order']; 
         $task->amount_start = $request['amount_start'];
         $task->amount_stop = $request['amount_stop'];
         $task->task_group_id = $request['task_group_id'];
-        $task->task_groups_id = $request['task_groups_id'];
-        $task->save();
-
-        foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-            $task->translateOrNew($locale)->name = "Title {$locale}";                        
+        $task->order_position_id = $request['order_position_id'];
+        
+        if ($task->save()) {
+            $task->translateOrNew('pl')->name = $request['name'];                        
+            $success = $task->save();
         }
 
-        $task->save();
+        //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
+            
+        //}       
 
-        return true;
+        return response()->json(['success' => $success, 'data' => $task]);        
     } 
 }

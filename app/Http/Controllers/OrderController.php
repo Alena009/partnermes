@@ -22,19 +22,19 @@ class OrderController extends BaseController
      */
     public function index($locale = 'pl')
     {
-        $result = [];
+        $orders = [];
         app()->setLocale($locale);
 
         $orders = \App\Models\Order::all();       
         
         foreach ($orders as $order) {
             $order['client'] = $order->client;
+            $order['text']   = $order->kod;
+            $order['value']  = $order->id; 
             //$order['status'] = $order->status;
-        }    
+        }
         
-        $result = ['data' => $orders, 'success' => true];
-        
-        return response()->json($result);        
+        return response()->json(['data' => $orders, 'success' => true]);        
     }
 
     /**
@@ -80,14 +80,19 @@ class OrderController extends BaseController
     
     public function positions($orderId)
     {
-        $order = [];
+        $order     = [];
         $positions = [];
         
-        $order = \App\Models\Order::find($orderId);
-        $positions = $order->positions;     
+        $order     = \App\Models\Order::find($orderId);
+        $positions = $order->positions;
+        
         foreach ($positions as $position) {
-            $product = $position->product;
-            $position['product_name'] = $product->name;
+            $product     = $position->product;
+            $productName = $product->name;
+            
+            $position['product_name'] = $productName;
+            $position['text']         = $productName;
+            $position['value']        = $position['id'];            
         }
 
         return response()->json(['data' => $positions, 'success' => true]);        

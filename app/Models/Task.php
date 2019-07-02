@@ -11,7 +11,7 @@ class Task extends BaseModel
     protected $table = "tasks";
     
     protected $fillable = [
-        'kod', 'name', 'for_order', 'task_group_id'
+        'kod', 'name', 'for_order', 'task_group_id', 'order_position_id'
     ];
     
     /* fields for translating */    

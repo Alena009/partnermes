@@ -180,15 +180,15 @@ function isFunction(functionToCheck) {
 }  
 
 function ajaxPost(url, params, callback, headers = {}) {
-    axiosQuery('post', url, params, callback, headers);
+    return axiosQuery('post', url, params, callback, headers);
 }
 
 function ajaxGet(url, params, callback) {
-    axiosQuery('get', url, params, callback);
+    return axiosQuery('get', url, params, callback);
 }
 
 function ajaxDelete(url, params, callback) {
-    axiosQuery('delete', url, params, callback);
+    return axiosQuery('delete', url, params, callback);
 }
 
 function axiosQuery(method, url, params, callback, inputHeaders = {}) {      
@@ -198,12 +198,12 @@ function axiosQuery(method, url, params, callback, inputHeaders = {}) {
 //        'Authorization': api_token        
 //    };
 
-var headers = inputHeaders;
-headers.Authorization = 'Bearer ' + api_token;
+    var headers = inputHeaders;
+    headers.Authorization = 'Bearer ' + api_token;
    
     var requestBody = {
         method: method,
-        url: url,     
+        url: url,               
         headers: headers   
     };
     
@@ -246,7 +246,7 @@ headers.Authorization = 'Bearer ' + api_token;
 		})
     .catch(function (error) {
         console.log(error);
-    });
+    });   
 }
 
 

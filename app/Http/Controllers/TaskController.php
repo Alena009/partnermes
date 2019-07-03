@@ -25,7 +25,18 @@ class TaskController extends BaseController
         
         app()->setLocale($locale);
 
-        $tasks = \App\Models\Task::all();
+        $tasks = \App\Models\Task::all();        
+        
+        foreach ($tasks as $task) {
+            $orderPosition = $task->orderPosition;
+            $order         = $orderPosition->order; 
+            $product       = $orderPosition->product;
+            
+            $task['order_kod']         = $order['kod'];
+            $task['order_description'] = $order['description'];
+            $task['product']           = $product['name'];
+            $task['date_delivery']     = $orderPosition['date_delivery'];
+        }
         
         if ($tasks) {
             $success = true;    

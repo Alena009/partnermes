@@ -21,4 +21,9 @@ class OrderPosition extends BaseModel
     {
         return $this->belongsTo('App\Models\Order');
     }
+    
+    public function tasks()
+    {
+        return $this->hasMany('App\Models\Task', 'order_position_id', 'id');
+    }
 }

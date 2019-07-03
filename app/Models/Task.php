@@ -16,4 +16,9 @@ class Task extends BaseModel
     
     /* fields for translating */    
     public $translatedAttributes = ['name'];
+    
+    public function orderPosition()
+    {
+        return $this->belongsTo('App\Models\OrderPosition');
+    }    
 }

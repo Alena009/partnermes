@@ -19,13 +19,24 @@ class ProductController extends BaseController
     /**
      * Get products list with translations
      */
-    public function products($locale = 'pl')
+    public function index($locale = 'pl')
     {
+        $products = [];
+        
         app()->setLocale($locale);
 
         $products = \App\Models\Product::all();
         
-        return response()->json($products);        
+        foreach ($products as $product) {
+            $product['product_name'] = $product['name'];
+            $product['product_kod'] = $product['kod'];
+        }
+        
+        if ($products) {
+            $success = true;
+        }
+        
+        return response()->json(["success" => $success, "data" => $products]);        
     }
 
     /**

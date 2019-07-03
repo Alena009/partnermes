@@ -144,28 +144,28 @@ function zleceniaInit(cell) {
 				sort: "str"				
 			},{
 				label: "Zamowienie",
-				id:'order',
+				id:'order_kod',
 				width: 200,
 				type: "co",
 				sort: "str",
 				align: "left"
 			},{
 				label: "Produkt",
-				id:'produkt',
+				id:'product',
 				width: 200,
 				type: "co",
 				sort: "str",
 				align: "left"
 			},{
 				label: "Produkt KOD",
-				id:'produktKod',
+				id:'product_kod',
 				width: 200,
 				type: "co",
 				sort: "str",
 				align: "left"
 			},{
 				label: "Zlecenie",
-				id:'zlecenie',
+				id:'name',
 				width: 320,
 				type: "edtxt",
 				sort: "str",
@@ -186,14 +186,14 @@ function zleceniaInit(cell) {
 				align: "center"
 			},{
 				label: "Szt",
-				id:'szt',
+				id:'amount_stop',
 				width: 60,
 				type: "edn",
 				sort: "str",
 				align: "right"
 			},{
 				label: "Data dodania",
-				id:'data_dodania',
+				id:'created_at',
 				width: "120",
 				type: "dhxCalendarA",
 				sort: "date",
@@ -206,8 +206,8 @@ function zleceniaInit(cell) {
 				sort: "date",
 				align: "center"
 			},{
-				label: "KW Wys",
-				id:'data_wysylki',
+				label: "Data wysylki",
+				id:'date_delivery',
 				width: "60",
 				type: "edn",
 				sort: "int",
@@ -228,7 +228,7 @@ function zleceniaInit(cell) {
 				align: "center"
 			},{
 				label: "Opis",
-				id:'name',
+				id:'order_description',
 				width: "300",
 				type: "edtxt",
 				sort: "int",
@@ -273,10 +273,10 @@ function zleceniaInit(cell) {
 		zleceniaGrid.zaladuj = function(i){
 			var ids = Array();
 			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-			var new_data = ajaxGet("api/zlecenia",'grupy='+ids.join('|'),function(data){
+			var new_data = ajaxGet("api/zlecenia", '',function(data){
 				if (data.data && data.success){
-					var d = data.data;
-                                        zleceniaGrid.parse(d, "js");
+                                    console.log(data.data);
+                                        zleceniaGrid.parse(data.data, "js");
                                     }
                                 });			
 		};
@@ -383,8 +383,7 @@ function zleceniaInit(cell) {
                                                 }                         
                                             ],
                                                 multiselect: true
-                                        });
-                                        //ordersPositionsGrid.attachHeader("#text_filter,#select_filter,#text_filter,#text_search,#select_filter,#numeric_filter,#text_search,#text_search,#text_search,#text_search,#text_search,#text_search");
+                                        });                                                                              
                                         ordersPositionsGrid.attachHeader("#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter");
                                         ordersPositionsGrid.fill = function(forOrder = true) {
                                             var url = "api/positions";
@@ -411,8 +410,7 @@ function zleceniaInit(cell) {
                                                         searchStr = searchStr + input[i] + "(.+)";                                                                
                                                         //var searchStr = /^zz(.+)np(.+)/ig;
                                                     }
-                                                    var regExp = new RegExp("^" + searchStr, "ig");      
-                                                    console.log(regExp);
+                                                    var regExp = new RegExp("^" + searchStr, "ig");                                                          
                                                     if (val.toLowerCase().match(regExp)){                                                             
                                                         return true;
                                                     }                                                    
@@ -432,7 +430,7 @@ function zleceniaInit(cell) {
                                                     zlecenieForm.showItem("order_name");
                                                     zlecenieForm.showItem("kod");
                                                     zlecenieForm.showItem("date_delivery");                                                                                                        
-                                                } else {                                                             
+                                                } else {                                                              
                                                     zlecenieForm.setItemValue("amount", "");
                                                     zlecenieForm.hideItem("order_kod");
                                                     zlecenieForm.hideItem("order_name");
@@ -450,6 +448,8 @@ function zleceniaInit(cell) {
                                                             var data = zlecenieForm.getFormData();
                                                             data.amount_start = 1;
                                                             data.task_group_id = taskGroup;
+                                                            data.name = data.name_task;
+                                                            data.kod = data.kod_task;
                                                             console.log(data);
                                                             ajaxPost("api/zlecenia", data, function(data){                                                            
                                                                 //grupyTree.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
@@ -541,8 +541,8 @@ function zleceniaInit(cell) {
                         {type: "input",    name: "product_name",    label: _("Produkt nazwa"),    labelAlign: "left", readonly:true},                                             
                         {type: "input",    name: "amount_stop",     label: _("Ilosc"),            labelAlign: "left"},
                         {type: "input",    name: "date_delivery",   label: _("Data dostawy"),     labelAlign: "left", readonly:true},
-                        {type: "input",    name: "name",            label: _("Zlecenie"),         labelAlign: "left"},                        
-                        {type: "input",    name: "kod",             label: _("Zlecenie kod"),     labelAlign: "left"},                        
+                        {type: "input",    name: "name_task",            label: _("Zlecenie"),         labelAlign: "left"},                        
+                        {type: "input",    name: "kod_task",             label: _("Zlecenie kod"),     labelAlign: "left"},                        
                         {type: "input",    name: "plan_date_start", label: _("Data start"),       labelAlign: "left"},
                         {type: "input",    name: "plan_date_stop",  label: _("Data end"),         labelAlign: "left"}, 
                         {type: "hidden",   name: "order_position_id"},

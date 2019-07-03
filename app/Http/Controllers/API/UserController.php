@@ -27,7 +27,7 @@ class UserController extends \App\Http\Controllers\BaseController
             $token = $user->createToken('MyApp')->accessToken;
             return response()->json(['success' => true, 'token' => $token], $this->successStatus);
         } else {
-            return response()->json(['error' => 'Unauthorised'], 401);
+            return response()->json(['success' => false, 'message' => 'Unauthorised user']);
         }
     }
 

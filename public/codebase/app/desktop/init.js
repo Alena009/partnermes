@@ -102,10 +102,10 @@ function loginFormShow(callback2={}){
 		loginForm.weryfikuj = function(id){
 			var data = loginForm.getFormData();                        
 			ajaxPost("api/login","login="+data.login+"&password="+data.password,function(data){
-				
+                            console.log(data);
 				if (data.success===true){
                                     localStorage.setItem('token',data.token);
-                                    console.log(data);
+                                    //console.log(data);
                                     
 					w1.hide();
 					if (loginForm.callback.success && isFunction(loginForm.callback.success)){
@@ -116,15 +116,17 @@ function loginFormShow(callback2={}){
 						}
 					}
 				}else{
-					if (loginForm.callback.failure && isFunction(loginForm.callback.failure)){
-						loginForm.callback['failure']();
-					}else{
-                        dhtmlx.alert({
-                            title:_("Błąd logowania!"),
-                            type:"alert-error",
-                            text:data.message
-                        });
-                    }
+                                    console.log("here");
+                                    if (loginForm.callback.failure && isFunction(loginForm.callback.failure)){
+                                        
+                                            loginForm.callback['failure']();
+                                    }else{
+                                        dhtmlx.alert({
+                                            title:_("Błąd logowania!"),
+                                            type:"alert-error",
+                                            text:data.message
+                                        });
+                                    }
 				}
 			});
 			return this.isLogged;

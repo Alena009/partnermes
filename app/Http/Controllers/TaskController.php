@@ -22,23 +22,28 @@ class TaskController extends BaseController
     public function index($locale = 'pl')
     {
         $tasks = [];
+        $success = false;
         
         app()->setLocale($locale);
 
-        $tasks = \App\Models\Task::all();        
-        
-        foreach ($tasks as $task) {
-            $orderPosition = $task->orderPosition;
-            $order         = $orderPosition->order; 
-            $product       = $orderPosition->product;
-            
-            $task['order_kod']         = $order['kod'];
-            $task['order_description'] = $order['description'];
-            $task['product']           = $product['name'];
-            $task['date_delivery']     = $orderPosition['date_delivery'];
-        }
+        $tasks = \App\Models\Task::all();  
         
         if ($tasks) {
+            foreach ($tasks as $task) {
+                $orderPosition = $task->orderPosition;
+                if ($orderPosition) {
+                    $order   = $orderPosition->order; 
+                    $product = $orderPosition->product;
+                    $task['order_kod']         = $order['kod'];
+                    $task['order_description'] = $order['description'];
+                    $task['date_delivery']     = $orderPosition['date_delivery'];
+                    $task['product_name']      = $product['name'];                
+                } else {
+                    $product              = $task->product;
+                    $task['product_name'] = $product->name;                
+                }              
+            }
+            
             $success = true;    
         }
         
@@ -60,6 +65,7 @@ class TaskController extends BaseController
         $task->amount_stop = $request['amount_stop'];
         $task->task_group_id = $request['task_group_id'];
         $task->order_position_id = $request['order_position_id'];
+        $task->product_id = $request['product_id'];
         
         if ($task->save()) {
             $task->translateOrNew('pl')->name = $request['name'];                        

@@ -42,9 +42,7 @@ Route::group([
     //users
     Route::get('/users/avatar/{userId}', 'API\UserController@avatar');
     Route::post('/users/avatar/load/{userId}', 'API\UserController@loadAvatar');
-    Route::resource('/users', 'API\UserController');
-    
-           
+    Route::resource('/users', 'API\UserController');          
     
     //departaments
     Route::get('/departamentstree', 'DepartamentController@departamentsTree');
@@ -62,7 +60,7 @@ Route::group([
     
 //tasks groups
     Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
-    Route::resource('/taskgroup', 'TaskGroupController');
+    Route::resource('/taskgroups', 'TaskGroupController');
     //zlecenia
     Route::resource('/zlecenia', 'TaskController');  
     //product types

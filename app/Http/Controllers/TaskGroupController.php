@@ -26,7 +26,12 @@ class TaskGroupController extends BaseController
 
         $taskgroups = \App\Models\TaskGroup::all();
         
-         return response()->json(['success' => true, 'data' => $taskgroups]);        
+        foreach ($taskgroups as $group) {
+            $group->text = $group->name;  
+            $group->value = (string)$group->id;           
+        }
+        
+        return response()->json(['success' => true, 'data' => $taskgroups]);        
     }   
     
     /**

@@ -6,7 +6,7 @@ function timelineInit(cell) {
 	if (timelineLayout == null) {
 		
 		// init layout
-		timelineLayout = cell.attachLayout("1C");
+		var timelineLayout = cell.attachLayout("1C");
         timelineLayout.cells("a").hideHeader();
         timelineLayout.cells("a").showInnerScroll();
 		
@@ -216,13 +216,13 @@ function timelineInit(cell) {
 			;
 		
 		timelineLayout.cells("a").attachScheduler(new Date(), "timeline",sTabs);
-		var schedulerDP = new dataProcessor("zdarzenia"); 
+		var schedulerDP = new dataProcessor("api/operations"); 
 		schedulerDP.init(scheduler); 
 		schedulerDP.setTransactionMode("JSON");
 		schedulerDP.setTransactionMode("REST");
-		scheduler.load("timeline/zdarzenia","json");
+		scheduler.parse("api/operations","json");
 	}else{
-		scheduler.load("timeline/zdarzenia","json");
+		scheduler.parse("api/operations","json");
 	}
 	scheduler.on_load = function (loader) {
 		var evs;

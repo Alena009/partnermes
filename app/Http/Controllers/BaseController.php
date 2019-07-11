@@ -135,6 +135,11 @@ class BaseController extends Controller
         return array_get(explode('.', Route::currentRouteName()), 0);
     }
     
+    /**
+     * Build struct for tree view on front-end
+     * 
+     * @return json 
+     */    
     public function buildTree() {
         $model = $this->repository->getModel();
         $parents = $model::where('parent_id', '=', 0)->get('id', 'name');   
@@ -146,20 +151,24 @@ class BaseController extends Controller
                 $kids = $this->kidTree($parent);
             } 
             $item = [
-                'item' => $kids, 
+                'items' => $kids, 
                 'id' => $parent['id'], 
                 'text' => $parent['name'], 
                 'value' => $parent['id']
             ];
 
             $tree[] = $item;
-        }              
+        }                     
         
-        $result = ['data' => $tree, 'success' => true];
-        
-        return response()->json($result);        
+        return response()->json(['data' => $tree, 'success' => true]);        
     }
     
+    /**
+     * Get list of child elements for tree
+     * 
+     * @param object $parentItem
+     * @return array of kids
+     */    
     protected function kidTree($item)
     {
         $kids = [];  

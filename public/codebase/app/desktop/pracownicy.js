@@ -57,8 +57,10 @@ function pracownicyInit(cell) {
 		});                
 		    grupyTree.attachEvent("onSelect",function(id, mode){  
                     if (mode) {
+                        var grupy=grupyTree.getAllChecked();                                            
+                        grupy[grupy.length]=id;
 			pracownicyGrid.clearAll();
-			pracownicyGrid.zaladuj(id);
+			pracownicyGrid.zaladuj(grupy);
                         console.log(id);
 			return true;                        
                     }
@@ -109,7 +111,7 @@ function pracownicyInit(cell) {
 		    pracownicyGrid.zaladuj = function(i){
 			var ids = Array();
 			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;                        
-			var new_data = ajaxGet("api/workerslist/" + i, '', function(data){                                     
+			var new_data = ajaxGet("api/workerslist/" + ids, '', function(data){                                     
 				if (data && data.success){
                                     console.log(data.data);
                                     pracownicyGrid.parse((data.data), "js");
@@ -292,7 +294,8 @@ function pracownicyInit(cell) {
                     pracownicyGridToolBar.attachEvent("onClick", function(id) { 
                         switch (id){
                             case 'Add':{                            
-                                pracownicyForm.clear();                                     
+                                pracownicyForm.clear();  
+                                pracownicyForm.fillAvatar(0);
                                 pracownicyLayout.cells("c").expand();
                                 pracownicyForm.attachEvent("onButtonClick", function(name){
                                     switch (name){

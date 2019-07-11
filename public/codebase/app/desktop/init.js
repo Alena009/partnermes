@@ -48,7 +48,7 @@ function appInit() {
 			});
 		}
 	});
-	mainSidebar.cells("pracownicy").setActive(true);
+	mainSidebar.cells("zlecenia").setActive(true);
         return;
 	//window.dhx4.callEvent("onSelect","projects");
 	//debugger;

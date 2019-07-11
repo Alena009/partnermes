@@ -45,7 +45,7 @@ Route::group([
     Route::resource('/users', 'API\UserController');          
     
     //departaments
-    Route::get('/departamentstree', 'DepartamentController@departamentsTree');
+    Route::get('/departamentstree', 'DepartamentController@buildTree');
     Route::resource('/departaments', 'DepartamentController');           
     //workerslist
     Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
@@ -58,11 +58,14 @@ Route::group([
     //Route::get('/departaments/all/{locale}', 'DepartamentController@departaments');    
     //Route::get('/departaments/{id}/{locale}', 'DepartamentController@departaments');  
     
-//tasks groups
+    //tasks groups
     Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
     Route::resource('/taskgroups', 'TaskGroupController');
     //zlecenia
+    Route::get('/zlecenia/list/{grupy}', 'TaskController@listTasks');  
+    Route::get('/zlecenia/list', 'TaskController@listTasks');  
     Route::resource('/zlecenia', 'TaskController');  
+    
     //product types
     Route::resource('/prodtypes', 'ProductTypeController'); 
     //products

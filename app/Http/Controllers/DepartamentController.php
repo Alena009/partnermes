@@ -67,62 +67,6 @@ class DepartamentController extends BaseController
     }
     
     /**
-     * Get list of departaments for tree view on front-end
-     * 
-     * @return json 
-     */
-    public function departamentsTree()
-    {
-        $Departaments = $this->repository->getDepartamentsRootNodes();     
-        
-        foreach ($Departaments as $Departament) {             
-            $kids = array();
-            if(count($Departament->kids)) {                
-                $kids = $this->kidTree($Departament);
-            } 
-            $item = [
-                'items' => $kids, 
-                'id' => $Departament['id'], 
-                'text' => $Departament['name'], 
-                'value' => $Departament['id']
-            ];
-            $tree[] = $item;
-        }              
-        
-        $result = ['data' => $tree, 'success' => true];
-        
-        return response()->json($result);
-    }
-    
-    /**
-     * Get list of child departaments for departament-parent
-     * 
-     * @param object $Departament
-     * @return array of kids
-     */
-    public function kidTree($Departament)
-    {
-        $kids = [];  
-        $kid = [];
-        
-        foreach ($Departament->kids as $arr) {
-            $kid = [                     
-                    'id' => $arr['id'], 
-                    'text' => $arr['name'], 
-                    'value' => $arr['id']
-                ];                
-            //if kid has his own kids - use recursion
-            if (count($arr->kids)) {                   
-                $kid['items'] = $this->kidTree($arr);
-            }      
-            
-            $kids[] = $kid;
-        }
-        
-        return $kids;
-    }
-    
-    /**
      * Getting workers list for each departament by departamnets ids
      * 
      * @param array $departamentsIds
@@ -134,8 +78,10 @@ class DepartamentController extends BaseController
         
         if ($departamentsIds) {            
             $departamentsIds = explode(',', $departamentsIds);
+            $allDepartamentsIdsWithChildNodes = \App\Models\Departament::whereIn("id", $departamentsIds)
+                    ->orWhereIn("parent_id", $departamentsIds)->pluck('id');
             $workerDepartamentModel = new \App\Models\WorkerDepartament();            
-            $workersIds = $workerDepartamentModel->getWorkersIdsByDepartamentsIds($departamentsIds);            
+            $workersIds = $workerDepartamentModel->getWorkersIdsByDepartamentsIds($allDepartamentsIdsWithChildNodes);            
             $workers = $workerModel::find($workersIds);            
         } else {
            $workers =  $workerModel::all();

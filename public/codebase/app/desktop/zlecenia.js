@@ -12,18 +12,27 @@ function zleceniaInit(cell) {
 		zleceniaLayout.cells("a").setWidth(280);
 		//console.log(pracownicyLayout.listAutoSizes());
 		zleceniaLayout.setAutoSize("a");
-		var grupyTree = zleceniaLayout.cells("a").attachTree();
-		grupyTree.setImagePath("codebase/imgs/dhxtree_web/");		
+		//var grupyTree = zleceniaLayout.cells("a").attachTree();
+                var grupyTree = zleceniaLayout.cells("a").attachTreeView({
+			skin: "dhx_web",    // string, optional, treeview's skin
+			iconset: "font_awesome", // string, optional, sets the font-awesome icons
+			multiselect: false,           // boolean, optional, enables multiselect
+			checkboxes: true,           // boolean, optional, enables checkboxes
+			dnd: true,           // boolean, optional, enables drag-and-drop
+			context_menu: true,           // boolean, optional, enables context menu
+			//json: [{id: 1, name: "Produkcja", kids: []}, {id: 2, name: "jkjkjklj"}]
+		});                
+		//grupyTree.setImagePath("codebase/imgs/dhxtree_web/");		
 		//'codebase/imgs/dhxtree_web/'
 		//grupyTree.enableSmartXMLParsing(true);
 		grupyTree.enableDragAndDrop(true);
-		grupyTree.setDragBehavior('complex');
+		//grupyTree.setDragBehavior('complex');
 		//grupyTree.enableKeyboardNavigation(true);
-		grupyTree.enableItemEditor(true);
-		grupyTree.enableCheckBoxes(true);
+		//grupyTree.enableItemEditor(true);
+		//grupyTree.enableCheckBoxes(true);
 		//grupyTree.enableAutoSavingSelected(true);
-		grupyTree.enableTreeImages(true);
-		grupyTree.enableTreeLines(true);
+		//grupyTree.enableTreeImages(true);
+		//grupyTree.enableTreeLines(true);
 		
 		grupyTreeToolBar = zleceniaLayout.cells("a").attachToolbar({
 			iconset: "awesome",
@@ -76,24 +85,55 @@ function zleceniaInit(cell) {
 						}
 				};break;
 			}
-		});		
-		grupyTree.attachEvent("onCheck",function(id){
-			var ids = grupyTree.getAllChecked();
-			ids = ids.split(',');
-			ids[ids.length]=id;
-			zleceniaGrid.clearAll();
-			zleceniaGrid.zaladuj(ids.join('|'));
-			return true;
 		});
-		grupyTree.attachEvent("onSelect",function(){
-			var id=grupyTree.getSelectedItemId(), 
-				ids = grupyTree.getAllChecked();
-			ids = ids.split(',');
-			ids[ids.length]=id;
-			zleceniaGrid.clearAll();
-			zleceniaGrid.zaladuj(ids.join('|'));
+		grupyTree.attachEvent("onDrop",function(id){
+			console.log("grupyTree.onDrop", arguments);
+                        var parent_id = arguments[1];
+                        parent_id = (parent_id) ? parent_id+'' : 0;
+                        var data = {
+                            id: id,
+                            parent_id: parent_id
+                        };                        
+                        updateGroup(id, data);
 			return true;
-		});							
+		});                 
+		grupyTree.attachEvent("onSelect",function(id, mode){  
+                    if (mode) {
+                        var grupy=grupyTree.getAllChecked();
+                        grupy[grupy.length]=id;
+			zleceniaGrid.clearAll();
+			zleceniaGrid.zaladuj(grupy);
+                        console.log(id);
+			return true;                        
+                    }
+		});
+		grupyTree.attachEvent("onCheck",function(id){
+			var grupy=grupyTree.getAllChecked(); 
+			zleceniaGrid.clearAll();
+			zleceniaGrid.zaladuj(grupy);
+			return true;
+		});                
+//		grupyTree.attachEvent("onCheck",function(id){
+//			var ids = grupyTree.getAllChecked();
+//                        
+////			ids = ids.split(',');
+//			ids[ids.length]=id;
+////			zleceniaGrid.clearAll();
+////			zleceniaGrid.zaladuj(ids.join('|'));
+//			zleceniaGrid.clearAll();
+//			zleceniaGrid.zaladuj(ids);
+//			return true;
+//		});
+//		grupyTree.attachEvent("onSelect",function(){
+//			var id=grupyTree.getSelectedItemId(), 
+//				ids = grupyTree.getAllChecked();
+//			//ids = ids.split(',');
+//			ids[ids.length]=id;
+//			zleceniaGrid.clearAll();
+//                        zleceniaGrid.zaladuj(ids);
+//			//zleceniaGrid.zaladuj(ids.join('|'));
+//			return true;
+//		});							
 //		var dpGrupyTree = new dataProcessor("api/taskgroup");
 //		dpGrupyTree.init(grupyTree);
 //		dpGrupyTree.setTransactionM);
@@ -121,28 +161,26 @@ function zleceniaInit(cell) {
 //			alert(tag.error);
 //			return false;
 //		});
-		grupyTree.zaladuj = function(i=null){
-                    var ids = Array();
-                    ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-                    var new_data = ajaxGet("api/taskgroups/grupytree",i!=null ? 'parent='+ids.join('|'): '',function(data){
-                            if (data.data && data.success){
-                                    var d = data.data;
-                                    console.log(d);
-                                    grupyTree.parse({id:0, item:data.data}, "json");
-                                    //parse(d,'json');
-                            }
-                    });			
+		grupyTree.zaladuj = function(i=null){	
+                    var treeStruct = ajaxGet("api/taskgroups/grupytree", '', function(data) {                    
+                        if (data && data.success){      
+                            grupyTree.clearAll();                            
+                            grupyTree.loadStruct(data.data);                           
+                        }                    
+                    });
                 };
 
 		var zleceniaGrid = zleceniaLayout.cells("b").attachGrid({
 			image_path:'codebase/imgs/',
-			columns: [{
-				label: "Na zamowienie",
-				id:'for_order',
-				width: 60,
-				type: "ch",
-				sort: "str"				
-			},{
+			columns: [
+//                        {
+//				label: "Na zamowienie",
+//				id:'for_order',
+//				width: 60,
+//				type: "ch",
+//				sort: "str"                                
+//			},
+                        {
 				label: "Zamowienie",
 				id:'order_kod',
 				width: 200,
@@ -257,10 +295,12 @@ function zleceniaInit(cell) {
                 });
 		//combo.enableFilteringMode(true);
 		//combo.load("produkty/all");
-		zleceniaGrid.setDateFormat("%Y-%m-%d","%Y-%m-%d");
+		zleceniaGrid.setDateFormat("%Y-%m-%d","%Y-%m-%d");                
+                //zleceniaGrid.enableAutoWidth(true);
+                //zleceniaGrid.enableAutoHeight(true);
 		//zleceniaGrid.enablePaging(true,15,5,document.body,true,"recInfoArea");
 		//console.log(zleceniaGrid.getColumnCombo(5));
-		//zleceniaGrid.setColTypes('edtxt','combo','ro','edtxt','edn','edtxt');
+		//zleceniaGrid.setColTypes('ro','combo','ro','edtxt','edn','edtxt');
 		//zleceniaGrid.setSubTree(treeGrupy, 2);
 		zleceniaGrid.attachHeader("#text_filter,#select_filter,#text_filter,#text_search,#select_filter,#numeric_filter,#text_search,#text_search,#text_search,#text_search,#text_search,#text_search");
 		//zleceniaGrid.setColumnIds("zlecenie,produkt,produktKod,kod,zamkniete,szt,data_dodania,data_zamkniecia,data_wysylki,plan_start,plan_stop,opis");
@@ -270,20 +310,20 @@ function zleceniaInit(cell) {
 		zleceniaGrid.enableEditEvents(false,true,true);
 		//grupyTree = createGrupyTree(zleceniaLayout.cells("a"),zleceniaGrid);
 
-		zleceniaGrid.zaladuj = function(){
-//			var ids = Array();
-//			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-			var new_data = ajaxGet("api/zlecenia", '',function(data){
-				if (data.data && data.success){
-                                    console.log(data.data);
-                                        zleceniaGrid.parse(data.data, "js");
-                                    }
-                                });			
+		zleceniaGrid.zaladuj = function(i){
+                    var ids = Array();
+                    ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
+                    var new_data = ajaxGet("api/zlecenia/list/" + ids, "", function(data){
+                            if (data.data && data.success){
+                                console.log(data.data);
+                                    zleceniaGrid.parse(data.data, "js");
+                                }
+                            });			
 		};
                 
               
 
-//		var dpZleceniaGrid = new dataProcessor("zlecenia/zlecenie/",'json');
+//		var dpZleceniaGrid = new dataProcessor("api/zlecenia",'json');
 //		dpZleceniaGrid.init(zleceniaGrid);
 //		dpZleceniaGrid.enableDataNames(true);
 //		dpZleceniaGrid.setTransactionMode("REST");
@@ -492,9 +532,10 @@ function zleceniaInit(cell) {
                                                         data.task_group_id = taskGroup;
                                                         data.name = data.name_task;
                                                         data.kod = data.kod_task;
-                                                        data.for_order = myForm.getCombo("for_order").getSelectedValue();
+                                                        data.for_order = myForm.getCombo("for_order").getSelectedValue();                                                        
                                                         if (!+data.for_order) {
                                                             data.order_position_id = 0;
+                                                            //data.product_id = myForm.getCombo("product").getSelectedValue();                                                        
                                                         };
                                                         
                                                         ajaxPost("api/zlecenia", data, function(data){                                                            
@@ -644,6 +685,14 @@ function zleceniaInit(cell) {
 	}
 	grupyTree.zaladuj();
 	zleceniaGrid.zaladuj(0);
+}
+
+function updateGroup(id, data) {
+    console.log(data);
+    ajaxGet("api/taskgroups/" + id + "/edit?", data, function(data){                                                            
+    //grupyTree.addItem(data.id, data.name, data.parent_id); // id, text, pId
+        console.log(data);
+    });    
 }
 
 var result;

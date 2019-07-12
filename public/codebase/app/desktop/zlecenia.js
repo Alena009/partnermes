@@ -19,9 +19,8 @@ function zleceniaInit(cell) {
 			multiselect: false,           // boolean, optional, enables multiselect
 			checkboxes: true,           // boolean, optional, enables checkboxes
 			dnd: true,           // boolean, optional, enables drag-and-drop
-			context_menu: true,           // boolean, optional, enables context menu
-			//json: [{id: 1, name: "Produkcja", kids: []}, {id: 2, name: "jkjkjklj"}]
-		});                
+			context_menu: true           // boolean, optional, enables context menu			
+		});                        
 		//grupyTree.setImagePath("codebase/imgs/dhxtree_web/");		
 		//'codebase/imgs/dhxtree_web/'
 		//grupyTree.enableSmartXMLParsing(true);
@@ -47,12 +46,31 @@ function zleceniaInit(cell) {
 		grupyTreeToolBar.attachEvent("onClick", function(btn) {
 			switch (btn){
 				case 'Add':{
-					var id = grupyTree.getSelectedItemId(),
-			                parent = grupyTree.getParentId(id) || 0;
-						
-					grupyTree.insertNewItem(id || parent,'_new',"nowa grupa");
-					grupyTree.selectItem('_new');
-					grupyTree.editItem('_new');
+					//var id = grupyTree.getSelectedId(),
+			                //parent = grupyTree.getParentId(id) || 0;          
+					
+                                        var grupyForm = createWindowWithForm(grupyFormAddData, 300, 350);
+                                        var dhxCombo = grupyForm.getCombo("parent_id");                             
+                                        ajaxGet("api/taskgroups", '', function(data) {                    
+                                                dhxCombo.addOption(data.data);
+                                        });                                        
+                                        grupyForm.attachEvent("onButtonClick", function(name){
+                                            switch (name){
+                                                case 'save':{                                                           
+                                                        ajaxPost("api/taskgroups", grupyForm.getFormData(), function(data){                                                            
+                                                            grupyTree.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
+                                                            grupyTree.openItem(data.data.parent_id);
+                                                        });
+                                                };break;
+                                                case 'cancel':{
+                                                    grupyForm.clear();
+                                                };break;
+                                            }
+                                        });
+					//grupyForm.bind(tree);						
+//					grupyTree.addItem('_new',"nowa grupa", id || parent);
+//					grupyTree.selectItem('_new');
+					//grupyTree.editItem('_new');
 //                                        grupyTree.attachEvent("onEdit", function(state=2, id, tree, value){
 //                                            var s;
 //                                            if (state == 2){
@@ -274,6 +292,7 @@ function zleceniaInit(cell) {
 			}],
 			multiselect: true
 		});
+                zleceniaGrid.setColumnColor("white,white,white,white,white,white,#d5f1ff");
                 
                 var ordersCombo = zleceniaGrid.getCombo(1);
 		var productsCombo = zleceniaGrid.getCombo(2);
@@ -341,6 +360,8 @@ function zleceniaInit(cell) {
 				{type: "spacer"},
 				{id: "Find", type: "button", img: "fa fa-search"},
 				{type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
+                                {type: "separator", id: "sep1"},
+                                {id: "Redo", type: "button", img: "fas fa-retweet "},
 				{type: "separator", id: "sep2"},
 				{id: "Add", type: "button", img: "fa fa-plus-square "},
 				{id: "Edit", type: "button", img: "fa fa-edit"},
@@ -690,10 +711,37 @@ function zleceniaInit(cell) {
 function updateGroup(id, data) {
     console.log(data);
     ajaxGet("api/taskgroups/" + id + "/edit?", data, function(data){                                                            
-    //grupyTree.addItem(data.id, data.name, data.parent_id); // id, text, pId
         console.log(data);
     });    
 }
+
+var grupyFormAddData = [
+        {type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
+                {type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),        options: [{text: "None", value: "0"}], inputWidth: 150},                                
+                {type:"input",  name:"name",    	label:_("Nazwa grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
+                {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+        ]}
+];
+
+function createWindowWithForm(formStruct, height, width){
+    var dhxWins = new dhtmlXWindows();
+    w1 = dhxWins.createWindow({
+            id:"w1",
+            left:20,
+            top:30,
+            width: width,
+            height: height,
+            center:true,
+            caption: _("Dodaj lub zmien grupe"),
+            header: true,
+            onClose:function(){
+
+            }
+    });
+    //initializing form 
+    return dhxWins.window("w1").attachForm(formStruct, true);         
+} 
 
 var result;
 

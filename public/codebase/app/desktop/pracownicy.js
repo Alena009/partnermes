@@ -22,7 +22,7 @@ function pracownicyInit(cell) {
 			context_menu: true,           // boolean, optional, enables context menu
 			//json: [{id: 1, name: "Produkcja", kids: []}, {id: 2, name: "jkjkjklj"}]
 		});                  
-		    grupyTree.build = function(){
+                grupyTree.build = function(){
                     var treeStruct = ajaxGet("api/departamentstree", '', function(data) {                    
                         if (data && data.success){      
                             grupyTree.clearAll();                            
@@ -30,7 +30,7 @@ function pracownicyInit(cell) {
                         }                    
                     });                       
                 };                
-                    grupyTree.build();
+                grupyTree.build();
                 
 		    grupyTree.attachEvent("onBeforeDrag",function(id){
 			console.log("grupyTree.onBeforeDrag", arguments);
@@ -162,6 +162,7 @@ function pracownicyInit(cell) {
                                                 case 'save':{                                                           
                                                         ajaxPost("api/departaments", grupyForm.getFormData(), function(data){                                                            
                                                             grupyTree.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
+                                                            grupyTree.openItem(data.data.parent_id);
                                                         });
                                                 };break;
                                                 case 'cancel':{
@@ -235,15 +236,15 @@ function pracownicyInit(cell) {
 			}
 		});
                 
-		grupyFormAddData = [
+		var grupyFormAddData = [
 			{type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
-				{type:"combo",  name:"parent_id",       label:"Grupa nadrzędna",        options: [{text: "None", value: "0"}], inputWidth: 150},                                
-				{type:"input",  name:"name",    	label:"Nazwa grupy",     	offsetTop:13, 	labelWidth:80},                                                                				
-				{type:"button", name:"save",    	value:"Zapisz",   		offsetTop:18},
-				{type:"button", name:"cancel",     	value:"Anuluj",   		offsetTop:18}
+				{type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),        options: [{text: "None", value: "0"}], inputWidth: 150},                                
+				{type:"input",  name:"name",    	label:_("Nazwa grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
+				{type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+				{type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
 			]}
 		];
-		grupyFormEditData = [
+		var grupyFormEditData = [
 			{type:"fieldset",  offsetTop:0, label:_("Grupa"), width:253, list:[                                			
 				{type:"input",  name:"name",    	label:"Nazwa grupy",     	offsetTop:13, 	labelWidth:80},                                                                				
 				{type:"button", name:"save",    	value:"Zapisz",   		offsetTop:18},
@@ -295,6 +296,7 @@ function pracownicyInit(cell) {
                         switch (id){
                             case 'Add':{                            
                                 pracownicyForm.clear();  
+                                pracownicyForm.setItemFocus("firstname");
                                 pracownicyForm.fillAvatar(0);
                                 pracownicyLayout.cells("c").expand();
                                 pracownicyForm.attachEvent("onButtonClick", function(name){
@@ -310,7 +312,8 @@ function pracownicyInit(cell) {
                                 }); 
                             };break;
                             case 'Edit':{
-                                pracownicyLayout.cells("c").expand();                                 
+                                pracownicyLayout.cells("c").expand();   
+                                pracownicyForm.setItemFocus("firstname");
                                 pracownicyForm.attachEvent("onButtonClick", function(name){
                                     switch (name){
                                         case 'save':{ 

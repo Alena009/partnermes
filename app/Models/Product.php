@@ -17,4 +17,9 @@ class Product extends BaseModel
     
     /* fields for translating */    
     public $translatedAttributes = ['name', 'description', 'pack'];
+    
+    public function group()
+    {
+        return $this->belongsTo('App\Models\ProductGroup', 'product_group_id', 'id');
+    }
 }

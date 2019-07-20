@@ -19,13 +19,18 @@ class ClientController extends BaseController
     /**
      * get clients list with translations
      */
-    public function clients($locale = 'pl')
+    public function index($locale = 'pl')
     {
         app()->setLocale($locale);
 
-        $clients = \App\Models\Clients::all();
+        $clients = \App\Models\Client::all();
         
-        return response()->json($clients);
+        foreach ($clients as $client) {
+            $client["value"] = $client->id;
+            $client["text"]  = $client->name;            
+        }
+        
+        return response()->json(["success" => true, "data" => $clients]);
     }
     
     /**

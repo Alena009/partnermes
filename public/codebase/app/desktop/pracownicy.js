@@ -19,8 +19,7 @@ function pracownicyInit(cell) {
 			multiselect: false,           // boolean, optional, enables multiselect
 			checkboxes: true,           // boolean, optional, enables checkboxes
 			dnd: true,           // boolean, optional, enables drag-and-drop
-			context_menu: true,           // boolean, optional, enables context menu
-			//json: [{id: 1, name: "Produkcja", kids: []}, {id: 2, name: "jkjkjklj"}]
+			context_menu: true           // boolean, optional, enables context menu			
 		});                  
                 grupyTree.build = function(){
                     var treeStruct = ajaxGet("api/departamentstree", '', function(data) {                    
@@ -238,7 +237,7 @@ function pracownicyInit(cell) {
                 
 		var grupyFormAddData = [
 			{type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
-				{type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),        options: [{text: "None", value: "0"}], inputWidth: 150},                                
+				{type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),     options: [{text: "None", value: "0"}], inputWidth: 150},                                
 				{type:"input",  name:"name",    	label:_("Nazwa grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
 				{type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
 				{type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}

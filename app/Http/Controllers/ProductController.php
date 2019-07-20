@@ -30,6 +30,8 @@ class ProductController extends BaseController
         foreach ($products as $product) {
             $product['product_name'] = $product['name'];
             $product['product_kod'] = $product['kod'];
+            $product['text'] = $product['name'];
+            $product['value'] = $product['id'];
         }
         
         if ($products) {
@@ -68,5 +70,23 @@ class ProductController extends BaseController
         $order->save();
 
         return true;
+    }   
+    
+    /**
+     * Get list products by groups
+     */
+    public function listProducts($groups = 0)
+    {                  
+        if ($groups) {  
+            $groupsIds = explode(',', $groups);
+            $allgroupsIdsWithChildNodes = \App\Models\ProductGroup::whereIn("id", $groupsIds)
+                    ->orWhereIn("parent_id", $groupsIds)->pluck('id');
+            $products = \App\Models\Product::whereIn("task_group_id", $allgroupsIdsWithChildNodes)->get();                     
+        } else {
+            $products = $this->index();        
+        }
+        
+        return response()->json(['success' => true, 'data' => $products]);       
+      
     }    
 }

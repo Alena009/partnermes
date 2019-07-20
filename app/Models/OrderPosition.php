@@ -9,7 +9,7 @@ class OrderPosition extends BaseModel
     protected $table = "orders_positions";
     
     protected $fillable = [
-        'kod', 'order_id', 'amount', 'date_delivery'
+        'kod', 'order_id', 'amount', 'date_delivery', 'product_id'
     ];
     
     public function product()

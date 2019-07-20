@@ -20,18 +20,37 @@ class OrderController extends BaseController
     /**
      * Get orders list with translations
      */
-    public function index($locale = 'pl')
+//    public function index($locale = 'pl')
+//    {
+//        $orders = [];
+//        app()->setLocale($locale);
+//
+//        $orders = \App\Models\Order::all();       
+//        
+//        foreach ($orders as $order) {
+//            $order['client_name'] = $order->client->name;
+//            $order['text']        = $order->kod;
+//            $order['value']       = $order->id;             
+//        }
+//        
+//        return response()->json(['data' => $orders, 'success' => true]);        
+//    }
+    
+    public function ordersList($amount = 0, $locale = 'pl') 
     {
         $orders = [];
         app()->setLocale($locale);
-
-        $orders = \App\Models\Order::all();       
+        
+        if ($amount) {
+            $orders = \App\Models\Order::orderBy('id', 'desc')->take($amount)->get();;       
+        } else {
+            $orders = \App\Models\Order::orderBy('id', 'desc')->all();       
+        }      
         
         foreach ($orders as $order) {
-            $order['client'] = $order->client;
-            $order['text']   = $order->kod;
-            $order['value']  = $order->id; 
-            //$order['status'] = $order->status;
+            $order['client_name'] = $order->client->name;
+            $order['text']        = $order->kod;
+            $order['value']       = $order->id;             
         }
         
         return response()->json(['data' => $orders, 'success' => true]);        
@@ -40,25 +59,27 @@ class OrderController extends BaseController
     /**
      * create new departament with translations
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
+        $locale = app()->getLocale();
+        
         $order = new \App\Models\Order();
-        $order->kod = $request['kod'];        
-        $order->name = $request['name'];        
+        $order->kod = $request['kod'];   
         $order->client_id = $request['client_id']; 
         $order->date_start = $request['date_start'];
         $order->date_end = $request['date_end'];
-        $order->description = $request['description'];
+        
         $order->save();
 
-        foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-            $order->translateOrNew($locale)->name = "Title {$locale}";            
-            $order->translateOrNew($locale)->description = "Title {$locale}";            
-        }
+        //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
+            $order->translateOrNew($locale)->name        = $request['name'];            
+            $order->translateOrNew($locale)->description = $request['description'];            
+        //}
+            $order->save();
+            
+        //TO-DO: add record to the order history here
 
-        $order->save();
-
-        return true;
+        return response()->json(['data' => $order, 'success' => true]);        
     } 
     
     /**

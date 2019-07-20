@@ -20,5 +20,10 @@ class ProductGroup extends BaseModel
     public function kids() 
     {
         return $this->hasMany($this, 'parent_id', 'id') ;
-    }     
+    }    
+    
+    public function products()
+    {
+        return $this->hasMany('App\Models\Product', 'product_group_id', 'id');
+    }
 }

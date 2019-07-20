@@ -11,7 +11,7 @@ class Order extends BaseModel
     protected $table = "orders";
     
     protected $fillable = [
-        'kod', 'client_id', 'date_start', 'date_end'
+        'kod', 'client_id', 'date_start', 'date_end', 'name', 'description'
     ];
     
     /* fields for translating */    
@@ -19,7 +19,7 @@ class Order extends BaseModel
     
     public function client() 
     {
-        return $this->belongsTo('App\Models\Client');
+        return $this->belongsTo('App\Models\Client', 'client_id', 'id');
     }
     
     public function history()
@@ -30,6 +30,5 @@ class Order extends BaseModel
     public function positions()
     {
         return $this->hasMany('App\Models\OrderPosition');
-    }
-    
+    }    
 }

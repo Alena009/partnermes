@@ -53,11 +53,7 @@ Route::group([
 
     //worker-departament    
     Route::get('/workerdep/del', 'WorkerDepartamentController@deleteRel');
-    Route::resource('/workerdep', 'WorkerDepartamentController');    
-    
-    //Route::get('/departaments/all/{locale}', 'DepartamentController@departaments');    
-    //Route::get('/departaments/{id}/{locale}', 'DepartamentController@departaments');  
-    
+    Route::resource('/workerdep', 'WorkerDepartamentController');       
     //tasks groups
     Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
     Route::resource('/taskgroups', 'TaskGroupController');
@@ -69,6 +65,7 @@ Route::group([
     //product types
     Route::resource('/prodtypes', 'ProductTypeController'); 
     //products
+    Route::get('/products/list/{grupy}', 'ProductController@listProducts');  
     Route::resource('/products', 'ProductController'); 
     //operations
     Route::resource('/operations', 'OperationController'); 
@@ -78,10 +75,16 @@ Route::group([
     //orders
     Route::get('/orders/history/{orderId}', 'OrderController@history');
     Route::get('/orders/positions/{orderId}', 'OrderController@positions');
+    Route::get('/orders/list/{amount}', 'OrderController@ordersList');
     Route::resource('/orders', 'OrderController');
     //orders positions
     //Route::get('/positions/{orderId}', 'OrderController@positions');
     Route::resource('/positions', 'OrderPositionController');  
+    //warehouse
+    Route::get('/warehouse/list/{grupy}', 'WarehouseController@listProducts');  
+    Route::resource('/warehouse', 'WarehouseController');  
+    //clients
+    Route::resource('/clients', 'ClientController');  
 });
 
 Route::post('login', 'API\UserController@login');

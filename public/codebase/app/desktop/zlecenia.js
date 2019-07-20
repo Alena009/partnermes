@@ -315,8 +315,8 @@ function zleceniaInit(cell) {
 		//combo.enableFilteringMode(true);
 		//combo.load("produkty/all");
 		zleceniaGrid.setDateFormat("%Y-%m-%d","%Y-%m-%d");                
-                //zleceniaGrid.enableAutoWidth(true);
-                //zleceniaGrid.enableAutoHeight(true);
+                zleceniaGrid.enableAutoWidth(true);
+                zleceniaGrid.enableAutoHeight(true);
 		//zleceniaGrid.enablePaging(true,15,5,document.body,true,"recInfoArea");
 		//console.log(zleceniaGrid.getColumnCombo(5));
 		//zleceniaGrid.setColTypes('ro','combo','ro','edtxt','edn','edtxt');
@@ -378,20 +378,12 @@ function zleceniaInit(cell) {
                                             newZlecenieLayout.cells("a").hideHeader();
                                             newZlecenieLayout.cells("b").hideHeader();                                        
                                             newZlecenieLayout.cells("c").hideHeader();                                             
-                                            newZlecenieLayout.setAutoSize("a;b;c");
-//                                        var grupy = newZlecenieLayout.cells("a").attachTree();
-//                                            grupy.setImagePath("codebase/imgs/dhxtree_web/");		
-//                                            grupy.enableCheckBoxes(true);
-//                                            grupy.enableTreeImages(true);
-//                                            grupy.enableTreeLines(true);                                   
-// 
-//                                        ajaxGet("api/taskgroups/grupytree",'',function(data){
-//                                                if (data.data && data.success){
-//                                                        grupy.parse({id:0, item:data.data}, "json");
-//                                                        //parse(d,'json');
-//                                            }
-//                                        });	
-                                        
+                                            newZlecenieLayout.setAutoSize("a;b;c"); 
+                                        var statusBarForm = newZlecenieLayout.cells("b").attachStatusBar({
+                                            // status bar config here, optional
+                                            text: _("Mode: Adding new task"),   // status bar text
+                                            height: 35                  // custom height
+                                        });
                                         var myForm = newZlecenieLayout.cells("a").attachForm([
                                             {type: "combo", name: "for_order",    label: _("Zlecenie na zamowienie"), labelWidth: 150, options: [
                                                 {text: _("Tak"), value: "1"},
@@ -522,8 +514,7 @@ function zleceniaInit(cell) {
                                             };
                                         };
                                         var zlecenieForm = newZlecenieLayout.cells("b").attachForm(taskForm);
-                                        zlecenieForm.bind(ordersPositionsGrid); 
-                                        //var productCombo = zlecenieForm.getcombo("order_kod");
+                                        zlecenieForm.bind(ordersPositionsGrid);                                         
                                         myForm.attachEvent("onChange", function(name, value, state){
                                             if (name == 'for_order') {                                                
                                                 ordersPositionsGrid.fill(+value);
@@ -559,8 +550,12 @@ function zleceniaInit(cell) {
                                                             //data.product_id = myForm.getCombo("product").getSelectedValue();                                                        
                                                         };
                                                         
-                                                        ajaxPost("api/zlecenia", data, function(data){                                                            
-                                                            zleceniaGrid.zaladuj();
+                                                        ajaxPost("api/zlecenia", data, function(data){ 
+                                                            if (data.success) {
+                                                                // set status bar text
+                                                                statusBarForm.setText(_("Result: New task has added"));
+                                                                zleceniaGrid.zaladuj();
+                                                            }
                                                         });
                                                     } else {
                                                         dhtmlx.alert({
@@ -576,7 +571,11 @@ function zleceniaInit(cell) {
                                                 };break;
                                             }
                                         });                              
-                                        
+                                        zlecenieForm.attachEvent("onChange", function (name, value, state){
+                                            if (name == 'name_task') {
+                                                statusBarForm.setText(_("Mode: Adding new task"));
+                                            }
+                                        });
                                         
 //                                        var zlecenieForm = createWindowWithForm(taskForm, 350, 350);
 //                                        var ordersCombo = zlecenieForm.getCombo("orders");
@@ -633,8 +632,7 @@ function zleceniaInit(cell) {
 			}
 		});		
 		zleceniaGrid.attachEvent("onSelectStateChanged", function(indexes,values){
-			console.log('onSelectStateChanged',arguments);
-			//console.log(zleceniaGrid.getSelectedCellIndex()+'x'+zleceniaGrid.getSelectedRowId());
+			console.log('onSelectStateChanged',arguments);			
 			return true;
 		});
                 
@@ -676,33 +674,8 @@ function zleceniaInit(cell) {
                             onClose:function(){
 
                             }
-                    });
-                    //initializing form 
-                    //return dhxWins.window("w1").attachForm(formStruct, true);         
-                } 
-                
-//                function regexpSearch(input, val) {
-//                    //var input = this.value; // gets the text of the filter input
-//                    input = input.trim().toLowerCase().split(' ');
-//                    return function(value, id){
-//                        //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
-//                            //var val = ordersPositionsGrid.cells(id, 0).getValue(); // gets the value of the current                                                    
-//                            //making pattern string for regexp
-//                            var searchStr = '';
-//                            for (var i = 0; i < input.length; i++) {
-//                                searchStr = searchStr + input[i] + "(.+)";                                                                
-//                                //var searchStr = /^zz(.+)np(.+)/ig;
-//                            }
-//                            var regExp = new RegExp("^" + searchStr, "ig");                                                          
-//                            if (val.toLowerCase().match(regExp)){                                                             
-//                                return true;
-//                            }                                                    
-//                        //}
-//                        return false;
-//                    };
-//                };
-                
-
+                    });                    
+                }
 	}
 	grupyTree.zaladuj();
 	zleceniaGrid.zaladuj(0);

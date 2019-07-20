@@ -16,7 +16,7 @@ function projectsInit(cell) {
 		projectsLayout.cells("c").hideHeader();
 		projectsLayout.cells("b").setWidth(330);
 		projectsLayout.cells("c").setHeight(350);
-		projectsLayout.cells("b").fixSize(true, true);
+		//projectsLayout.cells("b").fixSize(true, true);
 		projectsLayout.setAutoSize("a;c", "a;b");
 		
 		// attach grid
@@ -47,6 +47,14 @@ function projectsInit(cell) {
                             align: "left"
                         },
                         {
+                            label: _("Klient"),
+                            id: "client_name",
+                            width: 100, 
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },                        
+                        {
                             label: _("Date start"),
                             id: "date_start",
                             width: 100, 
@@ -69,17 +77,17 @@ function projectsInit(cell) {
 //		});
                 //projectsGrid.load("api/orders");
                 
-                projectsGrid.fill = function(){
-		    ajaxGet("api/orders", '', function(data){
+                projectsGrid.fill = function(amount){
+		    ajaxGet("api/orders/list/" + amount, '', function(data){
 		        if (data.data && data.success){
-			    var d = data.data;
-                            console.log(d);
-                            projectsGrid.parse(d, "js");
+                            projectsGrid.clearAll();
+                            projectsGrid.parse(data.data, "js");
                         }
                     });			
 		};
-                projectsGrid.fill();
-                
+                projectsGrid.fill(10);
+                projectsGrid.enableStableSorting(true);
+                projectsGrid.enableTooltips("false,true,true,true,true");                
                 
 		projectsGrid.attachEvent("onRowSelect", function() {
                     var selectedId = projectsGrid.getSelectedRowId();
@@ -89,31 +97,206 @@ function projectsInit(cell) {
 //		projectsGrid.attachEvent("onRowInserted", function(r, index){
 //		    projectsGrid.setCellTextStyle(projectsGrid.getRowId(index), projectsGrid.getColIndexById("project"), "font-weight:bold;");
 //		});
-		
-		// attach form
-		var projectsForm = projectsLayout.cells("b").attachForm([
+
+		var newProjectFormStruct = [
 			{type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
 			{type: "container", name: "photo", label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65},
-			{type: "input", name: "date_end",     label: "Due date", offsetTop: 20},
-			{type: "input", name: "name", label: "Project"},
-			{type: "input", name: "status",  label: "Status"},
-			{type: "input", name: "assign",  label: "Assigned to"},
-			{type: "input", name: "info",    label: "Additional info"}
-		]);
+			//{type: "input", name: "date_end",     label: "Due date", offsetTop: 20},
+	                {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
+                        {type: "input", name: "kod",         label: _("Kod zamowienia")},
+                        {type: "input", name: "name",        label: _("Zamowienie"),
+                           tooltip: _("Imie zamowienia"), required: true, info: true, 
+                           note: {text: _("Dodaj imie zamowienia. Jest obowiazkowe.")}},
+                        {type: "input", name: "description", label: _("Opis"),
+                           rows: 3,
+                           note: {text: _("Dodaj opis zamowienia. Nie jest obowiazkowe.")}},
+			{type: "calendar", name: "date_start",  label: _("Data poczatku"), 
+                            required: true, dateFormat: "%Y-%m-%d",
+                            note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},
+			{type: "calendar", name: "date_end",    label: _("Data zamkniecza"), 
+                            required: true, dateFormat: "%Y-%m-%d",
+                            note: {text: _("Data waznosci. Jest obowiazkowe.")}},
+                        {type: "block", blockOffset: 0, position: "label-center", list: [
+			    {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
+			    {type: "newcolumn"},
+			    {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
+	                ]}	        
+		];
+                var orderPositionFormStruct = [
+			{type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		
+                        {type: "input", name: "kod",        required: true, label: _("Kod pozycji")},
+	                {type: "combo", name: "product_id", required: true, label: _("Produkt"), options: []},		                        
+                        {type: "input", name: "amount",     label: _("Ilosc"),
+                           tooltip: _("Imie zamowienia"),   required: true,
+                        },
+			{type: "calendar", name: "date_delivery",  label: _("Data dostawy"), 
+                            required: true, dateFormat: "%Y-%m-%d",
+                            note: {text: _("Data kiedy produkt musi byc gotowy.")}},
+                        {type: "block", blockOffset: 0, position: "label-center", list: [
+			    {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
+			    {type: "newcolumn"},
+			    {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
+	                ]}                    
+                ];
+                var projectsForm = projectsLayout.cells("b").attachForm(newProjectFormStruct);
 		projectsForm.getContainer("photo").innerHTML = "<img src='imgs/projects/project.png' border='0' class='form_photo'>";
 		projectsForm.setSizes = projectsForm.centerForm;
 		projectsForm.setSizes();
+                var clientsCombo = projectsForm.getCombo("client_id");
+                ajaxGet("api/clients", "", function(data){
+                    clientsCombo.addOption(data.data);                    
+                });                
 		projectsForm.bind(projectsGrid); 
+                projectsForm.attachEvent("onButtonClick", function(name){
+                    switch (name){
+                        case 'save':{                                                                  
+                            var data = projectsForm.getFormData();
+                            var order_id = projectsGrid.getSelectedRowId(); 
+                            var ds   = projectsForm.getCalendar("date_start");                                        
+                            var de   = projectsForm.getCalendar("date_end");                                        
+                            data.date_start = ds.getDate(true);
+                            data.date_end   = de.getDate(true);
+                            ajaxGet("api/orders/" + order_id + "/edit", data, function(data){
+                                console.log(data);
+                            });                
+
+                        };break;
+                        case 'cancel':{
+
+                        };break;
+                    }
+                });                 
+                
+               
+                
+		var projectsGridToolBar = projectsLayout.cells("a").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Zamowienia")},                                
+                                {type: "spacer"},
+                                {type: "buttonSelect", id: "show_records", text: _("Ilosc wyswietlonych wpisow:"), options:[
+                                            {id: "10",  type: "obj", text: _("Ostatnie 10")},
+                                            {id: "20",  type: "obj", text: _("Ostatnie 20")},
+                                            {id: "50",  type: "obj", text: _("Ostatnie 50")},
+                                            {id: "all", type: "obj", text: _("Wszystkie")}		
+                                    ]},
+                                {type: "text", id: "amount_show", text: _("10")},				
+                                {type: "separator", id: "sep"},
+				{type: "text", id: "find", text: _("Find:")},				
+				{type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
+				{type: "separator", id: "sep2"},                                
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"}
+			]
+		});  
+                //projectsGridToolBar.setListOptionSelected("show_records", "last_ten");
+                projectsGridToolBar.attachEvent("onClick", function(id){                    
+                    if (id == "show_records") { 
+                        var amountRecords = arguments[0];
+                        if (amountRecords == "show_records") {amountRecords = "all"};
+                        projectsGridToolBar.setItemText("amount_show", amountRecords); 
+                        if (amountRecords == "all") {amountRecords = 0};
+                        projectsGrid.fill(amountRecords);
+                    }
+                });
+                projectsGridToolBar.attachEvent("onClick", function(id) { 
+                    switch (id){
+                        case 'Add':{                                                        
+                            var clientsCombo = projectsForm.getCombo("client_id");
+                            ajaxGet("api/clients", "", function(data){
+                                clientsCombo.addOption(data.data);
+                            });
+                            projectsForm.clear();  
+                            projectsForm.setItemFocus("client_id");
+//                                pracownicyForm.fillAvatar(0);                             
+                            projectsForm.attachEvent("onButtonClick", function(name){
+                                switch (name){
+                                    case 'save':{                                                           
+                                        var data = projectsForm.getFormData();
+                                        var ds   = projectsForm.getCalendar("date_start");                                        
+                                        var de   = projectsForm.getCalendar("date_end");                                        
+                                        data.date_start = ds.getDate(true);
+                                        data.date_end   = de.getDate(true);
+                                        ajaxPost("api/orders", data, function(data){
+                                            var orderData = data.data;
+                                            projectsGrid.fill(10);
+                                            projectsGrid.selectRowById(orderData.id);
+                                        });                
+                                        
+                                    };break;
+                                    case 'cancel':{
+                                        
+                                    };break;
+                                }
+                            }); 
+                        };break;
+                        case 'Edit':{                            
+                            projectsForm.setItemFocus("client_id");                           
+                        };break;                          
+                    }
+                });
                 
 		// attach tabbar
-		projectsTabbar = projectsLayout.cells("c").attachTabbar({
+		var projectsTabbar = projectsLayout.cells("c").attachTabbar({
 			arrows_mode: "auto",
 			tabs: [
-				{id: "positions", text: _("Positions"), selected: 1},
-                                {id: "history", text: _("History")},
-                                {id: "client", text: _("Client")}
+				{id: "positions", text: _("Pozycji"), selected: 1},
+                                {id: "history", text: _("Historija")}                                
 			]
 		});
+		positionsGridMenu = projectsTabbar.tabs("positions").attachMenu({
+			iconset: "awesome",
+			items: [
+                            {id:"Add", text: _("Dodaj")},
+                            {id:"Edit", text: _("Edytuj")},
+                            {id:"Del", text: _("Usun")}
+			]
+		});  
+                positionsGridMenu.attachEvent("onClick", function(id) { 
+                    switch (id){
+                        case 'Add':{                            
+                            var newOrderPositionForm = createWindowWithForm(orderPositionFormStruct, _("Dodaj pozycje"), 400, 400);                            
+                            var productsCombo = newOrderPositionForm.getCombo("product_id");
+                            //productsCombo.enableFilteringMode(true);
+                            ajaxGet("api/products", '', function(data) {
+                                if (data.success && data.data) {
+                                    productsCombo.addOption(data.data);                                    
+                                }
+                            });
+                            productsCombo.attachEvent("onKeyPressed", function(keyCode){
+                                var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
+                                var mask = "";
+                                for (var i = 0; i < input.length; i++) {
+                                    mask = mask + input[i] + "(.+)";                                                                                                                        
+                                }   
+                                console.log(mask);
+                                productsCombo.filter(function(opt){
+                                    return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
+                                }, false);                           
+                            });
+                            newOrderPositionForm.attachEvent("onButtonClick", function(name){
+                                switch (name){
+                                    case 'save':{                                                           
+                                        var data = newOrderPositionForm.getFormData();
+                                        var dd = newOrderPositionForm.getCalendar("date_delivery");
+                                        var order_id = projectsGrid.getSelectedRowId();
+                                        data.date_delivery = dd.getDate(true); 
+                                        data.order_id = order_id;
+                                        ajaxPost("api/positions", data, function(data){
+                                            positionsGrid.fill(order_id);
+                                        });                
+                                        
+                                    };break;
+                                    case 'cancel':{
+                                        
+                                    };break;
+                                }
+                            });
+                        };break;
+                    }
+                });
+                        
                 var positionsGrid = projectsTabbar.tabs("positions").attachGrid({
                     image_path:'codebase/imgs/',
 	            columns: [{
@@ -142,7 +325,12 @@ function projectsInit(cell) {
                         }                        
                     ],
 			multiselect: true                    
-                });                
+                });                                                 
+                positionsGrid.attachHeader("#text_filter,#select_filter,#text_search");		
+		positionsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]);
+		positionsGrid.enableMultiselect(true); 
+                positionsGrid.enableMultiline(true);
+		positionsGrid.enableEditEvents(false,true,true);
                 var historyGrid = projectsTabbar.tabs("history").attachGrid({
                     image_path:'codebase/imgs/',
 	            columns: [{
@@ -168,7 +356,6 @@ function projectsInit(cell) {
                 historyGrid.fill = function(orderId){
 		    ajaxGet("api/orders/history/" + orderId, '', function(data){
 		        if (data.data && data.success){			    
-//                            console.log(d);
                             historyGrid.clearAll();
                             historyGrid.parse(data.data, "js");
                         }
@@ -177,9 +364,7 @@ function projectsInit(cell) {
                 positionsGrid.fill = function(orderId){
 		    ajaxGet("api/orders/positions/" + orderId, '', function(data){
 		        if (data.data && data.success){			    
-//                            console.log(d);
                             positionsGrid.clearAll();
-                            console.log(data.data);
                             positionsGrid.parse(data.data, "js");
                         }
                     });			
@@ -213,6 +398,25 @@ function updateChart(id) {
 	// remember loaded project
 	projectsChartId = id;
 }
+
+function createWindowWithForm(formStruct, caption, height, width){
+    var dhxWins = new dhtmlXWindows();
+    w1 = dhxWins.createWindow({
+            id:"w1",
+            left:20,
+            top:30,
+            width: width,
+            height: height,
+            center:true,
+            caption: _(caption),
+            header: true,
+            onClose:function(){
+
+            }
+    });
+    //initializing form 
+    return dhxWins.window("w1").attachForm(formStruct, true);         
+} 
 
 function projectsFillForm(id) {
 	// update form

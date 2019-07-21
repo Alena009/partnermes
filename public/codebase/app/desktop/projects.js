@@ -174,32 +174,38 @@ function projectsInit(cell) {
 			items: [
 				{type: "text", id: "title", text: _("Zamowienia")},                                
                                 {type: "spacer"},
-                                {type: "buttonSelect", id: "show_records", text: _("Ilosc wyswietlonych wpisow:"), options:[
+                                {type: "text", id: "show_records", text: _("Ilosc wyswietlonych wpisow:")},				
+                                {type: "buttonSelect", id: "amount_show", text: _("10"), options:[
                                             {id: "10",  type: "obj", text: _("Ostatnie 10")},
                                             {id: "20",  type: "obj", text: _("Ostatnie 20")},
                                             {id: "50",  type: "obj", text: _("Ostatnie 50")},
                                             {id: "all", type: "obj", text: _("Wszystkie")}		
-                                    ]},
-                                {type: "text", id: "amount_show", text: _("10")},				
-                                {type: "separator", id: "sep"},
-				{type: "text", id: "find", text: _("Find:")},				
-				{type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
-				{type: "separator", id: "sep2"},                                
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
+                                    ]},                                
+                                {type: "separator",   id: "sep"},
+				{type: "text",        id: "find",   text: _("Find:")},				
+				{type: "buttonInput", id: "szukaj", text: _("Szukaj"), width: 100},
+				{type: "separator",   id: "sep2"},                                
+				{id: "Add",  type: "button", img: "fa fa-plus-square "},
 				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"}
+				{id: "Del",  type: "button", img: "fa fa-minus-square"}
 			]
-		});  
-                //projectsGridToolBar.setListOptionSelected("show_records", "last_ten");
-                projectsGridToolBar.attachEvent("onClick", function(id){                    
-                    if (id == "show_records") { 
-                        var amountRecords = arguments[0];
-                        if (amountRecords == "show_records") {amountRecords = "all"};
-                        projectsGridToolBar.setItemText("amount_show", amountRecords); 
-                        if (amountRecords == "all") {amountRecords = 0};
-                        projectsGrid.fill(amountRecords);
-                    }
-                });
+		});                  
+                projectsGridToolBar.attachEvent("onClick", function(id){
+                    var amountRecords = projectsGridToolBar.getListOptionSelected("amount_show");
+                    projectsGridToolBar.setItemText("amount_show", amountRecords);
+                    if (amountRecords == "all") {amountRecords = 0};
+                    projectsGrid.fill(amountRecords);                    
+                    
+                });                
+//                projectsGridToolBar.attachEvent("onClick", function(id){                    
+//                    if (id == "amount_show") { 
+//                        var amountRecords = this.value;
+//                        if (amountRecords == "show_records") {amountRecords = "all"};
+//                        projectsGridToolBar.setItemText("amount_show", amountRecords); 
+//                        if (amountRecords == "all") {amountRecords = 0};
+//                        projectsGrid.fill(amountRecords);
+//                    }
+//                });
                 projectsGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{                                                        
@@ -248,9 +254,9 @@ function projectsInit(cell) {
 		positionsGridMenu = projectsTabbar.tabs("positions").attachMenu({
 			iconset: "awesome",
 			items: [
-                            {id:"Add", text: _("Dodaj")},
-                            {id:"Edit", text: _("Edytuj")},
-                            {id:"Del", text: _("Usun")}
+                            {id:"Add",  text: _("Dodaj"),  img: "fa fa-plus-square"},
+                            {id:"Edit", text: _("Edytuj"), img: "fa fa-edit"},
+                            {id:"Del",  text: _("Usun"),   img: "fa fa-minus-square"}
 			]
 		});  
                 positionsGridMenu.attachEvent("onClick", function(id) { 

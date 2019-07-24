@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Repositories\ProductRepository;
+use App\Models\Product;
+use App\Models\ProductGroup;
 
 class ProductController extends BaseController
 {
@@ -25,7 +27,7 @@ class ProductController extends BaseController
         
         app()->setLocale($locale);
 
-        $products = \App\Models\Product::all();
+        $products = Product::all();
         
         foreach ($products as $product) {
             $product['product_name'] = $product['name'];
@@ -46,7 +48,7 @@ class ProductController extends BaseController
      */
     public function create(Request $request)
     {
-        $product = new \App\Models\Product();
+        $product = new Product();
         $product->kod = $request['kod'];        
         $product->name = $request['name'];        
         $product->product_type_id = $request['product_type_id']; 
@@ -73,15 +75,15 @@ class ProductController extends BaseController
     }   
     
     /**
-     * Get list products by groups
+     * Get list products by tasks groups
      */
-    public function listProducts($groups = 0)
+    public function listProductsByTaskGroup($groupsTasks = 0)
     {                  
-        if ($groups) {  
-            $groupsIds = explode(',', $groups);
-            $allgroupsIdsWithChildNodes = \App\Models\ProductGroup::whereIn("id", $groupsIds)
+        if ($groupsTasks) {  
+            $groupsIds = explode(',', $groupsTasks);
+            $allgroupsIdsWithChildNodes = ProductGroup::whereIn("id", $groupsIds)
                     ->orWhereIn("parent_id", $groupsIds)->pluck('id');
-            $products = \App\Models\Product::whereIn("task_group_id", $allgroupsIdsWithChildNodes)->get();                     
+            $products = Product::whereIn("task_group_id", $allgroupsIdsWithChildNodes)->get();                     
         } else {
             $products = $this->index();        
         }
@@ -89,4 +91,26 @@ class ProductController extends BaseController
         return response()->json(['success' => true, 'data' => $products]);       
       
     }    
+    
+    /**
+     * Get list products by products groups
+     */
+    public function listProductsByProductGroup($groupsProducts = 0)
+    {   
+        $products = [];
+        
+        if ($groupsProducts) {  
+            $groupsIds = explode(',', $groupsProducts);
+            $products = Product::whereIn("product_group_id", $groupsIds)->get();                     
+        } else {
+            $products = $this->index();        
+        }
+        
+        foreach ($products as $product) {
+            $product['text'] = $product['name'];
+            $product['value'] = $product['id'];
+        }
+        
+        return response()->json(['success' => true, 'data' => $products]);     
+    }     
 }

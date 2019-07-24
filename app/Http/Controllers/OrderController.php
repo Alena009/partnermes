@@ -44,7 +44,7 @@ class OrderController extends BaseController
         if ($amount) {
             $orders = \App\Models\Order::orderBy('id', 'desc')->take($amount)->get();;       
         } else {
-            $orders = \App\Models\Order::orderBy('id', 'desc')->all();       
+            $orders = \App\Models\Order::orderBy('id', 'desc')->get();       
         }      
         
         foreach ($orders as $order) {
@@ -111,6 +111,7 @@ class OrderController extends BaseController
             $product     = $position->product;
             $productName = $product->name;
             
+            $position['product_id']   = $product['id'];
             $position['product_name'] = $productName;
             $position['text']         = $productName;
             $position['value']        = $position['id'];            

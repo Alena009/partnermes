@@ -116,7 +116,7 @@ function projectsInit(cell) {
 			{type: "calendar", name: "date_end",    label: _("Data zamkniecza"), 
                             required: true, dateFormat: "%Y-%m-%d",
                             note: {text: _("Data waznosci. Jest obowiazkowe.")}},
-                        {type: "block", blockOffset: 0, position: "label-center", list: [
+                        {type: "block", blockOffset: 0, position: "label-left", list: [
 			    {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
 			    {type: "newcolumn"},
 			    {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
@@ -132,7 +132,7 @@ function projectsInit(cell) {
 			{type: "calendar", name: "date_delivery",  label: _("Data dostawy"), 
                             required: true, dateFormat: "%Y-%m-%d",
                             note: {text: _("Data kiedy produkt musi byc gotowy.")}},
-                        {type: "block", blockOffset: 0, position: "label-center", list: [
+                        {type: "block", blockOffset: 0, position: "laabel-left", list: [
 			    {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
 			    {type: "newcolumn"},
 			    {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
@@ -183,29 +183,21 @@ function projectsInit(cell) {
                                     ]},                                
                                 {type: "separator",   id: "sep"},
 				{type: "text",        id: "find",   text: _("Find:")},				
-				{type: "buttonInput", id: "szukaj", text: _("Szukaj"), width: 100},
+				{type: "buttonInput", id: "szukaj", text: _(""), width: 100},
 				{type: "separator",   id: "sep2"},                                
 				{id: "Add",  type: "button", img: "fa fa-plus-square "},
 				{id: "Edit", type: "button", img: "fa fa-edit"},
 				{id: "Del",  type: "button", img: "fa fa-minus-square"}
 			]
 		});                  
-                projectsGridToolBar.attachEvent("onClick", function(id){
+                projectsGridToolBar.attachEvent("onButtonSelectHide", function(id){
                     var amountRecords = projectsGridToolBar.getListOptionSelected("amount_show");
                     projectsGridToolBar.setItemText("amount_show", amountRecords);
                     if (amountRecords == "all") {amountRecords = 0};
                     projectsGrid.fill(amountRecords);                    
                     
                 });                
-//                projectsGridToolBar.attachEvent("onClick", function(id){                    
-//                    if (id == "amount_show") { 
-//                        var amountRecords = this.value;
-//                        if (amountRecords == "show_records") {amountRecords = "all"};
-//                        projectsGridToolBar.setItemText("amount_show", amountRecords); 
-//                        if (amountRecords == "all") {amountRecords = 0};
-//                        projectsGrid.fill(amountRecords);
-//                    }
-//                });
+
                 projectsGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{                                                        
@@ -214,7 +206,7 @@ function projectsInit(cell) {
                                 clientsCombo.addOption(data.data);
                             });
                             projectsForm.clear();  
-                            projectsForm.setItemFocus("client_id");
+                            projectsForm.setItemFocus("kod");
 //                                pracownicyForm.fillAvatar(0);                             
                             projectsForm.attachEvent("onButtonClick", function(name){
                                 switch (name){
@@ -251,59 +243,12 @@ function projectsInit(cell) {
                                 {id: "history", text: _("Historija")}                                
 			]
 		});
-		positionsGridMenu = projectsTabbar.tabs("positions").attachMenu({
-			iconset: "awesome",
-			items: [
-                            {id:"Add",  text: _("Dodaj"),  img: "fa fa-plus-square"},
-                            {id:"Edit", text: _("Edytuj"), img: "fa fa-edit"},
-                            {id:"Del",  text: _("Usun"),   img: "fa fa-minus-square"}
-			]
-		});  
-                positionsGridMenu.attachEvent("onClick", function(id) { 
-                    switch (id){
-                        case 'Add':{                            
-                            var newOrderPositionForm = createWindowWithForm(orderPositionFormStruct, _("Dodaj pozycje"), 400, 400);                            
-                            var productsCombo = newOrderPositionForm.getCombo("product_id");
-                            //productsCombo.enableFilteringMode(true);
-                            ajaxGet("api/products", '', function(data) {
-                                if (data.success && data.data) {
-                                    productsCombo.addOption(data.data);                                    
-                                }
-                            });
-                            productsCombo.attachEvent("onKeyPressed", function(keyCode){
-                                var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
-                                var mask = "";
-                                for (var i = 0; i < input.length; i++) {
-                                    mask = mask + input[i] + "(.+)";                                                                                                                        
-                                }   
-                                console.log(mask);
-                                productsCombo.filter(function(opt){
-                                    return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
-                                }, false);                           
-                            });
-                            newOrderPositionForm.attachEvent("onButtonClick", function(name){
-                                switch (name){
-                                    case 'save':{                                                           
-                                        var data = newOrderPositionForm.getFormData();
-                                        var dd = newOrderPositionForm.getCalendar("date_delivery");
-                                        var order_id = projectsGrid.getSelectedRowId();
-                                        data.date_delivery = dd.getDate(true); 
-                                        data.order_id = order_id;
-                                        ajaxPost("api/positions", data, function(data){
-                                            positionsGrid.fill(order_id);
-                                        });                
-                                        
-                                    };break;
-                                    case 'cancel':{
-                                        
-                                    };break;
-                                }
-                            });
-                        };break;
-                    }
-                });
-                        
-                var positionsGrid = projectsTabbar.tabs("positions").attachGrid({
+                var positionsLayout = projectsTabbar.tabs("positions").attachLayout("2U");  
+                positionsLayout.cells("a").hideHeader();
+		positionsLayout.cells("b").hideHeader();				
+		positionsLayout.setAutoSize("a", "a;b");
+                
+                var positionsGrid = positionsLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
 	            columns: [{
                             label: _("Produkt"),
@@ -331,12 +276,92 @@ function projectsInit(cell) {
                         }                        
                     ],
 			multiselect: true                    
-                });                                                 
+                });  
                 positionsGrid.attachHeader("#text_filter,#select_filter,#text_search");		
 		positionsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]);
 		positionsGrid.enableMultiselect(true); 
                 positionsGrid.enableMultiline(true);
 		positionsGrid.enableEditEvents(false,true,true);
+                
+                positionsGrid.fill = function(orderId){
+		    ajaxGet("api/orders/positions/" + orderId, '', function(data){
+		        if (data.data && data.success){			    
+                            positionsGrid.clearAll();
+                            positionsGrid.parse(data.data, "js");
+                        }
+                    });			
+		}; 
+                
+                var positionsForm = positionsLayout.cells("b").attachForm(orderPositionFormStruct);
+                positionsForm.bind(positionsGrid);                
+                positionsForm.setSizes = positionsForm.centerForm;
+                positionsForm.attachEvent("onButtonClick", function(name){
+                    switch (name){
+                            case 'save':{                                                           
+                                var data = positionsForm.getFormData();
+                                var dd = positionsForm.getCalendar("date_delivery");
+                                var order_id = projectsGrid.getSelectedRowId();
+                                data.date_delivery = dd.getDate(true); 
+                                data.order_id = order_id;
+                                var selectedPositionId = positionsGrid.getSelectedRowId();
+                                if (selectedPositionId) {
+                                    ajaxGet("api/positions/" + selectedPositionId + "/edit", data, function(data){
+                                        if (data.success && data.data) {
+                                            positionsGrid.fill(order_id);
+                                        }
+                                    });                                 
+                                } else {
+                                    ajaxPost("api/positions/", data, function(data){
+                                        if (data.success && data.data) {
+                                            positionsGrid.fill(order_id);
+                                        }
+                                    });  
+                                } 
+                            };break;
+                            case 'cancel':{
+
+                            };break;
+                        }
+                });
+                var productsCombo = positionsForm.getCombo("product_id");                
+                ajaxGet("api/products", '', function(data) {
+                    if (data.success && data.data) {
+                        productsCombo.addOption(data.data);                                    
+                    }
+                });
+                productsCombo.attachEvent("onKeyPressed", function(keyCode){
+                    var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
+                    var mask = "";
+                    for (var i = 0; i < input.length; i++) {
+                        mask = mask + input[i] + "(.+)";                                                                                                                        
+                    }                       
+                    productsCombo.filter(function(opt){
+                        return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
+                    }, false);                           
+                });   
+                
+		positionsGridMenu = projectsTabbar.tabs("positions").attachMenu({
+			iconset: "awesome",
+			items: [
+                            {id:"Add",  text: _("Dodaj"),  img: "fa fa-plus-square"},
+                            {id:"Edit", text: _("Edytuj"), img: "fa fa-edit"},
+                            {id:"Del",  text: _("Usun"),   img: "fa fa-minus-square"}
+			]
+		}); 
+                
+                positionsGridMenu.attachEvent("onClick", function(id) { 
+                    switch (id){
+                        case 'Add':{  
+                                positionsForm.clear();
+                                positionsForm.setItemFocus("kod");
+                        };break;
+                        case 'Edit':{
+                                positionsForm.setItemFocus("kod");                                                          
+                        };break;
+                    }
+                });
+                        
+
                 var historyGrid = projectsTabbar.tabs("history").attachGrid({
                     image_path:'codebase/imgs/',
 	            columns: [{
@@ -367,14 +392,7 @@ function projectsInit(cell) {
                         }
                     });			
 		};     
-                positionsGrid.fill = function(orderId){
-		    ajaxGet("api/orders/positions/" + orderId, '', function(data){
-		        if (data.data && data.success){			    
-                            positionsGrid.clearAll();
-                            positionsGrid.parse(data.data, "js");
-                        }
-                    });			
-		};                 
+                
 	}
 	
 }

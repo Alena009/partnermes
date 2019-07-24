@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Repositories\ProductGroupRepository;
+use App\Models\ProductGroup;
 
 class ProductGroupController extends BaseController
 {
@@ -23,7 +24,11 @@ class ProductGroupController extends BaseController
     {
         app()->setLocale($locale);
 
-        $productsGroups = \App\Models\ProductGroup::all();
+        $productsGroups = ProductGroup::all();
+        foreach ($productsGroups as $group) {
+            $group['text']  = $group->name;
+            $group['value'] = $group->id;
+        }
                 
         return response()->json(['success' => true, 'data' => $productsGroups]);        
     }
@@ -37,7 +42,7 @@ class ProductGroupController extends BaseController
         $result = [];
         $locale = app()->getLocale();
         
-        $productGroup = new \App\Models\ProductGroup();
+        $productGroup = new ProductGroup();
         $productGroup->parent_id = $request['parent_id'];               
         $productGroup->save();
 

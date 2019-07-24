@@ -65,7 +65,8 @@ Route::group([
     //product types
     Route::resource('/prodtypes', 'ProductTypeController'); 
     //products
-    Route::get('/products/list/{grupy}', 'ProductController@listProducts');  
+    Route::get('/products/listbygroups/{prodGroups}', 'ProductController@listProductsByProductGroup');  
+    Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup');  
     Route::resource('/products', 'ProductController'); 
     //operations
     Route::resource('/operations', 'OperationController'); 
@@ -77,10 +78,10 @@ Route::group([
     Route::get('/orders/positions/{orderId}', 'OrderController@positions');
     Route::get('/orders/list/{amount}', 'OrderController@ordersList');
     Route::resource('/orders', 'OrderController');
-    //orders positions
-    //Route::get('/positions/{orderId}', 'OrderController@positions');
+    //orders positions    
     Route::resource('/positions', 'OrderPositionController');  
     //warehouse
+    Route::get('/warehouse/amountproduct/{productId}', 'WarehouseController@amountProductInWarehouse');  
     Route::get('/warehouse/list/{grupy}', 'WarehouseController@listProducts');  
     Route::resource('/warehouse', 'WarehouseController');  
     //clients

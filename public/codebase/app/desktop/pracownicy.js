@@ -151,7 +151,7 @@ function pracownicyInit(cell) {
 			switch (id){
 				case 'Add':{
 					console.log('Dodaj grupe');                                                                               
-                                        var grupyForm = createWindowWithForm(grupyFormAddData, 300, 350);
+                                        var grupyForm = createWindowWithForm(grupyFormAddData, _("Grupy pracownikow"), 300, 350);
                                         var dhxCombo = grupyForm.getCombo("parent_id");                             
                                         ajaxGet("api/departaments", '', function(data) {                    
                                                 dhxCombo.addOption(data.data);
@@ -162,6 +162,7 @@ function pracownicyInit(cell) {
                                                         ajaxPost("api/departaments", grupyForm.getFormData(), function(data){                                                            
                                                             grupyTree.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
                                                             grupyTree.openItem(data.data.parent_id);
+                                                            grupyTree.selectItem(data.data.id);
                                                         });
                                                 };break;
                                                 case 'cancel':{
@@ -178,7 +179,7 @@ function pracownicyInit(cell) {
                                                 id: id,
                                                 name: grupyTree.getItemText(id)
                                             };
-                                            var grupyForm = createWindowWithForm(grupyFormEditData, 300, 350);                                                                                       
+                                            var grupyForm = createWindowWithForm(grupyFormEditData, _("Grupy pracownikow"), 200, 250);                                                                                       
                                             grupyForm.setFormData(data);                                                                                                                   
                                             grupyForm.attachEvent("onButtonClick", function(name){
                                                 switch (name){
@@ -280,7 +281,7 @@ function pracownicyInit(cell) {
 				{type: "text", id: "title", text: _("Pracownicy")},
 				{type: "spacer"},
 				{type: "text", id: "find", text: _("Find:")},				
-				{type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
+				{type: "buttonInput", id: "szukaj", text: "", width: 100},
 				{type: "separator", id: "sep2"},
                                 {id: "Cog", type: "button", img: "fa fa-cog "},
                                 {type: "separator", id: "sep3"},
@@ -619,7 +620,6 @@ function pracownicyGridBold(r, index) {
 function updateDepartament(id, data) {
     console.log(data);
     ajaxGet("api/departaments/" + id + "/edit?", data, function(data){                                                            
-    //grupyTree.addItem(data.id, data.name, data.parent_id); // id, text, pId
         console.log(data);
     });    
 }

@@ -26,10 +26,13 @@ class WarehouseController extends BaseController
         $records = [];
         
         if ($groups) {  
-            $arrayGroupsIds = explode(',', $groups);     
-            $groupsIds = $this->func($arrayGroupsIds);     
-            
-            $records = Warehouse::leftJoin("products", "warehouse.product_id", "=", "products.id")
+            $arrayGroupsIds = explode(',', $groups);  
+            //$choosenProductGroups = ProductGroup::whereIn('id', $arrayGroupsIds)->get();
+            $groupsIds = ProductGroup::whereIn("id", $arrayGroupsIds)
+                    ->orWhereIn("parent_id", $arrayGroupsIds)
+                    ->pluck('id');
+            //print_r($groupsIds);
+            $records = Warehouse::leftJoin("products", "products.id", "=", "warehouse.product_id")
                     ->whereIn("products.product_group_id", $groupsIds)
                     ->orderBy('warehouse.id', 'desc')
                     ->get();                     
@@ -39,30 +42,28 @@ class WarehouseController extends BaseController
         
         foreach($records as $record) {
             $product  = $record->product;
-            $record['product_name'] = $product['name'];
-            $record['product_kod']  = $product['kod'];
-            $record['group_name']   = $product->group['name'];
+            $record['product_name']     = $product['name'];
+            $record['product_kod']      = $product['kod'];
+            $record['product_group_id'] = $product->group['id'];
+            $record['group_name']       = $product->group['name'];
         }  
         
         return response()->json(['success' => true, 'data' => $records]);       
     }  
-    
-    private function func($array)
-    {
-        $childs = [];
-        $result = [];
+           
+    public function func($choosenGroups) 
+    {                
+        $result = [];  
         
-        foreach ($array as $arr) {
-            $childs = ProductGroup::where('parent_id', '=', $arr)->pluck('id');
-            if ($childs) {                   
-                $result[] = $this->func($arr);
-            }           
-            $result[] = $arr;
+        foreach ($choosenGroups as $item) {
+            $result[] = $item['id'];
+            if (count($item->kids)) {
+                $result[] = $this->func($item->kids);
+            }
         }
         
         return $result;
-    }
-    
+    }   
 
     /**
      * Get count quantity of a particular product in warehouse

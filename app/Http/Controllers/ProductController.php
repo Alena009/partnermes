@@ -34,6 +34,8 @@ class ProductController extends BaseController
             $product['product_kod'] = $product['kod'];
             $product['text'] = $product['name'];
             $product['value'] = $product['id'];
+            $product['product_type_name']  = $product->type['name'];
+            $product['product_group_name'] = $product->group['name'];
         }
         
         if ($products) {

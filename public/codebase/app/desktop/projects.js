@@ -10,7 +10,7 @@ function projectsInit(cell) {
 	if (projectsLayout == null) {
 		
 		// init layout
-		projectsLayout = cell.attachLayout("3J");
+		var projectsLayout = cell.attachLayout("3J");
 		projectsLayout.cells("a").hideHeader();
 		projectsLayout.cells("b").hideHeader();
 		projectsLayout.cells("c").hideHeader();
@@ -99,28 +99,28 @@ function projectsInit(cell) {
 //		});
 
 		var newProjectFormStruct = [
-			{type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
-			{type: "container", name: "photo", label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65},
-			//{type: "input", name: "date_end",     label: "Due date", offsetTop: 20},
-	                {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
-                        {type: "input", name: "kod",         label: _("Kod zamowienia")},
-                        {type: "input", name: "name",        label: _("Zamowienie"),
-                           tooltip: _("Imie zamowienia"), required: true, info: true, 
-                           note: {text: _("Dodaj imie zamowienia. Jest obowiazkowe.")}},
-                        {type: "input", name: "description", label: _("Opis"),
-                           rows: 3,
-                           note: {text: _("Dodaj opis zamowienia. Nie jest obowiazkowe.")}},
-			{type: "calendar", name: "date_start",  label: _("Data poczatku"), 
-                            required: true, dateFormat: "%Y-%m-%d",
-                            note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},
-			{type: "calendar", name: "date_end",    label: _("Data zamkniecza"), 
-                            required: true, dateFormat: "%Y-%m-%d",
-                            note: {text: _("Data waznosci. Jest obowiazkowe.")}},
-                        {type: "block", blockOffset: 0, position: "label-left", list: [
-			    {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
-			    {type: "newcolumn"},
-			    {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
-	                ]}	        
+                    {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
+                    {type: "container", name: "photo", label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65},
+                    //{type: "input", name: "date_end",     label: "Due date", offsetTop: 20},
+                    {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
+                    {type: "input", name: "kod",         label: _("Kod zamowienia")},
+                    {type: "input", name: "name",        label: _("Zamowienie"),
+                       tooltip: _("Imie zamowienia"), required: true, info: true, 
+                       note: {text: _("Dodaj imie zamowienia. Jest obowiazkowe.")}},
+                    {type: "input", name: "description", label: _("Opis"),
+                       rows: 3,
+                       note: {text: _("Dodaj opis zamowienia. Nie jest obowiazkowe.")}},
+                    {type: "calendar", name: "date_start",  label: _("Data poczatku"), 
+                        required: true, dateFormat: "%Y-%m-%d",
+                        note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},
+                    {type: "calendar", name: "date_end",    label: _("Data zamkniecza"), 
+                        required: true, dateFormat: "%Y-%m-%d",
+                        note: {text: _("Data waznosci. Jest obowiazkowe.")}},
+                    {type: "block", blockOffset: 0, position: "label-left", list: [
+                        {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
+                        {type: "newcolumn"},
+                        {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
+                    ]}	        
 		];
                 var orderPositionFormStruct = [
 			{type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		

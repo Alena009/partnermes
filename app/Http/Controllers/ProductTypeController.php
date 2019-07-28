@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Repositories\ProductTypeRepository;
+use App\Models\ProductType;
 
 class ProductTypeController extends BaseController
 {
@@ -23,7 +24,11 @@ class ProductTypeController extends BaseController
     {
         app()->setLocale($locale);
 
-        $productTypes = \App\Models\ProductType::all();      
+        $productTypes = ProductType::all(); 
+        foreach ($productTypes as $type) {
+            $type['text']  = $type->name;
+            $type['value'] = $type->id;
+        }
         
         return response()->json(['success' => true, 'data' => $productTypes]);        
     }

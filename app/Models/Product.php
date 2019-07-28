@@ -22,4 +22,9 @@ class Product extends BaseModel
     {
         return $this->belongsTo('App\Models\ProductGroup', 'product_group_id', 'id');
     }
+    
+    public function type()
+    {
+        return $this->belongsTo('App\Models\ProductType', 'product_type_id', 'id');
+    }    
 }

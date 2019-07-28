@@ -19,73 +19,57 @@ Route::group([
 //    Route::get('/user', function (Request $request) {
 //        return $request->user();
 //    });
+    Route::resource('/clients', 'ClientController');
+    Route::get('/components/list/{productId}', 'ComponentController@listComponents');
+    Route::resource('/components', 'ComponentController');  
     
-    //roles
+    Route::get('/departamentstree', 'DepartamentController@buildTree');
+    Route::resource('/departaments', 'DepartamentController'); 
+    
+    Route::resource('/operations', 'OperationController');
+    Route::get('/orders/history/{orderId}', 'OrderController@history');
+    Route::get('/orders/positions/{orderId}', 'OrderController@positions');
+    Route::get('/orders/list/{amount}', 'OrderController@ordersList');
+    Route::resource('/orders', 'OrderController');    
+    
+    Route::resource('/permissions', 'PermissionController');  
+    Route::resource('/positions', 'OrderPositionController');      
+    Route::resource('/prodtypes', 'ProductTypeController'); 
+    Route::get('/products/listbygroups/{prodGroups}', 'ProductController@listProductsByProductGroup');  
+    Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup'); 
+    Route::get('/prodgroups/grupytree', 'ProductGroupController@buildTree');    
+    Route::resource('/prodgroups', 'ProductGroupController');     
+    Route::resource('/products', 'ProductController');     
+    
     Route::resource('/roles', 'RoleController');
     Route::get('/roles', 'RoleController@roles');
     Route::get('/roles/{roleId}/permissions', 'RoleController@listPermissions');
     Route::get('/roles/{roleId}/users', 'RoleController@listUsers');
-    
-    //user-role
-    Route::get('/usersroles/del', 'UserRoleController@deleteByRoleAndUserId');
-    Route::resource('/usersroles', 'UserRoleController');
-    
-    //role-permission
     Route::get('/rolespermissions/edit', 'RolePermissionController@editByRoleAndPermissionId');    
     Route::post('/rolespermissions/fillRole/{roleId}', 'RolePermissionController@addPermissionsForNewRole');
     Route::post('/rolespermissions/addToRoles/{permissionId}', 'RolePermissionController@addNewPermissionToRoles');
-    Route::resource('/rolespermissions', 'RolePermissionController');
+    Route::resource('/rolespermissions', 'RolePermissionController');    
     
-    //permissions
-    Route::resource('/permissions', 'PermissionController');
+    Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
+    Route::resource('/taskgroups', 'TaskGroupController');    
     
-    //users
+    Route::get('/usersroles/del', 'UserRoleController@deleteByRoleAndUserId');
+    Route::resource('/usersroles', 'UserRoleController');
     Route::get('/users/avatar/{userId}', 'API\UserController@avatar');
     Route::post('/users/avatar/load/{userId}', 'API\UserController@loadAvatar');
-    Route::resource('/users', 'API\UserController');          
+    Route::resource('/users', 'API\UserController');
     
-    //departaments
-    Route::get('/departamentstree', 'DepartamentController@buildTree');
-    Route::resource('/departaments', 'DepartamentController');           
-    //workerslist
     Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
-    Route::get('/workerslist', 'DepartamentController@workersList'); 
-
-    //worker-departament    
+    Route::get('/workerslist', 'DepartamentController@workersList');     
     Route::get('/workerdep/del', 'WorkerDepartamentController@deleteRel');
-    Route::resource('/workerdep', 'WorkerDepartamentController');       
-    //tasks groups
-    Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
-    Route::resource('/taskgroups', 'TaskGroupController');
-    //zlecenia
+    Route::resource('/workerdep', 'WorkerDepartamentController');
+    Route::get('/warehouse/amountproduct/{productId}', 'WarehouseController@amountProductInWarehouse');  
+    Route::get('/warehouse/list/{grupy}', 'WarehouseController@listProducts');  
+    Route::resource('/warehouse', 'WarehouseController'); 
+    
     Route::get('/zlecenia/list/{grupy}', 'TaskController@listTasks');  
     Route::get('/zlecenia/list', 'TaskController@listTasks');  
     Route::resource('/zlecenia', 'TaskController');  
-    
-    //product types
-    Route::resource('/prodtypes', 'ProductTypeController'); 
-    //products
-    Route::get('/products/listbygroups/{prodGroups}', 'ProductController@listProductsByProductGroup');  
-    Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup');  
-    Route::resource('/products', 'ProductController'); 
-    //operations
-    Route::resource('/operations', 'OperationController'); 
-    //product groups
-    Route::get('/prodgroups/grupytree', 'ProductGroupController@buildTree');    
-    Route::resource('/prodgroups', 'ProductGroupController');  
-    //orders
-    Route::get('/orders/history/{orderId}', 'OrderController@history');
-    Route::get('/orders/positions/{orderId}', 'OrderController@positions');
-    Route::get('/orders/list/{amount}', 'OrderController@ordersList');
-    Route::resource('/orders', 'OrderController');
-    //orders positions    
-    Route::resource('/positions', 'OrderPositionController');  
-    //warehouse
-    Route::get('/warehouse/amountproduct/{productId}', 'WarehouseController@amountProductInWarehouse');  
-    Route::get('/warehouse/list/{grupy}', 'WarehouseController@listProducts');  
-    Route::resource('/warehouse', 'WarehouseController');  
-    //clients
-    Route::resource('/clients', 'ClientController');  
 });
 
 Route::post('login', 'API\UserController@login');

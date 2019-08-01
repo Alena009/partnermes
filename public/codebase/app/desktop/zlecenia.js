@@ -82,7 +82,7 @@ function zleceniaInit(cell) {
 //                                        });
 				};break;
 				case 'Edit':{
-					var id = grupyTree.getSelectedItemId(),
+					var id = grupyTree.getSelectedId(),
 						parent = grupyTree.getParentId(id) || 0;
 						if(id){
 							grupyTree.focusItem(id);
@@ -90,7 +90,7 @@ function zleceniaInit(cell) {
 						}
 					};break;
 				case 'Del':{
-					var id = grupyTree.getSelectedItemId(),
+					var id = grupyTree.getSelectedId(),
 						parent = grupyTree.getParentId(id) || 0;
 						if(id){							
 							var ch = grupyTree.getSubItems(id);
@@ -338,17 +338,16 @@ function zleceniaInit(cell) {
                                     zleceniaGrid.parse(data.data, "js");
                                 }
                             });			
-		};
-                
+		};            
               
 
-//		var dpZleceniaGrid = new dataProcessor("api/zlecenia",'json');
-//		dpZleceniaGrid.init(zleceniaGrid);
-//		dpZleceniaGrid.enableDataNames(true);
-//		dpZleceniaGrid.setTransactionMode("REST");
-//		dpZleceniaGrid.enablePartialDataSend(true);
-//		dpZleceniaGrid.enableDebug(true);
-//		dpZleceniaGrid.setUpdateMode("row", true);
+		var dpZleceniaGrid = new dataProcessor("api/zlecenia",'json');
+		dpZleceniaGrid.init(zleceniaGrid);
+		dpZleceniaGrid.enableDataNames(true);
+		dpZleceniaGrid.setTransactionMode("REST");
+		dpZleceniaGrid.enablePartialDataSend(true);
+		dpZleceniaGrid.enableDebug(true);
+		dpZleceniaGrid.setUpdateMode("row", true);
 		zleceniaGrid.attachEvent("onFilterStart", function(indexes,values){
 			console.log(arguments);
 			return true;
@@ -682,7 +681,6 @@ function zleceniaInit(cell) {
 }
 
 function updateGroup(id, data) {
-    console.log(data);
     ajaxGet("api/taskgroups/" + id + "/edit?", data, function(data){                                                            
         console.log(data);
     });    
@@ -692,8 +690,11 @@ var grupyFormAddData = [
         {type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
                 {type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),        options: [{text: "None", value: "0"}], inputWidth: 150},                                
                 {type:"input",  name:"name",    	label:_("Nazwa grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
-                {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
-                {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                    {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                    {type: "newcolumn"},
+                    {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                ]}
         ]}
 ];
 

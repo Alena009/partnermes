@@ -26,6 +26,7 @@ class ProductGroupController extends BaseController
 
         $productsGroups = ProductGroup::all();
         foreach ($productsGroups as $group) {
+            $group['label']  = $group->name;
             $group['text']  = $group->name;
             $group['value'] = $group->id;
         }

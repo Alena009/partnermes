@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Repositories\DepartamentRepository;
+use App\Models\Departament;
 
 class DepartamentController extends BaseController
 {
@@ -26,7 +27,7 @@ class DepartamentController extends BaseController
         
         app()->setLocale($locale);
 
-        $departaments = \App\Models\Departament::all();
+        $departaments = Departament::all();
         
         //adding column "text" and "value" for correct viewing in combobox front-end
         foreach ($departaments as $departament) {
@@ -46,10 +47,10 @@ class DepartamentController extends BaseController
     public function store(Request $request)
     {
         $departament = [];
-        $result = [];
+        $success = false;
         $locale = app()->getLocale();
         
-        $departament = new \App\Models\Departament();
+        $departament = new Departament();
         $departament->parent_id = $request['parent_id'];                
         $departament->save();        
         
@@ -61,9 +62,11 @@ class DepartamentController extends BaseController
 
         $departament->save();
         
-        $result = ['data' => $departament, 'success' => true];
+        if (!empty((array)$departament)) {
+            $success = true;
+        }
 
-        return response()->json($result);
+        return response()->json(['data' => $departament, 'success' => $success]);
     }
     
     /**
@@ -78,7 +81,7 @@ class DepartamentController extends BaseController
         
         if ($departamentsIds) {            
             $departamentsIds = explode(',', $departamentsIds);
-            $allDepartamentsIdsWithChildNodes = \App\Models\Departament::whereIn("id", $departamentsIds)
+            $allDepartamentsIdsWithChildNodes = Departament::whereIn("id", $departamentsIds)
                     ->orWhereIn("parent_id", $departamentsIds)->pluck('id');
             $workerDepartamentModel = new \App\Models\WorkerDepartament();            
             $workersIds = $workerDepartamentModel->getWorkersIdsByDepartamentsIds($allDepartamentsIdsWithChildNodes);            

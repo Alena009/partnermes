@@ -34,7 +34,8 @@ class TaskController extends BaseController
      * Get list tasks by groups
      */
     public function listTasks($groups = 0)
-    {                  
+    {
+        $tasks = [];
         if ($groups) {  
             $groupsIds = explode(',', $groups);
             $allgroupsIdsWithChildNodes = \App\Models\TaskGroup::whereIn("id", $groupsIds)

@@ -14,11 +14,10 @@ function settingsInit(cell) {
                 mainTabbar.addTab("a1", _("Role"), null, null, true);
                 mainTabbar.addTab("a2", _("Produkty"));                    
                 mainTabbar.addTab("a3", _("Grupy zlecen"));
-                mainTabbar.addTab("a4", _("Grupy produktow"));                
-                mainTabbar.addTab("a5", _("Grupy produktow - produkty"));
-                mainTabbar.addTab("a6", _("Typy produktow"));
-                mainTabbar.addTab("a7", _("Grupy pracownikow"));
-                mainTabbar.addTab("a8", _("Jezyk"));
+                mainTabbar.addTab("a4", _("Grupy produktow"));                                
+                mainTabbar.addTab("a5", _("Typy produktow"));
+                mainTabbar.addTab("a6", _("Grupy pracownikow"));
+               // mainTabbar.addTab("a7", _("Jezyk"));
             //Tabs
             var rolesLayout = mainTabbar.tabs("a1").attachLayout("3W");
                 rolesLayout.cells("a").hideHeader();
@@ -29,8 +28,28 @@ function settingsInit(cell) {
             var productsLayout = mainTabbar.tabs("a2").attachLayout("3J");
                 productsLayout.cells("a").hideHeader();
                 productsLayout.cells("b").hideHeader();                
-                productsLayout.cells("c").hideHeader();                                
-                                                  
+                productsLayout.cells("c").hideHeader();    
+                
+            var optionsTabbar = productsLayout.cells("c").attachTabbar(); 
+                optionsTabbar.addTab("a1", _("Componenty"), null, null, true);
+                optionsTabbar.addTab("a2", _("Zdjęcia")); 
+                
+            var componentsLayout = optionsTabbar.tabs("a1").attachLayout("1C"); 
+                componentsLayout.cells("a").hideHeader();
+            
+            var tasksGroupsLayout = mainTabbar.tabs("a3").attachLayout("1C"); 
+                tasksGroupsLayout.cells("a").hideHeader();
+                
+            var productsGroupsLayout = mainTabbar.tabs("a4").attachLayout("2U"); 
+                productsGroupsLayout.cells("a").hideHeader(); 
+                productsGroupsLayout.cells("b").hideHeader(); 
+                
+            var typesProductsLayout = mainTabbar.tabs("a5").attachLayout("1C");
+                typesProductsLayout.cells("a").hideHeader();
+                
+            var workersGroupsLayout = mainTabbar.tabs("a6").attachLayout("1C");
+                workersGroupsLayout.cells("a").hideHeader();
+             
                 
                 var rolesToolBar = rolesLayout.cells("a").attachToolbar({
 			iconset: "awesome",
@@ -42,201 +61,6 @@ function settingsInit(cell) {
 				{id: "Del", type: "button", img: "fa fa-minus-square"}
 			]
 		});
-                var usersToolBar = rolesLayout.cells("b").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Uzytkowniki")},
-				{type: "spacer"},                                
-                                {type: "text", id: "find", text: _("Find:")},
-				{type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
-                                {type: "separator", id: "sep2"},
-				{id: "Cog", type: "button", img: "fa fa-cog "},
-                                {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", img: "fa fa-reply"}
-			]
-		});                 
-                var permissionsToolBar = rolesLayout.cells("c").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Uprawnienia")},
-				{type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"},
-                                {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", img: "fa fa-reply"}
-			]
-		});    
-                var productsGridToolBar = productsLayout.cells("a").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Produkty")},
-                                {type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"}				                               
-			]                    
-                });
-                var productFormToolBar = productsLayout.cells("b").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Produkt")},
-				{type: "spacer"},								
-				{id: "Hide", type: "button", img: "fa fa-arrow-right"} 
-			]                    
-                });  
-                var productFormStruct = [
-                    {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
-                    //{type: "container", name: "photo", label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65},
-                    //{type: "input", name: "date_end",     label: "Due date", offsetTop: 20},                    
-                    {type: "combo", name: "product_group_id", required: true, label: _("Grupa produktu"), options: []},		
-                    {type: "combo", name: "product_type_id",  required: true, label: _("Typ produktu"),   options: []},		
-                    {type: "input", name: "kod",              required: true, label: _("Kod produktu")},
-                    {type: "input", name: "name",             required: true, label: _("Nazwa produktu"),
-                       tooltip: _("Imie zamowienia"), info: true, 
-                       note: {text: _("Imie produktu. Jest obowiazkowe.")}},
-                    {type: "input", name: "height",           label: _("Wysokość, mm")},
-                    {type: "input", name: "width",            label: _("Szerokość, mm")},
-                    {type: "input", name: "length",           label: _("Długość, mm")},
-                    {type: "input", name: "weight",           label: _("Masa, kg")},
-                    {type: "block", blockOffset: 0, position: "label-left", list: [
-                        {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
-                        {type: "newcolumn"},
-                        {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
-                    ]}
-                ];                
-                var componentsToolBar = productsLayout.cells("c").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Componenty")},
-				{type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"}
-			]                    
-                });                             
-                
-                var rolesTree = rolesLayout.cells("a").attachTreeView({
-                    skin: "dhx_skyblue",    // string, optional, treeview's skin
-			iconset: "font_awesome", // string, optional, sets the font-awesome icons
-			multiselect: false,           // boolean, optional, enables multiselect
-			//checkboxes: true,           // boolean, optional, enables checkboxes
-			//dnd: true,           // boolean, optional, enables drag-and-drop
-			context_menu: true,  
-                });                
-                    rolesTree.load = function(){ 
-                    ajaxGet("api/roles", '', function(data) {                    
-                            if (data && data.success){                            
-                                rolesTree.loadStruct(data.data);                           
-                            }                    
-                        });
-                    };
-                    rolesTree.load();                
-                    rolesTree.attachEvent("onSelect",function(id, mode){  
-                        if (mode) {
-                            usersGrid.clearAll();
-                            permissionsGrid.clearAll();			
-                            usersGrid.fill(id);
-                            permissionsGrid.fill(id);			
-                            console.log(id);
-                            return true;                        
-                        }
-                    });
-                
-                var usersGrid = rolesLayout.cells("b").attachGrid({
-                    image_path:'codebase/imgs/',
-	            columns: [                        
-                        {
-                            label: _("Nazwisko"),
-                            width: 100,
-                            id: "firstname",
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Imie"),
-                            width: 100,
-                            id: "lastname",
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Role"),
-                            width: 100,
-                            id: "role_name",
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        }                        
-                    ],
-			multiselect: true
-                });               
-                    usersGrid.fill = function(id) {
-                    ajaxGet("api/roles/" + id + "/users", '', function(data){                                     
-			if (data && data.success){
-                            usersGrid.clearAll();
-                            usersGrid.parse((data.data), "js");
-                        }
-		    });
-                };               
-                    usersGrid.fill(0);      
-                var searchElem = usersToolBar.getInput('szukaj');
-                                 usersGrid.makeFilter(searchElem, 0, true);
-                                 usersGrid.makeFilter(searchElem, 1, true);                                 
-                                 usersGrid.filterByAll();
-                                 
-                var permissionsGrid = rolesLayout.cells("c").attachGrid({
-                    image_path:'codebase/imgs/',
-	            columns: [
-                        {
-                            label: _("Uprawnienie"),
-                            width: 100,
-                            id: "name",
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Value"),
-                            id: "value",
-                            width: 50, 
-                            type: "ch"       
-                        },
-                        {
-                            label: _("Opis"),
-                            id: "description",
-                            width: 200, 
-                            type: "ed"       
-                        }                        
-                    ],
-			multiselect: true
-                });                
-                    permissionsGrid.fill = function(id) {
-                    ajaxGet("api/roles/" + id + "/permissions", '', function(data){                                     
-			if (data && data.success){
-                            permissionsGrid.clearAll();
-                            permissionsGrid.parse((data.data), "js");
-                        }
-		    });
-                };                
-                    permissionsGrid.fill(0);               
-                    permissionsGrid.attachEvent("onCheck", function(rId,cInd,state){
-                    var roleId = rolesTree.getSelectedId();
-                    if (roleId) {
-                        var data = {
-                                role_id: roleId,
-                                permission_id: rId, 
-                                value: +state
-                            };
-                        ajaxGet("api/rolespermissions/edit", data, '');
-                        
-                        permissionsGrid.fill(roleId);                          
-                    }                                 
-                });
-                
-                //Toolbars events
                 rolesToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
 		        case 'Add':{
@@ -322,7 +146,28 @@ function settingsInit(cell) {
                              
                         };break;                     
                     };
-                });                
+                });   
+                var roleForm = [
+                    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
+                            {type:"input",  name:"name",   label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				                            
+                            {type:"button", name:"save",   value:_("Zapisz"),     offsetTop:18},
+                            {type:"button", name:"cancel", value:_("Anuluj"),     offsetTop:18}
+                    ]}
+		]; 
+                
+                var usersToolBar = rolesLayout.cells("b").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Uzytkowniki")},
+				{type: "spacer"},                                
+                                {type: "text", id: "find", text: _("Find:")},
+				{type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
+                                {type: "separator", id: "sep2"},
+				{id: "Cog", type: "button", img: "fa fa-cog "},
+                                {type: "separator", id: "sep3"},
+                                {id: "Redo", type: "button", img: "fa fa-reply"}
+			]
+		});
                 usersToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
 		        case 'Cog':{                                
@@ -425,7 +270,20 @@ function settingsInit(cell) {
                                 permissionsGrid.fill(0);
                         };break; 
                     }
-                });                
+                });  
+                
+                var permissionsToolBar = rolesLayout.cells("c").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Uprawnienia")},
+				{type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Redo", type: "button", img: "fa fa-reply"}
+			]
+		});    
                 permissionsToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
 		        case 'Add':{
@@ -511,15 +369,184 @@ function settingsInit(cell) {
                         };break;
                     }
                 });
-                //----//
+                var permissionForm = [
+                    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
+                            {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:100},                                                                				                            
+                            {type:"input",  name:"description", label:_("Opis"), offsetTop:13, labelWidth:100},                                                                				                            
+                            {type:"button", name:"save",        value:_("Zapisz"),     offsetTop:18},
+                            {type:"button", name:"cancel",      value:_("Anuluj"),     offsetTop:18}
+                    ]}
+		];
+                
+                var rolesTree = rolesLayout.cells("a").attachTreeView({
+                    skin: "dhx_skyblue",    // string, optional, treeview's skin
+			iconset: "font_awesome", // string, optional, sets the font-awesome icons
+			multiselect: false,           // boolean, optional, enables multiselect
+			//checkboxes: true,           // boolean, optional, enables checkboxes
+			//dnd: true,           // boolean, optional, enables drag-and-drop
+			context_menu: true,  
+                });                
+                rolesTree.load = function(){ 
+                    ajaxGet("api/roles", '', function(data) {                    
+                        if (data && data.success){                            
+                            rolesTree.loadStruct(data.data);                           
+                        }                    
+                    });
+                };
+                rolesTree.load();                
+                rolesTree.attachEvent("onSelect",function(id, mode){  
+                    if (mode) {
+                        usersGrid.clearAll();
+                        permissionsGrid.clearAll();			
+                        usersGrid.fill(id);
+                        permissionsGrid.fill(id);			
+                        console.log(id);
+                        return true;                        
+                    }
+                });
+                
+                var usersGrid = rolesLayout.cells("b").attachGrid({
+                    image_path:'codebase/imgs/',
+	            columns: [                        
+                        {
+                            label: _("Nazwisko"),
+                            width: 100,
+                            id: "firstname",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Imie"),
+                            width: 100,
+                            id: "lastname",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Role"),
+                            width: 100,
+                            id: "role_name",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        }                        
+                    ],
+			multiselect: true
+                });               
+                usersGrid.fill = function(id) {
+                    ajaxGet("api/roles/" + id + "/users", '', function(data){                                     
+                        if (data && data.success){
+                            usersGrid.clearAll();
+                            usersGrid.parse((data.data), "js");
+                        }
+                    });
+                };               
+                usersGrid.fill(0);      
+                var searchElem = usersToolBar.getInput('szukaj');
+                                 usersGrid.makeFilter(searchElem, 0, true);
+                                 usersGrid.makeFilter(searchElem, 1, true);                                 
+                                 usersGrid.filterByAll(); 
+                                 
+                var permissionsGrid = rolesLayout.cells("c").attachGrid({
+                    image_path:'codebase/imgs/',
+	            columns: [
+                        {
+                            label: _("Uprawnienie"),
+                            width: 100,
+                            id: "name",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Value"),
+                            id: "value",
+                            width: 50, 
+                            type: "ch"       
+                        },
+                        {
+                            label: _("Opis"),
+                            id: "description",
+                            width: 200, 
+                            type: "ed"       
+                        }                        
+                    ],
+			multiselect: true
+                });                
+                permissionsGrid.fill = function(id) {
+                    ajaxGet("api/roles/" + id + "/permissions", '', function(data){                                     
+			if (data && data.success){
+                            permissionsGrid.clearAll();
+                            permissionsGrid.parse((data.data), "js");
+                        }
+		    });
+                };                
+                permissionsGrid.fill(0);               
+                permissionsGrid.attachEvent("onCheck", function(rId,cInd,state){
+                    var roleId = rolesTree.getSelectedId();
+                    if (roleId) {
+                        var data = {
+                                role_id: roleId,
+                                permission_id: rId, 
+                                value: +state
+                            };
+                        ajaxGet("api/rolespermissions/edit", data, '');
+                        
+                        permissionsGrid.fill(roleId);                          
+                    }                                 
+                });                
+                
                 
                 /**
                  * 
                  * Products tab
                  * 
                  * 
-                 */
+                 */   
                 
+                
+                var productsGridToolBar = productsLayout.cells("a").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Produkty")},
+                                {type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"}				                               
+			]                    
+                });
+                productsGridToolBar.attachEvent("onClick", function(name) {
+                    switch (name){
+                        case 'Add': {                            
+                            productForm.clear();
+                            productForm.setFocusOnFirstActive();
+                            productForm.showItem("block");                            
+                            productForm.showItem("savenew");                            
+                            productForm.hideItem("saveedit");                            
+                        };break;
+                        case 'Edit': {                                
+                            var selectedId = productsGrid.getSelectedRowId();                   
+                            if (selectedId) {                                 
+                                productForm.setFocusOnFirstActive();
+                                productForm.showItem("block");                            
+                                productForm.showItem("saveedit");                             
+                                productForm.hideItem("savenew");                            
+                            }
+                        };break;
+                        case 'Del': {
+                            var selectedId = productsGrid.getSelectedRowId();
+                            if (selectedId) {                                 
+                                ajaxDelete("api/products/" + selectedId,'', function(data){
+                                    if (data && data.success) {
+                                        productsGrid.deleteRow(selectedId);
+                                    }
+                                });                           
+                            }
+                        };break;                        
+                    }
+                });
                 var productsGrid = productsLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
 	            columns: [                        
@@ -613,26 +640,137 @@ function settingsInit(cell) {
                 });
 		productsGrid.attachEvent("onRowSelect", function() {
                     var selectedId = productsGrid.getSelectedRowId();
-                    componentsGrid.fill(selectedId);                    
-                });                
+                    componentsGrid.clearAll();
+                    componentsGrid.fill(selectedId);     
+                    productForm.hideItem("block");
+                }); 
                 
+                var productFormToolBar = productsLayout.cells("b").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Produkt")},
+				{type: "spacer"},								
+				{id: "Hide", type: "button", img: "fa fa-arrow-right"} 
+			]                    
+                });                
+                var productFormStruct = [
+                    {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
+                    //{type: "container", name: "photo", label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65},
+                    //{type: "input", name: "date_end",     label: "Due date", offsetTop: 20},                    
+                    {type: "combo", name: "product_group_id", required: true, label: _("Grupa produktu"), options: [{text: "", value: "0"}]},		
+                    {type: "combo", name: "product_type_id",  required: true, label: _("Typ produktu"),   options: [{text: "", value: "0"}]},		
+                    {type: "input", name: "kod",              required: true, label: _("Kod produktu")},
+                    {type: "input", name: "name",             required: true, label: _("Nazwa produktu")},                                      
+                    {type: "input", name: "height",                           label: _("Wysokość, mm")},
+                    {type: "input", name: "width",                            label: _("Szerokość, mm")},
+                    {type: "input", name: "length",                           label: _("Długość, mm")},
+                    {type: "input", name: "weight",           required: true, label: _("Masa, kg")},
+                    {type: "input", name: "area",             required: true, label: _("Powierzchnia, m2")},
+                    {type: "input", name: "pack",             required: true, label: _("Opakowanie")},
+                    {type: "input", name: "description",      required: true, label: _("Opis"), rows: 3},
+                    {type: "block", name: "block",         hidden: true, blockOffset: 0, position: "label-left", list: [
+                        {type: "button", name: "savenew",  hidden: true,  value: "Zapisz", offsetTop:18},
+                        {type: "button", name: "saveedit", hidden: true,  value: "Zapisz", offsetTop:18},
+                        {type: "newcolumn"},
+                        {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
+                    ]}
+                ];
                 var productForm = productsLayout.cells("b").attachForm(productFormStruct);
                 var productTypeCombo = productForm.getCombo("product_type_id");
                 ajaxGet("api/prodtypes", "", function(data){
-                    if (data && data.success) {
-                        productTypeCombo.addOption(data.data);
+                    if (data && data.success) {                        
+                        productTypeCombo.addOption(data.data);                        
                     }
                 });
                 var productGroupCombo = productForm.getCombo("product_group_id");
+                productGroupCombo.enableFilteringMode(true);
                 ajaxGet("api/prodgroups", "", function(data){
                     if (data && data.success) {
                         productGroupCombo.addOption(data.data);
                     }
-                });
+                });  
+                productForm.attachEvent("onButtonClick", function(name){
+                    switch (name){
+                        case 'savenew':{ 
+                            var data = productForm.getFormData();
+                            ajaxPost("api/products", data, function(data) {
+                                if (data && data.success) {
+                                    productsGrid.fill();
+                                    productsGrid.selectRowById(data.data.id);
+                                }
+                            }); 
+                        };break;
+                        case 'saveedit': {
+                            var selectedId = productsGrid.getSelectedRowId();
+                            if (selectedId) {
+                                var data = productForm.getFormData();                                                                 
+                                ajaxGet("api/products/" + selectedId + "/edit", data, function(data){
+                                    if (data && data.success) {
+                                       console.log(data);
+                                    }
+                                });                                     
+                            }                                
+                        };break;
+                    }
+                }); 
+                productForm.bind(productsGrid);                 
                 
-                productForm.bind(productsGrid);
-                
-                var componentsGrid = productsLayout.cells("c").attachGrid({
+                var componentsGridMenu = componentsLayout.cells("a").attachMenu({
+			iconset: "awesome",
+			items: [
+                            {id:"Add",  text: _("Dodaj"),  img: "fa fa-plus-square"},
+                            {id:"Edit", text: _("Edytuj"), img: "fa fa-edit"},
+                            {id:"Del",  text: _("Usun"),   img: "fa fa-minus-square"}
+			]                    
+                });  
+                componentsGridMenu.attachEvent("onClick", function(name) {
+                    var formStruct = [
+                                    {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
+                                    {type: "combo", name: "component_id", required: true, label: _("Produkt"), options: [{text: "", value: "0"}]},		
+                                    {type: "input", name: "amount",     required: true, label: _("Ilosc")},
+                                    {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                        {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
+                                        {type: "newcolumn"},
+                                        {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
+                                    ]}              
+                                ];
+                    switch(name) {
+                        case "Add": {
+                            var selectedProductId = productsGrid.getSelectedRowId();
+                            if (selectedProductId) {
+                                var addingForm = createWindowWithForm(formStruct, 300, 300);
+                                var productCombo = addingForm.getCombo("component_id");
+                                productCombo.enableFilteringMode(true);
+                                ajaxGet("api/products", '', function(data){
+                                    productCombo.addOption(data.data);
+                                });
+                                addingForm.attachEvent("onButtonClick", function(name){
+                                    var data = this.getFormData();
+                                    data.product_id = selectedProductId;
+                                    if (name == "save") {
+                                        ajaxPost("api/components", data, function(data){
+                                            if(data && data.success){
+                                                componentsGrid.fill(selectedProductId);
+                                                addingForm.setItemFocus("component_id");
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        };break;
+                        case "Del": {
+                            var selectedComponentId = componentsGrid.getSelectedRowId();
+                            if (selectedComponentId) {
+                                ajaxDelete("api/components/" + selectedComponentId, "", function(data){
+                                    if (data && data.success) {
+                                        componentsGrid.deleteRow();
+                                    }
+                                });    
+                            }                            
+                        };break;
+                    }
+                });                
+                var componentsGrid = componentsLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
 	            columns: [                        
                         {
@@ -680,12 +818,412 @@ function settingsInit(cell) {
                 });   
                 componentsGrid.fill = function(id = 0){						
                     ajaxGet("api/components/list/" + id, '', function(data){                                     
-                        if (data && data.success){                                    
+                        if (data && data.success){
                             componentsGrid.parse((data.data), "js");
                         }
                     });                        
-                };   
+                };
+                var dpComponentsGrid = new dataProcessor("api/components", "js");                
+                dpComponentsGrid.init(componentsGrid);
+                dpComponentsGrid.enableDataNames(true);
+                dpComponentsGrid.setTransactionMode("REST");
+                dpComponentsGrid.enablePartialDataSend(true);
+                dpComponentsGrid.enableDebug(true);
+                dpComponentsGrid.setUpdateMode("row", true);
+                dpComponentsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                    data.id = id;
+                    ajaxGet("api/components/" + id + "/edit", data, function(data){                                                            
+                        console.log(data);
+                    });
+                });                
                 
+                /**
+                 * 
+                 * Tasks groups tab
+                 * 
+                 */
+                
+                var tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Grupy")},
+				{type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"}
+			]
+		});
+		tasksGroupsToolBar.attachEvent("onClick", function(btn) {
+                    switch (btn){
+                            case 'Add':{			                                        
+                                    createAddEditGroupWindow("api/taskgroups", "api/taskgroups", tasksGroupsTree, 0);
+                            };break;
+                            case 'Edit':{
+                                var id = tasksGroupsTree.getSelectedId();
+                                if (id) {                                        
+                                    createAddEditGroupWindow("api/taskgroups", "api/taskgroups/" + id + "/edit", tasksGroupsTree, id);
+                                }
+                            };break;
+                            case 'Del':{
+                                var id = tasksGroupsTree.getSelectedId();
+                                if (id) {
+                                    deleteNodeFromTree(tasksGroupsTree, "api/taskgroups/" + id);
+                                }
+                            };break;
+                    }
+		});
+                var tasksGroupsTree = tasksGroupsLayout.cells("a").attachTreeView({
+			skin: "dhx_web",    // string, optional, treeview's skin
+			iconset: "font_awesome", // string, optional, sets the font-awesome icons
+			multiselect: false,           // boolean, optional, enables multiselect
+			checkboxes: true,           // boolean, optional, enables checkboxes
+			dnd: true,           // boolean, optional, enables drag-and-drop
+			context_menu: true           // boolean, optional, enables context menu			
+		});                 
+		tasksGroupsTree.attachEvent("onDrop",function(id){			
+                        var parent_id = arguments[1];
+                        parent_id = (parent_id) ? parent_id+'' : 0;
+                        var data = {
+                            id: id,
+                            parent_id: parent_id
+                        };                        
+                        ajaxGet("api/taskgroups/" + id + "/edit?", data, ''); 
+			return true;
+		});  
+                tasksGroupsTree.fill = function(i=null){	
+                    ajaxGet("api/taskgroups/grupytree", '', function(data) {                    
+                        if (data && data.success){      
+                            tasksGroupsTree.clearAll();                            
+                            tasksGroupsTree.loadStruct(data.data);                           
+                        }                    
+                    });
+                };
+                tasksGroupsTree.fill();
+
+                /**
+                 * 
+                 * Products by groups tab
+                 * 
+                 */
+                            
+                var productsGroupsToolBar = productsGroupsLayout.cells("a").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Grupy")},
+				{type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"}
+			]
+		});
+		productsGroupsToolBar.attachEvent("onClick", function(btn) {
+                    switch (btn){
+                            case 'Add':{			                                        
+                                    createAddEditGroupWindow("api/prodgroups", "api/prodgroups", productsGroupsTree, 0);
+                            };break;
+                            case 'Edit':{
+                                var id = tasksGroupsTree.getSelectedId();
+                                if (id) {                                        
+                                    createAddEditGroupWindow("api/prodgroups", "api/prodgroups/" + id + "/edit", productsGroupsTree, id);
+                                }
+                            };break;
+                            case 'Del':{
+                                var id = tasksGroupsTree.getSelectedId();
+                                if (id) {
+                                    deleteNodeFromTree(productsGroupsTree, "api/prodgroups/" + id);
+                                }
+                            };break;
+                    }
+		});
+                var productsGroupsTree = productsGroupsLayout.cells("a").attachTreeView({
+			skin: "dhx_web",    // string, optional, treeview's skin
+			iconset: "font_awesome", // string, optional, sets the font-awesome icons
+			multiselect: false,           // boolean, optional, enables multiselect
+			checkboxes: true,           // boolean, optional, enables checkboxes
+			dnd: true,           // boolean, optional, enables drag-and-drop
+			context_menu: true           // boolean, optional, enables context menu			
+		});                 
+		productsGroupsTree.attachEvent("onDrop",function(id){			
+                        var parent_id = arguments[1];
+                        parent_id = (parent_id) ? parent_id+'' : 0;
+                        var data = {
+                            id: id,
+                            parent_id: parent_id
+                        };                        
+                        ajaxGet("api/prodgroups/" + id + "/edit?", data, ''); 
+			return true;
+		});  
+                productsGroupsTree.fill = function(i=null){	
+                    ajaxGet("api/prodgroups/grupytree", '', function(data) {                    
+                        if (data && data.success){      
+                            productsGroupsTree.clearAll();                            
+                            productsGroupsTree.loadStruct(data.data);                           
+                        }                    
+                    });
+                };
+                productsGroupsTree.fill();  
+                productsGroupsTree.attachEvent("onSelect",function(id, mode){  
+                    if (mode) {
+                        var grupy=productsGroupsTree.getAllChecked();
+                        grupy[grupy.length]=id;                      
+                        productsGrid.clearAll();
+                        productsGrid.fill(grupy);                          
+                        return true;                        
+                    }
+                });
+                productsGroupsTree.attachEvent("onCheck",function(id){
+                        var grupy=productsGroupsTree.getAllChecked(); 
+                        productsGrid.clearAll();
+                        productsGrid.fill(grupy);                        
+                        return true;
+                });                 
+                
+                var productsGridToolBar = productsGroupsLayout.cells("b").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Produkty")},
+				{type: "spacer"},				
+                                {id: "Redo", type: "button", img: "fa fa-reply"}
+			]
+		});
+		productsGridToolBar.attachEvent("onClick", function(btn) {
+                    if (btn = 'Redo') {
+                        productsGroupsTree.fill();
+                        productsGrid.fill(0);                        
+                    }
+		});          
+                var productsGrid = productsGroupsLayout.cells("b").attachGrid({
+                    image_path:'codebase/imgs/',
+	            columns: [
+                        {
+                            label: _("Kod"),
+                            width: 100,
+                            id: "product_kod",
+                            type: "ro", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Name"),
+                            id: "product_name",
+                            width: 100,
+                            type: "ro", 
+                            sort: "str", 
+                            align: "left"     
+                        },
+                        {
+                            label: _("Grupa"),
+                            id: "product_group_name",
+                            width: 100,
+                            type: "co",                            
+                            align: "left"     
+                        },  
+                        {
+                            label: _("Typ"),
+                            id: "product_type_name",
+                            width: 100,
+                            type: "ro", 
+                            sort: "str", 
+                            align: "left"     
+                        }                       
+                    ],
+			multiselect: true
+                });                              
+                productsGrid.fill = function(i) {
+                    var ids = Array();
+                    ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
+                    ajaxGet("api/products/listbygroups/" + ids, "", function(data){
+                        if (data && data.success){                    
+                            productsGrid.parse(data.data, "js");
+                        }
+                    });	                    
+                };               
+                var groupsCombo = productsGrid.getCombo(2);//takes the column index                
+                ajaxGet("api/prodgroups", "", function(data) {  
+                    if (data.success && data.data) {
+                        data.data.forEach(function(group){
+                            groupsCombo.put(group.id, group.name);
+                        });
+                    }                    
+                });
+                var dpProductsGrid = new dataProcessor("api/products", "js");                
+                dpProductsGrid.init(productsGrid);
+                dpProductsGrid.enableDataNames(true);
+                dpProductsGrid.setTransactionMode("REST");
+                dpProductsGrid.enablePartialDataSend(true);
+                dpProductsGrid.enableDebug(true);
+                dpProductsGrid.setUpdateMode("row", true);
+                dpProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                    data.id = id;
+                    data.product_group_id = data.product_group_name;
+                    ajaxGet("api/products/" + id + "/edit", data, function(data){                                                            
+                        console.log(data);
+                    });
+                });  
+                productsGrid.fill(0);                
+                
+                /**
+                 * 
+                 * Types of products tab
+                 * 
+                 */
+                
+                var typesProductsGridToolBar = typesProductsLayout.cells("a").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Typy produktow")},
+				{type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},				
+				{id: "Del", type: "button", img: "fa fa-minus-square"}
+			]
+		});
+		typesProductsGridToolBar.attachEvent("onClick", function(btn) {
+                    switch (btn){
+                            case 'Add':{			                                                                        
+                                var addingForm = createWindowWithForm([
+                                    {type:"fieldset",  offsetTop:0, label:_("Nowy typ produktu"), width:250, list:[                                                                          
+                                            {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
+                                            {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
+                                            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                                {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                                                {type: "newcolumn"},
+                                                {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                                            ]}
+                                    ]}                                    
+                                ], _("Dodaj typ produktu"), 300, 300);
+                                addingForm.attachEvent("onButtonClick", function(name){
+                                    if (name == 'save') {
+                                        ajaxPost("api/prodtypes", addingForm.getFormData(), function(data){
+                                            if (data && data.success) {
+                                                typesProductsGrid.addRow(data.data.id, [data.data.name, data.data.description]);   
+                                            }
+                                        });
+                                    }
+                                });                                
+                            };break;
+                            case 'Del':{
+                                var id = typesProductsGrid.getSelectedRowId();
+                                if (id) {
+                                    ajaxDelete("api/prodtypes/" + id, "", function(data){
+                                        if (data && data.success){
+                                            typesProductsGrid.deleteRow(id);
+                                        }
+                                    });    
+                                }
+                            };break;
+                    }
+		});               
+                var typesProductsGrid = typesProductsLayout.cells("a").attachGrid({
+                    image_path:'codebase/imgs/',
+	            columns: [
+                        {
+                            label: _("Imie"),
+                            id: "name",
+                            width: 100,
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"     
+                        },                                                
+                        {
+                            label: _("Opis"),
+                            id: "description",
+                            width: 300,
+                            type: "txt", 
+                            sort: "str", 
+                            align: "left"     
+                        }                          
+                    ],
+		    multiselect: true                    
+                });
+                typesProductsGrid.fill = function() {              
+                    ajaxGet("api/prodtypes", "", function(data){
+                        if (data && data.success){                    
+                            typesProductsGrid.parse(data.data, "js");
+                        }
+                    });	                    
+                };                  
+                typesProductsGrid.fill();
+                var dptypesProductsGrid = new dataProcessor("api/products", "js");                
+                dptypesProductsGrid.init(typesProductsGrid);
+                dptypesProductsGrid.enableDataNames(true);
+                dptypesProductsGrid.setTransactionMode("REST");
+                dptypesProductsGrid.enablePartialDataSend(true);
+                dptypesProductsGrid.enableDebug(true);
+                dptypesProductsGrid.setUpdateMode("row", true);
+                dptypesProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                    data.id = id;
+                    ajaxGet("api/prodtypes/" + id + "/edit", data, function(data){                                                            
+                        console.log(data);
+                    });
+                }); 
+                
+                /**
+                 * 
+                 * Groups of workers tab 
+                 * 
+                 */
+                var workersGroupsToolBar = workersGroupsLayout.cells("a").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Grupy")},
+				{type: "spacer"},
+				{id: "Add", type: "button", img: "fa fa-plus-square "},
+				{id: "Edit", type: "button", img: "fa fa-edit"},
+				{id: "Del", type: "button", img: "fa fa-minus-square"}
+			]
+		});
+		workersGroupsToolBar.attachEvent("onClick", function(btn) {
+                    switch (btn){
+                            case 'Add':{			                                        
+                                    createAddEditGroupWindow("api/departaments", "api/departaments", workersGroupsTree, 0);
+                            };break;
+                            case 'Edit':{
+                                var id = workersGroupsTree.getSelectedId();
+                                if (id) {                                        
+                                    createAddEditGroupWindow("api/departaments", "api/departaments/" + id + "/edit", workersGroupsTree, id);
+                                }
+                            };break;
+                            case 'Del':{
+                                var id = workersGroupsTree.getSelectedId();
+                                if (id) {
+                                    deleteNodeFromTree(workersGroupsTree, "api/departaments/" + id);
+                                }
+                            };break;
+                    }
+		});
+                var workersGroupsTree = workersGroupsLayout.cells("a").attachTreeView({
+			skin: "dhx_web",    // string, optional, treeview's skin
+			iconset: "font_awesome", // string, optional, sets the font-awesome icons
+			multiselect: false,           // boolean, optional, enables multiselect
+			checkboxes: true,           // boolean, optional, enables checkboxes
+			dnd: true,           // boolean, optional, enables drag-and-drop
+			context_menu: true           // boolean, optional, enables context menu			
+		});                 
+		workersGroupsTree.attachEvent("onDrop",function(id){			
+                        var parent_id = arguments[1];
+                        parent_id = (parent_id) ? parent_id+'' : 0;
+                        var data = {
+                            id: id,
+                            parent_id: parent_id
+                        };                        
+                        ajaxGet("api/departaments/" + id + "/edit?", data, ''); 
+			return true;
+		});  
+                workersGroupsTree.fill = function(i=null){	
+                    ajaxGet("api/departamentstree", '', function(data) {                    
+                        if (data && data.success){      
+                            workersGroupsTree.clearAll();                            
+                            workersGroupsTree.loadStruct(data.data);                           
+                        }                    
+                    });
+                };
+                workersGroupsTree.fill();                
+                
+
+
+
+
+
 //                productTypesToolBar.attachEvent("onClick", function(id) { 
 //                    switch (id){
 //		        case 'Add':{
@@ -795,68 +1333,7 @@ function settingsInit(cell) {
 //                
 //                productGroupTree.attachEvent("onEdit", function(state, id, tree, value){
 //                    console.log('onEdit', arguments);
-//                });
-                
-                //form for work with roles
-                function createWindowWithForm(formStruct, height, width){
-                    var dhxWins = new dhtmlXWindows();
-                    w1 = dhxWins.createWindow({
-                            id:"w1",
-                            left:20,
-                            top:30,
-                            width: width,
-                            height: height,
-                            center:true,
-                            caption: _("Dodaj lub zmien"),
-                            header: true,
-                            onClose:function(){
-
-                            }
-                    });
-                    //initializing form 
-                    return dhxWins.window("w1").attachForm(formStruct, true);         
-                }  
-                
-                var roleForm = [
-                    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
-                            {type:"input",  name:"name",   label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				                            
-                            {type:"button", name:"save",   value:_("Zapisz"),     offsetTop:18},
-                            {type:"button", name:"cancel", value:_("Anuluj"),     offsetTop:18}
-                    ]}
-		];
-                
-                var permissionForm = [
-                    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
-                            {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:100},                                                                				                            
-                            {type:"input",  name:"description", label:_("Opis"), offsetTop:13, labelWidth:100},                                                                				                            
-                            {type:"button", name:"save",        value:_("Zapisz"),     offsetTop:18},
-                            {type:"button", name:"cancel",      value:_("Anuluj"),     offsetTop:18}
-                    ]}
-		]; 
-                
-                var productFormStruct = [
-                    {type: "file",     name: "upload_photo", hidden: true},
-                    {type: "container",name: "photo",      label: "",             inputWidth: 160,    inputHeight: 160, offsetTop: 20, offsetLeft: 65},                        //
-                    {type: "input",    name: "kod",        label: _("Kod"),       labelAlign: "left", required: true},
-                    {type: "input",    name: "firstname",  label: _("First name"),labelAlign: "left", required: true},
-                    {type: "input",    name: "lastname",   label: _("Last name"), labelAlign: "left", required: true},
-                    {type: "input",    name: "name",       label: _("Name"),      labelAlign: "left"},
-                    {type: "input",    name: "login",      label: _("Login"),     labelAlign: "left"},
-                    {type: "password", name: "password",   label: _("Password"),  labelAlign: "left"},
-                    {type: "input",    name: "email",      label: _("E-mail"),    labelAlign: "left"},
-                    {type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},		 	                                                                        
-                    {type: "label",                        label: _("Is worker")},
-                    {type: "radio",    name: "is_worker",  label: _("Tak"), value: 1,  checked: true},
-                    {type: "radio",    name: "is_worker",  label: _("Nie"),  value: 0},                        
-                    {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
-                    {type: "block",    name: "buttonblock",inputWidth: 200,    className: "myBlock", list:[
-                        {type: "button",   name: "save",   value:_("Zapisz"), offsetTop:18},
-                        {type: "newcolumn"},
-                        {type: "button",   name: "cancel", value:_("Anuluj"), offsetTop:18}
-                    ]}  
-                ];
-                
-                
+//                });                
                 
 //                var new_data = ajaxGet("api/workerslist/" + i, '', function(data){                                     
 //				if (data && data.success){
@@ -899,11 +1376,108 @@ function settingsInit(cell) {
 //			settingsForm = settingsLayout.cells("b").attachForm(formData);
 //			settingsForm.setSizes = settingsForm.centerForm;
 //			settingsForm.setSizes();
-//		});
-		
+//		});		
 	}
 	
 }
+
+var groupFormStruct = [
+        {type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
+                {type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),        options: [{text: "None", value: "0"}], inputWidth: 150},                                
+                {type:"input",  name:"name",    	label:_("Nazwa grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
+                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                    {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                    {type: "newcolumn"},
+                    {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                ]}
+        ]}
+];
+
+function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, id = 0) {
+    var grupyForm = createWindowWithForm(groupFormStruct, "Dodaj lub zmien grupe", 300, 350);
+    if (id) {
+        grupyForm.removeItem("parent_id");
+        grupyForm.setItemValue("name", treeObj.getItemText(id));
+    } else {
+        var dhxCombo = grupyForm.getCombo("parent_id");                             
+        ajaxGet(urlForParentCombo, '', function(data) {                    
+                dhxCombo.addOption(data.data);
+        });                  
+    }
+    grupyForm.attachEvent("onButtonClick", function(name){
+        switch (name){
+            case 'save':{
+                if (id) {                    
+                    ajaxGet(urlForSaveButton, grupyForm.getFormData(), function(data){                                                                                                            
+                        treeObj.setItemText(id, data.data.name);
+                    });
+                } else {                   
+                    ajaxPost(urlForSaveButton, grupyForm.getFormData(), function(data){                                                            
+                        treeObj.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
+                        if (data.data.parent_id) {
+                            treeObj.openItem(data.data.parent_id);
+                        }
+                        treeObj.selectItem(data.data.id);
+                    });                
+                }
+            };break;         
+            case 'cancel':{
+                grupyForm.clear();
+            };break;
+        }
+    });
+    return grupyForm;
+}
+
+function deleteNodeFromTree(treeObj, deleteUrl) {
+    var id = treeObj.getSelectedId();
+    if (id) {
+        dhtmlx.confirm({
+        title:_("Ostrożność"),                                    
+        text:_("Czy na pewno chcesz usunąć grupe?"),
+        callback: function(result){
+                    if (result) {
+                        ajaxDelete(deleteUrl, '', function(data) {
+                            if (data.success) {
+                                treeObj.deleteItem(id);                                                    
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Błąd!"),
+                                    type:"alert-error",
+                                    text:data.message
+                                });
+                            }
+                        }); 
+                    }
+                }
+            });
+    }  else {
+        dhtmlx.alert({
+            title:_("Wiadomość"),
+            type:"alert",
+            text:_("Wybierz grupe, która chcesz usunąć!")
+        });
+    }  
+}
+
+function createWindowWithForm(formStruct, caption, height, width){
+    var dhxWins = new dhtmlXWindows();
+    w1 = dhxWins.createWindow({
+            id:"w1",
+            left:20,
+            top:30,
+            width: width,
+            height: height,
+            center:true,
+            caption: _(caption),
+            header: true,
+            onClose:function(){
+
+            }
+    });
+    //initializing form 
+    return dhxWins.window("w1").attachForm(formStruct, true);         
+} 
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 	if (id == "settings") {

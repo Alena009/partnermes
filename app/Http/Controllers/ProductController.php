@@ -48,32 +48,36 @@ class ProductController extends BaseController
     /**
      * create new product with translations
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
+        $product = [];
+        $success = false;
+        $locale = app()->getLocale();
+        
         $product = new Product();
-        $product->kod = $request['kod'];        
-        $product->name = $request['name'];        
-        $product->product_type_id = $request['product_type_id']; 
-        $product->weight = $request['weight'];
-        $product->height = $request['height'];
-        $product->width = $request['width'];
-        $product->length = $request['length'];
-        $product->pictures = $request['pictures'];
-        $product->description = $request['description'];
+        $product->kod              = $request['kod'];                
+        $product->product_type_id  = $request['product_type_id']; 
+        $product->weight           = $request['weight'];
+        $product->height           = $request['height'];
+        $product->width            = $request['width'];
+        $product->length           = $request['length'];
+        $product->area             = $request['area'];
+        $product->pictures         = $request['pictures'];        
         $product->product_group_id = $request['product_group_id'];
-        $product->area = $request['area'];
-        $product->pack = $request['pack'];
+
         $product->save();
 
-        foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-            $order->translateOrNew($locale)->name = "Title {$locale}";            
-            $order->translateOrNew($locale)->description = "Title {$locale}";            
-            $order->translateOrNew($locale)->pack = "Title {$locale}";            
-        }
+        $product->translateOrNew($locale)->name        = $request['name']; 
+        $product->translateOrNew($locale)->description = $request['description'];        
+        $product->translateOrNew($locale)->pack        = $request['pack'];
+        
+        $product->save();
+        
+        if (!empty((array) $product)) {
+            $success = true;
+        }      
 
-        $order->save();
-
-        return true;
+        return response()->json(['data' => $product, 'success' => $success]);
     }   
     
     /**
@@ -103,16 +107,21 @@ class ProductController extends BaseController
         
         if ($groupsProducts) {  
             $groupsIds = explode(',', $groupsProducts);
-            $products = Product::whereIn("product_group_id", $groupsIds)->get();                     
+            $products = Product::whereIn("product_group_id", $groupsIds)->get();
+        
+            foreach ($products as $product) {
+                $product['product_name'] = $product['name'];
+                $product['product_kod'] = $product['kod'];
+                $product['text'] = $product['name'];
+                $product['value'] = $product['id'];
+                $product['product_type_name']  = $product->type['name'];
+                $product['product_group_name'] = $product->group['name'];
+            }
+                    
         } else {
             $products = $this->index();        
         }
-        
-        foreach ($products as $product) {
-            $product['text'] = $product['name'];
-            $product['value'] = $product['id'];
-        }
-        
+
         return response()->json(['success' => true, 'data' => $products]);     
     }     
 }

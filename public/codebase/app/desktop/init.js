@@ -48,7 +48,7 @@ function appInit() {
 			});
 		}
 	});
-	mainSidebar.cells("zlecenia").setActive(true);
+	mainSidebar.cells("timeline").setActive(true);
         return;
 	//window.dhx4.callEvent("onSelect","projects");
 	//debugger;
@@ -201,7 +201,7 @@ function axiosQuery(method, url, params, callback, inputHeaders = {}) {
 //    };
 
     var headers = inputHeaders;
-    headers.Authorization = 'Bearer ' + api_token;
+    headers.Authorization = 'Bearer ' + localStorage.token;
    
     var requestBody = {
         method: method,

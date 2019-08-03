@@ -166,6 +166,17 @@ class UserController extends \App\Http\Controllers\BaseController
             return ['success' => false, 'id' => $id,'msg'=>$this->repository->errors(),'class'=>__CLASS__,'method' => __METHOD__];
         }
     }
-
+    
+    public function index()
+    {
+        $users = [];
+        $users = User::all();
         
+        foreach ($users as $user) {
+            $user['key']   = $user['id'];
+            $user['label'] = $user['name']; 
+        }
+        
+        return response()->json(['success' => true, 'data' => $users]);
+    }
 }

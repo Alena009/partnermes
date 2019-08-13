@@ -26,7 +26,8 @@ Route::group([
     Route::get('/departamentstree', 'DepartamentController@buildTree');
     Route::resource('/departaments', 'DepartamentController'); 
     
-    Route::resource('/operations', 'OperationController');
+    Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
+    Route::resource('/operations', 'OperationController'); 
     Route::get('/orders/history/{orderId}', 'OrderController@history');
     Route::get('/orders/positions/{orderId}', 'OrderController@positions');
     Route::get('/orders/list/{amount}', 'OrderController@ordersList');
@@ -39,7 +40,9 @@ Route::group([
     Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup'); 
     Route::get('/prodgroups/grupytree', 'ProductGroupController@buildTree');    
     Route::resource('/prodgroups', 'ProductGroupController');     
-    Route::resource('/products', 'ProductController');     
+    Route::resource('/products', 'ProductController');  
+    Route::get('/productstasks/list/{productId}', 'ProductTaskController@listTasksByProduct');
+    Route::resource('/productstasks', 'ProductTaskController');  
     
     Route::resource('/roles', 'RoleController');
     Route::get('/roles', 'RoleController@roles');
@@ -50,6 +53,8 @@ Route::group([
     Route::post('/rolespermissions/addToRoles/{permissionId}', 'RolePermissionController@addNewPermissionToRoles');
     Route::resource('/rolespermissions', 'RolePermissionController');    
     
+    Route::get('/tasks/listbygroups/{groups}', 'TaskController@listByGroups');    
+    Route::resource('/tasks', 'TaskController');    
     Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
     Route::resource('/taskgroups', 'TaskGroupController');    
     
@@ -67,9 +72,8 @@ Route::group([
     Route::get('/warehouse/list/{grupy}', 'WarehouseController@listProducts');  
     Route::resource('/warehouse', 'WarehouseController'); 
     
-    Route::get('/zlecenia/list/{grupy}', 'TaskController@listTasks');  
-    Route::get('/zlecenia/list', 'TaskController@listTasks');  
-    Route::resource('/zlecenia', 'TaskController');  
+    Route::get('/zlecenia/list/{groups}', 'OrderPositionController@zleceniaListByGroups');   
+ 
 });
 
 Route::post('login', 'API\UserController@login');

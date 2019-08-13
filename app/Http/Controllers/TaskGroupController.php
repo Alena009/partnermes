@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Repositories\TaskGroupRepository;
+use App\Models\TaskGroup;
 
 class TaskGroupController extends BaseController
 {
@@ -22,16 +23,17 @@ class TaskGroupController extends BaseController
      */
     public function index($locale = 'pl')
     {
+        $taskGroups = [];
         app()->setLocale($locale);
 
-        $taskgroups = \App\Models\TaskGroup::all();
+        $taskGroups = \App\Models\TaskGroup::all();
         
-        foreach ($taskgroups as $group) {
+        foreach ($taskGroups as $group) {
             $group->text = $group->name;  
             $group->value = (string)$group->id;           
         }
         
-        return response()->json(['success' => true, 'data' => $taskgroups]);        
+        return response()->json(['success' => true, 'data' => $taskGroups]);        
     }   
     
     /**

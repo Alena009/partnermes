@@ -25,5 +25,10 @@ class Product extends BaseModel
     public function type()
     {
         return $this->belongsTo('App\Models\ProductType', 'product_type_id', 'id');
+    }
+
+    public function tasks()
+    {
+        return $this->belongsToMany('App\Models\Task', 'product_tasks', 'product_id', 'task_id');        
     }    
 }

@@ -13,7 +13,7 @@ function settingsInit(cell) {
             var mainTabbar = settingsLayout.cells("a").attachTabbar();
                 mainTabbar.addTab("a1", _("Role"), null, null, true);
                 mainTabbar.addTab("a2", _("Produkty"));                    
-                mainTabbar.addTab("a3", _("Grupy zlecen"));
+                mainTabbar.addTab("a3", _("Grupy zlecen, zlecenia"));
                 mainTabbar.addTab("a4", _("Grupy produktow"));                                
                 mainTabbar.addTab("a5", _("Typy produktow"));
                 mainTabbar.addTab("a6", _("Grupy pracownikow"));
@@ -32,13 +32,17 @@ function settingsInit(cell) {
                 
             var optionsTabbar = productsLayout.cells("c").attachTabbar(); 
                 optionsTabbar.addTab("a1", _("Componenty"), null, null, true);
-                optionsTabbar.addTab("a2", _("Zdjęcia")); 
+                optionsTabbar.addTab("a2", _("Zlecenia"));
+                optionsTabbar.addTab("a3", _("Zdjęcia")); 
                 
-            var componentsLayout = optionsTabbar.tabs("a1").attachLayout("1C"); 
-                componentsLayout.cells("a").hideHeader();
+                var componentsLayout = optionsTabbar.tabs("a1").attachLayout("1C"); 
+                    componentsLayout.cells("a").hideHeader();
+                var zleceniaForProductLayout = optionsTabbar.tabs("a2").attachLayout("1C"); 
+                    zleceniaForProductLayout.cells("a").hideHeader();                    
             
-            var tasksGroupsLayout = mainTabbar.tabs("a3").attachLayout("1C"); 
+            var tasksGroupsLayout = mainTabbar.tabs("a3").attachLayout("2U"); 
                 tasksGroupsLayout.cells("a").hideHeader();
+                tasksGroupsLayout.cells("b").hideHeader();
                 
             var productsGroupsLayout = mainTabbar.tabs("a4").attachLayout("2U"); 
                 productsGroupsLayout.cells("a").hideHeader(); 
@@ -49,21 +53,25 @@ function settingsInit(cell) {
                 
             var workersGroupsLayout = mainTabbar.tabs("a6").attachLayout("1C");
                 workersGroupsLayout.cells("a").hideHeader();
-             
                 
+                /**
+                 * 
+                 * Roles tab
+                 * 
+                 */
                 var rolesToolBar = rolesLayout.cells("a").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Role")},
-				{type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"}
-			]
-		});
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Role")},
+                                {type: "spacer"},
+                                {id: "Add", type: "button", img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", img: "fa fa-edit"},
+                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                        ]
+                });
                 rolesToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
-		        case 'Add':{
+                        case 'Add':{
                             var form = createWindowWithForm(roleForm, 300, 300);
                             form.attachEvent("onButtonClick", function(name){
                                 switch (name){
@@ -81,7 +89,7 @@ function settingsInit(cell) {
                                 }
                             });
                         };break;
-		        case 'Edit':{                            
+                        case 'Edit':{                            
                             var roleId = rolesTree.getSelectedId();
                             if (roleId) {
                                 var form = createWindowWithForm(roleForm, 300, 300);
@@ -112,7 +120,7 @@ function settingsInit(cell) {
                                 });
                             }
                         };break;  
-		        case 'Del':{
+                        case 'Del':{
                             var roleId = rolesTree.getSelectedId();
                             if (roleId) {
                                 dhtmlx.confirm({
@@ -143,34 +151,33 @@ function settingsInit(cell) {
                                     text:_("Wybierz rolę, którą chcesz usunąć!")
                                 });
                             }
-                             
+
                         };break;                     
                     };
-                });   
+                }); 
                 var roleForm = [
                     {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
                             {type:"input",  name:"name",   label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				                            
                             {type:"button", name:"save",   value:_("Zapisz"),     offsetTop:18},
                             {type:"button", name:"cancel", value:_("Anuluj"),     offsetTop:18}
                     ]}
-		]; 
-                
+                ]; 
                 var usersToolBar = rolesLayout.cells("b").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Uzytkowniki")},
-				{type: "spacer"},                                
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Uzytkowniki")},
+                                {type: "spacer"},                                
                                 {type: "text", id: "find", text: _("Find:")},
-				{type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
+                                {type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
                                 {type: "separator", id: "sep2"},
-				{id: "Cog", type: "button", img: "fa fa-cog "},
+                                {id: "Cog", type: "button", img: "fa fa-cog "},
                                 {type: "separator", id: "sep3"},
                                 {id: "Redo", type: "button", img: "fa fa-reply"}
-			]
-		});
+                        ]
+                });
                 usersToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
-		        case 'Cog':{                                
+                        case 'Cog':{                                
                             var roleId = rolesTree.getSelectedId();
                             if (roleId) {
                                 var dhxWins = new dhtmlXWindows();
@@ -270,23 +277,22 @@ function settingsInit(cell) {
                                 permissionsGrid.fill(0);
                         };break; 
                     }
-                });  
-                
+                });
                 var permissionsToolBar = rolesLayout.cells("c").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Uprawnienia")},
-				{type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"},
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Uprawnienia")},
+                                {type: "spacer"},
+                                {id: "Add", type: "button", img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", img: "fa fa-edit"},
+                                {id: "Del", type: "button", img: "fa fa-minus-square"},
                                 {type: "separator", id: "sep3"},
                                 {id: "Redo", type: "button", img: "fa fa-reply"}
-			]
-		});    
+                        ]
+                });
                 permissionsToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
-		        case 'Add':{
+                        case 'Add':{
                                 var form = createWindowWithForm(permissionForm, 300, 300);
                                 form.attachEvent("onButtonClick", function(name){
                                     switch (name){
@@ -376,24 +382,22 @@ function settingsInit(cell) {
                             {type:"button", name:"save",        value:_("Zapisz"),     offsetTop:18},
                             {type:"button", name:"cancel",      value:_("Anuluj"),     offsetTop:18}
                     ]}
-		];
-                
+                ];
                 var rolesTree = rolesLayout.cells("a").attachTreeView({
                     skin: "dhx_skyblue",    // string, optional, treeview's skin
-			iconset: "font_awesome", // string, optional, sets the font-awesome icons
-			multiselect: false,           // boolean, optional, enables multiselect
-			//checkboxes: true,           // boolean, optional, enables checkboxes
-			//dnd: true,           // boolean, optional, enables drag-and-drop
-			context_menu: true,  
-                });                
+                        iconset: "font_awesome", // string, optional, sets the font-awesome icons
+                        multiselect: false,           // boolean, optional, enables multiselect
+                        //checkboxes: true,           // boolean, optional, enables checkboxes
+                        //dnd: true,           // boolean, optional, enables drag-and-drop
+                        context_menu: true,  
+                }); 
                 rolesTree.load = function(){ 
                     ajaxGet("api/roles", '', function(data) {                    
                         if (data && data.success){                            
                             rolesTree.loadStruct(data.data);                           
                         }                    
                     });
-                };
-                rolesTree.load();                
+                }; 
                 rolesTree.attachEvent("onSelect",function(id, mode){  
                     if (mode) {
                         usersGrid.clearAll();
@@ -404,10 +408,9 @@ function settingsInit(cell) {
                         return true;                        
                     }
                 });
-                
                 var usersGrid = rolesLayout.cells("b").attachGrid({
                     image_path:'codebase/imgs/',
-	            columns: [                        
+                    columns: [                        
                         {
                             label: _("Nazwisko"),
                             width: 100,
@@ -433,7 +436,7 @@ function settingsInit(cell) {
                             align: "left"
                         }                        
                     ],
-			multiselect: true
+                        multiselect: true
                 });               
                 usersGrid.fill = function(id) {
                     ajaxGet("api/roles/" + id + "/users", '', function(data){                                     
@@ -442,16 +445,14 @@ function settingsInit(cell) {
                             usersGrid.parse((data.data), "js");
                         }
                     });
-                };               
-                usersGrid.fill(0);      
+                };
                 var searchElem = usersToolBar.getInput('szukaj');
-                                 usersGrid.makeFilter(searchElem, 0, true);
-                                 usersGrid.makeFilter(searchElem, 1, true);                                 
-                                 usersGrid.filterByAll(); 
-                                 
+                     usersGrid.makeFilter(searchElem, 0, true);
+                     usersGrid.makeFilter(searchElem, 1, true);                                 
+                     usersGrid.filterByAll();
                 var permissionsGrid = rolesLayout.cells("c").attachGrid({
                     image_path:'codebase/imgs/',
-	            columns: [
+                    columns: [
                         {
                             label: _("Uprawnienie"),
                             width: 100,
@@ -473,17 +474,16 @@ function settingsInit(cell) {
                             type: "ed"       
                         }                        
                     ],
-			multiselect: true
-                });                
+                        multiselect: true
+                }); 
                 permissionsGrid.fill = function(id) {
                     ajaxGet("api/roles/" + id + "/permissions", '', function(data){                                     
-			if (data && data.success){
+                        if (data && data.success){
                             permissionsGrid.clearAll();
                             permissionsGrid.parse((data.data), "js");
                         }
-		    });
-                };                
-                permissionsGrid.fill(0);               
+                    });
+                };
                 permissionsGrid.attachEvent("onCheck", function(rId,cInd,state){
                     var roleId = rolesTree.getSelectedId();
                     if (roleId) {
@@ -493,29 +493,28 @@ function settingsInit(cell) {
                                 value: +state
                             };
                         ajaxGet("api/rolespermissions/edit", data, '');
-                        
+
                         permissionsGrid.fill(roleId);                          
                     }                                 
-                });                
-                
+                });
+                rolesTree.load();                                                           
+                usersGrid.fill(0);                 
+                permissionsGrid.fill(0);                 
                 
                 /**
                  * 
-                 * Products tab
+                 * Products tab 
                  * 
-                 * 
-                 */   
-                
-                
+                 */                              
                 var productsGridToolBar = productsLayout.cells("a").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Produkty")},
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Produkty")},
                                 {type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"}				                               
-			]                    
+                                {id: "Add", type: "button", img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", img: "fa fa-edit"},
+                                {id: "Del", type: "button", img: "fa fa-minus-square"}				                               
+                        ]                    
                 });
                 productsGridToolBar.attachEvent("onClick", function(name) {
                     switch (name){
@@ -549,7 +548,7 @@ function settingsInit(cell) {
                 });
                 var productsGrid = productsLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
-	            columns: [                        
+                    columns: [                        
                         {
                             label: _("Kod"),
                             width: 100,
@@ -559,7 +558,7 @@ function settingsInit(cell) {
                             align: "left"
                         },
                         {
-                            label: _("Nazwa produktu"),
+                            label: _("Imie produktu"),
                             width: 100,
                             id: "name",
                             type: "ed", 
@@ -575,7 +574,7 @@ function settingsInit(cell) {
                             align: "left"
                         },
                         {
-                            label: _("Group produktu"),
+                            label: _("Grupa produktu"),
                             width: 100,
                             id: "product_group_name",
                             type: "ed", 
@@ -615,12 +614,12 @@ function settingsInit(cell) {
                             align: "left"
                         }                           
                     ],
-			multiselect: true
+                        multiselect: true
                 });                
                 productsGrid.fill = function(){						
                     ajaxGet("api/products", '', function(data){                                     
                         if (data && data.success){                                    
-                            productsGrid.parse((data.data), "js");
+                            productsGrid.parse(data.data, "js");
                         }
                     });                        
                 };                
@@ -638,20 +637,21 @@ function settingsInit(cell) {
                         console.log(data);
                     });
                 });
-		productsGrid.attachEvent("onRowSelect", function() {
+                productsGrid.attachEvent("onRowSelect", function() {
                     var selectedId = productsGrid.getSelectedRowId();
                     componentsGrid.clearAll();
                     componentsGrid.fill(selectedId);     
+                    zleceniaForProductGrid.fill(selectedId);     
                     productForm.hideItem("block");
                 }); 
-                
+
                 var productFormToolBar = productsLayout.cells("b").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Produkt")},
-				{type: "spacer"},								
-				{id: "Hide", type: "button", img: "fa fa-arrow-right"} 
-			]                    
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Produkt")},
+                                {type: "spacer"},								
+                                {id: "Hide", type: "button", img: "fa fa-arrow-right"} 
+                        ]                    
                 });                
                 var productFormStruct = [
                     {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
@@ -714,14 +714,14 @@ function settingsInit(cell) {
                     }
                 }); 
                 productForm.bind(productsGrid);                 
-                
+
                 var componentsGridMenu = componentsLayout.cells("a").attachMenu({
-			iconset: "awesome",
-			items: [
+                        iconset: "awesome",
+                        items: [
                             {id:"Add",  text: _("Dodaj"),  img: "fa fa-plus-square"},
                             {id:"Edit", text: _("Edytuj"), img: "fa fa-edit"},
                             {id:"Del",  text: _("Usun"),   img: "fa fa-minus-square"}
-			]                    
+                        ]                    
                 });  
                 componentsGridMenu.attachEvent("onClick", function(name) {
                     var formStruct = [
@@ -738,7 +738,7 @@ function settingsInit(cell) {
                         case "Add": {
                             var selectedProductId = productsGrid.getSelectedRowId();
                             if (selectedProductId) {
-                                var addingForm = createWindowWithForm(formStruct, 300, 300);
+                                var addingForm = createWindowWithForm(formStruct, "Componenty", 300, 300);
                                 var productCombo = addingForm.getCombo("component_id");
                                 productCombo.enableFilteringMode(true);
                                 ajaxGet("api/products", '', function(data){
@@ -772,7 +772,7 @@ function settingsInit(cell) {
                 });                
                 var componentsGrid = componentsLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
-	            columns: [                        
+                    columns: [                        
                         {
                             label: _("Kod"),
                             width: 100,
@@ -814,7 +814,7 @@ function settingsInit(cell) {
                             align: "left"
                         }                           
                     ],
-			multiselect: true
+                        multiselect: true
                 });   
                 componentsGrid.fill = function(id = 0){						
                     ajaxGet("api/components/list/" + id, '', function(data){                                     
@@ -835,25 +835,131 @@ function settingsInit(cell) {
                     ajaxGet("api/components/" + id + "/edit", data, function(data){                                                            
                         console.log(data);
                     });
-                });                
-                
+                }); 
+                var zleceniaForProductGridMenu = zleceniaForProductLayout.cells("a").attachMenu({
+                        iconset: "awesome",
+                        items: [
+                            {id:"Add",  text: _("Dodaj"),  img: "fa fa-plus-square"},
+                            {id:"Edit", text: _("Edytuj"), img: "fa fa-edit"},
+                            {id:"Del",  text: _("Usun"),   img: "fa fa-minus-square"}
+                        ]                    
+                });
+                zleceniaForProductGridMenu.attachEvent("onClick", function(name) {
+                    var formStruct = [
+                                    {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
+                                    {type: "combo", name: "task_id",  required: true, label: _("Zlecenie"), options: []},		
+                                    {type: "input", name: "duration", required: true, label: _("Czas")},
+                                    {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                        {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
+                                        {type: "newcolumn"},
+                                        {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
+                                    ]}              
+                                ];
+                    switch(name) {
+                        case "Add": {
+                            var selectedProductId = productsGrid.getSelectedRowId();
+                            if (selectedProductId) {
+                                var addingForm = createWindowWithForm(formStruct, "Componenty", 300, 300);
+                                var tasksCombo = addingForm.getCombo("task_id");
+                                tasksCombo.enableFilteringMode(true);
+                                ajaxGet("api/tasks", '', function(data){
+                                    tasksCombo.addOption(data.data);
+                                });
+                                addingForm.attachEvent("onButtonClick", function(name){
+                                    var data = this.getFormData();
+                                    data.product_id = selectedProductId;
+                                    if (name == "save") {
+                                        ajaxPost("api/productstasks", data, function(data){
+                                            if(data && data.success){
+                                                zleceniaForProductGrid.fill(selectedProductId);
+                                                addingForm.setItemFocus("task_id");
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        };break;
+                        case "Del": {
+                            var selectedId = zleceniaForProductGrid.getSelectedRowId();
+                            if (selectedId) {
+                                ajaxDelete("api/productstasks/" + selectedId, "", function(data){
+                                    if (data && data.success) {
+                                        zleceniaForProductGrid.deleteRow();
+                                    }
+                                });    
+                            }                            
+                        };break;
+                    }
+                });                 
+                var zleceniaForProductGrid = zleceniaForProductLayout.cells("a").attachGrid({
+                    image_path:'codebase/imgs/',
+                    columns: [                        
+                        {
+                            label: _("Kod"),
+                            width: 100,
+                            id: "task_kod",
+                            type: "ro", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Zlecenie"),
+                            width: 100,
+                            id: "task_name",
+                            type: "ro", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Trwalosc"),
+                            width: 100,
+                            id: "duration",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        }                           
+                    ],
+                        multiselect: true
+                });
+                zleceniaForProductGrid.fill = function(id = 0){						
+                    ajaxGet("api/productstasks/list/" + id, '', function(data){                                     
+                        if (data && data.success){
+                            zleceniaForProductGrid.parse((data.data), "js");
+                        }
+                    });                        
+                };
+                var dpZleceniaForProductGrid = new dataProcessor("api/productstasks", "js");                
+                dpZleceniaForProductGrid.init(zleceniaForProductGrid);
+                dpZleceniaForProductGrid.enableDataNames(true);
+                dpZleceniaForProductGrid.setTransactionMode("REST");
+                dpZleceniaForProductGrid.enablePartialDataSend(true);
+                dpZleceniaForProductGrid.enableDebug(true);
+                dpZleceniaForProductGrid.setUpdateMode("row", true);
+                dpZleceniaForProductGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                    data.id = id;
+                    ajaxGet("api/productstasks/" + id + "/edit", data, function(data){                                                            
+                        console.log(data);
+                    });
+                });                 
+                            
+              
+
                 /**
                  * 
                  * Tasks groups tab
                  * 
-                 */
-                
+                 */                
                 var tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Grupy")},
-				{type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"}
-			]
-		});
-		tasksGroupsToolBar.attachEvent("onClick", function(btn) {
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Grupy")},
+                                {type: "spacer"},
+                                {id: "Add", type: "button", img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", img: "fa fa-edit"},
+                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                        ]
+                });
+                tasksGroupsToolBar.attachEvent("onClick", function(btn) {
                     switch (btn){
                             case 'Add':{			                                        
                                     createAddEditGroupWindow("api/taskgroups", "api/taskgroups", tasksGroupsTree, 0);
@@ -871,16 +977,16 @@ function settingsInit(cell) {
                                 }
                             };break;
                     }
-		});
+                });
                 var tasksGroupsTree = tasksGroupsLayout.cells("a").attachTreeView({
-			skin: "dhx_web",    // string, optional, treeview's skin
-			iconset: "font_awesome", // string, optional, sets the font-awesome icons
-			multiselect: false,           // boolean, optional, enables multiselect
-			checkboxes: true,           // boolean, optional, enables checkboxes
-			dnd: true,           // boolean, optional, enables drag-and-drop
-			context_menu: true           // boolean, optional, enables context menu			
-		});                 
-		tasksGroupsTree.attachEvent("onDrop",function(id){			
+                        skin: "dhx_web",    // string, optional, treeview's skin
+                        iconset: "font_awesome", // string, optional, sets the font-awesome icons
+                        multiselect: false,           // boolean, optional, enables multiselect
+                        checkboxes: true,           // boolean, optional, enables checkboxes
+                        dnd: true,           // boolean, optional, enables drag-and-drop
+                        context_menu: true           // boolean, optional, enables context menu			
+                });                 
+                tasksGroupsTree.attachEvent("onDrop",function(id){			
                         var parent_id = arguments[1];
                         parent_id = (parent_id) ? parent_id+'' : 0;
                         var data = {
@@ -888,8 +994,8 @@ function settingsInit(cell) {
                             parent_id: parent_id
                         };                        
                         ajaxGet("api/taskgroups/" + id + "/edit?", data, ''); 
-			return true;
-		});  
+                        return true;
+                });  
                 tasksGroupsTree.fill = function(i=null){	
                     ajaxGet("api/taskgroups/grupytree", '', function(data) {                    
                         if (data && data.success){      
@@ -899,24 +1005,162 @@ function settingsInit(cell) {
                     });
                 };
                 tasksGroupsTree.fill();
+                tasksGroupsTree.attachEvent("onSelect",function(id, mode){  
+                    if (mode) {
+                        var grupy=productsGroupsTree.getAllChecked();
+                        grupy[grupy.length]=id;                      
+                        tasksGrid.clearAll();
+                        tasksGrid.fill(grupy);                          
+                        return true;                        
+                    }
+                });
+                tasksGroupsTree.attachEvent("onCheck",function(id){
+                        var grupy=productsGroupsTree.getAllChecked(); 
+                        tasksGrid.clearAll();
+                        tasksGrid.fill(grupy);                        
+                        return true;
+                });                 
+                var tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar({
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Zlecenia")},
+                                {type: "spacer"},
+                                {id: "Add", type: "button", img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", img: "fa fa-edit"},
+                                {id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Redo", type: "button", img: "fa fa-reply"}
+                        ]
+                });                               
+                tasksGridToolBar.attachEvent("onClick", function(id) {
+                    switch (id){
+                        case 'Add': {
+                            var form = createWindowWithForm(taskFormStruct, "Nowe zlecenie", 300, 300);
+                            var groupsCombo = form.getCombo("task_group_id");
+                            ajaxGet("api/taskgroups", "", function(data){                                                                                                        
+                                if (data && data.success) {
+                                    groupsCombo.addOption(data.data);
+                                }                                           
+                            });                            
+                            form.attachEvent("onButtonClick", function(name){
+                                switch (name){
+                                    case 'save':{ 
+                                        //var idSelectedGroup = tasksGroupsTree.getSelectedId();
+                                        ajaxPost("api/tasks", form.getFormData(), function(data){                                                                                                        
+                                            if (data && data.success) {
+                                                tasksGrid.fill(data.data.task_group_id);
+                                            }                                           
+                                        });
+                                    };break;
+                                    case 'cancel':{
+                                        form.clear();    
+                                    };break;
+                                }
+                            });                                
+                        };break;
+                        case 'Edit': {  };break;
+                        case 'Del': {
+                            var id = tasksGrid.getSelectedRowId();
+                            if (id) {
+                                ajaxDelete("api/tasks/" + id, "", function(data){
+                                    if (data && data.success){
+                                        tasksGrid.deleteRow(id);
+                                    }
+                                });    
+                            }                                
+                        };break;
+                        case 'Redo': {
+                            tasksGroupsTree.fill();
+                            tasksGrid.fill(0);     
+                        };break;
+                    }
+                }); 
+                var tasksGrid = tasksGroupsLayout.cells("b").attachGrid({
+                    image_path:'codebase/imgs/',
+                    columns: [
+                        {
+                            label: _("Kod"),
+                            width: 100,
+                            id: "kod",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Name"),
+                            id: "name",
+                            width: 100,
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"     
+                        },
+                        {
+                            label: _("Potrzebuje zamowienia"),
+                            id: "for_order",
+                            width: 100,
+                            type: "ch",                            
+                            align: "center"     
+                        },  
+                        {
+                            label: _("Ilosc start"),
+                            id: "amount_start",
+                            width: 60,
+                            type: "edn",
+                            sort: "str",                            
+                            align: "right"     
+                        },  
+                        {
+                            label: _("Ilosc stop"),
+                            id: "amount_stop",
+                            width: 60,
+                            type: "edn",                             
+                            sort: "str",
+                            align: "right"     
+                        }                        
+                    ],
+                        multiselect: true
+                });                
+                tasksGrid.fill = function(i) {
+                    var ids = Array();
+                    ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
+                    ajaxGet("api/tasks/listbygroups/" + ids, "", function(data){
+                        if (data && data.success){                    
+                            tasksGrid.parse(data.data, "js");
+                        }
+                    });	                    
+                };
+                tasksGrid.fill(0);
+                var dpTasksGrid = new dataProcessor("api/tasks", "js");                
+                dpTasksGrid.init(tasksGrid);
+                dpTasksGrid.enableDataNames(true);
+                dpTasksGrid.setTransactionMode("REST");
+                dpTasksGrid.enablePartialDataSend(true);
+                dpTasksGrid.enableDebug(true);
+                dpTasksGrid.setUpdateMode("row", true);
+                dpTasksGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                    data.id = id;
+                    ajaxGet("api/tasks/" + id + "/edit", data, function(data){                                                            
+                        console.log(data.data);
+                    });
+                }); 
+
 
                 /**
                  * 
                  * Products by groups tab
                  * 
-                 */
-                            
+                 */                            
                 var productsGroupsToolBar = productsGroupsLayout.cells("a").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Grupy")},
-				{type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"}
-			]
-		});
-		productsGroupsToolBar.attachEvent("onClick", function(btn) {
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Grupy")},
+                                {type: "spacer"},
+                                {id: "Add", type: "button", img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", img: "fa fa-edit"},
+                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                        ]
+                });
+                productsGroupsToolBar.attachEvent("onClick", function(btn) {
                     switch (btn){
                             case 'Add':{			                                        
                                     createAddEditGroupWindow("api/prodgroups", "api/prodgroups", productsGroupsTree, 0);
@@ -934,16 +1178,16 @@ function settingsInit(cell) {
                                 }
                             };break;
                     }
-		});
+                });
                 var productsGroupsTree = productsGroupsLayout.cells("a").attachTreeView({
-			skin: "dhx_web",    // string, optional, treeview's skin
-			iconset: "font_awesome", // string, optional, sets the font-awesome icons
-			multiselect: false,           // boolean, optional, enables multiselect
-			checkboxes: true,           // boolean, optional, enables checkboxes
-			dnd: true,           // boolean, optional, enables drag-and-drop
-			context_menu: true           // boolean, optional, enables context menu			
-		});                 
-		productsGroupsTree.attachEvent("onDrop",function(id){			
+                        skin: "dhx_web",    // string, optional, treeview's skin
+                        iconset: "font_awesome", // string, optional, sets the font-awesome icons
+                        multiselect: false,           // boolean, optional, enables multiselect
+                        checkboxes: true,           // boolean, optional, enables checkboxes
+                        dnd: true,           // boolean, optional, enables drag-and-drop
+                        context_menu: true           // boolean, optional, enables context menu			
+                });                 
+                productsGroupsTree.attachEvent("onDrop",function(id){			
                         var parent_id = arguments[1];
                         parent_id = (parent_id) ? parent_id+'' : 0;
                         var data = {
@@ -951,8 +1195,8 @@ function settingsInit(cell) {
                             parent_id: parent_id
                         };                        
                         ajaxGet("api/prodgroups/" + id + "/edit?", data, ''); 
-			return true;
-		});  
+                        return true;
+                });  
                 productsGroupsTree.fill = function(i=null){	
                     ajaxGet("api/prodgroups/grupytree", '', function(data) {                    
                         if (data && data.success){      
@@ -966,35 +1210,35 @@ function settingsInit(cell) {
                     if (mode) {
                         var grupy=productsGroupsTree.getAllChecked();
                         grupy[grupy.length]=id;                      
-                        productsGrid.clearAll();
-                        productsGrid.fill(grupy);                          
+                        productsByGroupsGrid.clearAll();
+                        productsByGroupsGrid.fill(grupy);                          
                         return true;                        
                     }
                 });
                 productsGroupsTree.attachEvent("onCheck",function(id){
                         var grupy=productsGroupsTree.getAllChecked(); 
-                        productsGrid.clearAll();
-                        productsGrid.fill(grupy);                        
+                        productsByGroupsGrid.clearAll();
+                        productsByGroupsGrid.fill(grupy);                        
                         return true;
                 });                 
-                
-                var productsGridToolBar = productsGroupsLayout.cells("b").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Produkty")},
-				{type: "spacer"},				
+
+                var productsByGroupsGridToolBar = productsGroupsLayout.cells("b").attachToolbar({
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Produkty")},
+                                {type: "spacer"},				
                                 {id: "Redo", type: "button", img: "fa fa-reply"}
-			]
-		});
-		productsGridToolBar.attachEvent("onClick", function(btn) {
+                        ]
+                });
+                productsGridToolBar.attachEvent("onClick", function(btn) {
                     if (btn = 'Redo') {
                         productsGroupsTree.fill();
-                        productsGrid.fill(0);                        
+                        productsByGroupsGrid.fill(0);                        
                     }
-		});          
-                var productsGrid = productsGroupsLayout.cells("b").attachGrid({
+                });          
+                var productsByGroupsGrid = productsGroupsLayout.cells("b").attachGrid({
                     image_path:'codebase/imgs/',
-	            columns: [
+                    columns: [
                         {
                             label: _("Kod"),
                             width: 100,
@@ -1027,14 +1271,14 @@ function settingsInit(cell) {
                             align: "left"     
                         }                       
                     ],
-			multiselect: true
+                        multiselect: true
                 });                              
-                productsGrid.fill = function(i) {
+                productsByGroupsGrid.fill = function(i) {
                     var ids = Array();
                     ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
                     ajaxGet("api/products/listbygroups/" + ids, "", function(data){
                         if (data && data.success){                    
-                            productsGrid.parse(data.data, "js");
+                            productsByGroupsGrid.parse(data.data, "js");
                         }
                     });	                    
                 };               
@@ -1046,38 +1290,39 @@ function settingsInit(cell) {
                         });
                     }                    
                 });
-                var dpProductsGrid = new dataProcessor("api/products", "js");                
-                dpProductsGrid.init(productsGrid);
-                dpProductsGrid.enableDataNames(true);
-                dpProductsGrid.setTransactionMode("REST");
-                dpProductsGrid.enablePartialDataSend(true);
-                dpProductsGrid.enableDebug(true);
-                dpProductsGrid.setUpdateMode("row", true);
-                dpProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                var dpProductsByGroupsGrid = new dataProcessor("api/products", "js");                
+                dpProductsByGroupsGrid.init(productsByGroupsGrid);
+                dpProductsByGroupsGrid.enableDataNames(true);
+                dpProductsByGroupsGrid.setTransactionMode("REST");
+                dpProductsByGroupsGrid.enablePartialDataSend(true);
+                dpProductsByGroupsGrid.enableDebug(true);
+                dpProductsByGroupsGrid.setUpdateMode("row", true);
+                dpProductsByGroupsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
                     data.id = id;
                     data.product_group_id = data.product_group_name;
                     ajaxGet("api/products/" + id + "/edit", data, function(data){                                                            
                         console.log(data);
                     });
                 });  
-                productsGrid.fill(0);                
-                
+                productsByGroupsGrid.fill(0);                                
+
+
                 /**
                  * 
                  * Types of products tab
                  * 
                  */
-                
+
                 var typesProductsGridToolBar = typesProductsLayout.cells("a").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Typy produktow")},
-				{type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},				
-				{id: "Del", type: "button", img: "fa fa-minus-square"}
-			]
-		});
-		typesProductsGridToolBar.attachEvent("onClick", function(btn) {
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Typy produktow")},
+                                {type: "spacer"},
+                                {id: "Add", type: "button", img: "fa fa-plus-square "},				
+                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                        ]
+                });
+                typesProductsGridToolBar.attachEvent("onClick", function(btn) {
                     switch (btn){
                             case 'Add':{			                                                                        
                                 var addingForm = createWindowWithForm([
@@ -1112,10 +1357,10 @@ function settingsInit(cell) {
                                 }
                             };break;
                     }
-		});               
+                });               
                 var typesProductsGrid = typesProductsLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
-	            columns: [
+                    columns: [
                         {
                             label: _("Imie"),
                             id: "name",
@@ -1133,7 +1378,7 @@ function settingsInit(cell) {
                             align: "left"     
                         }                          
                     ],
-		    multiselect: true                    
+                    multiselect: true                    
                 });
                 typesProductsGrid.fill = function() {              
                     ajaxGet("api/prodtypes", "", function(data){
@@ -1155,24 +1400,25 @@ function settingsInit(cell) {
                     ajaxGet("api/prodtypes/" + id + "/edit", data, function(data){                                                            
                         console.log(data);
                     });
-                }); 
-                
+                });                                 
+
+
                 /**
                  * 
                  * Groups of workers tab 
                  * 
                  */
                 var workersGroupsToolBar = workersGroupsLayout.cells("a").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Grupy")},
-				{type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"}
-			]
-		});
-		workersGroupsToolBar.attachEvent("onClick", function(btn) {
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Grupy")},
+                                {type: "spacer"},
+                                {id: "Add", type: "button", img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", img: "fa fa-edit"},
+                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                        ]
+                });
+                workersGroupsToolBar.attachEvent("onClick", function(btn) {
                     switch (btn){
                             case 'Add':{			                                        
                                     createAddEditGroupWindow("api/departaments", "api/departaments", workersGroupsTree, 0);
@@ -1190,16 +1436,16 @@ function settingsInit(cell) {
                                 }
                             };break;
                     }
-		});
+                });
                 var workersGroupsTree = workersGroupsLayout.cells("a").attachTreeView({
-			skin: "dhx_web",    // string, optional, treeview's skin
-			iconset: "font_awesome", // string, optional, sets the font-awesome icons
-			multiselect: false,           // boolean, optional, enables multiselect
-			checkboxes: true,           // boolean, optional, enables checkboxes
-			dnd: true,           // boolean, optional, enables drag-and-drop
-			context_menu: true           // boolean, optional, enables context menu			
-		});                 
-		workersGroupsTree.attachEvent("onDrop",function(id){			
+                        skin: "dhx_web",    // string, optional, treeview's skin
+                        iconset: "font_awesome", // string, optional, sets the font-awesome icons
+                        multiselect: false,           // boolean, optional, enables multiselect
+                        checkboxes: true,           // boolean, optional, enables checkboxes
+                        dnd: true,           // boolean, optional, enables drag-and-drop
+                        context_menu: true           // boolean, optional, enables context menu			
+                });                 
+                workersGroupsTree.attachEvent("onDrop",function(id){			
                         var parent_id = arguments[1];
                         parent_id = (parent_id) ? parent_id+'' : 0;
                         var data = {
@@ -1207,8 +1453,8 @@ function settingsInit(cell) {
                             parent_id: parent_id
                         };                        
                         ajaxGet("api/departaments/" + id + "/edit?", data, ''); 
-			return true;
-		});  
+                        return true;
+                });  
                 workersGroupsTree.fill = function(i=null){	
                     ajaxGet("api/departamentstree", '', function(data) {                    
                         if (data && data.success){      
@@ -1217,13 +1463,9 @@ function settingsInit(cell) {
                         }                    
                     });
                 };
-                workersGroupsTree.fill();                
+                workersGroupsTree.fill();                                
+                                    
                 
-
-
-
-
-
 //                productTypesToolBar.attachEvent("onClick", function(id) { 
 //                    switch (id){
 //		        case 'Add':{
@@ -1384,7 +1626,25 @@ function settingsInit(cell) {
 var groupFormStruct = [
         {type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
                 {type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),        options: [{text: "None", value: "0"}], inputWidth: 150},                                
-                {type:"input",  name:"name",    	label:_("Nazwa grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
+                {type:"input",  name:"name",    	label:_("Imie grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
+                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                    {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                    {type: "newcolumn"},
+                    {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                ]}
+        ]}
+];
+
+var taskFormStruct = [
+        {type:"fieldset",  offsetTop:0, label:_("Nowe zlecenie"), width:253, list:[  
+                {type:"combo",  name: "task_group_id", label:_("Grupa"), options: [], inputWidth: 150},                                                
+                {type: "combo", label: "Potrzebuje zamowienia", name: "for_order", options:[
+                    {text: "Tak", value: "1", selected: true},
+                    {text: "Nie", value: "0"}]},
+                {type:"input",  name:"kod",          label:_("Kod"),         offsetTop:13, labelWidth:80},                                                                				
+                {type:"input",  name:"name",         label:_("Imie"),        offsetTop:13, labelWidth:80}, 
+                {type:"input",  name:"amount_start", label:_("Ilosc start"), offsetTop:13, labelWidth:80},                                                                				
+                {type:"input",  name:"amount_stop",  label:_("Ilosc stop"),  offsetTop:13, labelWidth:80},                
                 {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                     {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
                     {type: "newcolumn"},

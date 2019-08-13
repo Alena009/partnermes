@@ -11,19 +11,14 @@ class Task extends BaseModel
     protected $table = "tasks";
     
     protected $fillable = [
-        'kod', 'name', 'for_order', 'task_group_id', 'order_position_id', 'product_id'
+        'kod', 'name', 'for_order', 'task_group_id', 'amount_start', 'amount_stop'
     ];
     
     /* fields for translating */    
-    public $translatedAttributes = ['name'];
+    public $translatedAttributes = ['name'];      
     
-    public function orderPosition()
+    public function group()
     {
-        return $this->belongsTo('App\Models\OrderPosition');
-    } 
-    
-    public function product()
-    {
-        return $this->belongsTo('App\Models\Product', 'product_id', 'id');
-    }
+        return $this->belongsTo('App\Models\TaskGroup', 'task_group_id', 'id');
+    }     
 }

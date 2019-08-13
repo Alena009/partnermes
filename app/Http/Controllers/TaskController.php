@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Repositories\TaskRepository;
+use App\Models\Task;
 
 class TaskController extends BaseController
 {
@@ -21,49 +22,18 @@ class TaskController extends BaseController
      */
     public function index($locale = 'pl')
     {
-        $tasks = [];
+        $result = [];
         
         app()->setLocale($locale);
         
-        $tasks = \App\Models\Task::all(); 
+        $result = Task::all(); 
         
-        return $tasks;        
-    }
-    
-    /**
-     * Get list tasks by groups
-     */
-    public function listTasks($groups = 0)
-    {
-        $tasks = [];
-        if ($groups) {  
-            $groupsIds = explode(',', $groups);
-            $allgroupsIdsWithChildNodes = \App\Models\TaskGroup::whereIn("id", $groupsIds)
-                    ->orWhereIn("parent_id", $groupsIds)->pluck('id');
-            $tasks = \App\Models\Task::whereIn("task_group_id", $allgroupsIdsWithChildNodes)->get();                     
-        } else {
-            $tasks = $this->index();        
-        }
+        foreach ($result as $task) {
+            $task->text = $task->name;  
+            $task->value = (string)$task->id;           
+        }        
         
-        foreach ($tasks as $task) {
-            if ($task->for_order) {
-                $orderPosition = $task->orderPosition;
-                $order         = $orderPosition->order; 
-                $product       = $orderPosition->product;
-                $task['order_kod']         = $order['kod'];
-                $task['order_description'] = $order['description'];
-                $task['date_delivery']     = $orderPosition['date_delivery'];
-                $task['product_name']      = $product['name'];                
-                $task['product_kod']       = $product['kod'];                
-            } else {
-                $product              = $task->product;
-                $task['product_name'] = $product["name"];                
-                $task['product_kod']  = $product["kod"];                  
-            }
-        }
-        
-        return response()->json(['success' => true, 'data' => $tasks]);       
-      
+        return response()->json(['success' => true, 'data' => $result]);        
     }
 
     /**
@@ -73,15 +43,12 @@ class TaskController extends BaseController
     {
         $success = false;
         
-        $task = new \App\Models\Task();
-        $task->kod = $request['kod'];        
-        //$task->name = $request['name'];        
+        $task = new Task();
+        $task->kod = $request['kod'];           
         $task->for_order = $request['for_order']; 
         $task->amount_start = $request['amount_start'];
         $task->amount_stop = $request['amount_stop'];
         $task->task_group_id = $request['task_group_id'];
-        $task->order_position_id = $request['order_position_id'];
-        $task->product_id = $request['product_id'];
         
         if ($task->save()) {
             $task->translateOrNew('pl')->name = $request['name'];                        
@@ -94,4 +61,26 @@ class TaskController extends BaseController
 
         return response()->json(['success' => $success, 'data' => $task]);        
     } 
+    
+    /**
+     * Get list tasks by task group
+     */
+    public function listByGroups($groups = 0)
+    {   
+        $result = [];
+        if ($groups) {  
+            $groupsIds = explode(',', $groups);
+            $result = Task::whereIn('task_group_id', $groupsIds)->get();                     
+        } else {
+            $result = Task::all();         
+        }
+        
+        foreach ($result as $task) {
+            $task->text = $task->name;  
+            $task->value = (string)$task->id;           
+        }         
+        
+        return response()->json(['success' => true, 'data' => $result]);             
+    }  
+        
 }

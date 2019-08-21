@@ -17,27 +17,28 @@ class OperationController extends BaseController
         $this->setRepository($rep);
     }
     
-//    public function index($locale = 'pl')
-//    {
-//        $operations = [];
-//        app()->setLocale($locale);
-//        
-//        $operations = Operation::all();
-//        
-//        if ($operations) {
-//            foreach ($operations as $operation){
-//                $task = $operation->task;
-//                $user = $operation->user;            
-//                //for timeline view
-//                $operation['text'] = $task->name;   
-//                $operation['start_date'] = $operation['date_start'];
-//                $operation['end_date'] = $operation['date_end'];
-//                //
-//            }
-//        }
-//        
-//        return response()->json(['success' => true, 'data' => $operations]);
-//    }
+    public function index($locale = 'pl')
+    {
+        $operations = [];
+        app()->setLocale($locale);
+        
+        $operations = Operation::all();
+        
+        if ($operations) {
+            foreach ($operations as $operation){
+                $task = $operation->task;
+                $user = $operation->user;            
+                //for timeline view
+                $operation['text']       = $task->name;   
+                $operation['start_date'] = $operation['date_start'];
+                $operation['end_date']   = $operation['date_end'];
+                $operation['task_name']  = $operation['text'];
+                $operation['user_name']  = $user->name;
+            }
+        }
+        
+        return response()->json(['success' => true, 'data' => $operations]);
+    }
     
     /**
      * Get list tasks by groups

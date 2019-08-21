@@ -29,8 +29,10 @@ class TaskController extends BaseController
         $result = Task::all(); 
         
         foreach ($result as $task) {
-            $task->text = $task->name;  
-            $task->value = (string)$task->id;           
+            $task->text  = $task->name;  
+            $task->value = (string)$task->id;
+            $task->key   = $task->id;
+            $task->label = $task->name;
         }        
         
         return response()->json(['success' => true, 'data' => $result]);        

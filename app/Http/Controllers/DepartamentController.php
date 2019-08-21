@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use App\Repositories\DepartamentRepository;
 use App\Models\Departament;
+use App\Models\User;
+use App\Models\WorkerDepartament;
 
 class DepartamentController extends BaseController
 {
@@ -76,24 +78,21 @@ class DepartamentController extends BaseController
      * @return array $workers
      */
     public function workersList($departamentsIds = 0)
-    {      
-        $workerModel = new \App\Models\User();
+    {   
+        $result = [];
         
         if ($departamentsIds) {            
             $departamentsIds = explode(',', $departamentsIds);
             $allDepartamentsIdsWithChildNodes = Departament::whereIn("id", $departamentsIds)
-                    ->orWhereIn("parent_id", $departamentsIds)->pluck('id');
-            $workerDepartamentModel = new \App\Models\WorkerDepartament();            
-            $workersIds = $workerDepartamentModel->getWorkersIdsByDepartamentsIds($allDepartamentsIdsWithChildNodes);            
-            $workers = $workerModel::find($workersIds);            
+                    ->orWhereIn("parent_id", $departamentsIds)->pluck('id');            
+            $workersIds = WorkerDepartament::whereIn('departament_id', $allDepartamentsIdsWithChildNodes)
+                    ->pluck('user_id');            
+            $result = User::find($workersIds);            
         } else {
-           $workers =  $workerModel::all();
+           $result =  User::all();
         }
-
-        $result = ['data' => $workers, 'success' => true];
         
-        return response()->json($result);
-        
+        return response()->json(['data' => $result, 'success' => true]);        
     }
 
 }

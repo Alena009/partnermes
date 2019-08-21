@@ -16,6 +16,7 @@ function appInit() {
 			{id: "pracownicy", text: "Pracownicy", icon: "contacts.png"},
 			{id: "projects",   text: "Projects",   icon: "projects.png"},
 			{id: "events",     text: "Warehouse",  icon: "events.png"  },
+                        {id: "products",   text: "Produkty",   icon: "box.png"},
 			{id: "settings",   text: "Settings",   icon: "settings.png"}
 		]
 	});
@@ -193,12 +194,7 @@ function ajaxDelete(url, params, callback) {
     return axiosQuery('delete', url, params, callback);
 }
 
-function axiosQuery(method, url, params, callback, inputHeaders = {}) {      
-    var api_token = localStorage.token;
-    
-//    var headers = {        
-//        'Authorization': api_token        
-//    };
+function axiosQuery(method, url, params, callback, inputHeaders = {}) {  
 
     var headers = inputHeaders;
     headers.Authorization = 'Bearer ' + localStorage.token;

@@ -23,7 +23,7 @@ Route::group([
     Route::get('/components/list/{productId}', 'ComponentController@listComponents');
     Route::resource('/components', 'ComponentController');  
     
-    Route::get('/departamentstree', 'DepartamentController@buildTree');
+    Route::get('/departaments/grupytree', 'DepartamentController@buildTree');
     Route::resource('/departaments', 'DepartamentController'); 
     
     Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
@@ -64,8 +64,8 @@ Route::group([
     Route::post('/users/avatar/load/{userId}', 'API\UserController@loadAvatar');
     Route::resource('/users', 'API\UserController');
     
-    Route::get('/workerslist/{departaments}', 'DepartamentController@workersList');
-    Route::get('/workerslist', 'DepartamentController@workersList');     
+    Route::get('/workerslist/{departaments?}', 'DepartamentController@workersList');
+    //Route::get('/workerslist', 'DepartamentController@workersList');     
     Route::get('/workerdep/del', 'WorkerDepartamentController@deleteRel');
     Route::resource('/workerdep', 'WorkerDepartamentController');
     Route::get('/warehouse/amountproduct/{productId}', 'WarehouseController@amountProductInWarehouse');  

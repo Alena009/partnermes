@@ -399,15 +399,7 @@ function zleceniaInit(cell) {
 		});                
 		var zleceniaGrid = zleceniaLayout.cells("b").attachGrid({
 			image_path:'codebase/imgs/',
-			columns: [
-                        {
-                            label: "Kod zlecenia",
-                            id:'kod',
-                            width: 100,
-                            type: "ro",
-                            sort: "str",
-                            align: "center"
-			},                            
+			columns: [                                                    
                         {
                             label: "Kod zlecenia",
                             id:'kod',

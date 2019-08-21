@@ -124,7 +124,7 @@ function timelineInit(cell) {
         }
         function changeRuckmeld(){
             var me = this;
-            ajaxGet("zlecenia/zlecenie/ruckmeld/"+this.value,
+            ajaxGet("api/zlecenia/duration/"+this.value,
                 {
                         'success':function(data){
                                 console.log()
@@ -224,17 +224,33 @@ function timelineInit(cell) {
 //				return false;
 //			}
                 return true;
-        })		
+        })	
+       
+        ajaxGet("api/operations", "", function(data){
+            console.log(data);    
+        });
+        
+        
         scheduler.config.lightbox.sections=[	
-                {name:"Pracownik",  type:"timeline", options:scheduler.serverList("pracownicy") , map_to:"_id" }, //type should be the same as name of the tab
+                {name:"Pracownik",  type:"timeline", options:scheduler.serverList("users") , map_to:"user_id" }, //type should be the same as name of the tab
                 //{name:"Pracownik", height:40, map_to:"id_user", type:"select", options:scheduler.serverList("pracownicy")},
-                {name:"Zadanie",  map_to:"id_zadanie", type:"select", options:scheduler.serverList("zadania"),onchange:changeZadania},
-                {name:"Zlecenie",  map_to:"kod", type:"zlecenieEditor",onchange:changeZlecenia},
-                {name:"Ruckmeld",  map_to:"ruckmeld", type:"ruckmeldEditor", onchange:changeRuckmeld},
-                {name:"Szt",  map_to:"szt",type:"sztEditor", onchange:changeSzt},
+                //{name:"Zadanie",  map_to:"id_zadanie", type:"select", options:scheduler.serverList("zadania"),onchange:changeZadania},                
+                //{name:"Zlecenie",  map_to:"kod", type:"zlecenieEditor",onchange:changeZlecenia},
+                {name:"Zlecenie", type:"select", options:scheduler.serverList("zlecenia"), map_to:"order_position_id", onchange:changeZlecenia},
+                {name:"Zadanie",  type:"select", options:scheduler.serverList("tasks"),    map_to:"task_id" }, 
+                {name:"Ruckmeld", type:"ruckmeldEditor",                                   map_to:"ruckmeld", onchange:changeRuckmeld},
+                {name:"Szt",      type:"sztEditor",                                        map_to:"amount",   onchange:changeSzt},
                 {name:"time", height:72, type:"time", map_to:"auto",time_format:["%Y","%m","%d","%H:%i"]}
         ];
-
+        
+        ajaxGet("api/tasks", "", function(data){
+            scheduler.updateCollection("tasks", data.data);
+        });
+        
+        ajaxGet("api/zlecenia/list/0", "", function(data){
+            scheduler.updateCollection("zlecenia", data.data);
+        });        
+        
         ajaxGet("api/users", "", function(data2){
             if (data2 && data2.success){
                 var usersList = scheduler.serverList("users", data2.data);
@@ -267,10 +283,9 @@ function timelineInit(cell) {
         scheduler.createGridView({
             fields:[
                 {id:"id",width:100, align:'right', sort:'int'},
-                {id:"user_id",width:'*',align:'left'},
-                //{id:"zadanie",width:'*',align:'left'},
-                {id:"task_id",width:'*',align:'left'},
-                //{id:"ruckmeld",width:'*',align:'left'},
+                {id:"user_name",width:'*',align:'left'},
+                {id:"task_name",width:'*',align:'left'},                
+                {id:"ruckmeld",width:'*',align:'left'},
                 {id:"start_date",width:180},
                 {id:"end_date",width:180}
             ],
@@ -278,12 +293,13 @@ function timelineInit(cell) {
             paging:true
         });
   
-        var sTabs = '<div class="dhx_cal_tab" name="grid_tab" style="right:140px;"></div>' + 
-                    '<div class="dhx_minical_icon" name="minical_tab" id="dhx_minical_icon" onclick="show_minical()">&nbsp;</div>'+
-                    '<div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>'+
-                    '<div class="dhx_cal_tab" name="week_tab" style="right:140px;"></div>'+
-                    '<div class="dhx_cal_tab" name="month_tab" style="right:280px;"></div>'+
-                    '<div class="dhx_cal_tab" name="timeline_tab" style="right:106px;"></div>';		
+        var sTabs = '<div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>'+
+                    '<div class="dhx_cal_tab" name="week_tab" style="right:200px;"></div>'+
+                    '<div class="dhx_cal_tab" name="month_tab" style="right:200px;"></div>'+
+                    '<div class="dhx_cal_tab" name="grid_tab" style="left:240px;"></div>' + 
+                    '<div class="dhx_cal_tab" name="timeline_tab" style="right:256px;"></div>'+
+                    '<div class="dhx_minical_icon" name="minical_tab" id="dhx_minical_icon" onclick="show_minical()">&nbsp;</div>';
+                    
 
         timelineLayout.cells("a").attachScheduler(null, "grid", sTabs);
         var schedulerDP = new dataProcessor("api/operations"); 
@@ -298,7 +314,6 @@ function timelineInit(cell) {
                 console.log(event);
                 return event.text2;
         };
-
 		
         scheduler.templates.tooltip_text = function(start,end,event) {
                 return "<b>Pracownik :</b> "+event.pracownik+"<br/>"

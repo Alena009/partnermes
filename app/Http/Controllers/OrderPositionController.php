@@ -40,7 +40,7 @@ class OrderPositionController extends BaseController
             $position['order_kod']          = $position->order->kod;            
             $position['order_name']         = $position->order->name;    
             $position['amount_stop']        = $position->amount;    
-            $position['order_position_id']  = $position->id;                
+            $position['order_position_id']  = $position->id;              
         }           
              
         return response()->json(['data' => $ordersPositions, 'success' => true]);        
@@ -72,9 +72,11 @@ class OrderPositionController extends BaseController
             $product = $res->product;
             $task    = $res->task; 
             
-            $res['product_name']      = $product->name;
-            $res['product_kod']       = $product->kod;
-            $res['task_name']         = $task['name'];
+            $res['product_name'] = $product->name;
+            $res['product_kod']  = $product->kod;
+            $res['task_name']    = $task['name'];
+            $res['key']          = $res->id;    
+            $res['label']        = $res->kod;              
         }         
         
         return response()->json(['success' => true, 'data' => $result]);            

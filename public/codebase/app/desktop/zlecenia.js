@@ -14,7 +14,7 @@ function zleceniaInit(cell) {
 		var grupyTreeToolBar = zleceniaLayout.cells("a").attachToolbar({
 			iconset: "awesome",
 			items: [
-				{type: "text", id: "title", text: _("Grupy")},
+				{type: "text", id: "title", text: _("Grupy zadan")},
 				{type: "spacer"},
 				{id: "Add", type: "button", img: "fa fa-plus-square "},
 				{id: "Edit", type: "button", img: "fa fa-edit"},

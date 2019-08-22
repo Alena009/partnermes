@@ -11,39 +11,31 @@ function settingsInit(cell) {
                 settingsLayout.cells("a").hideHeader();
 
             var mainTabbar = settingsLayout.cells("a").attachTabbar();
-                mainTabbar.addTab("a1", _("Role"), null, null, true);
-                mainTabbar.addTab("a2", _("Produkty"));                    
-                mainTabbar.addTab("a3", _("Grupy zlecen, zlecenia"));
-                mainTabbar.addTab("a4", _("Grupy produktow"));                                
-                mainTabbar.addTab("a5", _("Typy produktow"));
-                mainTabbar.addTab("a6", _("Grupy pracownikow"));
+                mainTabbar.addTab("a1", _("Role"), null, null, true);               
+                mainTabbar.addTab("a2", _("Grupy zadan, zadania"));
+                mainTabbar.addTab("a3", _("Grupy produktow"));                                
+                mainTabbar.addTab("a4", _("Typy produktow"));
+                mainTabbar.addTab("a5", _("Grupy pracownikow"));
                // mainTabbar.addTab("a7", _("Jezyk"));
             //Tabs
             var rolesLayout = mainTabbar.tabs("a1").attachLayout("3W");
                 rolesLayout.cells("a").hideHeader();
                 rolesLayout.cells("b").hideHeader();                
                 rolesLayout.cells("c").hideHeader();                                
-                rolesLayout.setAutoSize("a", "a;b;c");
-
-            var productsLayout = mainTabbar.tabs("a2").attachLayout("3J");
-                productsLayout.cells("a").hideHeader();
-                productsLayout.cells("b").hideHeader();                
-                productsLayout.cells("c").hideHeader();    
-                
-                 
+                rolesLayout.setAutoSize("a", "a;b;c");               
             
-            var tasksGroupsLayout = mainTabbar.tabs("a3").attachLayout("2U"); 
+            var tasksGroupsLayout = mainTabbar.tabs("a2").attachLayout("2U"); 
                 tasksGroupsLayout.cells("a").hideHeader();
                 tasksGroupsLayout.cells("b").hideHeader();
                 
-            var productsGroupsLayout = mainTabbar.tabs("a4").attachLayout("2U"); 
+            var productsGroupsLayout = mainTabbar.tabs("a3").attachLayout("2U"); 
                 productsGroupsLayout.cells("a").hideHeader(); 
                 productsGroupsLayout.cells("b").hideHeader(); 
                 
-            var typesProductsLayout = mainTabbar.tabs("a5").attachLayout("1C");
+            var typesProductsLayout = mainTabbar.tabs("a4").attachLayout("1C");
                 typesProductsLayout.cells("a").hideHeader();
                 
-            var workersGroupsLayout = mainTabbar.tabs("a6").attachLayout("1C");
+            var workersGroupsLayout = mainTabbar.tabs("a5").attachLayout("1C");
                 workersGroupsLayout.cells("a").hideHeader();
                 
                 /**
@@ -491,30 +483,7 @@ function settingsInit(cell) {
                 });
                 rolesTree.load();                                                           
                 usersGrid.fill(0);                 
-                permissionsGrid.fill(0);                 
-                
-                /**
-                 * 
-                 * Products tab 
-                 * 
-                 */                              
-                
-                
-                
-
-                
-                  
-                                 
-
-                 
-                                
-                
-                
-                               
-                
-                                 
-                            
-              
+                permissionsGrid.fill(0);                             
 
                 /**
                  * 
@@ -595,7 +564,7 @@ function settingsInit(cell) {
                 var tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar({
                         iconset: "awesome",
                         items: [
-                                {type: "text", id: "title", text: _("Zlecenia")},
+                                {type: "text", id: "title", text: _("Zadania")},
                                 {type: "spacer"},
                                 {id: "Add", type: "button", img: "fa fa-plus-square "},
                                 {id: "Edit", type: "button", img: "fa fa-edit"},
@@ -801,8 +770,8 @@ function settingsInit(cell) {
                                 {type: "spacer"},				
                                 {id: "Redo", type: "button", img: "fa fa-reply"}
                         ]
-                });
-                productsGridToolBar.attachEvent("onClick", function(btn) {
+                });                               
+                productsByGroupsGridToolBar.attachEvent("onClick", function(btn) {
                     if (btn = 'Redo') {
                         productsGroupsTree.fill();
                         productsByGroupsGrid.fill(0);                        
@@ -845,7 +814,7 @@ function settingsInit(cell) {
                     ],
                         multiselect: true
                 });                              
-                productsByGroupsGrid.fill = function(i) {
+                productsByGroupsGrid.fill = function(i = 0) {
                     var ids = Array();
                     ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
                     ajaxGet("api/products/listbygroups/" + ids, "", function(data){
@@ -854,7 +823,7 @@ function settingsInit(cell) {
                         }
                     });	                    
                 };               
-                var groupsCombo = productsGrid.getCombo(2);//takes the column index                
+                var groupsCombo = productsByGroupsGrid.getCombo(2);//takes the column index                
                 ajaxGet("api/prodgroups", "", function(data) {  
                     if (data.success && data.data) {
                         data.data.forEach(function(group){

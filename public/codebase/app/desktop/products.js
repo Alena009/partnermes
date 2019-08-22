@@ -10,7 +10,7 @@ function productsInit(cell) {
         productsLayout.cells("c").hideHeader();  
             var optionsTabbar = productsLayout.cells("c").attachTabbar(); 
             optionsTabbar.addTab("a1", _("Componenty"), null, null, true);
-            optionsTabbar.addTab("a2", _("Zlecenia"));
+            optionsTabbar.addTab("a2", _("Zadania"));
             optionsTabbar.addTab("a3", _("Zdjęcia")); 
                 var componentsLayout = optionsTabbar.tabs("a1").attachLayout("1C"); 
                 componentsLayout.cells("a").hideHeader();

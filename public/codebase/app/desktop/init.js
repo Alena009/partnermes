@@ -11,13 +11,14 @@ function appInit() {
 		width: 140,
 		template: "tiles",
 		items: [
-			{id: "timeline",   text: "Timeline",   icon: "timeline.png"},
-			{id: "zlecenia",   text: "Zlecenia",   icon: "list.png"},
-			{id: "pracownicy", text: "Pracownicy", icon: "contacts.png"},
-			{id: "projects",   text: "Projects",   icon: "projects.png"},
-			{id: "events",     text: "Warehouse",  icon: "events.png"  },
-                        {id: "products",   text: "Produkty",   icon: "box.png"},
-			{id: "settings",   text: "Settings",   icon: "settings.png"}
+			{id: "timeline",       text: "Timeline",          icon: "timeline.png"},
+			{id: "zlecenia",       text: "Zlecenia",          icon: "list.png"},
+			{id: "pracownicy",     text: "Pracownicy",        icon: "contacts.png"},
+			{id: "projects",       text: "Zamowienia",        icon: "projects.png"},
+			{id: "events",         text: "Magazyn",           icon: "events.png"  },
+                        {id: "products",       text: "Produkty",          icon: "box.png"},
+                        {id: "products_tasks", text: "Zadania",           icon: "shuffle.png"},
+			{id: "settings",       text: "Settings",          icon: "settings.png"}
 		]
 	});
 

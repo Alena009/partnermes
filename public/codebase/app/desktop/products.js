@@ -325,7 +325,8 @@ function productsInit(cell) {
             ],
                 multiselect: true
         });   
-        componentsGrid.fill = function(id = 0){						
+        componentsGrid.fill = function(id = 0){	
+            componentsGrid.clearAll();
             ajaxGet("api/components/list/" + id, '', function(data){                                     
                 if (data && data.success){
                     componentsGrid.parse((data.data), "js");
@@ -430,7 +431,8 @@ function productsInit(cell) {
             ],
                 multiselect: true
         });
-        zleceniaForProductGrid.fill = function(id = 0){						
+        zleceniaForProductGrid.fill = function(id = 0){	
+            zleceniaForProductGrid.clearAll();
             ajaxGet("api/productstasks/list/" + id, '', function(data){                                     
                 if (data && data.success){
                     zleceniaForProductGrid.parse((data.data), "js");

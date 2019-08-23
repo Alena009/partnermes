@@ -11,29 +11,11 @@ function productsTasksInit(cell) {
                 items: [
                         {type: "text", id: "title", text: _("Produkty")},
                         {type: "spacer"},
-                        {id: "Add", type: "button", img: "fa fa-plus-square "},
-                        {id: "Edit", type: "button", img: "fa fa-edit"},
                         {id: "Del", type: "button", img: "fa fa-minus-square"}				                               
                 ]                    
         });
         productsGridToolBar.attachEvent("onClick", function(name) {
-            switch (name){
-                case 'Add': {                            
-                    productForm.clear();
-                    productForm.setFocusOnFirstActive();
-                    productForm.showItem("block");                            
-                    productForm.showItem("savenew");                            
-                    productForm.hideItem("saveedit");                            
-                };break;
-                case 'Edit': {                                
-                    var selectedId = productsGrid.getSelectedRowId();                   
-                    if (selectedId) {                                 
-                        productForm.setFocusOnFirstActive();
-                        productForm.showItem("block");                            
-                        productForm.showItem("saveedit");                             
-                        productForm.hideItem("savenew");                            
-                    }
-                };break;
+            switch (name){                
                 case 'Del': {
                     var selectedId = productsGrid.getSelectedRowId();
                     if (selectedId) {                                 
@@ -116,7 +98,8 @@ function productsTasksInit(cell) {
             ],
                 multiselect: true
         });                
-        productsGrid.fill = function(){						
+        productsGrid.fill = function(){
+            productsGrid.clearAll();
             ajaxGet("api/products", '', function(data){                                     
                 if (data && data.success){                                    
                     productsGrid.parse(data.data, "js");
@@ -167,7 +150,7 @@ function productsTasksInit(cell) {
                 case "Add": {
                     var selectedProductId = productsGrid.getSelectedRowId();
                     if (selectedProductId) {
-                        var addingForm = createWindowWithForm(formStruct, "Componenty", 300, 300);
+                        var addingForm = createWindowWithForm(formStruct, "Zadania do produktow", 300, 300);
                         var tasksCombo = addingForm.getCombo("task_id");
                         tasksCombo.enableFilteringMode(true);
                         ajaxGet("api/tasks", '', function(data){
@@ -229,7 +212,8 @@ function productsTasksInit(cell) {
             ],
                 multiselect: true
         });
-        zadaniaGrid.fill = function(id = 0){						
+        zadaniaGrid.fill = function(id = 0){	
+            zadaniaGrid.clearAll();					
             ajaxGet("api/productstasks/list/" + id, '', function(data){                                     
                 if (data && data.success){
                     zadaniaGrid.parse((data.data), "js");

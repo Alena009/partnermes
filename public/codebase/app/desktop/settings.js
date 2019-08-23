@@ -576,7 +576,7 @@ function settingsInit(cell) {
                 tasksGridToolBar.attachEvent("onClick", function(id) {
                     switch (id){
                         case 'Add': {
-                            var form = createWindowWithForm(taskFormStruct, "Nowe zlecenie", 300, 300);
+                            var form = createWindowWithForm(taskFormStruct, "Nowe zadanie", 300, 300);
                             var groupsCombo = form.getCombo("task_group_id");
                             ajaxGet("api/taskgroups", "", function(data){                                                                                                        
                                 if (data && data.success) {
@@ -641,23 +641,7 @@ function settingsInit(cell) {
                             width: 100,
                             type: "ch",                            
                             align: "center"     
-                        },  
-                        {
-                            label: _("Ilosc start"),
-                            id: "amount_start",
-                            width: 60,
-                            type: "edn",
-                            sort: "str",                            
-                            align: "right"     
-                        },  
-                        {
-                            label: _("Ilosc stop"),
-                            id: "amount_stop",
-                            width: 60,
-                            type: "edn",                             
-                            sort: "str",
-                            align: "right"     
-                        }                        
+                        }                       
                     ],
                         multiselect: true
                 });                
@@ -1183,9 +1167,7 @@ var taskFormStruct = [
                     {text: "Tak", value: "1", selected: true},
                     {text: "Nie", value: "0"}]},
                 {type:"input",  name:"kod",          label:_("Kod"),         offsetTop:13, labelWidth:80},                                                                				
-                {type:"input",  name:"name",         label:_("Imie"),        offsetTop:13, labelWidth:80}, 
-                {type:"input",  name:"amount_start", label:_("Ilosc start"), offsetTop:13, labelWidth:80},                                                                				
-                {type:"input",  name:"amount_stop",  label:_("Ilosc stop"),  offsetTop:13, labelWidth:80},                
+                {type:"input",  name:"name",         label:_("Imie"),        offsetTop:13, labelWidth:80},                 
                 {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                     {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
                     {type: "newcolumn"},

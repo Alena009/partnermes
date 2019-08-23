@@ -139,7 +139,7 @@ function productsTasksInit(cell) {
             var formStruct = [
                             {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
                             {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
-                            {type: "input", name: "duration", required: true, label: _("Czas")},
+                            {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},
                             {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                                 {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
                                 {type: "newcolumn"},
@@ -202,7 +202,7 @@ function productsTasksInit(cell) {
                     align: "left"
                 },
                 {
-                    label: _("Trwalosc"),
+                    label: _("Czas, min"),
                     width: 100,
                     id: "duration",
                     type: "ed", 
@@ -232,7 +232,11 @@ function productsTasksInit(cell) {
             ajaxGet("api/productstasks/" + id + "/edit", data, function(data){                                                            
                 console.log(data);
             });
-        });        
+        });
+        zadaniaGrid.attachFooter(
+            [_("Ilosc czasu na wykonanie, min: "),"#cspan","#stat_total"],
+            ["text-align:right;","text-align:center"]
+        );
     }
 }
 

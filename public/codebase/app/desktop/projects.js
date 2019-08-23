@@ -76,7 +76,19 @@ function projectsInit(cell) {
 //			projectsGrid.selectRow(0, true);
 //		});
                 //projectsGrid.load("api/orders");
-                
+                var dpProjectsGrid = new dataProcessor("api/orders", "js");                
+                dpProjectsGrid.init(projectsGrid);
+                dpProjectsGrid.enableDataNames(true);
+                dpProjectsGrid.setTransactionMode("REST");
+                dpProjectsGrid.enablePartialDataSend(true);
+                dpProjectsGrid.enableDebug(true);
+                dpProjectsGrid.setUpdateMode("row", true);
+                dpProjectsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                    data.id = id;
+                    ajaxGet("api/orders/" + id + "/edit", data, function(data){                                                            
+                        console.log(data);
+                    });
+                });                
                 projectsGrid.fill = function(amount){
 		    ajaxGet("api/orders/list/" + amount, '', function(data){
 		        if (data.data && data.success){
@@ -250,7 +262,16 @@ function projectsInit(cell) {
                 
                 var positionsGrid = positionsLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
-	            columns: [{
+	            columns: [
+                        {
+                            label: _("Kod pozycji"),
+                            width: 50,
+                            id: "kod",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
                             label: _("Produkt"),
                             width: 100,
                             id: "product_name",
@@ -279,11 +300,22 @@ function projectsInit(cell) {
                 });  
                 positionsGrid.attachHeader("#text_filter,#select_filter,#text_search");		
 		positionsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]);
-		positionsGrid.enableMultiselect(true); 
-                positionsGrid.enableMultiline(true);
-		positionsGrid.enableEditEvents(false,true,true);
+                var dpPositionsGrid = new dataProcessor("api/positions", "js");                
+                dpPositionsGrid.init(positionsGrid);
+                dpPositionsGrid.enableDataNames(true);
+                dpPositionsGrid.setTransactionMode("REST");
+                dpPositionsGrid.enablePartialDataSend(true);
+                dpPositionsGrid.enableDebug(true);
+                dpPositionsGrid.setUpdateMode("row", true);
+                dpPositionsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                    data.id = id;
+                    ajaxGet("api/positions/" + id + "/edit", data, function(data){                                                            
+                        console.log(data);
+                    });
+                }); 
                 
                 positionsGrid.fill = function(orderId){
+                    positionsGrid.clearAll();
 		    ajaxGet("api/orders/positions/" + orderId, '', function(data){
 		        if (data.data && data.success){			    
                             positionsGrid.clearAll();
@@ -385,6 +417,7 @@ function projectsInit(cell) {
                 });
                 
                 historyGrid.fill = function(orderId){
+                    historyGrid.clearAll();
 		    ajaxGet("api/orders/history/" + orderId, '', function(data){
 		        if (data.data && data.success){			    
                             historyGrid.clearAll();

@@ -1,16 +1,16 @@
-var eventsDataView;
-var eventsLayout;
-var eventsMap;
+var warehouseDataView;
+var warehouseLayout;
+var warehouseMap;
 
-function eventsInit(cell) {
-    if (eventsLayout == null) {
+function warehouseInit(cell) {
+    if (warehouseLayout == null) {
         // init layout
-        var eventsLayout = cell.attachLayout("2U");                  
-        eventsLayout.cells("a").hideHeader();
-        eventsLayout.cells("b").hideHeader();                
-        eventsLayout.cells("a").setWidth(380);		                
-        eventsLayout.setAutoSize("a", "a;b");
-        var productsTreeToolBar = eventsLayout.cells("a").attachToolbar({
+        var warehouseLayout = cell.attachLayout("2U");                  
+        warehouseLayout.cells("a").hideHeader();
+        warehouseLayout.cells("b").hideHeader();                
+        warehouseLayout.cells("a").setWidth(380);		                
+        warehouseLayout.setAutoSize("a", "a;b");
+        var productsTreeToolBar = warehouseLayout.cells("a").attachToolbar({
                 iconset: "awesome",
                 items: [
                         {type: "text", id: "title", text: _("Grupy produktow")},
@@ -131,7 +131,7 @@ function eventsInit(cell) {
                 };break;
             }                    
         });        
-        var productsTree = eventsLayout.cells("a").attachTreeView({
+        var productsTree = warehouseLayout.cells("a").attachTreeView({
             skin: "dhx_web",    // string, optional, treeview's skin
             iconset: "font_awesome", // string, optional, sets the font-awesome icons
             multiselect: false,           // boolean, optional, enables multiselect
@@ -177,7 +177,7 @@ function eventsInit(cell) {
                 productsGrid.fill(grupy);                        
                 return true;
         }); 
-        var productsGridToolBar = eventsLayout.cells("b").attachToolbar({
+        var productsGridToolBar = warehouseLayout.cells("b").attachToolbar({
             iconset: "awesome",
             items: [
                 {type: "text", id: "title", text: _("Produkty")},
@@ -254,7 +254,7 @@ function eventsInit(cell) {
         }); 
         
         //initialising and configuration grid
-        var productsGrid = eventsLayout.cells("b").attachGrid({
+        var productsGrid = warehouseLayout.cells("b").attachGrid({
             image_path:'codebase/imgs/',
             columns: [                                                  
                 {
@@ -369,8 +369,8 @@ function eventsInit(cell) {
 }
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){    
-	if (id == "events") {                        
+	if (id == "warehouse") {                        
             window.history.pushState({ 'page_id': id }, null, '#events'); 
-            eventsInit(cell);      
+            warehouseInit(cell);      
         }        
 });

@@ -18,7 +18,7 @@ var A = {
 				'sources/dhtmlxScheduler/codebase/sources/locale/locale_pl'
 			],
 
-		app: ["dhtmlx_ext", "timeline", "zlecenia", "pracownicy", "projects", "events", "settings", "products", "products_tasks", "gantt", "init"],
+		app: ["dhtmlx_ext", "timeline", "zlecenia", "pracownicy", "projects", "warehouse", "settings", "products", "products_tasks", "gantt", "init"],
 		common: ["settings_forms","base64ArrayBuffer"]
 	}
 };

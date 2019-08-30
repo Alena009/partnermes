@@ -16,7 +16,7 @@ function appInit() {
 			{id: "zlecenia",       text: "Zlecenia",          icon: "list.png"},
 			{id: "pracownicy",     text: "Pracownicy",        icon: "contacts.png"},
 			{id: "projects",       text: "Zamowienia",        icon: "projects.png"},
-			{id: "events",         text: "Magazyn",           icon: "events.png"  },
+			{id: "warehouse",         text: "Magazyn",        icon: "events.png"  },
                         {id: "products",       text: "Produkty",          icon: "box.png"},
                         {id: "products_tasks", text: "Zadania",           icon: "shuffle.png"},
 			{id: "settings",       text: "Settings",          icon: "settings.png"}

@@ -74,7 +74,7 @@ Route::group([
     Route::get('/workerdep/del', 'WorkerDepartamentController@deleteRel');
     Route::resource('/workerdep', 'WorkerDepartamentController');
     Route::get('/warehouse/amountproduct/{productId}', 'WarehouseController@amountProductInWarehouse');  
-    Route::get('/warehouse/list/{grupy}', 'WarehouseController@listProducts');  
+    Route::get('/warehouse/list/{grupy?}', 'WarehouseController@listProducts');  
     Route::resource('/warehouse', 'WarehouseController'); 
  
     Route::get('/gantt', 'OperationController@buildGantt');   

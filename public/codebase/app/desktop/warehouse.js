@@ -8,19 +8,17 @@ function warehouseInit(cell) {
         var warehouseLayout = cell.attachLayout("2U");                  
         warehouseLayout.cells("a").hideHeader();
         warehouseLayout.cells("b").hideHeader();                
-        warehouseLayout.cells("a").setWidth(380);		                
+        warehouseLayout.cells("a").setWidth(280);		                
         warehouseLayout.setAutoSize("a", "a;b");
         var productsTreeToolBar = warehouseLayout.cells("a").attachToolbar({
                 iconset: "awesome",
                 items: [
                         {type: "text", id: "title", text: _("Grupy produktow")},
-                        {type: "spacer"},
-                        {type: "text", id: "find", text: _("Find:")},				
-                        {type: "buttonInput", id: "szukaj", text: "", width: 100},
-                        {type: "separator", id: "sep2"},                                
+                        {type: "spacer"},                                                       
                         {id: "Add", type: "button", img: "fa fa-plus-square "},
                         {id: "Edit", type: "button", img: "fa fa-edit"},
-                        {id: "Del", type: "button", img: "fa fa-minus-square"}                                 
+                        {id: "Del", type: "button", img: "fa fa-minus-square"},
+                        {id: "Hide", type: "button", img: "fa fa-arrow-left"}
                 ]
         }); 
         var grupyFormAddData = [
@@ -129,6 +127,9 @@ function warehouseInit(cell) {
                                     });
                                 }   
                 };break;
+                case 'Hide': {
+                        warehouseLayout.cells("a").collapse();
+                };break; 
             }                    
         });        
         var productsTree = warehouseLayout.cells("a").attachTreeView({
@@ -139,15 +140,7 @@ function warehouseInit(cell) {
             dnd: true,           // boolean, optional, enables drag-and-drop
             context_menu: true
         });  
-        productsTree.enableDragAndDrop(true);                
-        productsTree.build = function() {
-            var treeStruct = ajaxGet("api/prodgroups/grupytree", "", function(data){
-                if (data.success) {
-                    productsTree.loadStruct(data.data);
-                }
-            });
-        };
-        productsTree.build(); 
+        productsTree.enableDragAndDrop(true);                 
         productsTree.attachEvent("onDrop",function(id){                    
             var parent_id = arguments[1];
             parent_id = (parent_id) ? parent_id+'' : 0;
@@ -177,7 +170,15 @@ function warehouseInit(cell) {
                 productsGrid.fill(grupy);                        
                 return true;
         }); 
-        var productsGridToolBar = warehouseLayout.cells("b").attachToolbar({
+        productsTree.build = function() {
+            var treeStruct = ajaxGet("api/prodgroups/grupytree", "", function(data){
+                if (data.success) {
+                    productsTree.loadStruct(data.data);
+                }
+            });
+        };
+        productsTree.build();        
+        productsGridToolBar = warehouseLayout.cells("b").attachToolbar({
             iconset: "awesome",
             items: [
                 {type: "text", id: "title", text: _("Produkty")},
@@ -186,8 +187,10 @@ function warehouseInit(cell) {
                 {type: "buttonInput", id: "szukaj", text: "", width: 100},
                 {type: "separator", id: "sep2"},                                
                 {id: "Add", type: "button", img: "fa fa-plus-square "},
-                {id: "Edit", type: "button", img: "fa fa-edit"},
-                {id: "Del", type: "button", img: "fa fa-minus-square"}                                
+//                {id: "Edit", type: "button", img: "fa fa-edit"},
+//                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                {type: "separator", id: "sep1"},
+                {id: "Redo", type: "button", img: "fa fa-reply"}
             ]
         });
         productsGridToolBar.attachEvent("onClick", function(name){
@@ -225,10 +228,13 @@ function warehouseInit(cell) {
                                     var data = addingForm.getFormData();
                                     data.amount = data.amount * addingForm.getItemValue("type_operation");
                                     ajaxPost("api/warehouse", data, function(data) {                    
-                                        if (data.success) {
+                                        if (data && data.success) {
                                             var selectedGroupInTree = productsTree.getSelectedId();
-                                            productsGrid.fill(selectedGroupInTree);                                                    
-                                            //productsGrid.addRow(data.data.id, [], 0);
+                                            if (!selectedGroupInTree) {
+                                                productsGrid.fill(0);
+                                            } else {
+                                                productsGrid.fill(selectedGroupInTree);
+                                            }                                            
                                         }
                                     });
                                 };break;
@@ -250,6 +256,13 @@ function warehouseInit(cell) {
                         }
                     });
                 };break;
+                case 'Redo':{
+                    productsGrid.fill(0);
+                    productsTree.getAllChecked().forEach(function(elem){
+                        productsTree.uncheckItem(elem);
+                    });                    
+                    productsTree.unselectItem(productsTree.getSelectedId());
+                };break;                
             }
         }); 
         
@@ -258,62 +271,77 @@ function warehouseInit(cell) {
             image_path:'codebase/imgs/',
             columns: [                                                  
                 {
-                    label: _("Grupa"),
-                    width: 100,
+                    label: _("Grupa"),                 
                     id: "group_name",
                     type: "ro",                                             
                     sort: "str", 
                     align: "left"
                 },
                 {
-                    label: _("Produkt"),
-                    width: 200,
+                    label: _("Produkt"),                   
                     id: "product_name",
                     type: "ro", 
                     sort: "str", 
                     align: "left"
                 },
                 {
-                    label: _("Produkt kod"),
-                    width: 100,
+                    label: _("Produkt kod"),                  
                     id: "product_kod",
                     type: "ro", 
                     sort: "str", 
                     align: "left"
                 },                        
                 {
-                    label: _("Data"),
-                    id: "created_at",
-                    width: 60, 
+                    label: _("Ilosc"),
+                    id: "amount",                    
                     type: "ro", 
                     sort: "str", 
                     align: "left"
-                },                         
-                {
-                    label: _("Ilosc"),
-                    id: "amount",
-                    width: 60, 
-                    type: "dyn", 
-                    sort: "str", 
-                    align: "left"
                 }                     
-            ]                                       
+            ],
+            multiline: true
         });
+        productsGrid.attachHeader("#select_filter,#text_filter,#select_filter");
         productsGrid.attachFooter(
-            [_("Ilosc: "),"#cspan","#cspan","#cspan","#stat_total"],
+            [_("Ilosc: "),"#cspan","#cspan","#stat_total"],
             ["text-align:right;","text-align:center"]
-        );         
-        productsGrid.fill = function(i) {
+        );  
+        productsGrid.fill = function(i = 0) {
+            productsGrid.clearAll();
             var ids = Array();
             ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-            var new_data = ajaxGet("api/warehouse/list/" + ids, "", function(data){
+            ajaxGet("api/warehouse/list/" + ids, "", function(data){
                 if (data && data.success){
-                    console.log(data.data);
                     productsGrid.parse(data.data, "js");
                 }
             });	                    
         };
         productsGrid.fill(0); 
+        //filtering by column filter
+        productsGrid.getFilterElement(1)._filter = function (filterElem){
+            var input = this.value; // gets the text of the filter input
+            input = input.trim().toLowerCase().split(' ');
+            return function(value, id){
+                //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
+                var val = productsGrid.cells(id, 1).getValue(); // gets the value of the current                                                    
+                //making pattern string for regexp
+                var searchStr = '';
+                for (var i = 0; i < input.length; i++) {
+                    searchStr = searchStr + input[i] + "(.+)";                                                                
+                    //var searchStr = /^zz(.+)np(.+)/ig;
+                }
+                var regExp = new RegExp("^" + searchStr, "ig");                                                          
+                if (val.toLowerCase().match(regExp)){                                                             
+                    return true;
+                }                                                    
+                //}
+                return false;
+            };
+        };     
+        
+        var searchElem = productsGridToolBar.getInput('szukaj');
+        productsGrid.makeFilter(searchElem, 1, true);                                                                  
+        productsGrid.filterByAll();         
         var dpProductsGrid = new dataProcessor("api/warehouse", "js");                
         dpProductsGrid.init(productsGrid);
         dpProductsGrid.enableDataNames(true);

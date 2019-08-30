@@ -51,7 +51,7 @@ function appInit() {
 			});
 		}
 	});
-	mainSidebar.cells("timeline").setActive(true);
+	mainSidebar.cells("warehouse").setActive(true);
         return;
 	//window.dhx4.callEvent("onSelect","projects");
 	//debugger;

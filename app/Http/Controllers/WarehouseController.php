@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Repositories\WarehouseRepository;
 use App\Models\Warehouse;
 use App\Models\ProductGroup;
+use App\Models\Product;
 
 class WarehouseController extends BaseController
 {
@@ -26,26 +27,27 @@ class WarehouseController extends BaseController
         $records = [];
         
         if ($groups) {  
-            $arrayGroupsIds = explode(',', $groups);  
-            //$choosenProductGroups = ProductGroup::whereIn('id', $arrayGroupsIds)->get();
+            $arrayGroupsIds = explode(',', $groups);              
             $groupsIds = ProductGroup::whereIn("id", $arrayGroupsIds)
                     ->orWhereIn("parent_id", $arrayGroupsIds)
                     ->pluck('id');
-            //print_r($groupsIds);
-            $records = Warehouse::leftJoin("products", "products.id", "=", "warehouse.product_id")
-                    ->whereIn("products.product_group_id", $groupsIds)
-                    ->orderBy('warehouse.id', 'desc')
-                    ->get();                     
+            $productsIds = Product::whereIn("product_group_id", $groupsIds)->pluck('id');
+            $records = Warehouse::groupBy('product_id')
+                    ->selectRaw('*, sum(amount) as amount')
+                    ->whereIn('product_id', $productsIds)
+                    ->get();                    
         } else {
-            $records = Warehouse::orderBy('id', 'desc')->get();         
+            $records = Warehouse::groupBy('product_id')
+                    ->selectRaw('*, sum(amount) as amount')
+                    ->get();         
         }
         
         foreach($records as $record) {
-            $product  = $record->product;
+            $product                    = $record->product;
             $record['product_name']     = $product['name'];
             $record['product_kod']      = $product['kod'];
-            $record['product_group_id'] = $product->group['id'];
-            $record['group_name']       = $product->group['name'];
+            $record['product_group_id'] = $product->group->id;
+            $record['group_name']       = $product->group->name;
         }  
         
         return response()->json(['success' => true, 'data' => $records]);       
@@ -66,11 +68,12 @@ class WarehouseController extends BaseController
     }   
 
     /**
-     * Get count quantity of a particular product in warehouse
+     * Get amount of product in warehouse
      */    
     public function amountProductInWarehouse($productId)
     {
         $totalAmount = Warehouse::where('product_id', '=', $productId)->sum('amount');
         return response()->json(['success' => true, 'data' => $totalAmount]);       
     }
+    
 }

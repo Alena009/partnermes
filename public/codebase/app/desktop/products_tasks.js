@@ -195,9 +195,9 @@ function productsTasksInit(cell) {
                 },
                 {
                     label: _("Zadanie"),
-                    width: 100,
+                    width: 200,
                     id: "task_name",
-                    type: "ro", 
+                    type: "coro", 
                     sort: "str", 
                     align: "left"
                 },
@@ -229,10 +229,19 @@ function productsTasksInit(cell) {
         dpZleceniaForProductGrid.setUpdateMode("row", true);
         dpZleceniaForProductGrid.attachEvent("onBeforeDataSending", function(id, state, data){
             data.id = id;
+            data.task_id = data.task_name;
             ajaxGet("api/productstasks/" + id + "/edit", data, function(data){                                                            
                 console.log(data);
             });
         });
+        var tasksCombo = zadaniaGrid.getCombo(1);
+        ajaxGet("api/tasks", "", function(data){                                                            
+            if (data.success && data.data) {
+                data.data.forEach(function(task){
+                    tasksCombo.put(task.id, task.name);
+                });
+            }
+        });        
         zadaniaGrid.attachFooter(
             [_("Ilosc czasu na wykonanie, min: "),"#cspan","#stat_total"],
             ["text-align:right;","text-align:center"]

@@ -18,6 +18,8 @@
     @if (Auth::check())
         <link rel="stylesheet" type="text/css"
             href="codebase/dhtmlx/sources/dhtmlxScheduler/codebase/dhtmlxscheduler_material.css" />
+        <link rel="stylesheet" type="text/css"
+            href="codebase/dhtmlx/sources/dhtmlxGantt/codebase/dhtmlxgantt.css" />       
         <link rel="stylesheet" type="text/css" href="css/timeline.css" />
         <link rel="stylesheet" type="text/css" href="css/zlecenia.css" />
         <link rel="stylesheet" type="text/css" href="codebase/fonts/font_roboto/roboto.css" />

@@ -8,15 +8,17 @@ var A = {
 		dhtmlx: ["dhtmlx.debug",
 //				"sources/dhtmlxCombo/codebase/dhtmlxcombo",
 				"sources/dhtmlxScheduler/codebase/dhtmlxscheduler",
+                                "sources/dhtmlxGantt/codebase/dhtmlxgantt",
 				"sources/dhtmlxScheduler/codebase/dhtmlxscheduler_timeline",
 				"sources/dhtmlxScheduler/codebase/dhtmlxscheduler_treetimeline",
 				"sources/dhtmlxScheduler/codebase/ext/dhtmlxscheduler_grid_view",
 				"sources/dhtmlxScheduler/codebase/ext/dhtmlxscheduler_minical",
 				"sources/dhtmlxScheduler/codebase/ext/dhtmlxscheduler_tooltip",
+                                "sources/dhtmlxScheduler/codebase/ext/dhtmlxscheduler_editors",
 				'sources/dhtmlxScheduler/codebase/sources/locale/locale_pl'
 			],
 
-		app: ["dhtmlx_ext", "timeline", "zlecenia", "pracownicy", "projects", "events", "settings", "products", "products_tasks", "init"],
+		app: ["dhtmlx_ext", "timeline", "zlecenia", "pracownicy", "projects", "events", "settings", "products", "products_tasks", "gantt", "init"],
 		common: ["settings_forms","base64ArrayBuffer"]
 	}
 };

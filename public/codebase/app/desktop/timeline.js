@@ -99,26 +99,67 @@ function timelineInit(cell) {
         scheduler.config.show_loading = true;
         scheduler.config.multi_day = true;
         scheduler.config.time_step = 1;
-
-
+        
+        scheduler.config.lightbox.sections=[	
+            {name:"Pracownik",  type:"timeline", options:scheduler.serverList("users") , map_to:"user_id" }, //type should be the same as name of the tab
+            //{name:"Pracownik", height:40, map_to:"id_user", type:"select", options:scheduler.serverList("pracownicy")},
+            //{name:"Zadanie",  map_to:"id_zadanie", type:"select", options:scheduler.serverList("zadania"),onchange:changeZadania},                
+            //{name:"Zlecenie",  map_to:"kod", type:"zlecenieEditor",onchange:changeZlecenia},
+            {name:"Zlecenie", type:"combo", filtering:true, height:50, width: 150,
+                options:scheduler.serverList("zlecenia"), 
+                map_to:"order_position_id", 
+                onchange:changeZlecenia},
+//            {name:"Zadanie", type:"combo", filtering:true, height:50, width: 150,
+//                options:scheduler.serverList("tasks"), 
+//                map_to:"task_id"},            
+//            {name:"Zlecenie", type:"select", options:scheduler.serverList("zlecenia"), 
+//                map_to:"order_position_id", onchange:changeZlecenia}, 
+            {name:"Zadanie",  type:"select", options:[],    
+                map_to:"task_id" }, 
+            {name:"Ruckmeld", type:"ruckmeldEditor", 
+                map_to:"ruckmeld", onchange:changeRuckmeld},
+            {name:"Szt",      type:"sztEditor",  
+                map_to:"amount",   onchange:changeSzt}
+//            {name:"time", height:72, type:"time",
+//                map_to:"auto", time_format:["%Y","%m","%d","%H:%i"]}
+        ];           
+        
+        ajaxGet("api/positions", "", function(data){
+            scheduler.updateCollection("zlecenia", data.data);
+        }); 
+        
         function changeZadania(){
                 console.log(this);
                 console.log(arguments);
         }
+        
+        var update_select_options = function(select, options) { // helper function                 
+                select.options.length = 0;
+                for (var i=0; i<options.length; i++) {
+                        var option = options[i];
+                        select[i] = new Option(option.label, option.key);
+                }
+        };    
+        scheduler.attachEvent("onBeforeLightbox", function(id){                      
+            update_select_options(scheduler.formSection('Zadanie').control, []);
+            return true;
+        });        
         function changeZlecenia(el){
             var me = this;
-            ajaxGet("api/zlecenia/"+this.value,
+            ajaxGet("api/declaredworks/byorderpos/"+this.getSelectedValue(), "",
                 {
-                        'success':function(data){
-                                if(me.nextSibling && data[0].zlecenie!==undefined) me.nextSibling.value = data[0].zlecenie;				
-                                me.ev.zlecenie=data[0].zlecenie;	
-                                me.ev.id_zlecenie=data[0].id_zlecenie;	
-                        },
-                        'failure':function(data){
-                                me.ev.zlecenie='';
-                                me.ev.id_zlecenie='';
-                                if(me.nextSibling) me.nextSibling.value = "BRAK ZLECENIA!!!";				
-                        }
+                    'success':function(data){                            
+                        update_select_options(scheduler.formSection('Zadanie').control, data.data);
+
+//                                if(me.nextSibling && data[0].zlecenie!==undefined) me.nextSibling.value = data[0].zlecenie;				
+//                                me.ev.zlecenie=data[0].zlecenie;	
+//                                me.ev.id_zlecenie=data[0].id_zlecenie;	
+                    },
+                    'failure':function(data){
+                            me.ev.zlecenie='';
+                            me.ev.id_zlecenie='';
+                            if(me.nextSibling) me.nextSibling.value = "BRAK ZLECENIA!!!";				
+                    }
                 }
             );
         }
@@ -127,7 +168,6 @@ function timelineInit(cell) {
             ajaxGet("api/zlecenia/duration/"+this.value,
                 {
                         'success':function(data){
-                                console.log()
                                 if(me.nextSibling && data[0].ruckmeld!==undefined) me.nextSibling.value = data[0].ruckmeld;				
                                 me.ev.ruckmeld=data[0].ruckmeld;	
                                 me.ev.ruckmeld=data[0].ruckmeld;	
@@ -218,39 +258,14 @@ function timelineInit(cell) {
 
         };
         scheduler.attachEvent("onEventSave",function(id,ev,is_new){
-                console.log(arguments);
-//			if (!ev.zlecenie) {
-//				alert("Text must not be empty");
-//				return false;
-//			}
+                console.log(ev);
+                    if (!ev.task_id) {
+                            alert("Text must not be empty");
+                            return false;
+                    }
                 return true;
-        })	
-       
-        ajaxGet("api/operations", "", function(data){
-            console.log(data);    
         });
-        
-        
-        scheduler.config.lightbox.sections=[	
-                {name:"Pracownik",  type:"timeline", options:scheduler.serverList("users") , map_to:"user_id" }, //type should be the same as name of the tab
-                //{name:"Pracownik", height:40, map_to:"id_user", type:"select", options:scheduler.serverList("pracownicy")},
-                //{name:"Zadanie",  map_to:"id_zadanie", type:"select", options:scheduler.serverList("zadania"),onchange:changeZadania},                
-                //{name:"Zlecenie",  map_to:"kod", type:"zlecenieEditor",onchange:changeZlecenia},
-                {name:"Zlecenie", type:"select", options:scheduler.serverList("zlecenia"), map_to:"order_position_id", onchange:changeZlecenia},
-                {name:"Zadanie",  type:"select", options:scheduler.serverList("tasks"),    map_to:"task_id" }, 
-                {name:"Ruckmeld", type:"ruckmeldEditor",                                   map_to:"ruckmeld", onchange:changeRuckmeld},
-                {name:"Szt",      type:"sztEditor",                                        map_to:"amount",   onchange:changeSzt},
-                {name:"time", height:72, type:"time", map_to:"auto",time_format:["%Y","%m","%d","%H:%i"]}
-        ];
-        
-        ajaxGet("api/tasks", "", function(data){
-            scheduler.updateCollection("tasks", data.data);
-        });
-        
-        ajaxGet("api/zlecenia/list/0", "", function(data){
-            scheduler.updateCollection("zlecenia", data.data);
-        });        
-        
+               
         ajaxGet("api/users", "", function(data2){
             if (data2 && data2.success){
                 var usersList = scheduler.serverList("users", data2.data);
@@ -299,13 +314,14 @@ function timelineInit(cell) {
                     '<div class="dhx_cal_tab" name="grid_tab" style="left:240px;"></div>' + 
                     '<div class="dhx_cal_tab" name="timeline_tab" style="right:256px;"></div>'+
                     '<div class="dhx_minical_icon" name="minical_tab" id="dhx_minical_icon" onclick="show_minical()">&nbsp;</div>';
-                    
+                     
 
         timelineLayout.cells("a").attachScheduler(null, "grid", sTabs);
-        var schedulerDP = new dataProcessor("api/operations"); 
-        schedulerDP.init(scheduler); 
-        //schedulerDP.setTransactionMode("JSON");
-        schedulerDP.setTransactionMode("REST");
+//        var schedulerDP = new dataProcessor("api/operations", "js"); 
+//        schedulerDP.init(scheduler); 
+//        schedulerDP.setTransactionMode("JSON");
+     
+        //schedulerDP.setTransactionMode("REST");
         scheduler.templates.grid_single_date = function(date){
                 var formatFunc = scheduler.date.date_to_str("%Y-%m-%d %H:%i");
                 return formatFunc(date); 

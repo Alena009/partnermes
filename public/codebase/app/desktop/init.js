@@ -11,6 +11,7 @@ function appInit() {
 		width: 140,
 		template: "tiles",
 		items: [
+                        {id: "gantt",          text: "Gant",              icon: "timeline.png"},
 			{id: "timeline",       text: "Timeline",          icon: "timeline.png"},
 			{id: "zlecenia",       text: "Zlecenia",          icon: "list.png"},
 			{id: "pracownicy",     text: "Pracownicy",        icon: "contacts.png"},

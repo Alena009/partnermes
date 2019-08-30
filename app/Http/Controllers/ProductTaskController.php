@@ -32,12 +32,15 @@ class ProductTaskController extends BaseController
         
         foreach ($result as $item){
             $task    = $item->task;
+            $group   = $task->group;
             $product = $item->product;
             
-            $item['task_name']    = $task->name;
-            $item['task_kod']     = $task->kod;
-            $item['product_name'] = $product->name;
-            $item['product_kod']  = $product->kod;
+            $item['task_id']         = $task->id;
+            $item['task_name']       = $task->name;
+            $item['task_kod']        = $task->kod;
+            $item['product_name']    = $product->name;
+            $item['product_kod']     = $product->kod;
+            $item['task_group_name'] = $group->name;
         }
         
         return response()->json(['success' => true, 'data' => $result]);           

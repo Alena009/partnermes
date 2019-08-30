@@ -23,6 +23,11 @@ Route::group([
     Route::get('/components/list/{productId}', 'ComponentController@listComponents');
     Route::resource('/components', 'ComponentController');  
     
+    Route::get('/declaredworks/byorderpos/{pos}', 'DeclaredWorkController@listWorksForOrderPos');   
+    Route::get('/declaredworks/fortimeline', 'DeclaredWorkController@listWorksForTimeline');   
+    Route::get('/declaredworks/list/{groups}', 'DeclaredWorkController@listWorksByGroups');   
+    Route::resource('/declaredworks', 'DeclaredWorkController'); 
+    
     Route::get('/departaments/grupytree', 'DepartamentController@buildTree');
     Route::resource('/departaments', 'DepartamentController'); 
     
@@ -53,7 +58,7 @@ Route::group([
     Route::post('/rolespermissions/addToRoles/{permissionId}', 'RolePermissionController@addNewPermissionToRoles');
     Route::resource('/rolespermissions', 'RolePermissionController');    
     
-    Route::get('/tasks/listbygroups/{groups}', 'TaskController@listByGroups');    
+    Route::get('/tasks/listbygroups/{groups?}', 'TaskController@listByGroups');    
     Route::resource('/tasks', 'TaskController');    
     Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
     Route::resource('/taskgroups', 'TaskGroupController');    
@@ -71,9 +76,8 @@ Route::group([
     Route::get('/warehouse/amountproduct/{productId}', 'WarehouseController@amountProductInWarehouse');  
     Route::get('/warehouse/list/{grupy}', 'WarehouseController@listProducts');  
     Route::resource('/warehouse', 'WarehouseController'); 
-    
-    Route::get('/zlecenia/list/{groups}', 'OrderPositionController@zleceniaListByGroups');   
  
+    Route::get('/gantt', 'OperationController@buildGantt');   
 });
 
 Route::post('login', 'API\UserController@login');

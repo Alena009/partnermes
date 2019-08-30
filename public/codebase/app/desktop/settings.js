@@ -25,8 +25,10 @@ function settingsInit(cell) {
                 rolesLayout.setAutoSize("a", "a;b;c");               
             
             var tasksGroupsLayout = mainTabbar.tabs("a2").attachLayout("2U"); 
-                tasksGroupsLayout.cells("a").hideHeader();
+                tasksGroupsLayout.cells("a").hideHeader();                
                 tasksGroupsLayout.cells("b").hideHeader();
+                tasksGroupsLayout.cells("a").setWidth(280);
+                tasksGroupsLayout.setAutoSize("a", "a;b");                
                 
             var productsGroupsLayout = mainTabbar.tabs("a3").attachLayout("2U"); 
                 productsGroupsLayout.cells("a").hideHeader(); 
@@ -493,7 +495,7 @@ function settingsInit(cell) {
                 var tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar({
                         iconset: "awesome",
                         items: [
-                                {type: "text", id: "title", text: _("Grupy")},
+                                {type: "text", id: "title", text: _("Grupy zadan")},
                                 {type: "spacer"},
                                 {id: "Add", type: "button", img: "fa fa-plus-square "},
                                 {id: "Edit", type: "button", img: "fa fa-edit"},
@@ -630,7 +632,7 @@ function settingsInit(cell) {
                         {
                             label: _("Name"),
                             id: "name",
-                            width: 100,
+                            width: 200,
                             type: "ed", 
                             sort: "str", 
                             align: "left"     
@@ -641,11 +643,18 @@ function settingsInit(cell) {
                             width: 100,
                             type: "ch",                            
                             align: "center"     
-                        }                       
+                        },
+                        {
+                            label: _("Grupa"),
+                            id: "task_group_name",
+                            width: 150,
+                            type: "coro",                            
+                            align: "left"     
+                        }                      
                     ],
                         multiselect: true
                 });                
-                tasksGrid.fill = function(i) {
+                tasksGrid.fill = function(i = 0) {
                     var ids = Array();
                     ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
                     ajaxGet("api/tasks/listbygroups/" + ids, "", function(data){
@@ -655,6 +664,14 @@ function settingsInit(cell) {
                     });	                    
                 };
                 tasksGrid.fill(0);
+                var grupyCombo = tasksGrid.getCombo(3);
+                ajaxGet("api/taskgroups", "", function(data){                                                            
+                    if (data.success && data.data) {
+                        data.data.forEach(function(group){
+                            grupyCombo.put(group.id, group.name);
+                        });
+                    }
+                });
                 var dpTasksGrid = new dataProcessor("api/tasks", "js");                
                 dpTasksGrid.init(tasksGrid);
                 dpTasksGrid.enableDataNames(true);
@@ -664,6 +681,7 @@ function settingsInit(cell) {
                 dpTasksGrid.setUpdateMode("row", true);
                 dpTasksGrid.attachEvent("onBeforeDataSending", function(id, state, data){
                     data.id = id;
+                    data.task_group_id = data.task_group_name;
                     ajaxGet("api/tasks/" + id + "/edit", data, function(data){                                                            
                         console.log(data.data);
                     });
@@ -981,7 +999,7 @@ function settingsInit(cell) {
                         return true;
                 });  
                 workersGroupsTree.fill = function(i=null){	
-                    ajaxGet("api/departamentstree", '', function(data) {                    
+                    ajaxGet("api/departaments/grupytree", '', function(data) {                    
                         if (data && data.success){      
                             workersGroupsTree.clearAll();                            
                             workersGroupsTree.loadStruct(data.data);                           
@@ -1178,6 +1196,8 @@ var taskFormStruct = [
 
 function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, id = 0) {
     var grupyForm = createWindowWithForm(groupFormStruct, "Dodaj lub zmien grupe", 300, 350);
+    //if we editing some group, we removing parent_grop combo, because 
+    //we can drag groups and change parent group by that way
     if (id) {
         grupyForm.removeItem("parent_id");
         grupyForm.setItemValue("name", treeObj.getItemText(id));
@@ -1185,7 +1205,9 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
         var dhxCombo = grupyForm.getCombo("parent_id");                             
         ajaxGet(urlForParentCombo, '', function(data) {                    
                 dhxCombo.addOption(data.data);
-        });                  
+        });  
+        dhxCombo.setComboValue(treeObj.getSelectedId());
+        dhxCombo.setComboText(treeObj.getItemText(treeObj.getSelectedId()));
     }
     grupyForm.attachEvent("onButtonClick", function(name){
         switch (name){

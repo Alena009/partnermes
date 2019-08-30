@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Repositories\OperationRepository;
 use App\Models\Operation;
+use App\Models\Order;
 
 class OperationController extends BaseController
 {
@@ -30,8 +31,6 @@ class OperationController extends BaseController
                 $user = $operation->user;            
                 //for timeline view
                 $operation['text']       = $task->name;   
-                $operation['start_date'] = $operation['date_start'];
-                $operation['end_date']   = $operation['date_end'];
                 $operation['task_name']  = $operation['text'];
                 $operation['user_name']  = $user->name;
             }
@@ -95,13 +94,42 @@ class OperationController extends BaseController
                 $operation['order_description'] = $order->description;                
                 $operation['date_delivery']     = $orderPosition->date_delivery;                
                 //for timeline view
-                $operation['text'] = $taskName;   
-                $operation['start_date'] = $operation['date_start'];
-                $operation['end_date'] = $operation['date_end'];                
+                $operation['text'] = $taskName;                   
             }
         }        
         return response()->json(['success' => true, 'data' => $operations]);       
       
     }    
+    
+    public function buildGantt()
+    {
+        $result = [];
+        $orders = [];
+        $tasks  = [];
+        $incr   = 1;
+        
+        $orders = Order::all();
+        foreach($orders as $order) {
+            $datetime1 = date_create($order->start_date);
+            $datetime2 = date_create($order->end_date);   
+            
+            $date = date_create($order->start_date);
+            $order->start_date = date_format($date, 'd-m-Y');
+            $order->text       = $order->name;
+            $order->duration   = date_diff($datetime1, $datetime2)->days;
+            $order->progress   = 0;
+            
+            $order->order_id = $order->id;
+            $order->id = $incr;
+            $incr++;
+        }
+        
+        //$tasks = 
+        
+        
+        $result = $orders;
+        
+        return response()->json(['success' => true, 'data' => $result]);       
+    }
        
 }

@@ -310,9 +310,11 @@ function pracownicyInit(cell) {
                                 });
                             }
                         };break;
-                        case 'Redo': {
-                                var departamentId = grupyTree.getSelectedId();
-                                grupyTree.unselectItem(departamentId);
+                        case 'Redo': {                                
+                                grupyTree.unselectItem(grupyTree.getSelectedId());
+                                grupyTree.getAllChecked().forEach(function(elem){
+                                    grupyTree.uncheckItem(elem);
+                                });                                   
                                 pracownicyGrid.zaladuj(0);                                
                         };break;
                     }

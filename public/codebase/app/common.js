@@ -6,7 +6,7 @@ var A = {
 	cache: true,
 	modules: {
 		dhtmlx: ["dhtmlx.debug",
-//				"sources/dhtmlxCombo/codebase/dhtmlxcombo",
+//			"sources/dhtmlxCombo/codebase/dhtmlxcombo",
 				"sources/dhtmlxScheduler/codebase/dhtmlxscheduler",
                                 "sources/dhtmlxGantt/codebase/dhtmlxgantt",
 				"sources/dhtmlxScheduler/codebase/dhtmlxscheduler_timeline",

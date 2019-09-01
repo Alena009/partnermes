@@ -13,10 +13,11 @@ function projectsInit(cell) {
 		var projectsLayout = cell.attachLayout("3J");
 		projectsLayout.cells("a").hideHeader();
 		projectsLayout.cells("b").hideHeader();
+                projectsLayout.cells("b").setCollapsedText(_("Informacja o zamowieniu"));
 		projectsLayout.cells("c").hideHeader();
+                projectsLayout.cells("c").setCollapsedText(_("Pozycji"));
 		projectsLayout.cells("b").setWidth(330);
 		projectsLayout.cells("c").setHeight(350);
-		//projectsLayout.cells("b").fixSize(true, true);
 		projectsLayout.setAutoSize("a;c", "a;b");
 		
 		// attach grid
@@ -24,7 +25,6 @@ function projectsInit(cell) {
                     image_path:'codebase/imgs/',
 	            columns: [{
                             label: _("Kod"),
-                            width: 100,
                             id: "kod",
                             type: "ed", 
                             sort: "str", 
@@ -32,16 +32,7 @@ function projectsInit(cell) {
                         },
                         {
                             label: _("Imie"),
-                            id: "name",
-                            width: 100, 
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Opis"),
-                            id: "description",
-                            width: 100, 
+                            id: "name", 
                             type: "ed", 
                             sort: "str", 
                             align: "left"
@@ -49,29 +40,25 @@ function projectsInit(cell) {
                         {
                             label: _("Klient"),
                             id: "client_name",
-                            width: 100, 
-                            type: "ed", 
+                            type: "coro", 
                             sort: "str", 
                             align: "left"
-                        },                        
+                        },                                                                                                
                         {
-                            label: _("Date start"),
-                            id: "date_start",
-                            width: 100, 
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        },                                                 
-                        {
-                            label: _("Date end"),
+                            label: _("Termin wykonania"),
                             id: "date_end",
                             type: "ed", 
                             sort: "str",	
                             align: "left"
-                        }                        
+                        }, 
+                        {
+                            id: "client_id"
+                        }
                     ],
-			multiselect: true                    
+                    multiline: true
                 });
+                projectsGrid.attachHeader('#select_filter,#text_filter,#select_filter');      
+                projectsGrid.setColumnHidden(4,true);
 //		projectsGrid.load(A.server+"projects.xml?type="+A.deviceType, function(){
 //			projectsGrid.selectRow(0, true);
 //		});
@@ -97,10 +84,15 @@ function projectsInit(cell) {
                         }
                     });			
 		};
-                projectsGrid.fill(10);
-                projectsGrid.enableStableSorting(true);
-                projectsGrid.enableTooltips("false,true,true,true,true");                
-                
+                projectsGrid.fill(10);                
+                var clientsCombo = projectsGrid.getCombo(2);                
+                ajaxGet("api/clients", '', function(data) {
+                    if (data.success && data.data) {
+                        data.data.forEach(function(client){
+                            clientsCombo.put(client.id, client.name);
+                        });
+                    }
+                });            
 		projectsGrid.attachEvent("onRowSelect", function() {
                     var selectedId = projectsGrid.getSelectedRowId();
                     historyGrid.fill(selectedId);
@@ -111,75 +103,65 @@ function projectsInit(cell) {
 //		});
 
 		var newProjectFormStruct = [
+                    {type:"fieldset",  offsetTop:0, label:_("Zamowienie"), list:[
+                        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
+                        //{type: "container", name: "photo", label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65},
+                        //{type: "input", name: "date_end",     label: "Due date", offsetTop: 20},
+                        {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
+                        {type: "input", name: "kod",       required: true,  label: _("Kod zamowienia")},
+                        {type: "input", name: "name",        label: _("Zamowienie"),
+                           tooltip: _("Imie zamowienia"), required: true, info: true, 
+                           note: {text: _("Dodaj imie zamowienia. Jest obowiazkowe.")}},
+                        {type: "input", name: "description", label: _("Opis"),
+                           rows: 3,
+                           note: {text: _("Dodaj opis zamowienia. Nie jest obowiazkowe.")}},
+                        {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 
+                            required: true, dateFormat: "%Y-%m-%d",
+                            note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},
+                        {type: "calendar", name: "date_end",    label: _("Termin wykonania"), 
+                            required: true, dateFormat: "%Y-%m-%d",
+                            note: {text: _("Data kiedy zamowienie musi byc zakonczone. Jest obowiazkowe.")}},
+                        {type: "block", blockOffset: 0, position: "label-left", list: [
+                            {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
+                            {type: "newcolumn"},
+                            {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
+                        ]}	
+                    ]}
+		];                
+                projectFormToolBar = projectsLayout.cells("b").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Informacja o zamowieniu")},
+				{type: "spacer"},				
+				{id: "Hide", type: "button", img: "fa fa-arrow-right"}
+			]
+		});   
+                projectFormToolBar.attachEvent("onClick", function(id) { 
+                    if (id == 'Hide') {
+                        projectsLayout.cells("b").collapse();                        
+                    }                    
+                }); 
+                
+		var projectFormStruct = [
                     {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
-                    {type: "container", name: "photo", label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65},
+                    //{type: "container", name: "photo", label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65},
                     //{type: "input", name: "date_end",     label: "Due date", offsetTop: 20},
-                    {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
+                    {type: "input", name: "client_name", label: _("Klient")},		
                     {type: "input", name: "kod",         label: _("Kod zamowienia")},
                     {type: "input", name: "name",        label: _("Zamowienie"),
-                       tooltip: _("Imie zamowienia"), required: true, info: true, 
-                       note: {text: _("Dodaj imie zamowienia. Jest obowiazkowe.")}},
-                    {type: "input", name: "description", label: _("Opis"),
-                       rows: 3,
-                       note: {text: _("Dodaj opis zamowienia. Nie jest obowiazkowe.")}},
-                    {type: "calendar", name: "date_start",  label: _("Data poczatku"), 
-                        required: true, dateFormat: "%Y-%m-%d",
-                        note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},
-                    {type: "calendar", name: "date_end",    label: _("Data zamkniecza"), 
-                        required: true, dateFormat: "%Y-%m-%d",
-                        note: {text: _("Data waznosci. Jest obowiazkowe.")}},
-                    {type: "block", blockOffset: 0, position: "label-left", list: [
-                        {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
-                        {type: "newcolumn"},
-                        {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
-                    ]}	        
-		];
-                var orderPositionFormStruct = [
-			{type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		
-                        {type: "input", name: "kod",        required: true, label: _("Kod pozycji")},
-	                {type: "combo", name: "product_id", required: true, label: _("Produkt"), options: []},		                        
-                        {type: "input", name: "amount",     label: _("Ilosc"),
-                           tooltip: _("Imie zamowienia"),   required: true,
-                        },
-			{type: "calendar", name: "date_delivery",  label: _("Data dostawy"), 
-                            required: true, dateFormat: "%Y-%m-%d",
-                            note: {text: _("Data kiedy produkt musi byc gotowy.")}},
-                        {type: "block", blockOffset: 0, position: "laabel-left", list: [
-			    {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
-			    {type: "newcolumn"},
-			    {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
-	                ]}                    
-                ];
-                var projectsForm = projectsLayout.cells("b").attachForm(newProjectFormStruct);
-		projectsForm.getContainer("photo").innerHTML = "<img src='imgs/projects/project.png' border='0' class='form_photo'>";
-		projectsForm.setSizes = projectsForm.centerForm;
-		projectsForm.setSizes();
-                var clientsCombo = projectsForm.getCombo("client_id");
-                ajaxGet("api/clients", "", function(data){
-                    clientsCombo.addOption(data.data);                    
-                });                
-		projectsForm.bind(projectsGrid); 
-                projectsForm.attachEvent("onButtonClick", function(name){
-                    switch (name){
-                        case 'save':{                                                                  
-                            var data = projectsForm.getFormData();
-                            var order_id = projectsGrid.getSelectedRowId(); 
-                            var ds   = projectsForm.getCalendar("date_start");                                        
-                            var de   = projectsForm.getCalendar("date_end");                                        
-                            data.date_start = ds.getDate(true);
-                            data.date_end   = de.getDate(true);
-                            ajaxGet("api/orders/" + order_id + "/edit", data, function(data){
-                                console.log(data);
-                            });                
-
-                        };break;
-                        case 'cancel':{
-
-                        };break;
-                    }
-                });                 
-                
-               
+                       tooltip: _("Imie zamowienia"),    info: true},
+                    {type: "input", name: "description", label: _("Opis"), rows: 3},
+                    {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 
+                        dateFormat: "%Y-%m-%d"},
+                    {type: "calendar", name: "date_end",    label: _("Termin wykonania"), 
+                        dateFormat: "%Y-%m-%d"},
+                    {type: "input", name: "status", label: _("Status zamowienia")}		
+		];                 
+                var projectsForm = projectsLayout.cells("b").attachForm(projectFormStruct);
+//		projectsForm.getContainer("photo").innerHTML = "<img src='imgs/projects/project.png' border='0' class='form_photo'>";
+//		projectsForm.setSizes = projectsForm.centerForm;
+//		projectsForm.setSizes();             
+		projectsForm.bind(projectsGrid);        
                 
 		var projectsGridToolBar = projectsLayout.cells("a").attachToolbar({
 			iconset: "awesome",
@@ -201,52 +183,117 @@ function projectsInit(cell) {
 				{id: "Edit", type: "button", img: "fa fa-edit"},
 				{id: "Del",  type: "button", img: "fa fa-minus-square"}
 			]
-		});                  
+		});
+                /**
+                 * Selecting amount of visible records in the projectGrid table.
+                 * There is a select button on a projectsGridToolBar that allows 
+                 * to select how many records we want to load to the projects grid.
+                 * 
+                 */                
                 projectsGridToolBar.attachEvent("onButtonSelectHide", function(id){
                     var amountRecords = projectsGridToolBar.getListOptionSelected("amount_show");
                     projectsGridToolBar.setItemText("amount_show", amountRecords);
                     if (amountRecords == "all") {amountRecords = 0};
-                    projectsGrid.fill(amountRecords);                    
-                    
-                });                
-
+                    projectsGrid.fill(amountRecords);                  
+                });
                 projectsGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
-                        case 'Add':{                                                        
-                            var clientsCombo = projectsForm.getCombo("client_id");
+                        case 'Add':{   
+                                var newOrderForm = createWindowWithForm(newProjectFormStruct, _("Nowe zamowienie"), 480, 380);                                
+                                var clientsCombo = newOrderForm.getCombo("client_id");
+                                ajaxGet("api/clients", "", function(data){
+                                    clientsCombo.addOption(data.data);
+                                });
+                                clientsCombo.enableFilteringMode(true);
+                                newOrderForm.clear();  
+                                newOrderForm.setItemFocus("kod");                            
+                                newOrderForm.attachEvent("onButtonClick", function(name){
+                                    switch (name){
+                                        case 'save':{                                                           
+                                            var data = newOrderForm.getFormData();                                     
+                                            data.date_start = newOrderForm.getCalendar("date_start").getDate(true); 
+                                            data.date_end   = newOrderForm.getCalendar("date_end").getDate(true); 
+                                            ajaxPost("api/orders", data, function(data){
+                                                console.log(data.data);
+                                                projectsGrid.fill(10);
+                                                projectsGrid.selectRowById(data.data.id);
+                                            });                
+
+                                        };break;
+                                        case 'cancel':{
+
+                                        };break;
+                                    }
+                                }); 
+                        };break;
+                        case 'Edit':{      
+                            var editOrderForm = createWindowWithForm(newProjectFormStruct, _("Edytuj zamowienie"), 480, 380);                                
+                            var clientsCombo = editOrderForm.getCombo("client_id");
                             ajaxGet("api/clients", "", function(data){
                                 clientsCombo.addOption(data.data);
-                            });
-                            projectsForm.clear();  
-                            projectsForm.setItemFocus("kod");
-//                                pracownicyForm.fillAvatar(0);                             
-                            projectsForm.attachEvent("onButtonClick", function(name){
+                            });  
+                            editOrderForm.bind(projectsGrid);     
+                            editOrderForm.unbind(projectsGrid);
+                            var rowData = projectsGrid.getRowData(projectsGrid.getSelectedRowId());
+                            clientsCombo.setComboText(rowData.client_name);
+                            clientsCombo.setComboValue(rowData.client_id);                            
+                            editOrderForm.attachEvent("onButtonClick", function(name){
                                 switch (name){
                                     case 'save':{                                                           
-                                        var data = projectsForm.getFormData();
-                                        var ds   = projectsForm.getCalendar("date_start");                                        
-                                        var de   = projectsForm.getCalendar("date_end");                                        
-                                        data.date_start = ds.getDate(true);
-                                        data.date_end   = de.getDate(true);
-                                        ajaxPost("api/orders", data, function(data){
-                                            var orderData = data.data;
+                                        var data = editOrderForm.getFormData();   
+                                        console.log(data);
+                                        data.date_start = editOrderForm.getCalendar("date_start").getDate(true); 
+                                        data.date_end   = editOrderForm.getCalendar("date_end").getDate(true); 
+                                        ajaxGet("api/orders/" + data.id + "/edit", data, function(data){
                                             projectsGrid.fill(10);
-                                            projectsGrid.selectRowById(orderData.id);
-                                        });                
-                                        
+                                            console.log(data.data);
+                                        });
                                     };break;
                                     case 'cancel':{
-                                        
+
                                     };break;
                                 }
-                            }); 
-                        };break;
-                        case 'Edit':{                            
-                            projectsForm.setItemFocus("client_id");                           
-                        };break;                          
+                            });                            
+                        };break;   
+                        case 'Del': {                            
+                            var orderId = projectsGrid.getSelectedRowId();
+                            if (orderId) {
+                                dhtmlx.confirm({
+                                    title: _("Ostrożność"),                                    
+                                    text: _("Czy na pewno chcesz usunąć zamowienie?"),
+                                    callback: function(result){
+                                        if (result) {                                
+                                            ajaxDelete("api/orders/" + orderId, "", function(data){
+                                                if (data.data && data.success) {
+                                                    projectsGrid.deleteSelectedRows();
+                                                }
+                                            }); 
+                                        }
+                                    }
+                                });
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Wybierz zamowienie, które chcesz usunąć!")
+                                });
+                            }                            
+                        };break; 
                     }
-                });
-                
+                });               
+               
+                positionsLayoutToolBar = projectsLayout.cells("c").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{type: "text", id: "title", text: _("Pozycji")},
+				{type: "spacer"},				
+				{id: "Hide", type: "button", img: "fa fa-arrow-down"}
+			]
+		});   
+                positionsLayoutToolBar.attachEvent("onClick", function(id) { 
+                    if (id == 'Hide') {
+                        projectsLayout.cells("c").collapse();
+                    }                    
+                });                              
 		// attach tabbar
 		var projectsTabbar = projectsLayout.cells("c").attachTabbar({
 			arrows_mode: "auto",
@@ -254,26 +301,19 @@ function projectsInit(cell) {
 				{id: "positions", text: _("Pozycji"), selected: 1},
                                 {id: "history", text: _("Historija")}                                
 			]
-		});
-                var positionsLayout = projectsTabbar.tabs("positions").attachLayout("2U");  
-                positionsLayout.cells("a").hideHeader();
-		positionsLayout.cells("b").hideHeader();				
-		positionsLayout.setAutoSize("a", "a;b");
-                
-                var positionsGrid = positionsLayout.cells("a").attachGrid({
+		});                
+                var positionsGrid = projectsTabbar.tabs("positions").attachGrid({
                     image_path:'codebase/imgs/',
 	            columns: [
                         {
-                            label: _("Kod pozycji"),
-                            width: 50,
+                            label: _("Kod pozycji"),                           
                             id: "kod",
                             type: "ed", 
                             sort: "str", 
                             align: "left"
                         },
                         {
-                            label: _("Produkt"),
-                            width: 100,
+                            label: _("Produkt"),                            
                             id: "product_name",
                             type: "ed", 
                             sort: "str", 
@@ -281,16 +321,14 @@ function projectsInit(cell) {
                         },
                         {
                             label: _("Ilosc"),
-                            id: "amount",
-                            width: 100, 
+                            id: "amount",                             
                             type: "ed", 
                             sort: "str", 
                             align: "left"
                         },
                         {
                             label: _("Data dostawy"),
-                            id: "date_delivery",
-                            width: 100, 
+                            id: "date_delivery",                             
                             type: "ed", 
                             sort: "str", 
                             align: "left"
@@ -298,7 +336,7 @@ function projectsInit(cell) {
                     ],
 			multiselect: true                    
                 });  
-                positionsGrid.attachHeader("#text_filter,#select_filter,#text_search");		
+                positionsGrid.attachHeader("#select_filter,#text_filter,,#text_filter");		
 		positionsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]);
                 var dpPositionsGrid = new dataProcessor("api/positions", "js");                
                 dpPositionsGrid.init(positionsGrid);
@@ -312,8 +350,7 @@ function projectsInit(cell) {
                     ajaxGet("api/positions/" + id + "/edit", data, function(data){                                                            
                         console.log(data);
                     });
-                }); 
-                
+                });               
                 positionsGrid.fill = function(orderId){
                     positionsGrid.clearAll();
 		    ajaxGet("api/orders/positions/" + orderId, '', function(data){
@@ -323,55 +360,68 @@ function projectsInit(cell) {
                         }
                     });			
 		}; 
-                
-                var positionsForm = positionsLayout.cells("b").attachForm(orderPositionFormStruct);
-                positionsForm.bind(positionsGrid);                
-                positionsForm.setSizes = positionsForm.centerForm;
-                positionsForm.attachEvent("onButtonClick", function(name){
-                    switch (name){
-                            case 'save':{                                                           
-                                var data = positionsForm.getFormData();
-                                var dd = positionsForm.getCalendar("date_delivery");
-                                var order_id = projectsGrid.getSelectedRowId();
-                                data.date_delivery = dd.getDate(true); 
-                                data.order_id = order_id;
-                                var selectedPositionId = positionsGrid.getSelectedRowId();
-                                if (selectedPositionId) {
-                                    ajaxGet("api/positions/" + selectedPositionId + "/edit", data, function(data){
-                                        if (data.success && data.data) {
-                                            positionsGrid.fill(order_id);
-                                        }
-                                    });                                 
-                                } else {
-                                    ajaxPost("api/positions/", data, function(data){
-                                        if (data.success && data.data) {
-                                            positionsGrid.fill(order_id);
-                                        }
-                                    });  
-                                } 
-                            };break;
-                            case 'cancel':{
-
-                            };break;
-                        }
-                });
-                var productsCombo = positionsForm.getCombo("product_id");                
-                ajaxGet("api/products", '', function(data) {
-                    if (data.success && data.data) {
-                        productsCombo.addOption(data.data);                                    
-                    }
-                });
-                productsCombo.attachEvent("onKeyPressed", function(keyCode){
-                    var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
-                    var mask = "";
-                    for (var i = 0; i < input.length; i++) {
-                        mask = mask + input[i] + "(.+)";                                                                                                                        
-                    }                       
-                    productsCombo.filter(function(opt){
-                        return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
-                    }, false);                           
-                });   
-                
+               
+//                var positionsForm = positionsLayout.cells("b").attachForm(orderPositionFormStruct);
+//                positionsForm.bind(positionsGrid);                
+//                positionsForm.setSizes = positionsForm.centerForm;
+//                positionsForm.attachEvent("onButtonClick", function(name){
+//                    switch (name){
+//                            case 'save':{                                                           
+//                                var data = positionsForm.getFormData();
+//                                var dd = positionsForm.getCalendar("date_delivery");
+//                                var order_id = projectsGrid.getSelectedRowId();
+//                                data.date_delivery = dd.getDate(true); 
+//                                data.order_id = order_id;
+//                                var selectedPositionId = positionsGrid.getSelectedRowId();
+//                                if (selectedPositionId) {
+//                                    ajaxGet("api/positions/" + selectedPositionId + "/edit", data, function(data){
+//                                        if (data.success && data.data) {
+//                                            positionsGrid.fill(order_id);
+//                                        }
+//                                    });                                 
+//                                } else {
+//                                    ajaxPost("api/positions/", data, function(data){
+//                                        if (data.success && data.data) {
+//                                            positionsGrid.fill(order_id);
+//                                        }
+//                                    });  
+//                                } 
+//                            };break;
+//                            case 'cancel':{
+//
+//                            };break;
+//                        }
+//                });
+//                var productsCombo = positionsForm.getCombo("product_id");                
+//                ajaxGet("api/products", '', function(data) {
+//                    if (data.success && data.data) {
+//                        productsCombo.addOption(data.data);                                    
+//                    }
+//                });
+//                productsCombo.attachEvent("onKeyPressed", function(keyCode){
+//                    var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
+//                    var mask = "";
+//                    for (var i = 0; i < input.length; i++) {
+//                        mask = mask + input[i] + "(.+)";                                                                                                                        
+//                    }                       
+//                    productsCombo.filter(function(opt){
+//                        return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
+//                    }, false);                           
+//                });   
+                var orderPositionFormStruct = [
+			{type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		
+                        {type: "input", name: "kod",        required: true, label: _("Kod pozycji")},
+	                {type: "combo", name: "product_id", required: true, label: _("Produkt"), options: []},		                        
+                        {type: "input", name: "amount",     required: true, label: _("Ilosc")},
+			{type: "calendar", name: "date_delivery",  label: _("Data dostawy"), 
+                            required: true, dateFormat: "%Y-%m-%d",
+                            note: {text: _("Data kiedy produkt musi byc gotowy.")}},
+                        {type: "block", blockOffset: 0, position: "laabel-left", list: [
+			    {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
+			    {type: "newcolumn"},
+			    {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
+	                ]}                    
+                ];                
 		positionsGridMenu = projectsTabbar.tabs("positions").attachMenu({
 			iconset: "awesome",
 			items: [
@@ -379,17 +429,126 @@ function projectsInit(cell) {
                             {id:"Edit", text: _("Edytuj"), img: "fa fa-edit"},
                             {id:"Del",  text: _("Usun"),   img: "fa fa-minus-square"}
 			]
-		}); 
-                
+		});                 
                 positionsGridMenu.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{  
-                                positionsForm.clear();
+                            var orderId = projectsGrid.getSelectedRowId();
+                            if (orderId) {
+                                var positionsForm = createWindowWithForm(orderPositionFormStruct, _("Nowa pozycja"), 250, 350);                                                                
                                 positionsForm.setItemFocus("kod");
+                                var productsCombo = positionsForm.getCombo("product_id");                
+                                ajaxGet("api/products", '', function(data) {
+                                    if (data.success && data.data) {
+                                        productsCombo.addOption(data.data);                                    
+                                    }
+                                }); 
+                                productsCombo.attachEvent("onKeyPressed", function(keyCode){
+                                    var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
+                                    var mask = "";
+                                    for (var i = 0; i < input.length; i++) {
+                                        mask = mask + input[i] + "(.+)";                                                                                                                        
+                                    }                       
+                                    productsCombo.filter(function(opt){
+                                        return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
+                                    }, false);                           
+                                });                                   
+                                positionsForm.attachEvent("onButtonClick", function(name){
+                                    switch (name){
+                                            case 'save':{                                                           
+                                                var data = positionsForm.getFormData();                                            
+                                                data.date_delivery = positionsForm.getCalendar("date_delivery").getDate(true); 
+                                                data.order_id = projectsGrid.getSelectedRowId();
+                                                ajaxPost("api/positions", data, function(data){
+                                                    if (data.success && data.data) {
+                                                        positionsGrid.fill(projectsGrid.getSelectedRowId());
+                                                    }
+                                                });                                            
+                                            };break;
+                                            case 'cancel':{
+
+                                            };break;
+                                        }
+                                });  
+                            } else {
+                                dhtmlx.message({
+                                    title:_("Wiadomość"),
+                                    type:"alert",
+                                    text:_("Wybierz zamowienie!")
+                                });                                
+                            }
                         };break;
                         case 'Edit':{
-                                positionsForm.setItemFocus("kod");                                                          
+                            var orderId = projectsGrid.getSelectedRowId();
+                            if (orderId) {
+                                var editPositionForm = createWindowWithForm(orderPositionFormStruct, _("Edutyj pozycje"), 280, 380);                                                                
+                                var productsCombo = editPositionForm .getCombo("product_id");
+                                ajaxGet("api/products", "", function(data){
+                                    productsCombo.addOption(data.data);
+                                });  
+                                editPositionForm.bind(positionsGrid);     
+                                editPositionForm.unbind(positionsGrid);
+                                var rowData = positionsGrid.getRowData(positionsGrid.getSelectedRowId());
+                                productsCombo.setComboText(rowData.product_name);
+                                productsCombo.setComboValue(rowData.product_id);   
+                                productsCombo.attachEvent("onKeyPressed", function(keyCode){
+                                    var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
+                                    var mask = "";
+                                    for (var i = 0; i < input.length; i++) {
+                                        mask = mask + input[i] + "(.+)";                                                                                                                        
+                                    }                       
+                                    productsCombo.filter(function(opt){
+                                        return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
+                                    }, false);                           
+                                });                                 
+                                editPositionForm.attachEvent("onButtonClick", function(name){
+                                    switch (name){
+                                        case 'save':{                                                           
+                                            var data = editPositionForm.getFormData();                                            
+                                            data.date_delivery = editPositionForm.getCalendar("date_delivery").getDate(true); 
+                                            data.order_id = projectsGrid.getSelectedRowId();
+                                            ajaxPost("api/positions", data, function(data){
+                                                if (data.success && data.data) {
+                                                    positionsGrid.fill(projectsGrid.getSelectedRowId());
+                                                }
+                                            });                                            
+                                        };break;
+                                        case 'cancel':{
+
+                                        };break;
+                                    }
+                                });  
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    type:"alert",
+                                    text:_("Wybierz zamowienie!")
+                                });                                 
+                            }
                         };break;
+                        case 'Del': {                            
+                            var positionId = positionsGrid.getSelectedRowId();
+                            if (positionId) {
+                                dhtmlx.confirm({
+                                    title: _("Ostrożność"),                                    
+                                    text: _("Czy na pewno chcesz usunąć pozycje?"),
+                                    callback: function(result){
+                                        if (result) {                                
+                                            ajaxDelete("api/positions/" + positionId, "", function(data){
+                                                if (data.data && data.success) {
+                                                    positionsGrid.deleteSelectedRows();
+                                                }
+                                            }); 
+                                        }
+                                    }
+                                });
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Wybierz pozycje, która chcesz usunąć!")
+                                });
+                            }                            
+                        };break;                         
                     }
                 });
                         
@@ -397,25 +556,22 @@ function projectsInit(cell) {
                 var historyGrid = projectsTabbar.tabs("history").attachGrid({
                     image_path:'codebase/imgs/',
 	            columns: [{
-                            label: _("Imie"),
-                            width: 100,
+                            label: _("Imie"),                            
                             id: "name",
-                            type: "ed", 
+                            type: "ro", 
                             sort: "str", 
                             align: "left"
                         },
                         {
                             label: _("Data"),
-                            id: "created_at",
-                            width: 100, 
-                            type: "ed", 
+                            id: "created_at",                            
+                            type: "ro", 
                             sort: "str", 
                             align: "left"
                         }                        
                     ],
 			multiselect: true                    
-                });
-                
+                });                
                 historyGrid.fill = function(orderId){
                     historyGrid.clearAll();
 		    ajaxGet("api/orders/history/" + orderId, '', function(data){
@@ -424,10 +580,8 @@ function projectsInit(cell) {
                             historyGrid.parse(data.data, "js");
                         }
                     });			
-		};     
-                
-	}
-	
+		};               
+	}	
 }
 
 function updateChart(id) {
@@ -455,25 +609,6 @@ function updateChart(id) {
 	// remember loaded project
 	projectsChartId = id;
 }
-
-function createWindowWithForm(formStruct, caption, height, width){
-    var dhxWins = new dhtmlXWindows();
-    w1 = dhxWins.createWindow({
-            id:"w1",
-            left:20,
-            top:30,
-            width: width,
-            height: height,
-            center:true,
-            caption: _(caption),
-            header: true,
-            onClose:function(){
-
-            }
-    });
-    //initializing form 
-    return dhxWins.window("w1").attachForm(formStruct, true);         
-} 
 
 function projectsFillForm(id) {
 	// update form

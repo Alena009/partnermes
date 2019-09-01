@@ -1277,7 +1277,10 @@ function createWindowWithForm(formStruct, caption, height, width){
             caption: _(caption),
             header: true,
             onClose:function(){
-
+//                var obj = dhxWins.window("w1").getAttachedObject();
+//                if (typeof(window.dhtmlXFormObject) == "function" && obj instanceof dhtmlXFormObject) {
+//                    
+//                }               
             }
     });
     //initializing form 

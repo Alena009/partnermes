@@ -16,4 +16,9 @@ class Status extends BaseModel
     
     /* fields for translating */    
     public $translatedAttributes = ['name', 'description'];
+    
+    public function order()
+    {
+        return $this->belongsTo('App\Models\Order', 'order_id', 'id');
+    }     
 }

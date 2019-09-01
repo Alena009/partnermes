@@ -50,7 +50,7 @@ class OrderController extends BaseController
         foreach ($orders as $order) {
             $order['client_name'] = $order->client->name;
             $order['text']        = $order->kod;
-            $order['value']       = $order->id;             
+            $order['value']       = $order->id;       
         }
         
         return response()->json(['data' => $orders, 'success' => true]);        

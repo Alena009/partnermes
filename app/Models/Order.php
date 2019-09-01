@@ -30,5 +30,5 @@ class Order extends BaseModel
     public function positions()
     {
         return $this->hasMany('App\Models\OrderPosition');
-    }    
+    }       
 }

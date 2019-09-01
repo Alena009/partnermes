@@ -8,8 +8,10 @@ function pracownicyInit(cell) {
 		// init layout
 		var pracownicyLayout = cell.attachLayout("3W");
 		    pracownicyLayout.cells("a").hideHeader();
+                    pracownicyLayout.cells("a").setCollapsedText(_("Grupy pracownikow"));                    
 		    pracownicyLayout.cells("b").hideHeader();
-                    pracownicyLayout.cells("c").hideHeader();                
+                    pracownicyLayout.cells("c").hideHeader();
+                    pracownicyLayout.cells("c").setCollapsedText(_("Informacja o pracowniku"));
 		    pracownicyLayout.cells("a").setWidth(280);		
 		    pracownicyLayout.setAutoSize("a");   
                 
@@ -78,9 +80,10 @@ function pracownicyInit(cell) {
 				{type: "spacer"},
 				{id: "Add", type: "button", img: "fa fa-plus-square "},
 				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"}
+				{id: "Del", type: "button", img: "fa fa-minus-square"},				
+				{id: "Hide", type: "button", img: "fa fa-arrow-left"}                                
 			]
-		});  
+		});                 
                 grupyTreeToolBar.attachEvent("onClick", function(id) {                        		
 			switch (id){
 				case 'Add':{
@@ -167,6 +170,9 @@ function pracownicyInit(cell) {
                                             });
                                         }
 				};break;
+                                case 'Hide':{
+                                    pracownicyLayout.cells("a").collapse();                        
+                                };break;    
 			}
 		});               
                 var pracownicyGridToolBar = pracownicyLayout.cells("b").attachToolbar({

@@ -39,6 +39,7 @@ Route::group([
     Route::resource('/orders', 'OrderController');    
     
     Route::resource('/permissions', 'PermissionController');  
+    Route::get('/positions/list/freepositions', 'OrderPositionController@freePositionsList');
     Route::resource('/positions', 'OrderPositionController');      
     Route::resource('/prodtypes', 'ProductTypeController'); 
     Route::get('/products/listbygroups/{prodGroups}', 'ProductController@listProductsByProductGroup');  

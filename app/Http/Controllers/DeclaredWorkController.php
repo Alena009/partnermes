@@ -51,6 +51,7 @@ class DeclaredWorkController extends BaseController
             $res['date_delivery']= $orderPosition->date_delivery;
             $res['key']          = $orderPosition->id;
             $res['label']        = $orderPosition->kod;
+            $res['closed']       = 0;
         }         
         
         return response()->json(['success' => true, 'data' => $result]);            

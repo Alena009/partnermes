@@ -19,7 +19,7 @@
         <link rel="stylesheet" type="text/css"
             href="codebase/dhtmlx/sources/dhtmlxScheduler/codebase/dhtmlxscheduler_material.css" />
         <link rel="stylesheet" type="text/css"
-            href="codebase/dhtmlx/sources/dhtmlxGantt/codebase/dhtmlxgantt.css" />       
+            href="codebase/dhtmlx/sources/dhtmlxGantt/codebase/sources/dhtmlxgantt.css?ver<?php echo date('Y-m-d H:i:s');?>" />       
         <link rel="stylesheet" type="text/css" href="css/timeline.css" />
         <link rel="stylesheet" type="text/css" href="css/zlecenia.css" />
         <link rel="stylesheet" type="text/css" href="codebase/fonts/font_roboto/roboto.css" />

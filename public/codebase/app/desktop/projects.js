@@ -59,6 +59,9 @@ function projectsInit(cell) {
                 });
                 projectsGrid.attachHeader('#select_filter,#text_filter,#select_filter');      
                 projectsGrid.setColumnHidden(4,true);
+                projectsGrid.enableValidation(true);
+                projectsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty","ValidDate"]);
+                
 //		projectsGrid.load(A.server+"projects.xml?type="+A.deviceType, function(){
 //			projectsGrid.selectRow(0, true);
 //		});
@@ -72,8 +75,11 @@ function projectsInit(cell) {
                 dpProjectsGrid.setUpdateMode("row", true);
                 dpProjectsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
                     data.id = id;
-                    ajaxGet("api/orders/" + id + "/edit", data, function(data){                                                            
-                        console.log(data);
+                    ajaxGet("api/orders/" + id + "/edit", data, function(data){
+                        if (data.success) {
+                            projectsGrid.setRowTextNormal(id);
+                            console.log(data);
+                        }
                     });
                 });                
                 projectsGrid.fill = function(amount){
@@ -98,9 +104,9 @@ function projectsInit(cell) {
                     historyGrid.fill(selectedId);
                     positionsGrid.fill(selectedId);
                 });
-//		projectsGrid.attachEvent("onRowInserted", function(r, index){
-//		    projectsGrid.setCellTextStyle(projectsGrid.getRowId(index), projectsGrid.getColIndexById("project"), "font-weight:bold;");
-//		});
+		projectsGrid.attachEvent("onRowInserted", function(r, index){
+		    projectsGrid.setCellTextStyle(projectsGrid.getRowId(index), projectsGrid.getColIndexById("project"), "font-weight:bold;");
+		});
 
 		var newProjectFormStruct = [
                     {type:"fieldset",  offsetTop:0, label:_("Zamowienie"), list:[
@@ -116,10 +122,10 @@ function projectsInit(cell) {
                            rows: 3,
                            note: {text: _("Dodaj opis zamowienia. Nie jest obowiazkowe.")}},
                         {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 
-                            required: true, dateFormat: "%Y-%m-%d",
+                            required: true, dateFormat: "%Y-%m-%d", enableTodayButton: true,
                             note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},
                         {type: "calendar", name: "date_end",    label: _("Termin wykonania"), 
-                            required: true, dateFormat: "%Y-%m-%d",
+                            required: true, dateFormat: "%Y-%m-%d", enableTodayButton: true,
                             note: {text: _("Data kiedy zamowienie musi byc zakonczone. Jest obowiazkowe.")}},
                         {type: "block", blockOffset: 0, position: "label-left", list: [
                             {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
@@ -161,7 +167,7 @@ function projectsInit(cell) {
 //		projectsForm.getContainer("photo").innerHTML = "<img src='imgs/projects/project.png' border='0' class='form_photo'>";
 //		projectsForm.setSizes = projectsForm.centerForm;
 //		projectsForm.setSizes();             
-		projectsForm.bind(projectsGrid);        
+		projectsForm.bind(projectsGrid);   
                 
 		var projectsGridToolBar = projectsLayout.cells("a").attachToolbar({
 			iconset: "awesome",
@@ -199,18 +205,19 @@ function projectsInit(cell) {
                 projectsGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{   
-                                var newOrderForm = createWindowWithForm(newProjectFormStruct, _("Nowe zamowienie"), 480, 380);                                
+                                var newOrderForm = createWindowWithForm(newProjectFormStruct, _("Nowe zamowienie"), 480, 380);                                                                
                                 var clientsCombo = newOrderForm.getCombo("client_id");
                                 ajaxGet("api/clients", "", function(data){
                                     clientsCombo.addOption(data.data);
                                 });
                                 clientsCombo.enableFilteringMode(true);
-                                newOrderForm.clear();  
-                                newOrderForm.setItemFocus("kod");                            
+                                newOrderForm.clear();                             
                                 newOrderForm.attachEvent("onButtonClick", function(name){
                                     switch (name){
-                                        case 'save':{                                                           
-                                            var data = newOrderForm.getFormData();                                     
+                                        case 'save':{    
+                                            //newOrderForm.validate();
+                                            var data = newOrderForm.getFormData(); 
+                                            
                                             data.date_start = newOrderForm.getCalendar("date_start").getDate(true); 
                                             data.date_end   = newOrderForm.getCalendar("date_end").getDate(true); 
                                             ajaxPost("api/orders", data, function(data){
@@ -221,7 +228,7 @@ function projectsInit(cell) {
 
                                         };break;
                                         case 'cancel':{
-
+                                                newOrderForm.clear();
                                         };break;
                                     }
                                 }); 
@@ -264,8 +271,8 @@ function projectsInit(cell) {
                                     callback: function(result){
                                         if (result) {                                
                                             ajaxDelete("api/orders/" + orderId, "", function(data){
-                                                if (data.data && data.success) {
-                                                    projectsGrid.deleteSelectedRows();
+                                                if (data.success) {
+                                                    projectsGrid.deleteRow(orderId);
                                                 }
                                             }); 
                                         }
@@ -414,7 +421,7 @@ function projectsInit(cell) {
 	                {type: "combo", name: "product_id", required: true, label: _("Produkt"), options: []},		                        
                         {type: "input", name: "amount",     required: true, label: _("Ilosc")},
 			{type: "calendar", name: "date_delivery",  label: _("Data dostawy"), 
-                            required: true, dateFormat: "%Y-%m-%d",
+                            required: true, dateFormat: "%d.%m.%Y",
                             note: {text: _("Data kiedy produkt musi byc gotowy.")}},
                         {type: "block", blockOffset: 0, position: "laabel-left", list: [
 			    {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
@@ -447,7 +454,7 @@ function projectsInit(cell) {
                                     var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
                                     var mask = "";
                                     for (var i = 0; i < input.length; i++) {
-                                        mask = mask + input[i] + "(.+)";                                                                                                                        
+                                        mask = mask + input[i] + "(.*)";                                                                                                                        
                                     }                       
                                     productsCombo.filter(function(opt){
                                         return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
@@ -495,7 +502,7 @@ function projectsInit(cell) {
                                     var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
                                     var mask = "";
                                     for (var i = 0; i < input.length; i++) {
-                                        mask = mask + input[i] + "(.+)";                                                                                                                        
+                                        mask = mask + input[i] + "(.*)";                                                                                                                        
                                     }                       
                                     productsCombo.filter(function(opt){
                                         return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;

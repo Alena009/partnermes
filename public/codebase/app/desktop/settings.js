@@ -1281,10 +1281,41 @@ function createWindowWithForm(formStruct, caption, height, width){
 //                if (typeof(window.dhtmlXFormObject) == "function" && obj instanceof dhtmlXFormObject) {
 //                    
 //                }               
-            }
+            }            
     });
     //initializing form 
-    return dhxWins.window("w1").attachForm(formStruct, true);         
+    var myForm = dhxWins.window("w1").attachForm(formStruct, true);
+    myForm.enableLiveValidation(true);
+//    myForm.attachEvent("onValidateError", function (name, value, result){
+//        dhtmlx.message({
+//            title: "Close",
+//            type: "alert-warning",
+//            text: "You can't close this window!"            
+//        });
+//    });
+    myForm.forEachItem(function(id){ 
+        switch(myForm.getItemType(id)){
+            case 'input':    {myForm.getInput(id).autocomplete = "off"; };break;
+            case 'calendar': {myForm.getInput(id).autocomplete = "off"; };break;
+            case 'combo':    {
+                var myCombo = myForm.getCombo(id);
+                myCombo.enableAutocomplete(true);
+                myCombo.attachEvent("onKeyPressed", function(keyCode){
+                    var input = myCombo.getComboText().trim().toLowerCase().split(' ');
+                    var mask = "";
+                    for (var i = 0; i < input.length; i++) {
+                        mask = mask + input[i] + "(.*)";                                                                                                                        
+                    }                       
+                    myCombo.filter(function(opt){
+                        return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
+                    }, false);                 
+                    myCombo.openSelect();
+                });                    
+            }
+        };           
+    });
+ 
+    return myForm;         
 } 
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){

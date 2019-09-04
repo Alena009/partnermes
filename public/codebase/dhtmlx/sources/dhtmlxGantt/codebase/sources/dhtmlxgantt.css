@@ -546,7 +546,7 @@ To use dhtmlxGantt in non-GPL projects (and get Pro version of the product), ple
 .gantt_popup_button {
   min-width: 100px;
 }
-div.dhx_modal_cover {
+/*div.dhx_modal_cover {
   background-color: #000;
   cursor: default;
   filter: progid:DXImageTransform.Microsoft.Alpha(opacity=20);
@@ -559,7 +559,7 @@ div.dhx_modal_cover {
   height: 100%;
   border: none;
   zoom: 1;
-}
+}*/
 .gantt-info img,
 .gantt_modal_box img {
   float: left;

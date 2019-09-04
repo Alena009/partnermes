@@ -162,7 +162,7 @@ function zleceniaInit(cell) {
                                     //making pattern string for regexp
                                     var searchStr = '';
                                     for (var i = 0; i < input.length; i++) {
-                                        searchStr = searchStr + input[i] + "(.+)";                                                                
+                                        searchStr = searchStr + input[i] + "(.*)";                                                                
                                         //var searchStr = /^zz(.+)np(.+)/ig;
                                     }
                                     var regExp = new RegExp("^" + searchStr, "ig");                                                          
@@ -363,7 +363,7 @@ function zleceniaInit(cell) {
                         //making pattern string for regexp
                         var searchStr = '';
                         for (var i = 0; i < input.length; i++) {
-                            searchStr = searchStr + input[i] + "(.+)";                                                                
+                            searchStr = searchStr + input[i] + "(.*)";                           
                             //var searchStr = /^zz(.+)np(.+)/ig;
                         }
                         var regExp = new RegExp("^" + searchStr, "ig");                                                          

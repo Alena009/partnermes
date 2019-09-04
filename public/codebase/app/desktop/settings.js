@@ -1299,18 +1299,19 @@ function createWindowWithForm(formStruct, caption, height, width){
             case 'calendar': {myForm.getInput(id).autocomplete = "off"; };break;
             case 'combo':    {
                 var myCombo = myForm.getCombo(id);
-                myCombo.enableAutocomplete(true);
+                myCombo.enableAutocomplete();
                 myCombo.attachEvent("onKeyPressed", function(keyCode){
-                    var input = myCombo.getComboText().trim().toLowerCase().split(' ');
-                    var mask = "";
-                    for (var i = 0; i < input.length; i++) {
-                        mask = mask + input[i] + "(.*)";                                                                                                                        
-                    }                       
-                    myCombo.filter(function(opt){
-                        return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
-                    }, false);                 
-                    myCombo.openSelect();
-                });                    
+                    if (keyCode != 40 && keyCode != 38) {    
+                        var input = myCombo.getComboText().trim().toLowerCase().split(' ');
+                        var mask = "";
+                        for (var i = 0; i < input.length; i++) {
+                            mask = mask + input[i] + "(.*)";                                                                                                                        
+                        }                       
+                        myCombo.filter(function(opt){
+                            return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
+                        }, true);                       
+                    }
+                });
             }
         };           
     });

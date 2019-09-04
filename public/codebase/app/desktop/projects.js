@@ -449,16 +449,6 @@ function projectsInit(cell) {
                                     if (data.success && data.data) {
                                         productsCombo.addOption(data.data);                                    
                                     }
-                                }); 
-                                productsCombo.attachEvent("onKeyPressed", function(keyCode){
-                                    var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
-                                    var mask = "";
-                                    for (var i = 0; i < input.length; i++) {
-                                        mask = mask + input[i] + "(.*)";                                                                                                                        
-                                    }                       
-                                    productsCombo.filter(function(opt){
-                                        return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
-                                    }, false);                           
                                 });                                   
                                 positionsForm.attachEvent("onButtonClick", function(name){
                                     switch (name){

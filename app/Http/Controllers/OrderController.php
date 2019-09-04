@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Repositories\OrderRepository;
+use App\Models\Order;
+use App\Models\OrderHistory;
 
 class OrderController extends BaseController
 {    
@@ -42,7 +44,7 @@ class OrderController extends BaseController
         app()->setLocale($locale);
         
         if ($amount) {
-            $orders = \App\Models\Order::orderBy('id', 'desc')->take($amount)->get();;       
+            $orders = \App\Models\Order::orderBy('id', 'desc')->take($amount)->get();       
         } else {
             $orders = \App\Models\Order::orderBy('id', 'desc')->get();       
         }      
@@ -50,7 +52,8 @@ class OrderController extends BaseController
         foreach ($orders as $order) {
             $order['client_name'] = $order->client->name;
             $order['text']        = $order->kod;
-            $order['value']       = $order->id;       
+            $order['value']       = $order->id; 
+            //$order['status']      = $order->history->first->name;
         }
         
         return response()->json(['data' => $orders, 'success' => true]);        
@@ -63,21 +66,20 @@ class OrderController extends BaseController
     {
         $locale = app()->getLocale();
         
-        $order = new \App\Models\Order();
+        $order = new Order();
         $order->kod = $request['kod'];   
         $order->client_id = $request['client_id']; 
         $order->date_start = $request['date_start'];
         $order->date_end = $request['date_end'];
         
-        $order->save();
-
-        //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-            $order->translateOrNew($locale)->name        = $request['name'];            
-            $order->translateOrNew($locale)->description = $request['description'];            
-        //}
-            $order->save();
-            
-        //TO-DO: add record to the order history here
+        if ($order->save()) {
+            //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
+                $order->translateOrNew($locale)->name        = $request['name'];            
+                $order->translateOrNew($locale)->description = $request['description'];            
+            //}
+            $order->save(); 
+            $order->changeStatus($order->id, 1);
+        }     
 
         return response()->json(['data' => $order, 'success' => true]);        
     } 
@@ -90,10 +92,10 @@ class OrderController extends BaseController
      */
     public function history($orderId)
     {
-        $order = [];
+        $order   = [];
         $history = [];
         
-        $order = \App\Models\Order::find($orderId);
+        $order   = Order::find($orderId);
         $history = $order->history;      
 
         return response()->json(['data' => $history, 'success' => true]);

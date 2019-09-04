@@ -8,6 +8,7 @@ use App\Repositories\WarehouseRepository;
 use App\Models\Warehouse;
 use App\Models\ProductGroup;
 use App\Models\Product;
+use DB;
 
 class WarehouseController extends BaseController
 {
@@ -32,22 +33,28 @@ class WarehouseController extends BaseController
                     ->orWhereIn("parent_id", $arrayGroupsIds)
                     ->pluck('id');
             $productsIds = Product::whereIn("product_group_id", $groupsIds)->pluck('id');
-            $records = Warehouse::groupBy('product_id')
-                    ->selectRaw('*, sum(amount) as amount')
+//            $records = Warehouse::groupBy('product_id')
+//                    ->selectRaw('*, sum(amount) as amount')
+//                    ->whereIn('product_id', $productsIds)
+//                    ->get();     
+            $records = Warehouse::select('product_id')
+                    ->distinct()
                     ->whereIn('product_id', $productsIds)
-                    ->get();                    
+                    ->get();            
         } else {
-            $records = Warehouse::groupBy('product_id')
-                    ->selectRaw('*, sum(amount) as amount')
-                    ->get();         
+//            $records = Warehouse::groupBy('product_id')
+//                    ->selectRaw('*, sum(amount) as amount')
+//                    ->get();  
+            $records = Warehouse::select('product_id')->distinct()->get();
         }
-        
+
         foreach($records as $record) {
             $product                    = $record->product;
             $record['product_name']     = $product['name'];
             $record['product_kod']      = $product['kod'];
             $record['product_group_id'] = $product->group->id;
             $record['group_name']       = $product->group->name;
+            $record["amount"]           = $this->amountProduct($product->id);
         }  
         
         return response()->json(['success' => true, 'data' => $records]);       
@@ -72,8 +79,13 @@ class WarehouseController extends BaseController
      */    
     public function amountProductInWarehouse($productId)
     {
-        $totalAmount = Warehouse::where('product_id', '=', $productId)->sum('amount');
+        $totalAmount = $this->amountProduct($productId);
         return response()->json(['success' => true, 'data' => $totalAmount]);       
+    }
+    
+    public function amountProduct($productId)
+    {
+        return Warehouse::where('product_id', '=', $productId)->sum('amount');
     }
     
 }

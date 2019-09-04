@@ -398,7 +398,7 @@ function warehouseInit(cell) {
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){    
 	if (id == "warehouse") {                        
-            window.history.pushState({ 'page_id': id }, null, '#events'); 
+            window.history.pushState({ 'page_id': id }, null, '#warehouse'); 
             warehouseInit(cell);      
         }        
 });

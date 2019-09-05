@@ -32,69 +32,33 @@ function productsTasksInit(cell) {
             image_path:'codebase/imgs/',
             columns: [                        
                 {
-                    label: _("Kod"),
-                    width: 100,
+                    label: _("Kod"),                    
                     id: "kod",
                     type: "ed", 
                     sort: "str", 
                     align: "left"
                 },
                 {
-                    label: _("Imie produktu"),
-                    width: 100,
+                    label: _("Imie produktu"),                    
                     id: "name",
                     type: "ed", 
                     sort: "str", 
                     align: "left"
                 },
                 {
-                    label: _("Typ produktu"),
-                    width: 100,
+                    label: _("Typ produktu"),                    
                     id: "product_type_name",
                     type: "ed", 
                     sort: "str", 
                     align: "left"
                 },
                 {
-                    label: _("Grupa produktu"),
-                    width: 100,
+                    label: _("Grupa produktu"),                    
                     id: "product_group_name",
                     type: "ed", 
                     sort: "str", 
                     align: "left"
-                },
-                {
-                    label: _("Wysokość, mm"),
-                    width: 100,
-                    id: "height",
-                    type: "ed", 
-                    sort: "str", 
-                    align: "left"
-                },                        
-                {
-                    label: _("Szerokość, mm"),
-                    width: 100,
-                    id: "width",
-                    type: "ed", 
-                    sort: "str", 
-                    align: "left"
-                },
-                {
-                    label: _("Długość, mm"),
-                    width: 100,
-                    id: "length",
-                    type: "ed", 
-                    sort: "str", 
-                    align: "left"
-                },
-                {
-                    label: _("Masa, kg"),
-                    width: 100,
-                    id: "weight",
-                    type: "ed", 
-                    sort: "str", 
-                    align: "left"
-                }                           
+                }                          
             ],
                 multiselect: true
         });                
@@ -107,6 +71,8 @@ function productsTasksInit(cell) {
             });                        
         };                
         productsGrid.fill();
+        productsGrid.attachHeader("#select_filter,#text_filter,#select_filter,#select_filter");		
+        productsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty","NotEmpty"]);        
         var dpProductsGrid = new dataProcessor("api/products", "js");                
         dpProductsGrid.init(productsGrid);
         dpProductsGrid.enableDataNames(true);
@@ -186,32 +152,36 @@ function productsTasksInit(cell) {
             image_path:'codebase/imgs/',
             columns: [                        
                 {
-                    label: _("Kod"),
-                    width: 100,
+                    label: _("Kod"),                  
                     id: "task_kod",
                     type: "ro", 
                     sort: "str", 
                     align: "left"
                 },
                 {
-                    label: _("Zadanie"),
-                    width: 200,
+                    label: _("Zadanie"),                    
                     id: "task_name",
                     type: "coro", 
                     sort: "str", 
                     align: "left"
                 },
                 {
-                    label: _("Czas, min"),
-                    width: 100,
+                    label: _("Czas, min"),                 
                     id: "duration",
                     type: "ed", 
                     sort: "str", 
                     align: "left"
-                }                           
+                },
+                {                                     
+                    id: "priopity"
+                }                
             ],
                 multiselect: true
         });
+        zadaniaGrid.setColumnHidden(3,true);
+        zadaniaGrid.attachHeader("#select_filter,#select_filter");		
+        zadaniaGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]); 
+        zadaniaGrid.enableDragAndDrop(true);
         zadaniaGrid.fill = function(id = 0){	
             zadaniaGrid.clearAll();					
             ajaxGet("api/productstasks/list/" + id, '', function(data){                                     
@@ -219,7 +189,16 @@ function productsTasksInit(cell) {
                     zadaniaGrid.parse((data.data), "js");
                 }
             });                        
-        };    
+        };  
+        zadaniaGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
+            console.log("zadaniaGrid.onDrop", arguments);
+            var data = {};
+            data.id = sId;
+            data.priority = tObj.getUserData(tId, "priority");
+            ajaxGet("api/productstasks/" + sId + "/edit", data, function(data){                                                            
+                console.log(data);
+            });   
+        });
         var dpZleceniaForProductGrid = new dataProcessor("api/productstasks", "js");                
         dpZleceniaForProductGrid.init(zadaniaGrid);
         dpZleceniaForProductGrid.enableDataNames(true);

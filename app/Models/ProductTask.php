@@ -9,7 +9,7 @@ class ProductTask extends BaseModel
     protected $table = 'product_tasks';
     
     protected $fillable = [
-        'product_id', 'task_id', 'duration'
+        'product_id', 'task_id', 'duration', 'priority'
     ]; 
     
     public function task()

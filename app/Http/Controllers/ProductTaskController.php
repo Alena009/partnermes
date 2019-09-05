@@ -18,6 +18,15 @@ class ProductTaskController extends BaseController
         $this->setRepository($rep);
     } 
     
+    public function store(Request $request) {        
+        $lastPriority = ProductTask::where("product_id", "=", $request['product_id'])
+                ->orderBy("id", "desc")
+                ->first();
+        $request["priority"] = $lastPriority["priority"] + 1;
+        
+        return parent::store($request);
+    }
+    
     /**
      * Get list products by tasks groups
      */

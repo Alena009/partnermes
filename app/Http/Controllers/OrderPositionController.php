@@ -8,6 +8,8 @@ use App\Repositories\OrderPositionRepository;
 use App\Models\OrderPosition;
 use App\Models\DeclaredWork;
 use App\Models\ProductTask;
+use App\Models\Product;
+use App\Models\Component;
 
 class OrderPositionController extends BaseController
 {
@@ -45,7 +47,7 @@ class OrderPositionController extends BaseController
     }   
     
     /**
-     * Get list order positions without declared tasks
+     * Get list order positions without declared tasks(zlecen)
      * 
      * @return response
      */    
@@ -77,28 +79,34 @@ class OrderPositionController extends BaseController
      * create new order position
      */
     public function store(Request $request)
-    {
-        $orderPosition = [];
+    {     
+        $result = [];
+        $success = false;
         
-        $orderPosition = new OrderPosition();
-        $orderPosition->kod           = $request['kod'];   
-        $orderPosition->order_id      = $request['order_id']; 
-        $orderPosition->product_id    = $request['product_id'];
-        $orderPosition->amount        = $request['amount'];
-        $orderPosition->date_delivery = $request['date_delivery'];
+        $idOrderPosition = parent::store($request);
         
-        if ($orderPosition->save()) {
-            $this->fillDeclaredTasksList($orderPosition->id, $orderPosition->product_id, $orderPosition->amount);
+        if ($idOrderPosition) {  
+            $orderPosition = OrderPosition::find($idOrderPosition);
+//            $components = Component::where("product_id", "=", $orderPosition->product_id)->get();       
+//            if ($components) {
+//                foreach ($components as $component) {
+//                    $this->fillDeclaredTasksList($orderPosition->id, $component->component_id, $component->amount);    
+//                }                
+//            }
+//            $this->fillDeclaredTasksList($orderPosition->id, $orderPosition->product_id, $orderPosition->amount);
+            $result = $orderPosition;
+            $success = true;
         }
 
-        return response()->json(['data' => $orderPosition, 'success' => true]);        
+        return response()->json(['data' => $result, 'success' => $success]);        
     }     
     
     /**
      * Automatic filling list of declared tasks (zlecenia) for order position
      */
     public function fillDeclaredTasksList($orderPos, $productId, $amount) 
-    {       
+    {      
+        $availableTasks = [];
         $availableTasks = ProductTask::where("product_id", "=", $productId)->get();
         
         foreach ($availableTasks as $task) {

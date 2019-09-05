@@ -1315,7 +1315,13 @@ function createWindowWithForm(formStruct, caption, height, width){
             }
         };           
     });
- 
+    myForm.attachEvent("onButtonClick", function(name){
+        switch (name){
+            case 'cancel':{
+                myForm.clear();
+            };break;
+        }
+    });
     return myForm;         
 } 
 

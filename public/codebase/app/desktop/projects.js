@@ -152,16 +152,16 @@ function projectsInit(cell) {
                     {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
                     //{type: "container", name: "photo", label: "", inputWidth: 160, inputHeight: 160, offsetTop: 20, offsetLeft: 65},
                     //{type: "input", name: "date_end",     label: "Due date", offsetTop: 20},
-                    {type: "input", name: "client_name", label: _("Klient")},		
-                    {type: "input", name: "kod",         label: _("Kod zamowienia")},
-                    {type: "input", name: "name",        label: _("Zamowienie"),
+                    {type: "input", name: "client_name", label: _("Klient"),              readonly: true},		
+                    {type: "input", name: "kod",         label: _("Kod zamowienia"),      readonly: true},
+                    {type: "input", name: "name",        label: _("Zamowienie"),          readonly: true,
                        tooltip: _("Imie zamowienia"),    info: true},
-                    {type: "input", name: "description", label: _("Opis"), rows: 3},
-                    {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 
+                    {type: "input", name: "description", label: _("Opis"), rows: 3,       readonly: true},
+                    {type: "calendar", name: "date_start",  label: _("Data zamowienia"),  readonly: true,
                         dateFormat: "%Y-%m-%d"},
-                    {type: "calendar", name: "date_end",    label: _("Termin wykonania"), 
+                    {type: "calendar", name: "date_end",    label: _("Termin wykonania"), readonly: true,
                         dateFormat: "%Y-%m-%d"},
-                    {type: "input", name: "status", label: _("Status zamowienia")}		
+                    {type: "input", name: "status", label: _("Status zamowienia"),        readonly: true}		
 		];                 
                 var projectsForm = projectsLayout.cells("b").attachForm(projectFormStruct);
 //		projectsForm.getContainer("photo").innerHTML = "<img src='imgs/projects/project.png' border='0' class='form_photo'>";
@@ -211,7 +211,7 @@ function projectsInit(cell) {
                                     clientsCombo.addOption(data.data);
                                 });
                                 clientsCombo.enableFilteringMode(true);
-                                newOrderForm.clear();                             
+                                newOrderForm.clear();                                        
                                 newOrderForm.attachEvent("onButtonClick", function(name){
                                     switch (name){
                                         case 'save':{    
@@ -226,10 +226,7 @@ function projectsInit(cell) {
                                                 projectsGrid.selectRowById(data.data.id);
                                             });                
 
-                                        };break;
-                                        case 'cancel':{
-                                                newOrderForm.clear();
-                                        };break;
+                                        };break;                                        
                                     }
                                 }); 
                         };break;
@@ -334,6 +331,13 @@ function projectsInit(cell) {
                             align: "left"
                         },
                         {
+                            label: _("Cena"),
+                            id: "price",                             
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },                        
+                        {
                             label: _("Data dostawy"),
                             id: "date_delivery",                             
                             type: "ed", 
@@ -343,7 +347,15 @@ function projectsInit(cell) {
                     ],
 			multiselect: true                    
                 });  
-                positionsGrid.attachHeader("#select_filter,#text_filter,,#text_filter");		
+                positionsGrid.attachHeader("#select_filter,#text_filter,,,#text_filter");
+                positionsGrid.attachFooter(
+                    [_("Suma: "),"#cspan","#cspan","#stat_total"],
+                    ["text-align:right;","text-align:center"]
+                );     
+                positionsGrid.attachFooter(
+                    [_("Ilosc pozycji: "),"#cspan","#cspan","#stat_count"],
+                    ["text-align:right;","text-align:center"]
+                );         
 		positionsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]);
                 var dpPositionsGrid = new dataProcessor("api/positions", "js");                
                 dpPositionsGrid.init(positionsGrid);
@@ -420,8 +432,9 @@ function projectsInit(cell) {
                         {type: "input", name: "kod",        required: true, label: _("Kod pozycji")},
 	                {type: "combo", name: "product_id", required: true, label: _("Produkt"), options: []},		                        
                         {type: "input", name: "amount",     required: true, label: _("Ilosc")},
+                        {type: "input", name: "price",      required: true, label: _("Cena")},
 			{type: "calendar", name: "date_delivery",  label: _("Data dostawy"), 
-                            required: true, dateFormat: "%d.%m.%Y",
+                            required: true, dateFormat: "%Y-%m-%d",
                             note: {text: _("Data kiedy produkt musi byc gotowy.")}},
                         {type: "block", blockOffset: 0, position: "laabel-left", list: [
 			    {type: "button", name: "save",   value: "Zapisz", offsetTop:18},

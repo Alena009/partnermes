@@ -59,7 +59,9 @@ function projectsInit(cell) {
                 });
                 projectsGrid.attachHeader('#select_filter,#text_filter,#select_filter');      
                 projectsGrid.setColumnHidden(4,true);
+
                 projectsGrid.enableValidation(true);
+                projectsGrid.enableMultiline(true);
                 projectsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty","ValidDate"]);
                 
 //		projectsGrid.load(A.server+"projects.xml?type="+A.deviceType, function(){
@@ -235,10 +237,10 @@ function projectsInit(cell) {
                             var clientsCombo = editOrderForm.getCombo("client_id");
                             ajaxGet("api/clients", "", function(data){
                                 clientsCombo.addOption(data.data);
-                            });  
-                            editOrderForm.bind(projectsGrid);     
-                            editOrderForm.unbind(projectsGrid);
+                            });
                             var rowData = projectsGrid.getRowData(projectsGrid.getSelectedRowId());
+                            editOrderForm.bind(projectsGrid);     
+                            editOrderForm.unbind(projectsGrid);                            
                             clientsCombo.setComboText(rowData.client_name);
                             clientsCombo.setComboValue(rowData.client_id);                            
                             editOrderForm.attachEvent("onButtonClick", function(name){
@@ -247,14 +249,12 @@ function projectsInit(cell) {
                                         var data = editOrderForm.getFormData();   
                                         console.log(data);
                                         data.date_start = editOrderForm.getCalendar("date_start").getDate(true); 
-                                        data.date_end   = editOrderForm.getCalendar("date_end").getDate(true); 
+                                        data.date_end   = editOrderForm.getCalendar("date_end").getDate(true);
+                                        data.client_id  = clientsCombo.getSelectedValue();
                                         ajaxGet("api/orders/" + data.id + "/edit", data, function(data){
                                             projectsGrid.fill(10);
                                             console.log(data.data);
                                         });
-                                    };break;
-                                    case 'cancel':{
-
                                     };break;
                                 }
                             });                            
@@ -314,49 +314,73 @@ function projectsInit(cell) {
                             id: "kod",
                             type: "ed", 
                             sort: "str", 
-                            align: "left"
+                            align: "left",
+                            width: 50                            
                         },
                         {
                             label: _("Produkt"),                            
                             id: "product_name",
-                            type: "ed", 
+                            type: "ro", 
                             sort: "str", 
-                            align: "left"
+                            align: "left",
+                            width: 150 
                         },
                         {
                             label: _("Ilosc"),
                             id: "amount",                             
                             type: "ed", 
                             sort: "str", 
-                            align: "left"
+                            align: "left",
+                            width: 50 
                         },
                         {
                             label: _("Cena"),
                             id: "price",                             
                             type: "ed", 
                             sort: "str", 
-                            align: "left"
-                        },                        
+                            align: "left",
+                            width: 50 
+                        },
                         {
                             label: _("Data dostawy"),
                             id: "date_delivery",                             
                             type: "ed", 
                             sort: "str", 
-                            align: "left"
+                            align: "left",
+                            width: 50 
                         }                        
                     ],
 			multiselect: true                    
                 });  
                 positionsGrid.attachHeader("#select_filter,#text_filter,,,#text_filter");
                 positionsGrid.attachFooter(
-                    [_("Suma: "),"#cspan","#cspan","#stat_total"],
+                    [_("Ilosc produktow: "),"#cspan","#stat_total",""],
                     ["text-align:right;","text-align:center"]
-                );     
+                );                  
+     
                 positionsGrid.attachFooter(
-                    [_("Ilosc pozycji: "),"#cspan","#cspan","#stat_count"],
+                    [_("Ilosc pozycji: "),"#cspan","","#stat_count"],
                     ["text-align:right;","text-align:center"]
-                );         
+                );    
+                positionsGrid._in_header_stat_total_sum=function(tag,index,data){//'stat_rowcount'-counter name
+                    var calc=function(){                       // function used for calculations
+                        var total_sum = 0;
+                        var data;
+                        this.forEachRow(function(id){
+                            data = this.getRowData(id);
+                            total_sum = total_sum + (data.price * data.amount); 
+                        });
+                        return total_sum;
+                    };
+                    this._stat_in_header(tag,calc,index,data); // default statistics handler processor
+                };
+                positionsGrid.attachFooter(
+                    [_("Suma: "),"#cspan","","#stat_total_sum"],
+                    ["text-align:right;","text-align:center"]
+                );
 		positionsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]);
+                positionsGrid.enableMultiline(true);
+                positionsGrid.enableColumnAutoSize(true);
                 var dpPositionsGrid = new dataProcessor("api/positions", "js");                
                 dpPositionsGrid.init(positionsGrid);
                 dpPositionsGrid.enableDataNames(true);

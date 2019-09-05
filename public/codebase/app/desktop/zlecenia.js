@@ -133,16 +133,17 @@ function zleceniaInit(cell) {
                                 image_path:'codebase/imgs/',
                                 columns: [   
                                     {id: "product_id"},
-                                    {label: _("Produkt"),        id: "product_name", type: "ro", sort: "str", align: "left"},
-                                    {label: _("Produkt Kod"),    id: "product_kod",  type: "ro", sort: "str", align: "left"},
-                                    {label: _("Zamowienie kod"), id: "order_kod",    type: "ro", sort: "str", align: "left"},
+                                    {label: _("Zamowienie Kod"), id: "order_kod",    type: "ro", sort: "str", align: "left"},
                                     {label: _("Zamowienie"),     id: "order_name",   type: "ro", sort: "str", align: "left"},
-                                    {label: _("Ilosc"),          id: "amount",  type: "ro", sort: "str", align: "left"},
+                                    {label: _("Produkt"),        id: "product_name", type: "ro", sort: "str", align: "left"},
+                                    {label: _("Produkt Kod"),    id: "product_kod",  type: "ro", sort: "str", align: "left"},                                    
+                                    {label: _("Ilosc"),          id: "amount",       type: "ro", sort: "str", align: "left"},
+                                    {label: _("Cena"),           id: "price",        type: "ro", sort: "str", align: "left"},
                                     {label: _("Data dostawy"),   id: "date_delivery",type: "ro", sort: "str", align: "left"}												
                                 ],
                                 multiselect: true
                             }); 
-                            ordersPositionsGrid.attachHeader("#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter");
+                            ordersPositionsGrid.attachHeader(",#text_filter,#select_filter,#text_filter,#text_filter,#text_filter,#text_filter");
                             ordersPositionsGrid.setColumnHidden(0,true);
                             ordersPositionsGrid.fill = function() {                                    
                                 this.clearAll();                                                                               

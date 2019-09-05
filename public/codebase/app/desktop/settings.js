@@ -1316,7 +1316,7 @@ function createWindowWithForm(formStruct, caption, height, width){
         };           
     });
     myForm.attachEvent("onButtonClick", function(name){
-        switch (name){
+        switch (name){          
             case 'cancel':{
                 myForm.clear();
             };break;

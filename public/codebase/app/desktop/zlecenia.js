@@ -133,13 +133,13 @@ function zleceniaInit(cell) {
                                 image_path:'codebase/imgs/',
                                 columns: [   
                                     {id: "product_id"},
-                                    {label: _("Zamowienie Kod"), id: "order_kod",    type: "ro", sort: "str", align: "left"},
-                                    {label: _("Zamowienie"),     id: "order_name",   type: "ro", sort: "str", align: "left"},
-                                    {label: _("Produkt"),        id: "product_name", type: "ro", sort: "str", align: "left"},
-                                    {label: _("Produkt Kod"),    id: "product_kod",  type: "ro", sort: "str", align: "left"},                                    
-                                    {label: _("Ilosc"),          id: "amount",       type: "ro", sort: "str", align: "left"},
-                                    {label: _("Cena"),           id: "price",        type: "ro", sort: "str", align: "left"},
-                                    {label: _("Data dostawy"),   id: "date_delivery",type: "ro", sort: "str", align: "left"}												
+                                    {label: _("Zamowienie Kod"), id: "order_kod",    type: "ro", sort: "str", align: "left", width: 50},
+                                    {label: _("Zamowienie"),     id: "order_name",   type: "ro", sort: "str", align: "left", width: 50},
+                                    {label: _("Produkt"),        id: "product_name", type: "ro", sort: "str", align: "left", width: 150},
+                                    {label: _("Produkt Kod"),    id: "product_kod",  type: "ro", sort: "str", align: "left", width: 50},                                    
+                                    {label: _("Ilosc"),          id: "amount",       type: "ro", sort: "str", align: "left", width: 50},
+                                    {label: _("Cena"),           id: "price",        type: "ro", sort: "str", align: "left", width: 50},
+                                    {label: _("Data dostawy"),   id: "date_delivery",type: "ro", sort: "str", align: "left", width: 50}												
                                 ],
                                 multiselect: true
                             }); 

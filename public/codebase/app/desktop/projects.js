@@ -207,7 +207,8 @@ function projectsInit(cell) {
                 projectsGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{   
-                                var newOrderForm = createWindowWithForm(newProjectFormStruct, _("Nowe zamowienie"), 480, 380);                                                                
+                                var newOrderForm = createWindowWithForm(newProjectFormStruct, 
+                                                                        _("Nowe zamowienie"), 480, 380);                                                                
                                 var clientsCombo = newOrderForm.getCombo("client_id");
                                 ajaxGet("api/clients", "", function(data){
                                     clientsCombo.addOption(data.data);

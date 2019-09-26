@@ -20,5 +20,12 @@ class Task extends BaseModel
     public function group()
     {
         return $this->belongsTo('App\Models\TaskGroup', 'task_group_id', 'id');
-    }     
+    } 
+    
+    public function products()
+    {
+        return $this->belongsToMany('App\Models\Product', 'product_tasks', 'task_id', 'product_id')
+                ->withPivot('duration', 'priority')
+                ->withTimestamps();        
+    }    
 }

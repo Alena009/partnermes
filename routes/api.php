@@ -26,6 +26,11 @@ Route::group([
     Route::get('/declaredworks/byorderpos/{pos}', 'DeclaredWorkController@listWorksForOrderPos');   
     Route::get('/declaredworks/fortimeline', 'DeclaredWorkController@listWorksForTimeline');   
     Route::get('/declaredworks/list/{groups}', 'DeclaredWorkController@listWorksByGroups');   
+    Route::get('/declaredworks/mainlist/{groups}', 'DeclaredWorkController@mainListWorksByGroups');   
+    //Route::get('/declaredworks/addforposition/{position}', 'DeclaredWorkController@addWorksForPosition');   
+    //Route::get('/declaredworks/addforcomponent', 'DeclaredWorkController@addWorksForComponent');   
+    Route::get('/declaredworks/makegeneral/{works}', 'DeclaredWorkController@makeGeneral');   
+    Route::get('/declaredworks/listforzlecenie/{workId}', 'DeclaredWorkController@listWorksForZlecenie');   
     Route::resource('/declaredworks', 'DeclaredWorkController'); 
     
     Route::get('/departaments/grupytree', 'DepartamentController@buildTree');
@@ -40,15 +45,24 @@ Route::group([
     
     Route::resource('/permissions', 'PermissionController');  
     Route::get('/positions/list/freepositions', 'OrderPositionController@freePositionsList');
+    Route::get('/positions/list/components/{position}', 'OrderPositionController@listComponentsForPosition');
+    Route::get('/positions/list/tasks/{position}', 'OrderPositionController@listTasksForPosition');
+    Route::get('/positions/list/componenttasks', 'OrderPositionController@listTasksForPositionComponent');
     Route::resource('/positions', 'OrderPositionController');      
+    
     Route::resource('/prodtypes', 'ProductTypeController'); 
-    Route::get('/products/listbygroups/{prodGroups}', 'ProductController@listProductsByProductGroup');  
-    Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup'); 
+    
     Route::get('/prodgroups/grupytree', 'ProductGroupController@buildTree');    
-    Route::resource('/prodgroups', 'ProductGroupController');     
+    Route::resource('/prodgroups', 'ProductGroupController');  
+    Route::post('/products/addtask', 'ProductController@addTaskForProduct');    
+    Route::get('/products/availabletasks/{productId}', 'ProductController@listAvailableTasks');
+    Route::get('/products/taskslist/{productId}', 'ProductController@listTasksForProduct');   
+    Route::get('/products/listbygroups/{prodGroups}', 'ProductController@listProductsByProductGroup');  
+    Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup');     
     Route::resource('/products', 'ProductController');  
-    Route::get('/productstasks/list/{productId}', 'ProductTaskController@listTasksByProduct');
-    Route::resource('/productstasks', 'ProductTaskController');  
+   // Route::get('/productstasks/list/components/{productsIds}', 'ProductTaskController@listTasksForComponentsByProduct');
+   // Route::get('/productstasks/list/{productId}', 'ProductTaskController@listTasksByProduct');
+   // Route::resource('/productstasks', 'ProductTaskController');  
     
     Route::resource('/roles', 'RoleController');
     Route::get('/roles', 'RoleController@roles');

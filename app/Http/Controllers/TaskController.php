@@ -65,7 +65,8 @@ class TaskController extends BaseController
     } 
     
     /**
-     * Get list tasks by task group
+     * Gets list tasks by task group
+     * 
      */
     public function listByGroups($groups = 0)
     {   

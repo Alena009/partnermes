@@ -16,5 +16,10 @@ class Component extends BaseModel
     {
         return $this->belongsTo('App\Models\Product', 'component_id', 'id');
     }
+    
+    public function components() 
+    {
+        return $this->hasMany($this, 'product_id', 'component_id') ;
+    }
      
 }

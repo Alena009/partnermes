@@ -29,11 +29,13 @@ class Product extends BaseModel
 
     public function tasks()
     {
-        return $this->belongsToMany('App\Models\Task', 'product_tasks', 'product_id', 'task_id');        
-    }  
+        return $this->belongsToMany('App\Models\Task', 'product_tasks', 'product_id', 'task_id')
+                ->withPivot('duration', 'priority')
+                ->withTimestamps();        
+    }     
     
     public function components()
     {
         return $this->hasMany('App\Models\Component');
-    }
+    }    
 }

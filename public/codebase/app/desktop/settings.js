@@ -1206,8 +1206,8 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
         ajaxGet(urlForParentCombo, '', function(data) {                    
                 dhxCombo.addOption(data.data);
         });  
-        dhxCombo.setComboValue(treeObj.getSelectedId());
-        dhxCombo.setComboText(treeObj.getItemText(treeObj.getSelectedId()));
+//        dhxCombo.setComboValue(treeObj.getSelectedId());
+//        dhxCombo.setComboText(treeObj.getItemText(treeObj.getSelectedId()));
     }
     grupyForm.attachEvent("onButtonClick", function(name){
         switch (name){

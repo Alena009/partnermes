@@ -343,6 +343,14 @@ function projectsInit(cell) {
                             width: 50 
                         },
                         {
+                            label: _("Szczegóły"),
+                            id: "description",                             
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left",
+                            width: 100 
+                        },                        
+                        {
                             label: _("Data dostawy"),
                             id: "date_delivery",                             
                             type: "ed", 
@@ -353,7 +361,7 @@ function projectsInit(cell) {
                     ],
 			multiselect: true                    
                 });  
-                positionsGrid.attachHeader("#select_filter,#text_filter,,,#text_filter");
+                positionsGrid.attachHeader("#select_filter,#text_filter,,,,#text_filter");
                 positionsGrid.attachFooter(
                     [_("Ilosc produktow: "),"#cspan","#stat_total",""],
                     ["text-align:right;","text-align:center"]
@@ -458,6 +466,7 @@ function projectsInit(cell) {
 	                {type: "combo", name: "product_id", required: true, label: _("Produkt"), options: []},		                        
                         {type: "input", name: "amount",     required: true, label: _("Ilosc")},
                         {type: "input", name: "price",      required: true, label: _("Cena")},
+                        {type: "input", name: "description", label: _("Opis"), rows: 3},
 			{type: "calendar", name: "date_delivery",  label: _("Data dostawy"), 
                             required: true, dateFormat: "%Y-%m-%d",
                             note: {text: _("Data kiedy produkt musi byc gotowy.")}},
@@ -521,28 +530,19 @@ function projectsInit(cell) {
                                 ajaxGet("api/products", "", function(data){
                                     productsCombo.addOption(data.data);
                                 });  
-                                editPositionForm.bind(positionsGrid);     
-                                editPositionForm.unbind(positionsGrid);
+//                                editPositionForm.bind(positionsGrid);     
+//                                editPositionForm.unbind(positionsGrid);
                                 var rowData = positionsGrid.getRowData(positionsGrid.getSelectedRowId());
-                                productsCombo.setComboText(rowData.product_name);
-                                productsCombo.setComboValue(rowData.product_id);   
-                                productsCombo.attachEvent("onKeyPressed", function(keyCode){
-                                    var input = productsCombo.getComboText().trim().toLowerCase().split(' ');
-                                    var mask = "";
-                                    for (var i = 0; i < input.length; i++) {
-                                        mask = mask + input[i] + "(.*)";                                                                                                                        
-                                    }                       
-                                    productsCombo.filter(function(opt){
-                                        return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
-                                    }, false);                           
-                                });                                 
+                                editPositionForm.setFormData(rowData);
+//                                productsCombo.setComboText(rowData.product_name);
+//                                productsCombo.setComboValue(rowData.product_id);                                   
                                 editPositionForm.attachEvent("onButtonClick", function(name){
                                     switch (name){
                                         case 'save':{                                                           
                                             var data = editPositionForm.getFormData();                                            
                                             data.date_delivery = editPositionForm.getCalendar("date_delivery").getDate(true); 
                                             data.order_id = projectsGrid.getSelectedRowId();
-                                            ajaxPost("api/positions", data, function(data){
+                                            ajaxGet("api/positions/" + data.id + "/edit", data, function(data){
                                                 if (data.success && data.data) {
                                                     positionsGrid.fill(projectsGrid.getSelectedRowId());
                                                 }

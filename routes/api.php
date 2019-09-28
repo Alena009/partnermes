@@ -16,10 +16,9 @@ use Illuminate\Http\Request;
 Route::group([
     'middleware' => ['auth:api']
         ], function () {
-//    Route::get('/user', function (Request $request) {
-//        return $request->user();
-//    });
+    
     Route::resource('/clients', 'ClientController');
+    
     Route::get('/components/list/{productId}', 'ComponentController@listComponents');
     Route::resource('/components', 'ComponentController');  
     
@@ -38,15 +37,19 @@ Route::group([
     
     Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
     Route::resource('/operations', 'OperationController'); 
+    
     Route::get('/orders/history/{orderId}', 'OrderController@history');
     Route::get('/orders/positions/{orderId}', 'OrderController@positions');
-    Route::get('/orders/list/{amount}', 'OrderController@ordersList');
+    Route::get('/orders/beguntasks/{orderId}', 'OrderController@beguntasks');
+    //Route::get('/orders/list/{amount}', 'OrderController@ordersList');
     Route::resource('/orders', 'OrderController');    
     
-    Route::resource('/permissions', 'PermissionController');  
-    Route::get('/positions/list/freepositions', 'OrderPositionController@freePositionsList');
+    Route::resource('/permissions', 'PermissionController');
+    
+    Route::get('/positions/list/freepositions', 'OrderPositionController@freePositionsList');    
     Route::get('/positions/list/components/{position}', 'OrderPositionController@listComponentsForPosition');
     Route::get('/positions/list/tasks/{position}', 'OrderPositionController@listTasksForPosition');
+    Route::get('/positions/list/beguntasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/componenttasks', 'OrderPositionController@listTasksForPositionComponent');
     Route::resource('/positions', 'OrderPositionController');      
     

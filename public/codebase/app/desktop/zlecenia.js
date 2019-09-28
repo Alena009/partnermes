@@ -270,17 +270,17 @@ function zleceniaInit(cell) {
                                 input = input.trim().toLowerCase().split(' ');
                                 return function(value, id){
                                     //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
-                                    var val = ordersPositionsGrid.cells(id, 5).getValue(); // gets the value of the current                                                    
-                                    //making pattern string for regexp
-                                    var searchStr = '';
-                                    for (var i = 0; i < input.length; i++) {
-                                        searchStr = searchStr + input[i] + "(.*)";                                                                
-                                        //var searchStr = /^zz(.+)np(.+)/ig;
-                                    }
-                                    var regExp = new RegExp("^" + searchStr, "ig");                                                          
-                                    if (val.toLowerCase().match(regExp)){                                                             
-                                        return true;
-                                    }                                                    
+                                        var val = ordersPositionsGrid.cells(id, 5).getValue(); // gets the value of the current                                                    
+                                        //making pattern string for regexp
+                                        var searchStr = '';
+                                        for (var i = 0; i < input.length; i++) {
+                                            searchStr = searchStr + input[i] + "(.*)";                                                                
+                                            //var searchStr = /^zz(.+)np(.+)/ig;
+                                        }
+                                        var regExp = new RegExp("^" + searchStr, "ig");                                                          
+                                        if (val.toLowerCase().match(regExp)){                                                             
+                                            return true;
+                                        }                                                    
                                     //}
                                     return false;
                                 };

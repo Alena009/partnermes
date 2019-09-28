@@ -1277,10 +1277,7 @@ function createWindowWithForm(formStruct, caption, height, width){
             caption: _(caption),
             header: true,
             onClose:function(){
-//                var obj = dhxWins.window("w1").getAttachedObject();
-//                if (typeof(window.dhtmlXFormObject) == "function" && obj instanceof dhtmlXFormObject) {
-//                    
-//                }               
+                dhxWins.unload();
             }            
     });
     //initializing form 
@@ -1290,12 +1287,15 @@ function createWindowWithForm(formStruct, caption, height, width){
 //        dhtmlx.message({
 //            title: "Close",
 //            type: "alert-warning",
-//            text: "You can't close this window!"            
+//            text: "Required field " + name + " is empty!"            
 //        });
 //    });
     myForm.forEachItem(function(id){ 
         switch(myForm.getItemType(id)){
-            case 'input':    {myForm.getInput(id).autocomplete = "off"; };break;
+            case 'input':    {
+                    var input = myForm.getInput(id); 
+                    input.autocomplete = "off";                     
+                };break;
             case 'calendar': {myForm.getInput(id).autocomplete = "off"; };break;
             case 'combo':    {
                 var myCombo = myForm.getCombo(id);
@@ -1315,15 +1315,62 @@ function createWindowWithForm(formStruct, caption, height, width){
             }
         };           
     });
+                    
+    myForm.attachEvent("onChange", function (name, value, state){
+        if (name.indexOf("price") !== -1) {
+            //var re = /^\d[0-9,]+\d$/;
+            var re = /^\d{1,8}([,\.])?\d{1,2}$/;
+            if (!re.test(value)) {
+                myForm.setItemValue(name, "");
+            }            
+        } else if (name.indexOf("amount") !== -1) {
+            var re = /^\d+$/;
+            console.log("ertertert");
+            if (!re.test(value)) {
+                myForm.setItemValue(name, "");
+            }            
+        }        
+    });  
+    
+    var dateEndCombo   = myForm.getCombo("num_week");
+    if (dateEndCombo) {
+        var numCurrentWeek = new Date().getWeekNumber();
+        for (var i = 1; i <= 53; i++) {
+            dateEndCombo.addOption(i, _("tydzień ") + i);
+        }
+        dateEndCombo.attachEvent("onChange", function(value, text){
+            if (value < numCurrentWeek) {
+                myForm.addItem(null, {type: "label", name: "on_next_year", label: _("Na nastepny rok")}, null, 1);
+            } else {
+                myForm.removeItem("on_next_year");
+            }
+        });  
+    }
+    
     myForm.attachEvent("onButtonClick", function(name){
-        switch (name){          
+        switch (name){  
+            case 'save':{
+                myForm.validate();
+            };break;            
             case 'cancel':{
-                myForm.clear();
+                dhxWins.window("w1").close();
             };break;
         }
     });
+    
     return myForm;         
-} 
+}
+
+Date.prototype.getWeekNumber = function(){
+    var d = new Date(+this);
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate()+4-(d.getDay()||7));
+    return Math.ceil((((d-new Date(d.getFullYear(),0,1))/8.64e7)+1)/7);
+};
+
+function createGrid(layoutCellObj){
+    return layoutCellObj.attachGrid();
+}
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 	if (id == "settings") {

@@ -27,8 +27,7 @@ class OrderPositionController extends BaseController
      */
     public function index()
     {
-        $ordersPositions = [];        
-
+        $ordersPositions = [];  
         $ordersPositions = OrderPosition::all();       
         
         foreach ($ordersPositions as $position) {            
@@ -42,9 +41,11 @@ class OrderPositionController extends BaseController
             $position['order_position_id']  = $position->id;      
             $position['key']                = $position->id;
             $position['label']              = $position->kod;
+            $date = new \DateTime($position->date_delivery);
+            $position['num_week'] = $date->format("W");             
         }           
              
-        return response()->json(['data' => $ordersPositions, 'success' => true]);        
+        return response()->json(['data' => $ordersPositions, 'success' => (boolean)count($ordersPositions)]);        
     }   
     
     /**
@@ -97,17 +98,28 @@ class OrderPositionController extends BaseController
      */
     public function store(Request $request)
     {     
-        $result = [];
-        $success = false;
-        
-        $idOrderPosition = parent::store($request);
-        
-        if ($idOrderPosition) {  
-            $result = OrderPosition::find($idOrderPosition);
-            $success = true;
+        $currentWeekNum = date("W");
+        $currentYear    = date("Y");
+        if ($request['num_week'] < $currentWeekNum) {
+            $year = $currentYear + 1; 
+        } else {
+            $year = $currentYear;
         }
+        
+        $date = new \DateTime;
+        $date_end = $date->setISODate($year, $request['num_week'])->format('Y-m-d');
 
-        return response()->json(['data' => $result, 'success' => $success]);        
+        $orderPosition                = new OrderPosition();
+        $orderPosition->kod           = $request['kod'];   
+        $orderPosition->order_id      = $request['order_id']; 
+        $orderPosition->product_id    = $request['product_id'];
+        $orderPosition->amount        = $request['amount'];
+        $orderPosition->price         = $request['price'];
+        $orderPosition->description   = $request['description'];
+        $orderPosition->date_delivery = $date_end;
+        $orderPosition->save();
+
+        return response()->json(['data' => $orderPosition, 'success' => (boolean)count($orderPosition)]);        
     }     
     
     /**
@@ -292,4 +304,31 @@ class OrderPositionController extends BaseController
 //        
 //        return response()->json(["success" => $success, "data" => $result]);                
 //    }    
+    
+    public function edit(Request $request, $id)
+    {
+        $orderPosition = [];
+        $currentWeekNum = date("W");
+        $currentYear    = date("Y");
+        if ($request['num_week'] < $currentWeekNum) {
+            $year = $currentYear + 1; 
+        } else {
+            $year = $currentYear;
+        }
+        
+        $date = new \DateTime;
+        $date_end = $date->setISODate($year, $request['num_week'])->format('Y-m-d');
+        
+        $orderPosition                = OrderPosition::find($id);
+        $orderPosition->kod           = $request['kod'];
+        $orderPosition->order_id      = $request['order_id'];
+        $orderPosition->product_id    = $request['product_id'];
+        $orderPosition->amount        = $request['amount'];
+        $orderPosition->price         = $request['price'];
+        $orderPosition->description   = $request['description'];
+        $orderPosition->date_delivery = $date_end;
+        $orderPosition->save();        
+        
+        return response()->json(['data' => $orderPosition, 'success' => (boolean)count($orderPosition)]);                
+    }    
 }

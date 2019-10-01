@@ -149,17 +149,18 @@ class DeclaredWorkController extends BaseController
         $declaredWorks = [];
         
         $declaredWork  = DeclaredWork::find($declaredWorkId); 
-        $declaredWorks = DeclaredWork::where("product_id", "=", $declaredWork->product_id)
-                ->where("order_position_id", "=", $declaredWork->order_position_id)
+        $declaredWorks = DeclaredWork::where("kod", "=", $declaredWork->kod)
+                ->selectRaw('*, sum(declared_amount) as amount')
+                ->groupBy('kod', 'product_id', 'task_id')                   
                 ->get();
         
         foreach ($declaredWorks as $work) {            
             $task    = $work->task;
             $product = $work->product;
                     
-            $work['task_kod']  = $task->kod;
-            $work['task_name'] = $task->name;
-            $work['checked']   = true;
+            $work['task_kod']        = $task->kod;
+            $work['task_name']       = $task->name;
+            $work['checked']         = true;
         }    
         
         $result = $declaredWorks;

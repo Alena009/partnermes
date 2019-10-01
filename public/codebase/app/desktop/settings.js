@@ -1195,7 +1195,8 @@ var taskFormStruct = [
 ];
 
 function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, id = 0) {
-    var grupyForm = createWindowWithForm(groupFormStruct, "Dodaj lub zmien grupe", 300, 350);
+    var grupyWindow = createWindow(_("Dodaj lub zmien grupe"), 300, 350);
+    var grupyForm = createForm(groupFormStruct, grupyWindow);
     //if we editing some group, we removing parent_grop combo, because 
     //we can drag groups and change parent group by that way
     if (id) {
@@ -1206,15 +1207,25 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
         ajaxGet(urlForParentCombo, '', function(data) {                    
                 dhxCombo.addOption(data.data);
         });  
-//        dhxCombo.setComboValue(treeObj.getSelectedId());
-//        dhxCombo.setComboText(treeObj.getItemText(treeObj.getSelectedId()));
     }
     grupyForm.attachEvent("onButtonClick", function(name){
         switch (name){
             case 'save':{
                 if (id) {                    
-                    ajaxGet(urlForSaveButton, grupyForm.getFormData(), function(data){                                                                                                            
-                        treeObj.setItemText(id, data.data.name);
+                    ajaxGet(urlForSaveButton, grupyForm.getFormData(), function(data){  
+                        if (data && data.success) {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Zapisane")
+                            });                
+                            grupyWindow.hide();
+                            treeObj.setItemText(id, data.data.name);
+                        } else {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Błąd! Zmiany nie zostały zapisane")
+                            });  
+                        }
                     });
                 } else {                   
                     ajaxPost(urlForSaveButton, grupyForm.getFormData(), function(data){                                                            
@@ -1231,6 +1242,7 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
             };break;
         }
     });
+    
     return grupyForm;
 }
 
@@ -1265,7 +1277,7 @@ function deleteNodeFromTree(treeObj, deleteUrl) {
     }  
 }
 
-function createWindowWithForm(formStruct, caption, height, width){
+function createWindow (caption, height, width) {
     var dhxWins = new dhtmlXWindows();
     w1 = dhxWins.createWindow({
             id:"w1",
@@ -1277,11 +1289,15 @@ function createWindowWithForm(formStruct, caption, height, width){
             caption: _(caption),
             header: true,
             onClose:function(){
-                dhxWins.unload();
+                //dhxWins.unload();
             }            
     });
-    //initializing form 
-    var myForm = dhxWins.window("w1").attachForm(formStruct, true);
+    
+    return w1;
+}
+
+function createForm(formStruct, windowObj){
+    var myForm = windowObj.attachForm(formStruct, true);
     myForm.enableLiveValidation(true);
 //    myForm.attachEvent("onValidateError", function (name, value, result){
 //        dhtmlx.message({
@@ -1353,7 +1369,7 @@ function createWindowWithForm(formStruct, caption, height, width){
                 myForm.validate();
             };break;            
             case 'cancel':{
-                dhxWins.window("w1").close();
+                windowObj.close();
             };break;
         }
     });
@@ -1367,10 +1383,6 @@ Date.prototype.getWeekNumber = function(){
     d.setDate(d.getDate()+4-(d.getDay()||7));
     return Math.ceil((((d-new Date(d.getFullYear(),0,1))/8.64e7)+1)/7);
 };
-
-function createGrid(layoutCellObj){
-    return layoutCellObj.attachGrid();
-}
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 	if (id == "settings") {

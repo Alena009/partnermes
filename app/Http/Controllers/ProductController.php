@@ -151,6 +151,8 @@ class ProductController extends BaseController
             foreach ($tasks as $task) {
                 $task->duration = $task->pivot->duration;
                 $task->priority = $task->pivot->priority;
+                $task->task_kod = $task->kod;                
+                $task->task_name= $task->name;
             }
         }
         return $tasks;        

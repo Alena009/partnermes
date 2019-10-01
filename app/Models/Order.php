@@ -25,7 +25,8 @@ class Order extends BaseModel
     
     public function history()
     {
-        return $this->belongsToMany("App\Models\Status", "orders_history", 'order_id', 'status_id');
+        //return $this->belongsToMany("App\Models\Status", "orders_history", 'order_id', 'status_id');
+        return $this->hasMany('App\Models\OrderHistory');
     }
     
     public function positions()

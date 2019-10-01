@@ -7,7 +7,6 @@ var projectsForm;
 
 function projectsInit(cell) {	
 	if (projectsLayout == null) {		
-		// init layout
 		var projectsLayout = cell.attachLayout("3J");
 		projectsLayout.cells("a").hideHeader();
 		projectsLayout.cells("b").hideHeader();
@@ -56,10 +55,7 @@ function projectsInit(cell) {
                            note: {text: _("Dodaj opis zamowienia. Nie jest obowiazkowe.")}},
                         {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 
                             required: true, dateFormat: "%Y-%m-%d", enableTodayButton: true,
-                            note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},
-//                        {type: "calendar", name: "date_end",  label: _("Data zamowienia"), 
-//                            required: true, dateFormat: "%Y-%m-%d", enableTodayButton: true,
-//                            note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},                        
+                            note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},                       
                         {type: "combo", name: "num_week", required: true, label: _("Termin wykonania"), 
                             options:[],
                             note: {text: _("Numer tygodnia kiedy zamowienie musi byc zakonczone. Jest obowiazkowe.")}},
@@ -73,7 +69,8 @@ function projectsInit(cell) {
                 projectsGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{   
-                            var newOrderForm = createWindowWithForm(newProjectFormStruct, _("Nowe zamowienie"), 500, 380);                                                                
+                            var newOrderWindow = createWindow(_("Nowe zamowienie"), 500, 380);
+                            var newOrderForm = createForm(newProjectFormStruct, newOrderWindow);                                                                
                             var clientsCombo = newOrderForm.getCombo("client_id");
                             ajaxGet("api/clients", "", function(data){
                                 clientsCombo.addOption(data.data);
@@ -84,15 +81,27 @@ function projectsInit(cell) {
                                         var data = newOrderForm.getFormData();
                                         data.date_start = newOrderForm.getCalendar("date_start").getDate(true);                                         
                                         ajaxPost("api/orders", data, function(data){
-                                            projectsGrid.fill();
-                                            projectsGrid.selectRowById(data.data.id);
+                                            if (data && data.success) {
+                                                dhtmlx.alert({
+                                                    title:_("Wiadomość"),
+                                                    text:_("Zapisane")
+                                                });
+                                                projectsGrid.fill();                                                
+                                                newOrderWindow.hide();                                                
+                                            } else {
+                                                dhtmlx.alert({
+                                                    title:_("Wiadomość"),
+                                                    text:_("Błąd! Zmiany nie zostały zapisane")
+                                                });
+                                            }
                                         });                
                                     };break;                                        
                                 }
                             }); 
                         };break;
                         case 'Edit':{      
-                            var editOrderForm = createWindowWithForm(newProjectFormStruct, _("Edytuj zamowienie"), 480, 380);                                
+                            var editOrderWindow = createWindow(_("Edytuj zamowienie"), 480, 380);                            
+                            var editOrderForm = createForm(newProjectFormStruct, editOrderWindow);                                
                             var rowData = projectsGrid.getRowData(projectsGrid.getSelectedRowId());
                             editOrderForm.bind(projectsGrid);
                             editOrderForm.unbind(projectsGrid);
@@ -106,9 +115,20 @@ function projectsInit(cell) {
                                     case 'save':{                                                           
                                         var data = editOrderForm.getFormData();   
                                         data.date_start = editOrderForm.getCalendar("date_start").getDate(true);                                                                              
-                                        ajaxGet("api/orders/" + data.id + "/edit", data, function(data){
-                                            projectsGrid.fill();
-                                            projectsGrid.selectRowById(data.id);
+                                        ajaxGet("api/orders/" + data.id + "/edit", data, function(data){                                            
+                                            if (data && data.success) {
+                                                dhtmlx.alert({
+                                                    title:_("Wiadomość"),
+                                                    text:_("Zapisane")
+                                                });
+                                                projectsGrid.fill();                                                
+                                                editOrderWindow.hide();                                                
+                                            } else {
+                                                dhtmlx.alert({
+                                                    title:_("Wiadomość"),
+                                                    text:_("Błąd! Zmiany nie zostały zapisane")
+                                                });
+                                            }
                                         });
                                     };break;
                                 }
@@ -148,7 +168,7 @@ function projectsInit(cell) {
                             }                            
                         };break; 
                     }
-                }); 
+                });                 
                 
 		var projectsGrid = projectsLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
@@ -161,10 +181,13 @@ function projectsInit(cell) {
                     ],
                     multiline: true
                 });
-                projectsGrid.attachHeader('#select_filter,#text_filter,#select_filter');      
+                projectsGrid.attachHeader('#text_filter,#text_filter,#select_filter');      
                 projectsGrid.setColumnHidden(4,true);
                 projectsGrid.enableValidation(true);
                 projectsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty","MotEmpty"]);
+                var searchElem = projectsGridToolBar.getInput('szukaj');
+                projectsGrid.makeFilter(searchElem, 0, true);                
+                projectsGrid.filterByAll();
 //                var clientsCombo = projectsGrid.getCombo(2);                
 //                ajaxGet("api/clients", '', function(data) {
 //                    if (data.success && data.data) {
@@ -275,8 +298,9 @@ function projectsInit(cell) {
                                 var orderId = projectsGrid.getSelectedRowId();                                                          
                                 if (orderId) {
                                     var order = projectsGrid.getRowData(orderId); 
-                                    var positionsForm = createWindowWithForm(orderPositionFormStruct, 
-                                        _("Nowa pozycja"), 350, 350);
+                                    var positionsWindow = createWindow(_("Nowa pozycja"), 350, 350);
+                                    var positionsForm = createForm(orderPositionFormStruct, 
+                                        positionsWindow);
                                     positionsForm.setItemFocus("kod");
                                     var productsCombo = positionsForm.getCombo("product_id");                
                                     ajaxGet("api/products", '', function(data) {
@@ -288,9 +312,15 @@ function projectsInit(cell) {
                                         if (name == 'save') {                                                     
                                             var data = positionsForm.getFormData();                                                                                                
                                             data.order_id = orderId;
-                                            ajaxPost("api/positions", data, function(data){
+                                            ajaxPost("api/positions", data, function(data){                                                   
                                                 if (data.success && data.data) {
                                                     positionsGrid.fill(projectsGrid.getSelectedRowId());
+                                                    positionsWindow.hide();
+                                                } else {
+                                                    dhtmlx.alert({
+                                                        title:_("Wiadomość"),
+                                                        text:_("Błąd! Zmiany nie zostały zapisane")
+                                                    });
                                                 }
                                             });                                                                                           
                                         }
@@ -309,8 +339,8 @@ function projectsInit(cell) {
                                 var positionId = positionsGrid.getSelectedRowId();
                                 if (positionId) {
                                     var position = positionsGrid.getRowData(positionId);
-                                    var positionsForm = createWindowWithForm(orderPositionFormStruct, 
-                                        _("Edutyj pozycje"), 350, 350);                                    
+                                    var positionsWindow = createWindow(_("Edutyj pozycje"), 350, 350);
+                                    var positionsForm = createForm(orderPositionFormStruct, positionsWindow);                                    
                                     positionsForm.setFormData(position);  
                                     var productsCombo = positionsForm.getCombo("product_id");
                                     ajaxGet("api/products", "", function(data){
@@ -323,7 +353,17 @@ function projectsInit(cell) {
                                             data.order_id = projectsGrid.getSelectedRowId();
                                             ajaxGet("api/positions/" + data.id + "/edit", data, function(data){
                                                 if (data.success && data.data) {
-                                                    positionsGrid.fill(projectsGrid.getSelectedRowId());                                                    
+                                                    dhtmlx.alert({
+                                                        title:_("Wiadomość"),
+                                                        text:_("Zapisane")
+                                                    });
+                                                    positionsGrid.fill(projectsGrid.getSelectedRowId());
+                                                    positionsWindow.hide();                                                    
+                                                } else {
+                                                    dhtmlx.alert({
+                                                        title:_("Wiadomość"),
+                                                        text:_("Błąd! Zmiany nie zostały zapisane")
+                                                    });                                                    
                                                 }
                                             });                                            
                                         }
@@ -446,6 +486,7 @@ function projectsInit(cell) {
                     image_path:'codebase/imgs/',
 	            columns: [
                         {label: _("Imie"), id: "name",       type: "ro", sort: "str", align: "left"},
+                        {label: _("Opis"), id: "description",type: "ro", sort: "str", align: "left"},
                         {label: _("Data"), id: "created_at", type: "ro", sort: "str", align: "left"}                        
                     ],
 			multiselect: true                    

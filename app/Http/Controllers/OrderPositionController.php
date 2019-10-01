@@ -194,38 +194,7 @@ class OrderPositionController extends BaseController
         }  
         
         return response()->json(["success" => (boolean)count($result), "data" => $result]);                
-    }
-    
-//    public function listTasksForComponentsPosition($orderPosition)
-//    {
-//        $result = [];
-//        $success = false;
-//        
-//        $position = OrderPosition::find($orderPosition);
-//        $order = $position->order;
-//        $product = $position->product;
-//        $components = $product->components;
-//        if ($components) {
-//            foreach ($components as $component) {
-//                $tasks = ProductController::getTasksForProduct($component->component_id);
-//                if ($tasks) {
-//                    foreach ($tasks as $task) {   
-//                        $task['order_kod']        = $order->kod;
-//                        $task['position_kod']     = $position->kod;
-//                        $task['component_name']   = $component->product->name;
-//                        $task['component_kod']    = $component->product->kod;
-//                        $task['component_amount'] = $component->amount * $position->amount;
-//                        $task['declared_amount']  = $component->amount * $position->amount;
-//                        $task['checked'] = true;
-//                        $result[] = $task;
-//                    }
-//                }                
-//            }
-//        }
-//    
-//        return response()->json(["success" => (boolean)count($result), "data" => $result]);                
-//    }    
-         
+    } 
     
     public function listTasksForPositionComponent(Request $request)
     {
@@ -250,64 +219,12 @@ class OrderPositionController extends BaseController
         }                
                 
         return response()->json(["success" => (boolean)count($result), "data" => $result]);                
-    }     
-    
-    
-//    public function listTasksForPosition($orderPosition)
-//    {
-//        $result = [];
-//        $success = false;
-//        
-//        $position            = OrderPosition::find($orderPosition);
-//        $order               = $position->order;
-//        $product             = $position->product;
-//        $components          = $product->components;
-//        $tasksForMainProduct = $product->tasks;
-//        $result              = $tasksForMainProduct;
-//        
-//        if ($result) {
-//            foreach ($result as $res) {
-//                $res['task_id']            = $res['id'];
-//                $res['order_kod']          = $order->kod;
-//                $res['position_kod']       = $position->kod;
-//                $res['product_kod']        = $product->kod;
-//                $res['product_name']       = $product->name;
-//                $res['product_type_name']  = $product->type->name;
-//                $res['declared_amount']    = $position->amount;
-//                $res['checked']            = true;
-//            }
-//        }         
-//        
-//        if ($components) {
-//            foreach ($components as $component) {
-//                $componentProduct = $component->product;
-//                $componentTasks   = $componentProduct->tasks;
-//                if ($componentTasks) {
-//                    foreach ($componentTasks as $task) {
-//                        $task['task_id']            = $task['id'];
-//                        $task['order_kod']          = $order->kod;
-//                        $task['position_kod']       = $position->kod;
-//                        $task['product_kod']        = $componentProduct->kod;
-//                        $task['product_name']       = $componentProduct->name;
-//                        $task['product_type_name']  = $componentProduct->type->name;
-//                        $task['declared_amount']    = $position->amount;
-//                        $task['checked']            = true;                        
-//                        $result[] = $task;
-//                    }            
-//                }
-//            }
-//        }  
-//        
-//        if ($result) {
-//            $success = true;
-//        }
-//        
-//        return response()->json(["success" => $success, "data" => $result]);                
-//    }    
+    }       
     
     public function edit(Request $request, $id)
-    {
+    {       
         $orderPosition = [];
+        
         $currentWeekNum = date("W");
         $currentYear    = date("Y");
         if ($request['num_week'] < $currentWeekNum) {
@@ -327,7 +244,9 @@ class OrderPositionController extends BaseController
         $orderPosition->price         = $request['price'];
         $orderPosition->description   = $request['description'];
         $orderPosition->date_delivery = $date_end;
-        $orderPosition->save();        
+        if ($orderPosition->save()) {
+            $orderPosition = OrderPosition::find($id);
+        }        
         
         return response()->json(['data' => $orderPosition, 'success' => (boolean)count($orderPosition)]);                
     }    

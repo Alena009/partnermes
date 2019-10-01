@@ -28,7 +28,7 @@ class OrderController extends BaseController
         $orders = [];
         app()->setLocale($locale);
 
-        $orders = Order::all();              
+        $orders = Order::orderBy("id", "desc")->get();              
         foreach ($orders as $order) {
             $order['client_name'] = $order->client->name;
             $order['text']        = $order->kod;
@@ -143,7 +143,11 @@ class OrderController extends BaseController
         $history = [];
         
         $order   = Order::find($orderId);
-        $history = $order->history;      
+        $history = $order->history; 
+        foreach ($history as $item) {
+            $item['name'] = $item->status->name;
+            $item['description'] = $item->status->description;
+        }
 
         return response()->json(['data' => $history, 'success' => (boolean)count($history)]);
     }

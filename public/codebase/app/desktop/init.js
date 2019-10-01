@@ -107,9 +107,7 @@ function loginFormShow(callback2={}){
 			ajaxPost("api/login","login="+data.login+"&password="+data.password,function(data){
                             console.log(data);
 				if (data.success===true){
-                                    localStorage.setItem('token',data.token);
-                                    //console.log(data);
-                                    
+                                    localStorage.setItem('token',data.token);                                   
 					w1.hide();
 					if (loginForm.callback.success && isFunction(loginForm.callback.success)){
 						loginForm.callback['success']();
@@ -119,9 +117,7 @@ function loginFormShow(callback2={}){
 						}
 					}
 				}else{
-                                    console.log("here");
-                                    if (loginForm.callback.failure && isFunction(loginForm.callback.failure)){
-                                        
+                                    if (loginForm.callback.failure && isFunction(loginForm.callback.failure)){                                        
                                             loginForm.callback['failure']();
                                     }else{
                                         dhtmlx.alert({

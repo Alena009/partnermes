@@ -12,33 +12,41 @@ function settingsInit(cell) {
 
             var mainTabbar = settingsLayout.cells("a").attachTabbar();
                 mainTabbar.addTab("a1", _("Role"), null, null, true);               
-                mainTabbar.addTab("a2", _("Grupy zadan, zadania"));
-                mainTabbar.addTab("a3", _("Grupy produktow"));                                
-                mainTabbar.addTab("a4", _("Typy produktow"));
-                mainTabbar.addTab("a5", _("Grupy pracownikow"));
-               // mainTabbar.addTab("a7", _("Jezyk"));
-            //Tabs
-            var rolesLayout = mainTabbar.tabs("a1").attachLayout("3W");
-                rolesLayout.cells("a").hideHeader();
-                rolesLayout.cells("b").hideHeader();                
-                rolesLayout.cells("c").hideHeader();                                
-                rolesLayout.setAutoSize("a", "a;b;c");               
-            
-            var tasksGroupsLayout = mainTabbar.tabs("a2").attachLayout("2U"); 
-                tasksGroupsLayout.cells("a").hideHeader();                
-                tasksGroupsLayout.cells("b").hideHeader();
-                tasksGroupsLayout.cells("a").setWidth(280);
-                tasksGroupsLayout.setAutoSize("a", "a;b");                
-                
-            var productsGroupsLayout = mainTabbar.tabs("a3").attachLayout("2U"); 
-                productsGroupsLayout.cells("a").hideHeader(); 
-                productsGroupsLayout.cells("b").hideHeader(); 
-                
-            var typesProductsLayout = mainTabbar.tabs("a4").attachLayout("1C");
-                typesProductsLayout.cells("a").hideHeader();
-                
-            var workersGroupsLayout = mainTabbar.tabs("a5").attachLayout("1C");
-                workersGroupsLayout.cells("a").hideHeader();
+                mainTabbar.addTab("a2", _("Grupy zadań, zadania"));
+                mainTabbar.addTab("a3", _("Grupy produktów"));                                
+                mainTabbar.addTab("a4", _("Typy produktów"));
+                mainTabbar.addTab("a5", _("Grupy pracowników"));
+                //Tabs
+                var rolesLayout = mainTabbar.tabs("a1").attachLayout("3W");
+                    rolesLayout.cells("a").hideHeader();
+                    rolesLayout.cells("a").setCollapsedText(_("Role"));
+                    rolesLayout.cells("b").hideHeader(); 
+                    rolesLayout.cells("b").setCollapsedText(_("Użytkownik"));
+                    rolesLayout.cells("c").hideHeader(); 
+                    rolesLayout.cells("c").setCollapsedText("Uprawnienia");
+                    rolesLayout.setAutoSize("a", "a;b;c");               
+
+                var tasksGroupsLayout = mainTabbar.tabs("a2").attachLayout("2U"); 
+                    tasksGroupsLayout.cells("a").hideHeader(); 
+                    tasksGroupsLayout.cells("a").setCollapsedText(_("Grupy zadań"));
+                    tasksGroupsLayout.cells("b").hideHeader();
+                    tasksGroupsLayout.cells("b").setCollapsedText(_("Zadania"));
+                    tasksGroupsLayout.cells("a").setWidth(280);
+                    tasksGroupsLayout.setAutoSize("a", "a;b");                
+
+                var productsGroupsLayout = mainTabbar.tabs("a3").attachLayout("2U"); 
+                    productsGroupsLayout.cells("a").hideHeader(); 
+                    productsGroupsLayout.cells("a").setCollapsedText(_("Grupy produktów"));
+                    productsGroupsLayout.cells("b").hideHeader();
+                    productsGroupsLayout.cells("b").setCollapsedText(_("Produkty"));
+                    productsGroupsLayout.cells("a").setWidth(280);
+                    productsGroupsLayout.setAutoSize("a", "a;b"); 
+
+                var typesProductsLayout = mainTabbar.tabs("a4").attachLayout("1C");
+                    typesProductsLayout.cells("a").hideHeader();
+
+                var workersGroupsLayout = mainTabbar.tabs("a5").attachLayout("1C");
+                    workersGroupsLayout.cells("a").hideHeader();
                 
                 /**
                  * 
@@ -52,7 +60,9 @@ function settingsInit(cell) {
                                 {type: "spacer"},
                                 {id: "Add", type: "button", img: "fa fa-plus-square "},
                                 {id: "Edit", type: "button", img: "fa fa-edit"},
-                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                                {id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Hide", type: "button", img: "fa fa-arrow-left"} 
                         ]
                 });
                 rolesToolBar.attachEvent("onClick", function(id) { 
@@ -65,13 +75,17 @@ function settingsInit(cell) {
                                     case 'save':{                                                           
                                         ajaxPost("api/roles", form.getFormData(), function(data){ 
                                             if (data.success) {
-                                                ajaxPost("api/rolespermissions/fillRole/" + data.data.id, '', '');
-                                                rolesTree.addItem(data.data.id, data.data.name); 
+                                                ajaxPost("api/rolespermissions/fillRole/" + data.data.id, '', '');                                                   
+                                                rolesTree.addItem(data.data.id, data.data.name);
+                                                windowForm.close();                                                                                                                                                            
+                                            } else {
+                                                dhtmlx.message({
+                                                    title:_("Wiadomość"),
+                                                    type:"alert",
+                                                    text:_("Błąd dodawania rekordu do bazy danych!")
+                                                });
                                             }
                                         });
-                                    };break;
-                                    case 'cancel':{
-                                        form.clear();    
                                     };break;
                                 }
                             });
@@ -92,6 +106,7 @@ function settingsInit(cell) {
                                             ajaxGet("api/roles/" + roleId + "/edit", form.getFormData(), function(data){                                                            
                                                 if (data.success) {                                                 
                                                     rolesTree.setItemText(roleId, data.data.name);
+                                                    windowForm.close();
                                                 } 
                                             });
                                         };break;
@@ -140,14 +155,20 @@ function settingsInit(cell) {
                                 });
                             }
 
-                        };break;                     
+                        };break;  
+                        case 'Hide':{
+                            rolesLayout.cells("a").collapse();                        
+                        };break; 
                     };
                 }); 
                 var roleForm = [
                     {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
-                            {type:"input",  name:"name",   label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				                            
-                            {type:"button", name:"save",   value:_("Zapisz"),     offsetTop:18},
-                            {type:"button", name:"cancel", value:_("Anuluj"),     offsetTop:18}
+                            {type:"input",  name:"name",   label:_("Nazwa"), offsetTop:13, labelWidth:80}, 
+                            {type: "block", blockOffset: 0, position: "laabel-left", list: [
+                                {type:"button", name:"save",   value:_("Zapisz"),     offsetTop:18},
+                                {type: "newcolumn"},
+                                {type:"button", name:"cancel", value:_("Anuluj"),     offsetTop:18}
+                            ]}
                     ]}
                 ]; 
                 var usersToolBar = rolesLayout.cells("b").attachToolbar({
@@ -158,9 +179,11 @@ function settingsInit(cell) {
                                 {type: "text", id: "find", text: _("Find:")},
                                 {type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
                                 {type: "separator", id: "sep2"},
-                                {id: "Cog", type: "button", img: "fa fa-cog "},
+                                {id: "Cog", type: "button", img: "fa fa-spin fa-cog "},
                                 {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", img: "fa fa-reply"}
+                                {id: "Redo", type: "button", img: "fa fa-refresh"},
+                                {type: "separator", id: "sep4"},
+                                {id: "Hide", type: "button", img: "fa fa-arrow-left"} 
                         ]
                 });
                 usersToolBar.attachEvent("onClick", function(id) { 
@@ -264,6 +287,9 @@ function settingsInit(cell) {
                                 usersGrid.fill(0);
                                 permissionsGrid.fill(0);
                         };break; 
+                        case 'Hide': {
+                            rolesLayout.cells("b").collapse();   
+                        };break;
                     }
                 });
                 var permissionsToolBar = rolesLayout.cells("c").attachToolbar({
@@ -275,7 +301,9 @@ function settingsInit(cell) {
                                 {id: "Edit", type: "button", img: "fa fa-edit"},
                                 {id: "Del", type: "button", img: "fa fa-minus-square"},
                                 {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", img: "fa fa-reply"}
+                                {id: "Redo", type: "button", img: "fa fa-refresh"},
+                                {type: "separator", id: "sep4"},
+                                {id: "Hide", type: "button", img: "fa fa-arrow-right"} 
                         ]
                 });
                 permissionsToolBar.attachEvent("onClick", function(id) { 
@@ -362,6 +390,9 @@ function settingsInit(cell) {
                                 rolesTree.unselectItem(roleId);
                                 usersGrid.fill(0);
                                 permissionsGrid.fill(0);
+                        };break;
+                        case 'Hide': {
+                            rolesLayout.cells("c").collapse();   
                         };break;
                     }
                 });
@@ -503,7 +534,9 @@ function settingsInit(cell) {
                                 {type: "spacer"},
                                 {id: "Add", type: "button", img: "fa fa-plus-square "},
                                 {id: "Edit", type: "button", img: "fa fa-edit"},
-                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                                {id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Hide", type: "button", img: "fa fa-arrow-left"} 
                         ]
                 });
                 tasksGroupsToolBar.attachEvent("onClick", function(btn) {
@@ -522,6 +555,9 @@ function settingsInit(cell) {
                                 if (id) {
                                     deleteNodeFromTree(tasksGroupsTree, "api/taskgroups/" + id);
                                 }
+                            };break;
+                            case 'Hide':{
+                                tasksGroupsLayout.cells("a").collapse();                        
                             };break;
                     }
                 });
@@ -576,7 +612,9 @@ function settingsInit(cell) {
                                 {id: "Edit", type: "button", img: "fa fa-edit"},
                                 {id: "Del", type: "button", img: "fa fa-minus-square"},
                                 {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", img: "fa fa-reply"}
+                                {id: "Redo", type: "button", img: "fa fa-refresh"},
+                                {type: "separator", id: "sep4"},
+                                {id: "Hide", type: "button", img: "fa fa-arrow-right"} 
                         ]
                 });                               
                 tasksGridToolBar.attachEvent("onClick", function(id) {
@@ -620,6 +658,9 @@ function settingsInit(cell) {
                         case 'Redo': {
                             tasksGroupsTree.fill();
                             tasksGrid.fill(0);     
+                        };break;
+                        case 'Hide':{
+                                tasksGroupsLayout.cells("b").collapse();                        
                         };break;
                     }
                 }); 
@@ -775,7 +816,7 @@ function settingsInit(cell) {
                         items: [
                                 {type: "text", id: "title", text: _("Produkty")},
                                 {type: "spacer"},				
-                                {id: "Redo", type: "button", img: "fa fa-reply"}
+                                {id: "Redo", type: "button", img: "fa fa-refresh"}
                         ]
                 });                               
                 productsByGroupsGridToolBar.attachEvent("onClick", function(btn) {
@@ -1012,162 +1053,7 @@ function settingsInit(cell) {
                         }                    
                     });
                 };
-                workersGroupsTree.fill();                                
-                                    
-                
-//                productTypesToolBar.attachEvent("onClick", function(id) { 
-//                    switch (id){
-//		        case 'Add':{
-//                            var form = createWindowWithForm(permissionForm, 300, 300);
-//                            form.attachEvent("onButtonClick", function(name){
-//                                switch (name){
-//                                    case 'save':{                                                           
-//                                        ajaxPost("api/prodtypes", form.getFormData(), function(data){ 
-//                                            if (data.success) {                                                
-//                                                productTypeGrid.fill();
-//                                            }
-//                                        });
-//                                    };break;
-//                                    case 'cancel':{
-//                                        form.clear();    
-//                                    };break;
-//                                }
-//                            });
-//                        };break;
-//		        case 'Del':{
-//                            var id = productTypeGrid.getSelectedRowId();;
-//                            if (id) {
-//                                dhtmlx.confirm({
-//                                    title:_("Ostrożność"),                                    
-//                                    text:_("Czy na pewno chcesz usunąć?"),
-//                                    callback: function(result){
-//                                        if (result) {
-//                                            ajaxDelete("api/prodtypes/" + id,'', function(data) {
-//                                                if (data.success) {
-//                                                    productTypeGrid.deleteSelectedRows();                                            
-//                                                } else {
-//                                                    dhtmlx.alert({
-//                                                        title:_("Błąd!"),
-//                                                        type:"alert-error",
-//                                                        text:data.message
-//                                                    });
-//                                                }
-//                                            });                                              
-//                                        }
-//                                    }
-//                                });   
-//                            } else {
-//                                dhtmlx.alert({
-//                                    title:_("Wiadomość"),
-//                                    type:"alert",
-//                                    text:_("Wybierz co chcesz usunąć!")
-//                                });
-//                            }
-//                             
-//                        };break;                     
-//                    };
-//                });                
-//                                
-//                productGroupsToolBar.attachEvent("onClick", function(id) {
-//                    switch (id) {
-//                        case 'Add':{
-//                                var id = productGroupTree.getSelectedItemId(),
-//				parent = productGroupTree.getParentId(id) || 0;                                   
-//                                
-//				var form = createWindowWithForm(permissionForm, 300, 300);
-//                                var data = {
-//                                    'parent_id': parent                                    
-//                                };
-//                                form.attachEvent("onButtonClick", function(name){
-//                                    switch (name){
-//                                        case 'save':{ 
-//                                            Object.assign(data, form.getFormData());
-//                                            ajaxPost("api/prodgroups", data, function(data){ 
-//                                                if (data.success) {                                                
-//                                                    productGroupTree.insertNewItem(id || parent,data.data.id,data.data.name);
-////					            productGroupTree.selectItem('_new');
-////					            productGroupTree.editItem('_new');
-//                                                }
-//                                            });
-//                                        };break;
-//                                        case 'cancel':{
-//                                            form.clear();    
-//                                        };break;
-//                                    }
-//                                });		
-//					
-//                                                                
-//                        };break;                        
-//                        case 'Edit':{
-//					var id = productGroupTree.getSelectedItemId(),
-//						parent = productGroupTree.getParentId(id) || 0;
-//						if(id){
-//							productGroupTree.focusItem(id);
-//							productGroupTree.editItem(id);
-//						}
-//                        };break;
-//                        case 'Del':{
-//                                var id = productGroupTree.getSelectedItemId(),
-//                                        parent = productGroupTree.getParentId(id) || 0;
-//                                        if(id){							
-//                                                var ch = productGroupTree.getSubItems(id);
-//                                                productGroupTree.deleteItem(id,true);
-//                                                ch = ch.split(',');
-//                                                for (k=0;k<ch.length;k++){
-//                                                        i=ch[k];
-//                                                        productGroupTree.moveItem(i,'item_child',parent);
-//                                                };
-//                                        }
-//                        };break;                        
-//                    };
-//                });
-//                
-//                productGroupTree.attachEvent("onEdit", function(state, id, tree, value){
-//                    console.log('onEdit', arguments);
-//                });                
-                
-//                var new_data = ajaxGet("api/workerslist/" + i, '', function(data){                                     
-//				if (data && data.success){
-//                                    pracownicyGrid.parse((data.data), "js");
-//                                }
-//			});
-//		settingsLayout.cells("b").hideHeader();
-//		settingsLayout.cells("b").setWidth(330);
-//		settingsLayout.cells("b").fixSize(true, true);
-//		settingsLayout.setAutoSize("a", "a;b");
-//		
-//		// attach data view
-//		settingsDataView = settingsLayout.cells("a").attachDataView({
-//			type: {
-//				template: "<div style='position:relative;'>"+
-//						"<div class='settings_image'><img src='imgs/settings/#image#' border='0' ondragstart='return false;'></div>"+
-//						"<div class='settings_title'>#title#"+
-//							"<div class='settings_descr'>#descr#</div>"+
-//						"</div>"+
-//						"</div>",
-//				margin: 10,
-//				padding: 20,
-//				height: 120
-//			},
-//			autowidth: 2,
-//			drag: false,
-//			select: true,
-//			edit: false
-//		});
-//		
-//		settingsDataView.load(A.server+"settings.xml?type="+A.deviceType, function(){
-//			settingsDataView.select("contacts");
-//		});
-//		
-//		settingsDataView.attachEvent("onAfterSelect", function(id){
-//			// attach form
-//			var formData = [];
-//			formData.push({type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160});
-//			formData = formData.concat(settingsFormStruct[id]);
-//			settingsForm = settingsLayout.cells("b").attachForm(formData);
-//			settingsForm.setSizes = settingsForm.centerForm;
-//			settingsForm.setSizes();
-//		});		
+                workersGroupsTree.fill();                                		
 	}
 	
 }
@@ -1375,7 +1261,7 @@ function createForm(formStruct, windowObj){
                 myForm.validate();
             };break;            
             case 'cancel':{
-                windowObj.close();
+                myForm.clear();
             };break;
         }
     });

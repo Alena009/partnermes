@@ -117,7 +117,7 @@ function zleceniaInit(cell) {
                                     items: [
                                         {type: "text", id: "title", text: _("Pozycji zamowien")},                                
                                         {type: "spacer"},
-                                        {id:"Add",  type: "button",  img: "fa fa-plus-square"}
+                                        {id:"Add",  type: "button", text: _("Zapisz zlecenie"), img: "fa fa-plus-square"}
                                     ]
                             }); 
                             ordersPositionsGridToolbar.attachEvent("onClick", function(id) { 
@@ -281,7 +281,7 @@ function zleceniaInit(cell) {
                                     items: [
                                         {type: "text", id: "title", text: _("Komponenty")},                                
                                         {type: "spacer"},                                        
-                                        {id:"Add",  type: "button",   img: "fa fa-plus-square"}
+                                        {id:"Add",  type: "button",  text: _("Zapisz zlecenie"), img: "fa fa-plus-square"}
                                     ]
                             });    
                             componentsGridToolbar.attachEvent("onClick", function(id) { 
@@ -401,10 +401,10 @@ function zleceniaInit(cell) {
                             });   
                             componentsGrid.attachEvent("onRowSelect", function(id,ind){
                                 var data = componentsGrid.getRowData(componentsGrid.getSelectedRowId());                                                                        
-                                if (data.available != 0) {
-                                    componentsGridToolbar.setItemDisabled("Add");
+                                if (data.available == 0) {                                    
+                                    componentsGridToolbar.enableItem("Add");
                                 } else {
-                                    componentsGridToolbar.setItemEnabled("Add");
+                                    componentsGridToolbar.disableItem("Add");
                                 }
                             });                            
                             componentsGrid.fill = function(positionId) {                                    

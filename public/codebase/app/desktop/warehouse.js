@@ -192,7 +192,7 @@ function warehouseInit(cell) {
 //                {id: "Edit", type: "button", img: "fa fa-edit"},
 //                {id: "Del", type: "button", img: "fa fa-minus-square"}
                 {type: "separator", id: "sep1"},
-                {id: "Redo", type: "button", img: "fa fa-reply"}
+                {id: "Redo", type: "button", img: "fa fa-refresh"}
             ]
         });
         productsGridToolBar.attachEvent("onClick", function(name){

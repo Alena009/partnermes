@@ -191,7 +191,7 @@ function pracownicyInit(cell) {
 				{id: "Edit", type: "button", img: "fa fa-edit"},
 				{id: "Del", type: "button", img: "fa fa-minus-square"},
                                 {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", img: "fa fa-reply"}
+                                {id: "Redo", type: "button", img: "fa fa-refresh"}
 			]
 		}); 
                 pracownicyGridToolBar.attachEvent("onClick", function(id) { 
@@ -348,6 +348,7 @@ function pracownicyInit(cell) {
                         {
                             label: _("User name"),
                             id: "name",
+                            width: 100, 
                             type: "ed", 
                             sort: "str",	
                             align: "left"
@@ -362,7 +363,8 @@ function pracownicyInit(cell) {
                         }                        
                     ],
 			multiselect: true
-                });                        
+                });        
+                pracownicyGrid.attachHeader("#text_filter,#text_filter,#text_filter");
 		pracownicyGrid.zaladuj = function(i){
 			var ids = Array();
 			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;                        

@@ -58,7 +58,8 @@ function settingsInit(cell) {
                 rolesToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{
-                            var form = createWindowWithForm(roleForm, 300, 300);
+                            var windowForm = createWindow(_("Role"), 300, 300);
+                            var form = createForm(roleForm, windowForm);
                             form.attachEvent("onButtonClick", function(name){
                                 switch (name){
                                     case 'save':{                                                           
@@ -78,7 +79,8 @@ function settingsInit(cell) {
                         case 'Edit':{                            
                             var roleId = rolesTree.getSelectedId();
                             if (roleId) {
-                                var form = createWindowWithForm(roleForm, 300, 300);
+                                var windowForm = createWindow(_("Role"), 300, 300);
+                                var form = createForm(roleForm, windowForm);
                                 var data = {
                                     id: roleId,
                                     name: rolesTree.getItemText(roleId)
@@ -279,7 +281,8 @@ function settingsInit(cell) {
                 permissionsToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{
-                                var form = createWindowWithForm(permissionForm, 300, 300);
+                                var windowForm = createWindow(_("Permission"), 300, 300);
+                                var form = createForm(permissionForm, windowForm);
                                 form.attachEvent("onButtonClick", function(name){
                                     switch (name){
                                         case 'save':{                                                           
@@ -299,8 +302,9 @@ function settingsInit(cell) {
                             };break;
                         case 'Edit':{                                
                                 var permissionId = permissionsGrid.getSelectedRowId();                                
-                                if (permissionId) {                                    
-                                    var form = createWindowWithForm(permissionForm, 300, 300);
+                                if (permissionId) {  
+                                    var windowForm = createWindow(_("Permission"), 300, 300);
+                                    var form = createForm(permissionForm, windowForm);
                                     var data = {
                                         id: permissionId,
                                         name: permissionsGrid.cells(permissionId, 0).getValue(),
@@ -578,7 +582,8 @@ function settingsInit(cell) {
                 tasksGridToolBar.attachEvent("onClick", function(id) {
                     switch (id){
                         case 'Add': {
-                            var form = createWindowWithForm(taskFormStruct, "Nowe zadanie", 300, 300);
+                            var windowForm = createWindow(_("Nowe zadanie"), 300, 300);
+                            var form = createForm(taskFormStruct, windowForm);
                             var groupsCombo = form.getCombo("task_group_id");
                             ajaxGet("api/taskgroups", "", function(data){                                                                                                        
                                 if (data && data.success) {
@@ -867,8 +872,9 @@ function settingsInit(cell) {
                 });
                 typesProductsGridToolBar.attachEvent("onClick", function(btn) {
                     switch (btn){
-                            case 'Add':{			                                                                        
-                                var addingForm = createWindowWithForm([
+                            case 'Add':{
+                                var addingWindow = createWindow(_("Dodaj typ produktu"), 300, 300);
+                                var addingForm = createForm([
                                     {type:"fieldset",  offsetTop:0, label:_("Nowy typ produktu"), width:250, list:[                                                                          
                                             {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
                                             {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
@@ -878,7 +884,7 @@ function settingsInit(cell) {
                                                 {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
                                             ]}
                                     ]}                                    
-                                ], _("Dodaj typ produktu"), 300, 300);
+                                ], addingWindow);
                                 addingForm.attachEvent("onButtonClick", function(name){
                                     if (name == 'save') {
                                         ajaxPost("api/prodtypes", addingForm.getFormData(), function(data){
@@ -1289,7 +1295,7 @@ function createWindow (caption, height, width) {
             caption: _(caption),
             header: true,
             onClose:function(){
-                //dhxWins.unload();
+                dhxWins.unload();
             }            
     });
     

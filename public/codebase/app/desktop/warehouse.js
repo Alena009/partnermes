@@ -44,8 +44,9 @@ function warehouseInit(cell) {
         ];        
         productsTreeToolBar.attachEvent("onClick", function(id) {
             switch (id){
-                case 'Add':{                                
-                    var addingForm = createWindowWithForm(grupyFormAddData, _("Grupy produktow"), 250, 300);            
+                case 'Add':{         
+                    var addingWindow = createWindow(_("Grupy produktow"), 300, 250);
+                    var addingForm = createForm(grupyFormAddData, addingWindow);            
                     var parentGroupsCombo = addingForm.getCombo("parent_id");
                     parentGroupsCombo.enableFilteringMode(true);  
                     ajaxGet("api/prodgroups", '', function(data) {                    
@@ -73,7 +74,8 @@ function warehouseInit(cell) {
                             id: id,
                             name: productsTree.getItemText(id)
                         };
-                        var grupyForm = createWindowWithForm(grupyFormEditData, _("Grupy produktow"), 200, 250);                                                                                       
+                        var grupyWindow = createWindow(_("Grupy produktow"), 250, 200);
+                        var grupyForm = createForm(grupyFormEditData, grupyWindow);                                                                                       
                         grupyForm.setFormData(data);                                                                                                                   
                         grupyForm.attachEvent("onButtonClick", function(name){
                             switch (name){
@@ -196,7 +198,8 @@ function warehouseInit(cell) {
         productsGridToolBar.attachEvent("onClick", function(name){
             switch (name){
                 case 'Add':{
-                    var addingForm = createWindowWithForm(addingFormStruct, _("Dodaj informacje"), 300, 400);
+                    var addingWindow = createWindow(_("Dodaj informacje"), 400, 300);
+                    var addingForm = createForm(addingFormStruct, addingWindow);
                     var productGroupsCombo = addingForm.getCombo("product_group_id");                           
                     addingForm.adjustParentSize();                            
                     productGroupsCombo.enableFilteringMode(true);                            
@@ -245,7 +248,8 @@ function warehouseInit(cell) {
                     });
                 };break;
                 case 'Edit':{
-                    var addingForm = createWindowWithForm(addingFormStruct, _("Zmien informacje"), 300, 400);
+                    var addingWindow = createWindow(_("Zmien informacje"), 400, 300);
+                    var addingForm = createForm(addingFormStruct, addingWindow);
                     addingForm.bind(productsGrid);                            
                 };break;
                 case 'Del':{
@@ -374,25 +378,7 @@ function warehouseInit(cell) {
                     {type:"button", name:"cancel", value: _("Anuluj"), offsetTop:18}
                 ]}
             ]}
-        ];          
-        function createWindowWithForm(formStruct, caption, height, width){
-            var dhxWins = new dhtmlXWindows();
-            w1 = dhxWins.createWindow({
-                    id:"w1",
-                    left:20,
-                    top:30,
-                    width: width,
-                    height: height,
-                    center:true,
-                    caption: _(caption),
-                    header: true,
-                    onClose:function(){
-
-                    }
-            });
-            //initializing form 
-            return dhxWins.window("w1").attachForm(formStruct, true);         
-        }                 
+        ];                        
     }	    
 }
 

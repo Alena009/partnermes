@@ -30,6 +30,7 @@ Route::group([
     //Route::get('/declaredworks/addforcomponent', 'DeclaredWorkController@addWorksForComponent');   
     Route::get('/declaredworks/makegeneral/{works}', 'DeclaredWorkController@makeGeneral');   
     Route::get('/declaredworks/listforzlecenie/{workId}', 'DeclaredWorkController@listWorksForZlecenie');   
+    Route::get('/declaredworks/delzlec/{selectedWorks}', 'DeclaredWorkController@deleteZlecenie');   
     Route::resource('/declaredworks', 'DeclaredWorkController'); 
     
     Route::get('/departaments/grupytree', 'DepartamentController@buildTree');

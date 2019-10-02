@@ -117,7 +117,8 @@ function productsTasksInit(cell) {
                 case "Add": {
                     var selectedProductId = productsGrid.getSelectedRowId();
                     if (selectedProductId) {
-                        var addingForm = createWindowWithForm(formStruct, "Zadania do produktow", 300, 300);
+                        var addingWindow = createWindow(_("Zadania do produktow"), 300, 300);
+                        var addingForm = createForm(formStruct, addingWindow);
                         var tasksCombo = addingForm.getCombo("task_id");
                         ajaxGet("api/products/availabletasks/" + selectedProductId, '', function(data){
                             tasksCombo.addOption(data.data);
@@ -140,7 +141,8 @@ function productsTasksInit(cell) {
                     var selectedId = zadaniaGrid.getSelectedRowId();
                     var selectedProductId = productsGrid.getSelectedRowId();
                     if (selectedId) {
-                        var editForm = createWindowWithForm(formStruct, "Zadania do produktow", 300, 300);
+                        var editWindow = createWindow(_("Zadania do produktow"), 300, 300);
+                        var editForm = createForm(formStruct, editWindow);
                         var tasksCombo = editForm.getCombo("task_id");
                         ajaxGet("api/products/availabletasks/" + selectedProductId, '', function(data){
                             tasksCombo.addOption(data.data);

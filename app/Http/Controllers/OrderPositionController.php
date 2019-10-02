@@ -77,7 +77,9 @@ class OrderPositionController extends BaseController
             $position['order_position_id']  = $position->id;      
             $position['order_position_kod'] = $position->kod;      
             $position['key']                = $position->id;
-            $position['label']              = $position->kod;   
+            $position['label']              = $position->kod;  
+            $date = new \DateTime($position->date_delivery);
+            $position['num_week'] = $date->format("W");               
             $position['available']          = 1;
             foreach ($components as $component) {
                 $availableAmountOfComponentInWarehouse = Warehouse::where('product_id', '=', $component->component_id)

@@ -29,8 +29,8 @@ function productsInit(cell) {
                 ]                    
         });
         productsGridToolBar.attachEvent("onClick", function(name) {
-            var productForm = createWindowWithForm(newProductFormStruct, 
-                                            _("Produkt"), 480, 380);  
+            var productWindow = createWindow(_("Produkt"), 380, 480);
+            var productForm = createForm(newProductFormStruct, productWindow);  
             var productTypeCombo = productForm.getCombo("product_type_id");
             ajaxGet("api/prodtypes", "", function(data){
                 if (data && data.success) {                        
@@ -242,7 +242,8 @@ function productsInit(cell) {
                 case "Add": {
                     var selectedProductId = productsGrid.getSelectedRowId();
                     if (selectedProductId) {
-                        var addingForm = createWindowWithForm(formStruct, "Componenty", 300, 300);
+                        var addingWindow = createWindow(_("Componenty"), 300, 300);
+                        var addingForm = createForm(formStruct, addingWindow);
                         var productCombo = addingForm.getCombo("component_id");
                         productCombo.enableFilteringMode(true);
                         ajaxGet("api/products", '', function(data){
@@ -364,7 +365,8 @@ function productsInit(cell) {
                 case "Add": {
                     var selectedProductId = productsGrid.getSelectedRowId();
                     if (selectedProductId) {
-                        var addingForm = createWindowWithForm(formStruct, "Componenty", 300, 300);
+                        var addingWindow = createWindow(_("Componenty"), 300, 300);
+                        var addingForm = createForm(formStruct, addingWindow);
                         var tasksCombo = addingForm.getCombo("task_id");
                         tasksCombo.enableFilteringMode(true);
                         ajaxGet("api/tasks", '', function(data){
@@ -428,7 +430,7 @@ function productsInit(cell) {
         });
         zleceniaForProductGrid.fill = function(id = 0){	
             zleceniaForProductGrid.clearAll();
-            ajaxGet("api/productstasks/list/" + id, '', function(data){                                     
+            ajaxGet("api/products/taskslist/" + id, '', function(data){                                     
                 if (data && data.success){
                     zleceniaForProductGrid.parse((data.data), "js");
                 }

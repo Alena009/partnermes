@@ -201,6 +201,8 @@ class ProductController extends BaseController
                 $task->value = (string)$task->id;
                 $task->key   = $task->id;
                 $task->label = $task->name;
+                $task->task_kod = $task->kod;
+                $task->task_name = $task->name;
             }            
         }           
 

@@ -34,12 +34,12 @@ class DeclaredWorkController extends BaseController
 
             $result = DeclaredWork::whereIn('task_id', $tasksByGroups)                   
                     ->orderBy('id', 'desc')
-                    ->selectRaw('*, sum(declared_amount) as amount')
+                    ->selectRaw('*, sum(declared_amount) as declared_amount')
                     ->groupBy('kod', 'product_id', 'task_id')                    
                     ->get();       
         } else {
             $result = DeclaredWork::orderBy('id', 'desc')
-                    ->selectRaw('*, sum(declared_amount) as amount')
+                    ->selectRaw('*, sum(declared_amount) as declared_amount')
                     ->groupBy('kod', 'product_id', 'task_id')                    
                     ->get();    
         }
@@ -49,6 +49,7 @@ class DeclaredWorkController extends BaseController
             $task          = $res->task; 
             $product       = $res->product;
 
+            $res['amount']             = $orderPosition->amount;
             $res['kod_zlecenia']       = $res->kod;
             $res['product_kod']        = $product->kod;
             $res['product_name']       = $product->name;
@@ -56,6 +57,8 @@ class DeclaredWorkController extends BaseController
             $res['task_name']          = $task->name;
             $res['task_kod']           = $task->kod;
             $res['date_delivery']      = $orderPosition->date_delivery;
+            $date = new \DateTime($orderPosition->date_delivery);
+            $res['num_week'] = $date->format("W");             
             $res['key']                = $orderPosition->id;
             $res['label']              = $orderPosition->kod;
             $res['closed']             = 0;
@@ -149,18 +152,24 @@ class DeclaredWorkController extends BaseController
         $declaredWorks = [];
         
         $declaredWork  = DeclaredWork::find($declaredWorkId); 
-        $declaredWorks = DeclaredWork::where("kod", "=", $declaredWork->kod)
-                ->selectRaw('*, sum(declared_amount) as amount')
-                ->groupBy('kod', 'product_id', 'task_id')                   
-                ->get();
+        $declaredWorks = DeclaredWork::where("kod", "=", $declaredWork->kod)->get();
         
         foreach ($declaredWorks as $work) {            
-            $task    = $work->task;
-            $product = $work->product;
-                    
-            $work['task_kod']        = $task->kod;
-            $work['task_name']       = $task->name;
-            $work['checked']         = true;
+            $task     = $work->task;
+            $product  = $work->product;
+            $position = $work->orderPosition;
+            $order    = $position->order; 
+                  
+            $date = new \DateTime($position->date_delivery);
+            $work['num_week'] = $date->format("W");             
+            $work['order_kod']         = $order->kod;
+            $work['position_kod']      = $position->kod;
+            $work['order_position_id'] = $position->id;
+            $work['product_id']        = $product->id;
+            $work['task_id']           = $task->id;
+            $work['task_kod']          = $task->kod;
+            $work['task_name']         = $task->name;
+            $work['checked']           = true;
         }    
         
         $result = $declaredWorks;
@@ -263,7 +272,8 @@ class DeclaredWorkController extends BaseController
     public function makeGeneral($works) 
     {
         $worksIds = explode(',', $works);
-        $declaredWorks = DeclaredWork::find($worksIds);
+        $declaredWorksKods = DeclaredWork::find($worksIds)->pluck("kod");
+        $declaredWorks = DeclaredWork::whereIn("kod", $declaredWorksKods)->get();
         $kod = 'T-' . idate('U');
         
         if ($declaredWorks) {           
@@ -275,35 +285,33 @@ class DeclaredWorkController extends BaseController
         return response()->json(['success' => true, 'data' => $declaredWorks]);                    
     }
     
-//    public function mainListWorksByGroups($groups = 0) 
-//    {
-//        $result = [];  
-//        
-//        if ($groups) {  
-//            $groupsIds = explode(',', $groups);  
-//            $tasksByGroups = Task::whereIn('task_group_id', $groupsIds)->pluck('id');
+    public function deleteZlecenie($works)
+    {         
+        $declaredWorksKods = [];
+        $declaredWorks = [];
+        
+        $worksIds = explode(',', $works);
+        $declaredWorksKods = DeclaredWork::find($worksIds)->pluck("kod");
+        $declaredWorks = DeclaredWork::whereIn("kod", $declaredWorksKods)->get();
+        if ($declaredWorks) {           
+            foreach ($declaredWorks as $work) {                                
+                if (!$work->delete()) {
+                        return response()->json(['success' => false, 'data' => $work]);                    
+                }
+            }
+        }
+//        if ($zlecenia) {
+//            foreach ($zlecenia as $item) {
+//                $zlecenieKod = $item->kod;
+//                $allWorksIds = DeclaredWork::where("kod", "=", $zlecenieKod)->pluck("id");
 //
-//            $result = DeclaredWork::whereIn('task_id', $tasksByGroups)                   
-//                    ->orderBy('id', 'desc')
-//                    ->groupBy('kod', 'product_id', 'task_id')
-//                    ->get();       
-//        } else {
-//            $result = DeclaredWork::orderBy('id', 'desc')
-//                    ->selectRaw('*, sum(declared_amount) as amount')
-//                    ->groupBy('kod', 'product_id', 'task_id')
-//                    ->get();    
+//                foreach ($allWorksIds as $workId) {
+//                    if (!parent::destroy($workId)) {
+//                        return response()->json(['success' => false, 'data' => $work]);                    
+//                    }
+//                }
+//            }
 //        }
-//        
-//        foreach ($result as $res) {            
-//            $product       = $res->product;
-//
-//            $res['kod_zlecenia']       = $res->kod;
-//            $res['product_kod']        = $product->kod;
-//            $res['product_name']       = $product->name;
-//            $res['product_type_name']  = $product->type->name;
-//            $res['closed']             = 0;
-//        }         
-//        
-//        return response()->json(['success' => true, 'data' => $result]);         
-//    }
+        return response()->json(['success' => true, 'data' => $declaredWorksKods]);                    
+    }
 }

@@ -124,7 +124,7 @@ function timelineInit(cell) {
 //                map_to:"auto", time_format:["%Y","%m","%d","%H:%i"]}
         ];           
         
-        ajaxGet("api/positions", "", function(data){
+        ajaxGet("api/declaredworks", "", function(data){
             scheduler.updateCollection("zlecenia", data.data);
         }); 
         

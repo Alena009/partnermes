@@ -190,4 +190,17 @@ class BaseController extends Controller
         
         return $kids;
     }
+    
+    /**
+     * Returns result in response format
+     * 
+     * @param array $data
+     * @return response
+     */
+    public function getResponseResult($data)
+    {
+        return response()->json(['success'=>$data?true:false,'data'=>$data]);       
+    }  
+    
+    
 }

@@ -243,8 +243,8 @@ function zleceniaInit(cell) {
                                     ordersPositionsGridToolbar.disableItem("Add");
                                 } else {
                                     ordersPositionsGridToolbar.enableItem("Add");
-                                }
-                                componentsGrid.fill(id);
+                                }                          
+                                componentsGrid.filterBy(7,id);                                  
                             });     
                             ordersPositionsGrid.getFilterElement(5)._filter = function (){
                                 var input = this.value; // gets the text of the filter input
@@ -385,12 +385,14 @@ function zleceniaInit(cell) {
                                     {label: _("Dostępna ilość"),      id: "amount_available",   type: "ro", sort: "str", align: "left", width: 50},
                                     {label: _("Zlecenie"),            id: "zlecenie",           type: "ro", sort: "str", align: "left", width: 100},												
                                     {id: "component_id"},												
-                                    {id: "available"}                                    
+                                    {id: "available"},
+                                    {id: "order_position_id"}
                                 ]
                             });   
                             componentsGrid.attachHeader(",#text_filter,#select_filter");
                             componentsGrid.setColumnHidden(5,true);
                             componentsGrid.setColumnHidden(6,true);
+                            componentsGrid.setColumnHidden(7,true);
                             componentsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                                 var data = componentsGrid.getRowData(rId);
                                 if (data.available == 0) {
@@ -406,15 +408,16 @@ function zleceniaInit(cell) {
                                 } else {
                                     componentsGridToolbar.disableItem("Add");
                                 }
-                            });                            
+                            });                                     
+                            
                             componentsGrid.fill = function(positionId) {                                    
-                                this.clearAll();                                                                               
-                                ajaxGet("api/positions/list/components/" + positionId, "", function(data){
+                                ajaxGet("api/positions/list/components", "", function(data){
                                     if (data.success && data.data) {																										
                                         componentsGrid.parse((data.data), "js");
                                     }
                                 });
-                            };                                                       
+                            };                              
+                            componentsGrid.fill();
                             
                             var formStructure = [
                                 {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		

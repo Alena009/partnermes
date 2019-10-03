@@ -48,7 +48,7 @@ Route::group([
     Route::resource('/permissions', 'PermissionController');
     
     Route::get('/positions/list/freepositions', 'OrderPositionController@freePositionsList');    
-    Route::get('/positions/list/components/{position}', 'OrderPositionController@listComponentsForPosition');
+    Route::get('/positions/list/components', 'OrderPositionController@getAllComponentsForFreePositions');
     Route::get('/positions/list/tasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/beguntasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/componenttasks', 'OrderPositionController@listTasksForPositionComponent');

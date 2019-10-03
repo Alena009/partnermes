@@ -8,9 +8,7 @@ use App\Repositories\TaskRepository;
 use App\Models\Task;
 
 class TaskController extends BaseController
-{
-    private $rep;
-    
+{    
     public function __construct(TaskRepository $rep)
     {
         parent:: __construct();
@@ -19,27 +17,22 @@ class TaskController extends BaseController
     
     /**
      * Get tasks list with translations
+     * 
+     * @param str $locale
+     * @return response
      */
     public function index($locale = 'pl')
-    {
-        $result = [];
-        
+    {        
         app()->setLocale($locale);
         
-        $result = Task::all(); 
-        
-        foreach ($result as $task) {
-            $task->text  = $task->name;  
-            $task->value = (string)$task->id;
-            $task->key   = $task->id;
-            $task->label = $task->name;
-        }        
-        
-        return response()->json(['success' => true, 'data' => $result]);        
+        return $this->getResponseResult($this->getListAllTasks());        
     }
 
     /**
-     * create new task with translations
+     * Create new task with translations
+     * 
+     * @param array $request
+     * @return response
      */
     public function store(Request $request)
     {
@@ -65,26 +58,40 @@ class TaskController extends BaseController
     } 
     
     /**
-     * Gets list tasks by task group
+     * Gets list tasks by tasks groups ids
      * 
+     * @param str $groups
+     * @return response 
      */
     public function listByGroups($groups = 0)
     {   
-        $result = [];
         if ($groups) {  
             $groupsIds = explode(',', $groups);
-            $result = Task::whereIn('task_group_id', $groupsIds)->get();                     
+            return $this->getResponseResult($this->getListTasksByGroups($groupsIds));                      
         } else {
-            $result = Task::all();         
-        }
-        
-        foreach ($result as $task) {
-            $task->task_group_name = $task->group->name;
-            $task->text = $task->name;  
-            $task->value = (string)$task->id;           
-        }         
-        
-        return response()->json(['success' => true, 'data' => $result]);             
-    }  
-        
+            return $this->getResponseResult($this->getListAllTasks());                              
+        }            
+    }
+    
+    /**
+     * Gets list tasks by tasks groups ids
+     * 
+     * @param array $groupsIds
+     * @return array 
+     */    
+    public function getListTasksByGroups($groupsIds)
+    {
+        return $this->repository->getListTasksByGroups($groupsIds);
+    }
+    
+    /**
+     * Gets list all tasks 
+     * 
+     * @param array $groupsIds
+     * @return array 
+     */     
+    public function getListAllTasks()
+    {
+        return $this->repository->getListAllTasks();
+    }
 }

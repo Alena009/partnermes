@@ -40,26 +40,6 @@ class OrderController extends BaseController
         return response()->json(['data' => $orders, 'success' => (boolean)count($orders)]);        
     }
     
-//    public function ordersList($amount = 0, $locale = 'pl') 
-//    {
-//        $orders = [];
-//        app()->setLocale($locale);
-//        
-//        if ($amount) {
-//            $orders = \App\Models\Order::orderBy('id', 'desc')->take($amount)->get();       
-//        } else {
-//            $orders = \App\Models\Order::orderBy('id', 'desc')->get();       
-//        }      
-//        
-//        foreach ($orders as $order) {
-//            $order['client_name'] = $order->client->name;
-//            $order['text']        = $order->kod;
-//            $order['value']       = $order->id; 
-//            //$order['status']      = $order->history->first->name;
-//        }
-//        
-//        return response()->json(['data' => $orders, 'success' => true]);        
-//    }
 
     /**
      * create new order
@@ -130,27 +110,6 @@ class OrderController extends BaseController
         return response()->json(['data' => $order, 'success' => (boolean)count($order)]);                
     }
 
-
-    /**
-     * Returns history of orders statuses
-     * 
-     * @param integer $orderId
-     * @return json
-     */
-    public function history($orderId)
-    {
-        $order   = [];
-        $history = [];
-        
-        $order   = Order::find($orderId);
-        $history = $order->history; 
-        foreach ($history as $item) {
-            $item['name'] = $item->status->name;
-            $item['description'] = $item->status->description;
-        }
-
-        return response()->json(['data' => $history, 'success' => (boolean)count($history)]);
-    }
     
     public function positions($orderId)
     {

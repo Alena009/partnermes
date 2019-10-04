@@ -64,15 +64,12 @@ function zleceniaInit(cell) {
                     if (mode) {
                         var grupy=grupyTree.getAllChecked();
                         grupy[grupy.length]=id;
-			zleceniaGrid.clearAll();
 			zleceniaGrid.zaladuj(grupy);
-                        console.log(id);
 			return true;                        
                     }
 		});
 		grupyTree.attachEvent("onCheck",function(id){
 			var grupy=grupyTree.getAllChecked(); 
-			zleceniaGrid.clearAll();
 			zleceniaGrid.zaladuj(grupy);
 			return true;
 		});                
@@ -99,7 +96,7 @@ function zleceniaInit(cell) {
                                 {id: "sep2",     type: "separator"},
                                 {id: "AddTotal", type: "button", img: "fa fa-check-square"},
                                 {id: "sep3",     type: "separator"},
-                                {id: "Redo",     type: "button", img: "fa fa-reply"}
+                                {id: "Redo",     type: "button", img: "fa fa-refresh"}
 			]
 		});
                 zleceniaGridToolBar.attachEvent("onClick", function(btn) {	

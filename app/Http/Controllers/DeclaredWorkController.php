@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Repositories\DeclaredWorkRepository;
+use App\Models\Task;
 
 class DeclaredWorkController extends BaseController
 {    
+    protected $rep;
     
     public function __construct(DeclaredWorkRepository $rep)
     {
@@ -22,12 +24,9 @@ class DeclaredWorkController extends BaseController
     public function listWorksByGroups($groups = 0)
     {   
         if ($groups) {  
-            $groupsIds = explode(',', $groups);  
-            $taskController = new TaskController(App\Repositories\TaskRepository);
-            $tasksByGroups = $taskController->getListTasksByGroups($groupsIds);
-            
-            return $this->getResponseResult($this
-                    ->getListDeclaredWorksByTaskGroups($tasksByGroups));     
+            $groupsIds = explode(',', $groups);            
+            return $this->getResponseResult($this->
+                    getDeclaredWorksByTaskGroups($groupsIds));     
         } else {
             return $this->getResponseResult($this->getAllDeclaredWorks());    
         }        
@@ -69,12 +68,13 @@ class DeclaredWorkController extends BaseController
     /**
      * Gets declared works by tasks groups ids
      * 
-     * @param array $groupsIds
+     * @param str $groupsIds
      * @return array
      */
     public function getDeclaredWorksByTaskGroups($groupsIds)
     {
-        return $this->repository->getDeclaredWorksByTaskGroups($groupsIds);
+        $tasksIdsByGroupsIds = Task::whereIn("task_group_id", $groupsIds)->pluck("id");
+        return $this->repository->getDeclaredWorksByTasksIds($tasksIdsByGroupsIds);
     }  
     
     /**

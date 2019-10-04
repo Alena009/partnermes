@@ -50,19 +50,19 @@ class DeclaredWorkRepository extends BaseRepository
     }
     
     /**
-     * Gets list declared works by task groups ids.
+     * Gets list declared works by tasks ids.
      * 
      * @param array $tasksIds
      * @return array
      */
-    public function getDeclaredWorksByTaskGroups($tasksIds)
-    {
-        $model = $this->model();
-        $declaredWorks = $model::whereIn('task_id', $tasksIds)                   
-                    ->orderBy('id', 'desc')
-                    ->selectRaw('*, sum(declared_amount) as declared_amount')
-                    ->groupBy('kod', 'product_id', 'task_id')                    
-                    ->get();
+    public function getDeclaredWorksByTasksIds($tasksIds)
+    {        
+        $model    = $this->model();
+        $declaredWorks = $model::whereIn('task_id', $tasksIds)
+                ->orderBy('id', 'desc')
+                ->selectRaw('*, sum(declared_amount) as declared_amount')
+                ->groupBy('kod', 'product_id', 'task_id')                    
+                ->get();
         
         return $this->getResult($declaredWorks, 0, false);
     }

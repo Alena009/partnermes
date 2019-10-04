@@ -3,18 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Repositories\OrderPositionRepository;
-use App\Models\OrderPosition;
+
+//use App\Models\OrderPosition;
 use App\Models\DeclaredWork;
 use App\Models\Warehouse;
-use Illuminate\Support\Facades\DB;
-use App\Models\Product;
-use App\Models\Component;
+//use Illuminate\Support\Facades\DB;
+//use App\Models\Product;
+//use App\Models\Component;
 
 class OrderPositionController extends BaseController
 {
-    
+    protected $rep;
+
     public function __construct(OrderPositionRepository $rep)
     {
         parent:: __construct();
@@ -28,19 +29,9 @@ class OrderPositionController extends BaseController
      */
     public function index()
     {
-        return $this->getResponseResult($this->getAllPositions());      
+        return $this->getResponseResult($this->repository->getAllPositionsWithAdditionalFields());      
     }
     
-    /**
-     * Returns all positions with parameters 
-     * which was added in the getPosition()
-     * 
-     * @return array
-     */
-    public function getAllPositions()
-    {
-        return $this->repository->getAllPositions();
-    }
     
     /**
      * Returns all components for positions by their ids
@@ -104,57 +95,50 @@ class OrderPositionController extends BaseController
     }
     
     
-    public function getFreePositions()
-    {
-        
-    }
-    
     /**
      * Get list order positions without declared tasks(zlecen)
      * 
      * @return response
      */    
     public function freePositionsList()
-    {
-        $ordersPositions = [];
-        $ordersPositionsIds = DB::select("SELECT id FROM orders_positions pos
-                                            where pos.id not in 
-                                            (select order_position_id from declared_works 
-                                            where product_id = pos.product_id)");
-        $ordersPositionsIds = array_column($ordersPositionsIds, "id");
+    {        
+        $data = [];
+        $positions = $this->repository->getFreePositions();
         
-        $ordersPositions = OrderPosition::find($ordersPositionsIds); 
-        foreach ($ordersPositions as $position) {
-            $product     = $position->product;
-            $components  = $product->components;
-
-            $position['summa']              = $position['price'] * $position['amount'];
-            $position['text']               = $product->name;
-            $position['value']              = $position->id;             
-            $position['product_name']       = $product->name;
-            $position['product_kod']        = $position->product->kod;
-            $position['order_kod']          = $position->order->kod;            
-            $position['order_name']         = $position->order->name;       
-            $position['order_position_id']  = $position->id;      
-            $position['order_position_kod'] = $position->kod;      
-            $position['key']                = $position->id;
-            $position['label']              = $position->kod;  
-            $date = new \DateTime($position->date_delivery);
-            $position['num_week'] = $date->format("W");               
-            $position['available']          = 1;
-            foreach ($components as $component) {
-                $availableAmountOfComponentInWarehouse = Warehouse::where('product_id', '=', $component->component_id)
-                                                    ->sum('amount');
-                $neededAvailableOfComponent = $position->amount * $component->amount;
-                if ($neededAvailableOfComponent > $availableAmountOfComponentInWarehouse) {
-                    $position['available'] = 0;
-                    break;
-                }
-            }            
-        }      
+        if ($positions) {            
+            $data = $this->repository->getResultPositionsWithAdditionalFields($positions);
+            foreach ($data as $position) {
+                $position->available = $this->isPositionAvailableForCreatingZlecenie($position);
+            }
+        }
         
-        return response()->json(['data' => $ordersPositions, 'success' => true]);        
+        return $this->getResponseResult($data);        
     }
+    
+    /**
+     * Checks do we have all components that position needs. 
+     * 
+     * @param obj $position
+     * @return int
+     */
+    public function isPositionAvailableForCreatingZlecenie($position)
+    {
+        $product     = $position->product;
+        $components  = $product->components;
+
+        if ($components) {
+            foreach ($components as $component) {
+                $availableAmount = Warehouse::where('product_id', '=', $component->component_id)
+                        ->sum('amount');
+                $neededAmount = $position->amount * $component->amount;
+                if ($neededAmount > $availableAmount) {
+                    return 0;
+                }
+            }  
+        }
+        
+        return 1;
+    }    
     
     /**
      * create new order position
@@ -191,48 +175,48 @@ class OrderPositionController extends BaseController
      * @param int $orderPosition
      * @return json response
      */
-//    public function listComponentsForPosition($orderPosition)
-//    {
-//        $result  = [];
-//        $success = false;
-//        
-//        $position = OrderPosition::find($orderPosition);
-//        if ($position) {
-//            $product    = $position->product;
-//            $components = $product->components;
-//            if ($components) {
-//                $success = true;                
-//                foreach ($components as $component) {                    
-//                    $componentProduct                      = $component->product;
-//                    $neededAvailableOfComponent            = $component->amount * $position->amount;
-//                    $availableAmountOfComponentInWarehouse = Warehouse::where('product_id', '=', $componentProduct->id)
-//                                        ->sum('amount');                    
-//                    $component['component_id']     = $componentProduct->id;
-//                    $component['component_kod']    = $componentProduct->kod;
-//                    $component['component_name']   = $componentProduct->name;
-//                    $component['amount_need']      = $neededAvailableOfComponent;
-//                    $component['amount_available'] = $availableAmountOfComponentInWarehouse;
-//                    $component['available']        = 1;
-//                    $component['zlecenie']         = "";
-//                    if ($neededAvailableOfComponent > $availableAmountOfComponentInWarehouse) {
-//                        $component['available'] = 0;
-//                        $inProgress = DeclaredWork::where("product_id", "=", $componentProduct->id)
-//                                ->where("order_position_id", "=", $position->id)
-//                                ->distinct("kod")
-//                                ->pluck("kod");
-//                        if (count($inProgress)) {
-//                            $component['available'] = 2;
-//                            $component['zlecenie']  = $inProgress[0];
-//                        }
-//                    }                  
-//                }
-//                $result = $components;
-//            }
-//        }   
-//        
-//        return response()->json(['data' => $result, 'success' => $success]);        
-//    }
-//    
+    public function listComponentsForPosition($orderPosition)
+    {
+        $result  = [];
+        $success = false;
+        
+        $position = OrderPosition::find($orderPosition);
+        if ($position) {
+            $product    = $position->product;
+            $components = $product->components;
+            if ($components) {
+                $success = true;                
+                foreach ($components as $component) {                    
+                    $componentProduct                      = $component->product;
+                    $neededAvailableOfComponent            = $component->amount * $position->amount;
+                    $availableAmountOfComponentInWarehouse = Warehouse::where('product_id', '=', $componentProduct->id)
+                                        ->sum('amount');                    
+                    $component['component_id']     = $componentProduct->id;
+                    $component['component_kod']    = $componentProduct->kod;
+                    $component['component_name']   = $componentProduct->name;
+                    $component['amount_need']      = $neededAvailableOfComponent;
+                    $component['amount_available'] = $availableAmountOfComponentInWarehouse;
+                    $component['available']        = 1;
+                    $component['zlecenie']         = "";
+                    if ($neededAvailableOfComponent > $availableAmountOfComponentInWarehouse) {
+                        $component['available'] = 0;
+                        $inProgress = DeclaredWork::where("product_id", "=", $componentProduct->id)
+                                ->where("order_position_id", "=", $position->id)
+                                ->distinct("kod")
+                                ->pluck("kod");
+                        if (count($inProgress)) {
+                            $component['available'] = 2;
+                            $component['zlecenie']  = $inProgress[0];
+                        }
+                    }                  
+                }
+                $result = $components;
+            }
+        }   
+        
+        return response()->json(['data' => $result, 'success' => $success]);        
+    }
+    
     public function listTasksForPosition($orderPosition)
     {
         $result = [];

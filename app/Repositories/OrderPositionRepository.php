@@ -9,19 +9,10 @@ class OrderPositionRepository extends BaseRepository
     {
         return "App\Models\OrderPosition";
     }
-    
-    public function getPosition($id)
-    {
-        $position  = [];
-        $model     = $this->getModel();
-        $position  = $model::find($id);
-        
-        return $position;
-    }
-    
+
     public function getPositionWithAdditionalFields($id)
     {
-        $position = $this->getPosition($id);
+        $position = $this->find($id);
         
         if ($position) {
             $product                      = $position->product;
@@ -32,41 +23,17 @@ class OrderPositionRepository extends BaseRepository
             $position->order_kod          = $position->order->kod;            
             $position->order_name         = $position->order->name;       
             $position->order_position_id  = $position->id;      
+            $position->order_position_kod = $position->kod;                
             $position->key                = $position->id;
             $position->label              = $position->kod;
             $date = new \DateTime($position->date_delivery);
-            $position->num_week           = $date->format("W");             
+            $position->num_week           = $date->format("W");
+            $position->summa              = $position->price * $position->amount;            
         }
         
         return $position;        
-    }
-    
-    /**
-     * Returns all positions 
-     * 
-     * @return array
-     */
-    public function getAllPositions()
-    {
-        $model        = $this->getModel();
-        $allPositions = $model::all();
-        
-        return $allPositions;
-    }    
-    
-    /**
-     * Returns list positions by ids
-     * 
-     * @param array $positionsIds
-     * @return array
-     */
-    public function getPositionsByIds($positionsIds)
-    {
-        $model        = $this->getModel();
-        $allPositions = $model::find($positionsIds);
-        
-        return $allPositions;
-    }    
+    }  
+  
     
     /**
      * Returns all positions with parameters 
@@ -76,7 +43,7 @@ class OrderPositionRepository extends BaseRepository
      */
     public function getAllPositionsWithAdditionalFields()
     {        
-        return $this->getResultPositionsWithAdditionalFields($this->getAllPositions());
+        return $this->getResultPositionsWithAdditionalFields($this->model::all());
     }
     
     /**

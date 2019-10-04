@@ -27,5 +27,7 @@ class Task extends BaseModel
         return $this->belongsToMany('App\Models\Product', 'product_tasks', 'task_id', 'product_id')
                 ->withPivot('duration', 'priority')
                 ->withTimestamps();        
-    }    
+    }   
+    
+    
 }

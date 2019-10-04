@@ -8,4 +8,10 @@ class WarehouseRepository extends BaseRepository
     {
         return "App\Models\Warehouse";
     }
+    
+    public function amountProduct($productId)
+    {
+        $model = $this->getModel();
+        return $model::where('product_id', '=', $productId)->sum('amount');
+    }
 }

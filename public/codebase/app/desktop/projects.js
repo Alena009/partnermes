@@ -197,9 +197,9 @@ function projectsInit(cell) {
 //                    }
 //                });                
 		projectsGrid.attachEvent("onRowSelect", function() {
-                    var selectedId = projectsGrid.getSelectedRowId();
-                    historyGrid.fill(selectedId);
-                    positionsGrid.fill(selectedId);
+                    var id = projectsGrid.getSelectedRowId();
+                    historyGrid.filterBy(3,id);
+                    positionsGrid.filterBy(8,id);
                 });
 		projectsGrid.attachEvent("onRowInserted", function(r, index){
 		    projectsGrid.setCellTextStyle(projectsGrid.getRowId(index), projectsGrid.getColIndexById("project"), "font-weight:bold;");
@@ -423,12 +423,14 @@ function projectsInit(cell) {
                             {label: _("Szczegóły"),   id: "description",  type: "ed", sort: "str", align: "left", width: 100},                        
                             {label: _("Data dostawy"),id: "num_week",     type: "ro", sort: "str", align: "left", width: 100}, 
                             {id: "product_id"},
-                            {id: "id"}
+                            {id: "id"},
+                            {id: "order_id"}
                         ],
                         multiselect: true                    
                     });  
                     positionsGrid.setColumnHidden(6,true);
                     positionsGrid.setColumnHidden(7,true);
+                    positionsGrid.setColumnHidden(8,true);
                     positionsGrid.attachHeader("#select_filter,#text_filter");
                     positionsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]);
                     positionsGrid.attachFooter(
@@ -468,37 +470,37 @@ function projectsInit(cell) {
                             console.log(data);
                         });
                     });               
-                    positionsGrid.fill = function(orderId){
+                    positionsGrid.fill = function(){
                         positionsGrid.clearAll();
-                        ajaxGet("api/orders/positions/" + orderId, '', function(data){
+                        ajaxGet("api/positions", '', function(data){
                             if (data.data && data.success){			    
-                                positionsGrid.clearAll();
                                 positionsGrid.parse(data.data, "js");
                             }
                         });			
-                    }; 
+                    };
+                    positionsGrid.fill();
   
-                
-		
-                        
-
                 var historyGrid = projectsTabbar.tabs("history").attachGrid({
                     image_path:'codebase/imgs/',
 	            columns: [
                         {label: _("Imie"), id: "name",       type: "ro", sort: "str", align: "left"},
                         {label: _("Opis"), id: "description",type: "ro", sort: "str", align: "left"},
-                        {label: _("Data"), id: "created_at", type: "ro", sort: "str", align: "left"}                        
+                        {label: _("Data"), id: "created_at", type: "ro", sort: "str", align: "left"},
+                        {id: "order_id"}
                     ],
 			multiselect: true                    
-                });                
-                historyGrid.fill = function(orderId){
-		    ajaxGet("api/orders/history/" + orderId, '', function(data){
+                });     
+                historyGrid.setColumnHidden(3,true);
+                historyGrid.fill = function(){
+		    ajaxGet("api/history", '', function(data){
 		        if (data.data && data.success){			    
                             historyGrid.clearAll();
                             historyGrid.parse(data.data, "js");
                         }
                     });			
 		}; 
+                historyGrid.fill();
+                
                 var orderPositionFormStruct = [
                     {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		
                     {type: "input", name: "kod",        required: true, label: _("Kod pozycji")},

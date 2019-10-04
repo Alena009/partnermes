@@ -37,5 +37,10 @@ class Product extends BaseModel
     public function components()
     {
         return $this->hasMany('App\Models\Component');
-    }    
+    } 
+    
+    public function warehouseRecords()
+    {
+        return $this->hasMany('App\Models\Warehouse', 'product_id', 'id');
+    }
 }

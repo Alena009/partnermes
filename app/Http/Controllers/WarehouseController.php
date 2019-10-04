@@ -8,11 +8,10 @@ use App\Repositories\WarehouseRepository;
 use App\Models\Warehouse;
 use App\Models\ProductGroup;
 use App\Models\Product;
-use DB;
 
 class WarehouseController extends BaseController
 {
-    private $rep;
+    protected $rep;
 
     public function __construct(WarehouseRepository $rep)
     {
@@ -79,7 +78,7 @@ class WarehouseController extends BaseController
      */    
     public function amountProductInWarehouse($productId)
     {
-        $totalAmount = $this->amountProduct($productId);
+        $totalAmount = $this->repository->amountProduct($productId);
         return response()->json(['success' => true, 'data' => $totalAmount]);       
     }
     

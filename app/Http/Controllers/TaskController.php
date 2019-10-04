@@ -9,6 +9,8 @@ use App\Models\Task;
 
 class TaskController extends BaseController
 {    
+    protected $rep;
+    
     public function __construct(TaskRepository $rep)
     {
         parent:: __construct();

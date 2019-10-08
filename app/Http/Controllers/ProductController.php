@@ -8,6 +8,7 @@ use App\Repositories\ProductRepository;
 use App\Models\Product;
 use App\Models\ProductGroup;
 use App\Models\Task;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends BaseController
 {
@@ -17,37 +18,29 @@ class ProductController extends BaseController
     {
         parent:: __construct();
         $this->setRepository($rep);
-    }   
+    }    
     
     /**
      * Get products list with translations
      */
     public function index($locale = 'pl')
-    {
-        $products = [];        
+    {      
         app()->setLocale($locale);
-
-        $products = Product::all();
-        
-        foreach ($products as $product) {
-            $product['product_name'] = $product['name'];
-            $product['product_kod'] = $product['kod'];
-            $product['text'] = $product['name'];
-            $product['value'] = $product['id'];
-            $product['product_type_name']  = $product->type['name'];
-            $product['product_group_name'] = $product->group['name'];
-        }
-        
-        return response()->json(["success" => (boolean)$products, "data" => $products]);        
+        return $this->getResponseResult($this->repository->allWithAdditionals());       
+    }
+    
+    public function show(Request $request, $id)
+    {
+        return $this->getResponseResult($this->repository->getWithAdditionals($id));
     }
 
     /**
-     * create new product with translations
+     * Create new product with translations
      */
     public function store(Request $request)
     {
         $product = [];
-        $success = false;
+
         $locale = app()->getLocale();
         
         $product = new Product();
@@ -60,21 +53,121 @@ class ProductController extends BaseController
         $product->area             = $request['area'];
         $product->pictures         = $request['pictures'];        
         $product->product_group_id = $request['product_group_id'];
-
-        $product->save();
-
-        $product->translateOrNew($locale)->name        = $request['name']; 
-        $product->translateOrNew($locale)->description = $request['description'];        
-        $product->translateOrNew($locale)->pack        = $request['pack'];
         
-        $product->save();
-        
-        if (!empty((array) $product)) {
-            $success = true;
-        }      
+        if ($product->save()) { 
+            $product->translateOrNew($locale)->name        = $request['name']; 
+            $product->translateOrNew($locale)->description = $request['description'];        
+            $product->translateOrNew($locale)->pack        = $request['pack'];
+            $product->save();    
+            
+            $newProduct = $this->repository->getLastRecord();            
+            $product = $this->repository->getWithAdditionals($newProduct->id);
+        }
 
-        return response()->json(['data' => $product, 'success' => $success]);
-    }   
+        return $this->getResponseResult($product);
+    }  
+    
+    public function edit(Request $request, $id)
+    {        
+        $product = [];
+
+        $locale = app()->getLocale();
+        
+        $product = Product::find($id);
+        $product->kod              = $request['kod'];                
+        $product->product_type_id  = $request['product_type_id']; 
+        $product->weight           = $request['weight'];
+        $product->height           = $request['height'];
+        $product->width            = $request['width'];
+        $product->length           = $request['length'];
+        $product->area             = $request['area'];
+        $product->pictures         = $request['pictures'];        
+        $product->product_group_id = $request['product_group_id'];
+        
+        if ($product->save()) { 
+            $product->translateOrNew($locale)->name        = $request['name']; 
+            $product->translateOrNew($locale)->description = $request['description'];        
+            $product->translateOrNew($locale)->pack        = $request['pack'];
+            $product->save();    
+        }
+
+        return $this->getResponseResult($product);        
+    }
+    
+    /**
+     * Delete several products by ids
+     * 
+     * @param array $ids
+     */
+    public function deleteSeveralProducts($ids)
+    {
+        $arrayIds = explode(',', $ids);      
+        return $this->getResponseResult(Product::destroy($arrayIds));       
+    }
+    
+    public function getListComponents($id)
+    {
+        $product    = $this->repository->get($id);
+        $components = $product->components;
+        foreach ($components as $component) {
+            $componentProduct              = $component->product;
+            $component->kod                = $componentProduct->kod; 
+            $component->name               = $componentProduct->name;
+            $component->product_type_name  = $componentProduct->type->name;
+            $component->product_group_name = $componentProduct->group->name;
+        }
+        
+        return $this->getResponseResult($components);       
+    }
+    
+    public function getListTasks($id)
+    {
+        $product = $this->repository->get($id);
+        $tasks   = $product->tasks;
+        if ($tasks) {
+            foreach ($tasks as $task) {
+                $task->duration = $task->pivot->duration;
+                $task->priority = $task->pivot->priority;
+                $task->task_kod = $task->kod;                
+                $task->task_name= $task->name;
+                $task->product_id = $product->id;
+                $task->task_id    = $task->id;
+            }        
+        }
+        return $this->getResponseResult($tasks);       
+    }
+    
+ //--------------------------------------------------------------------------   
+    /**
+     * Returns list tasks for all products
+     * 
+     * @return response
+     */
+    public function listTasksForProducts()
+    {
+        $tasks = [];
+        $result = [];
+        
+        $products = Product::all();
+        foreach ($products as $product) {
+            $tasks = $product->tasks;
+            if ($tasks) {
+                foreach ($tasks as $task) {
+                    $task->duration   = $task->pivot->duration;
+                    $task->priority   = $task->pivot->priority;
+                    $task->task_kod   = $task->kod;                
+                    $task->task_name  = $task->name;
+                    $task->product_id = $product->id;
+                    $task->task_id    = $task->id;
+                    $result[] = $task;
+                }  
+            }
+        }
+        
+        return $result;          
+    }
+    
+    
     
     /**
      * Get list products by tasks groups
@@ -128,10 +221,14 @@ class ProductController extends BaseController
      * @param integer $productId
      * @return json response
      */
-    public function listTasksForProduct($productId)
+    public function listTasksForProduct($productId = 0)
     {
-        $result = self::getTasksForProduct($productId);        
-        return response()->json(['success' => (boolean)$result, 'data' => $result]);     
+        if ($productId) {
+            $result = self::getTasksForProduct($productId);        
+        } else {
+            $result = self::listTasksForProducts();
+        }
+        return $this->getResponseResult($result);     
     }
     
     /**
@@ -153,6 +250,8 @@ class ProductController extends BaseController
                 $task->priority = $task->pivot->priority;
                 $task->task_kod = $task->kod;                
                 $task->task_name= $task->name;
+                $task->product_id = $product->id;
+                $task->task_id    = $task->id;
             }
         }
         return $tasks;        
@@ -168,17 +267,38 @@ class ProductController extends BaseController
     {
         $product = [];
         $result = [];
-        
+              
         $product = Product::find($request['product_id']);        
         if ($product) {
+            $latestTask = DB::table("product_tasks")
+                    ->where("product_id", "=", $product->id)
+                    ->orderBy("id", "desc")
+                    ->first();
+            if ($latestTask) {
+                $priority = $latestTask->priority + 1;
+            } else {
+                $priority = 1;
+            }
             $product->tasks()->attach($request['task_id'], 
                        ['duration' => $request['duration'], 
-                        'priority' => $request['priority']]);
+                        'priority' => $priority]);
             $result = self::getTasksForProduct($request['product_id']);
         } 
         
         return response()->json(['success' => (boolean)$result, 'data' => $result]);     
     }
+    
+    public function editTask(Request $request, $productId, $taskId)
+    {
+        $result = DB::table('product_tasks')
+            ->where("product_id", "=", $productId)
+            ->where("task_id", "=", $taskId)
+            ->update(['priority' => $request['priority'], 
+                'duration' => $request['duration']]);        
+        
+        return response()->json(['success' => (boolean)$result, 'data' => $result]);     
+    }    
+    
     
     /**
      * Gets list available tasks for adding to the list of tasks for product
@@ -209,4 +329,11 @@ class ProductController extends BaseController
         return response()->json(['success' => (boolean)$result, 'data' => $result]);     
     }
     
+    public function deleteTask($productId, $taskId)
+    {
+        $product = Product::find($productId);
+        $product->tasks()->detach($taskId);      
+        
+        return $this->getResponseResult($product->tasks);
+    }
 }

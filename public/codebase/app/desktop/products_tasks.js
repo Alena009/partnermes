@@ -11,7 +11,7 @@ function productsTasksInit(cell) {
                 items: [
                         {type: "text", id: "title", text: _("Produkty")},
                         {type: "spacer"},
-                        {id: "Del", type: "button", img: "fa fa-minus-square"}				                               
+                       // {id: "Del", type: "button", img: "fa fa-minus-square"}				                               
                 ]                    
         });
         productsGridToolBar.attachEvent("onClick", function(name) {
@@ -86,9 +86,8 @@ function productsTasksInit(cell) {
                 console.log(data);
             });
         });
-        productsGrid.attachEvent("onRowSelect", function() {
-            var selectedId = productsGrid.getSelectedRowId();    
-            zadaniaGrid.fill(selectedId);     
+        productsGrid.attachEvent("onRowSelect", function(id, ind) {            
+            zadaniaGrid.fill(id);     
         });    
 
         var zadaniaToolBar = productsTasksLayout.cells("b").attachToolbar({
@@ -106,7 +105,7 @@ function productsTasksInit(cell) {
                             {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
                             {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
                             {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},
-                            {type: "input", name: "priority", required: true, label: _("Kolej: ")},
+                            //{type: "input", name: "priority", required: true, label: _("Kolej: ")},
                             {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                                 {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
                                 {type: "newcolumn"},
@@ -165,10 +164,11 @@ function productsTasksInit(cell) {
                 };break;                
                 case "Del": {
                     var selectedId = zadaniaGrid.getSelectedRowId();
+                    var rowData = zadaniaGrid.getRowData(selectedId);
                     if (selectedId) {
-                        ajaxDelete("api/productstasks/" + selectedId, "", function(data){
+                        ajaxGet("api/products/deletetask/" + rowData.product_id + "/" + rowData.task_id, "", function(data){
                             if (data && data.success) {
-                                zadaniaGrid.deleteRow();
+                                zadaniaGrid.deleteRow(selectedId);
                             }
                         });    
                     }                            
@@ -209,16 +209,20 @@ function productsTasksInit(cell) {
                     width: 50,
                     sort: "str", 
                     align: "left"                    
-                }                
-            ],
-                multiselect: true
+                },
+                {id: "product_id"},
+                {id: "task_id"}
+            ]
+                
         });        
+        zadaniaGrid.setColumnHidden(4);
+        zadaniaGrid.setColumnHidden(5);
         zadaniaGrid.attachHeader("#select_filter,#select_filter");		
         zadaniaGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]); 
         zadaniaGrid.enableDragAndDrop(true);
         zadaniaGrid.fill = function(id = 0){	
             zadaniaGrid.clearAll();					
-            ajaxGet("api/products/taskslist/" + id, '', function(data){                                     
+            ajaxGet("api/products/tasks/" + id, '', function(data){                                     
                 if (data && data.success){
                     zadaniaGrid.parse((data.data), "js");
                 }

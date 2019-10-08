@@ -27,7 +27,7 @@ class TaskController extends BaseController
     {        
         app()->setLocale($locale);
         
-        return $this->getResponseResult($this->getListAllTasks());        
+        return $this->getResponseResult($this->repository->allWithAdditionals());        
     }
 
     /**
@@ -69,31 +69,9 @@ class TaskController extends BaseController
     {   
         if ($groups) {  
             $groupsIds = explode(',', $groups);
-            return $this->getResponseResult($this->getListTasksByGroups($groupsIds));                      
+            return $this->getResponseResult($this->repository->getListTasksByGroups($groupsIds));                      
         } else {
-            return $this->getResponseResult($this->getListAllTasks());                              
+            return $this->getResponseResult($this->allWithAdditionals());                              
         }            
-    }
-    
-    /**
-     * Gets list tasks by tasks groups ids
-     * 
-     * @param array $groupsIds
-     * @return array 
-     */    
-    public function getListTasksByGroups($groupsIds)
-    {
-        return $this->repository->getListTasksByGroups($groupsIds);
-    }
-    
-    /**
-     * Gets list all tasks 
-     * 
-     * @param array $groupsIds
-     * @return array 
-     */     
-    public function getListAllTasks()
-    {
-        return $this->repository->getListAllTasks();
     }
 }

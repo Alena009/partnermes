@@ -18,8 +18,7 @@ Route::group([
         ], function () {
     
     Route::resource('/clients', 'ClientController');
-    
-    Route::get('/components/list/{productId}', 'ComponentController@listComponents');
+       
     Route::resource('/components', 'ComponentController');  
     
     Route::get('/declaredworks/byorderpos/{pos}', 'DeclaredWorkController@listWorksForOrderPos');   
@@ -36,8 +35,7 @@ Route::group([
     
     Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
     Route::resource('/operations', 'OperationController'); 
-    
-    Route::get('/orders/history/{orderId}', 'OrderController@history');
+
     Route::get('/orders/beguntasks/{orderId}', 'OrderController@beguntasks');
     Route::resource('/orders', 'OrderController');    
     
@@ -54,12 +52,18 @@ Route::group([
     Route::resource('/prodtypes', 'ProductTypeController'); 
     
     Route::get('/prodgroups/grupytree', 'ProductGroupController@buildTree');    
-    Route::resource('/prodgroups', 'ProductGroupController');  
+    Route::resource('/prodgroups', 'ProductGroupController');
+    
     Route::post('/products/addtask', 'ProductController@addTaskForProduct');    
-    Route::get('/products/availabletasks/{productId}', 'ProductController@listAvailableTasks');
-    Route::get('/products/taskslist/{productId}', 'ProductController@listTasksForProduct');   
+    Route::get('/products/availabletasks/{productId}', 'ProductController@listAvailableTasks');    
+    Route::get('/products/tasks/{product?}', 'ProductController@listTasksForProduct');   
     Route::get('/products/listbygroups/{prodGroups}', 'ProductController@listProductsByProductGroup');  
     Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup');     
+    Route::get('/products/deleteseveral/{products}', 'ProductController@deleteSeveralProducts');     
+    Route::get('/products/deletetask/{product}/{task}', 'ProductController@deleteTask');  
+    Route::get('/products/tasks/{product}/{task}/edit', 'ProductController@editTask');  
+    Route::get('/products/components/{product}', 'ProductController@getListComponents');  
+    Route::get('/products/tasks/{product}', 'ProductController@getListTasks');  
     Route::resource('/products', 'ProductController');  
  
     
@@ -74,6 +78,7 @@ Route::group([
     
     Route::get('/tasks/listbygroups/{groups?}', 'TaskController@listByGroups');    
     Route::resource('/tasks', 'TaskController');    
+    
     Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
     Route::resource('/taskgroups', 'TaskGroupController');    
     

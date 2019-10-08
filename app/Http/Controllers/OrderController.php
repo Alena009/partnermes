@@ -34,7 +34,7 @@ class OrderController extends BaseController
             $order['text']        = $order->kod;
             $order['value']       = $order->id;
             $date = new \DateTime($order->date_end);
-            $order['num_week'] = $date->format("W");                     
+            $order['num_week'] = $date->format("W");
         }
         
         return response()->json(['data' => $orders, 'success' => (boolean)count($orders)]);        
@@ -147,7 +147,7 @@ class OrderController extends BaseController
         $positions    = $order->positions;
         $positionsIds = $positions->pluck('id');
         
-        $tasks = DeclaredWork::whereIn("order_position_id", $positionsIds);
+        $tasks = DeclaredWork::whereIn("order_position_id", $positionsIds)->get();
                         
         return response()->json(['data' => $tasks, 'success' => (boolean)count($tasks)]);         
     }

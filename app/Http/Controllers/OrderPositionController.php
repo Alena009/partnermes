@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\OrderPositionRepository;
 
-//use App\Models\OrderPosition;
+use App\Models\OrderPosition;
 use App\Models\DeclaredWork;
 use App\Models\Warehouse;
-//use Illuminate\Support\Facades\DB;
-//use App\Models\Product;
-//use App\Models\Component;
+use Illuminate\Support\Facades\DB;
+use App\Models\Product;
+use App\Models\Component;
 
 class OrderPositionController extends BaseController
 {
@@ -59,7 +59,7 @@ class OrderPositionController extends BaseController
     
     public function getComponentsForPosition($positionId)
     {
-        $position   = $this->repository->getPosition($positionId);
+        $position   = $this->repository->getPositionWithAdditionalFields($positionId);
         if ($position) {
             $product    = $position->product;
             $components = $product->components;

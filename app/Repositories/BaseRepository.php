@@ -173,16 +173,6 @@ class BaseRepository
     {
         $model = $this->model->create($attributes);
         $id = $model->getKey();
-        // $relationships = $this->model->getRelationships();
-        // if (is_array($relationships)) {
-        //     foreach ($relationships as $rs){
-        //         if (isset($attributes[$rs])){
-        //             //dd($attributes[$rs]);
-        //             //foreach($attributes[$rs] as $i) $a[]=['id'=>$id];
-        //             $model->$rs()->sync($attributes[$rs]);
-        //         }
-        //     }
-        // }
         return $model->save() ? $this->find($id) : false;
     }
 
@@ -266,5 +256,30 @@ class BaseRepository
         }
 
         return $orderBy;
+    }
+    
+    public function getWithAdditionals($id)
+    {
+        return $this->model::find($id);
+    }
+    
+    public function allWithAdditionals()
+    {
+        $data = $this->model::all();
+        return $this->withAdditionals($data);
+    }
+
+    private function withAdditionals($data)
+    {
+        $result = [];
+        
+        if ($data) {
+            foreach ($data as $d) {
+                $result[] = $this->
+                        getWithAdditionals($d->id);    
+            }        
+        }
+        
+        return $result;           
     }
 }

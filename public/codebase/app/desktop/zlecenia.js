@@ -242,7 +242,8 @@ function zleceniaInit(cell) {
                                     ordersPositionsGridToolbar.enableItem("Add");
                                 }                          
                                 componentsGrid.filterBy(7,id);                                  
-                            });     
+                            });    
+                            
                             ordersPositionsGrid.getFilterElement(5)._filter = function (){
                                 var input = this.value; // gets the text of the filter input
                                 input = input.trim().toLowerCase().split(' ');

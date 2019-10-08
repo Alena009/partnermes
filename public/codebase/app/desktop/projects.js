@@ -135,8 +135,9 @@ function projectsInit(cell) {
                             });                            
                         };break;   
                         case 'Del': {                            
-                            var orderId = projectsGrid.getSelectedRowId();
+                            var orderId = projectsGrid.getSelectedRowId();                            
                             if (orderId) {
+                                //var rowData = projectsGrid.getRowData(orderId);
                                 ajaxGet("api/orders/beguntasks/" + orderId, "", function (data){
                                     if (data && data.success) {
                                         dhtmlx.alert({
@@ -151,8 +152,11 @@ function projectsInit(cell) {
                                             callback: function(result){
                                                 if (result) {                                
                                                     ajaxDelete("api/orders/" + orderId, "", function(data){
-                                                        if (data.success) {
-                                                            projectsGrid.deleteRow(orderId);
+                                                        if (data && data.success) {
+                                                            projectsGrid.fill();
+                                                            positionsGrid.fill();
+                                                            historyGrid.fill();
+                                                            //dpProjectsGrid.sendData();
                                                         }
                                                     }); 
                                                 }
@@ -174,12 +178,12 @@ function projectsInit(cell) {
                     image_path:'codebase/imgs/',
 	            columns: [
                         {label: _("Kod"),              id: "kod",         type: "ed",   sort: "str", align: "left", width: 50},
-                        {label: _("Imie"),             id: "name",        type: "ed",   sort: "str", align: "left", width: 50},
+                        {label: _("Imie"),             id: "name",        type: "ed",   sort: "str", align: "left", width: 150},
                         {label: _("Klient"),           id: "client_name", type: "ro",   sort: "str", align: "left", width: 150},                                                                                                
                         {label: _("Termin wykonania"), id: "num_week",    type: "ro",   sort: "str", align: "left", width: 50},                         
                         {id: "client_id"}
                     ],
-                    multiline: true
+                    multiselect: true
                 });
                 projectsGrid.attachHeader('#text_filter,#text_filter,#select_filter');      
                 projectsGrid.setColumnHidden(4,true);
@@ -195,11 +199,11 @@ function projectsInit(cell) {
 //                            clientsCombo.put(client.id, client.name);
 //                        });
 //                    }
-//                });                
+//                });       
 		projectsGrid.attachEvent("onRowSelect", function() {
                     var id = projectsGrid.getSelectedRowId();
                     historyGrid.filterBy(3,id);
-                    positionsGrid.filterBy(8,id);
+                    positionsGrid.filterBy(9,id);
                 });
 		projectsGrid.attachEvent("onRowInserted", function(r, index){
 		    projectsGrid.setCellTextStyle(projectsGrid.getRowId(index), projectsGrid.getColIndexById("project"), "font-weight:bold;");
@@ -212,17 +216,25 @@ function projectsInit(cell) {
                 dpProjectsGrid.init(projectsGrid);
                 dpProjectsGrid.enableDataNames(true);
                 dpProjectsGrid.setTransactionMode("REST");
-                dpProjectsGrid.enablePartialDataSend(true);
+                //dpProjectsGrid.enablePartialDataSend(true);
                 dpProjectsGrid.enableDebug(true);
-                dpProjectsGrid.setUpdateMode("row", true);
+                dpProjectsGrid.setUpdateMode("off");
+                //dpProjectsGrid.setUpdateMode("row", true);
                 dpProjectsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
                     data.id = id;
+                    console.log(data);
                     ajaxGet("api/orders/" + id + "/edit", data, function(data){
                         if (data.success) {
                             projectsGrid.setRowTextNormal(id);
                         }
                     });
-                });                
+                });    
+                projectsGrid.attachEvent("onKeyPress", function(code,cFlag,sFlag){
+                    if (code == 13) {
+                        dpProjectsGrid.sendData();
+                    }                    
+                });
+
                 projectsGrid.fill = function(){
                     projectsGrid.clearAll();
 		    ajaxGet("api/orders", '', function(data){
@@ -284,15 +296,15 @@ function projectsInit(cell) {
                                 {id: "history", text: _("Historija")}                                
 			]
 		});  
-                    positionsGridMenu = projectsTabbar.tabs("positions").attachMenu({
+                    positionsGridToolbar = projectsTabbar.tabs("positions").attachToolbar({
                             iconset: "awesome",
                             items: [
-                                {id:"Add",  text: _("Dodaj"),  img: "fa fa-plus-square"},
-                                {id:"Edit", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id:"Del",  text: _("Usun"),   img: "fa fa-minus-square"}
+                                {id:"Add", type:"button",  text: _("Dodaj"),  img: "fa fa-plus-square"},
+                                {id:"Edit", type:"button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id:"Del",  type:"button",text: _("Usun"),   img: "fa fa-minus-square"}
                             ]
                     });                 
-                    positionsGridMenu.attachEvent("onClick", function(id) { 
+                    positionsGridToolbar.attachEvent("onClick", function(id) { 
                         switch (id) {
                             case 'Add': {
                                 var orderId = projectsGrid.getSelectedRowId();                                                          
@@ -420,6 +432,7 @@ function projectsInit(cell) {
                             {label: _("Produkt"),     id: "product_name", type: "ro", sort: "str", align: "left", width: 150},
                             {label: _("Ilosc"),       id: "amount",       type: "ed", sort: "str", align: "left", width: 50},
                             {label: _("Cena"),        id: "price",        type: "ed", sort: "str", align: "left", width: 50},
+                            {label: _("Suma"),        id: "summ",        type: "ed", sort: "str", align: "left", width: 50},
                             {label: _("Szczegóły"),   id: "description",  type: "ed", sort: "str", align: "left", width: 100},                        
                             {label: _("Data dostawy"),id: "num_week",     type: "ro", sort: "str", align: "left", width: 100}, 
                             {id: "product_id"},
@@ -428,33 +441,21 @@ function projectsInit(cell) {
                         ],
                         multiselect: true                    
                     });  
-                    positionsGrid.setColumnHidden(6,true);
                     positionsGrid.setColumnHidden(7,true);
                     positionsGrid.setColumnHidden(8,true);
+                    positionsGrid.setColumnHidden(9,true);
                     positionsGrid.attachHeader("#select_filter,#text_filter");
                     positionsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]);
                     positionsGrid.attachFooter(
-                        [_("Ilosc produktow: "),"#cspan","#stat_total",""],
+                        [_("Ilosc produktow: "),"#cspan","#stat_total","",""],
                         ["text-align:right;","text-align:center"]
                     );                       
                     positionsGrid.attachFooter(
-                        [_("Ilosc pozycji: "),"#cspan","","#stat_count"],
+                        [_("Ilosc pozycji: "),"#cspan","","#stat_count",""],
                         ["text-align:right;","text-align:center"]
-                    );              
-                    positionsGrid._in_header_stat_total_sum=function(tag,index,data){//'stat_rowcount'-counter name
-                        var calc=function(){                       // function used for calculations
-                            var total_sum = 0;
-                            var data;
-                            this.forEachRow(function(id){
-                                data = this.getRowData(id);
-                                total_sum = total_sum + (data.price * data.amount); 
-                            });
-                            return total_sum;
-                        };
-                        this._stat_in_header(tag,calc,index,data); // default statistics handler processor
-                    };   
+                    );                
                     positionsGrid.attachFooter(
-                        [_("Suma: "),"#cspan","","#stat_total_sum"],
+                        [_("Suma: "),"#cspan","","","#stat_total"],
                         ["text-align:right;","text-align:center"]
                     );                     
                     var dpPositionsGrid = new dataProcessor("api/positions", "js");                
@@ -469,7 +470,11 @@ function projectsInit(cell) {
                         ajaxGet("api/positions/" + id + "/edit", data, function(data){                                                            
                             console.log(data);
                         });
-                    });               
+                    });      
+                    positionsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
+                        var data = positionsGrid.getRowData(rId);                       
+                        positionsGrid.cells(rId,4).setValue(data.price * data.amount);
+                    });                    
                     positionsGrid.fill = function(){
                         positionsGrid.clearAll();
                         ajaxGet("api/positions", '', function(data){

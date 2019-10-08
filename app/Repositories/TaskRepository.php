@@ -9,32 +9,21 @@ class TaskRepository extends BaseRepository
         return "App\Models\Task";
     }
     
-    public function getTask($id)
-    {
-        $model = $this->model();
-        $task = $model::find($id);
+    public function getWithAdditionals($id)
+    {        
+        $task = $this->model::find($id);
         
         $task->task_group_name = $task->group->name;
         $task->text            = $task->name;  
         $task->value           = (string)$task->id;
         $task->key             = $task->id;
-        $task->label           = $task->name;        
+        $task->label           = $task->name; 
+        $task->task_kod        = $task->kod;
+        $task->task_name       = $task->name;
         
         return $task;        
     }
     
-    /**
-     * Returns list of all tasks
-     * 
-     * @return array
-     */
-    public function getListAllTasks()
-    {
-        $model = $this->model();
-        $tasks = $model::all();
-        
-        return $this->getResultTasksArray($tasks);                
-    }
     
     /**
      * Returns list tasks by selected tasks groups.
@@ -47,25 +36,7 @@ class TaskRepository extends BaseRepository
         $model = $this->model();
         $tasks = $model::whereIn('task_group_id', $groupsIds)->get(); 
 
-        return $this->getResultTaskskArray($tasks);       
+        return $this->withAdditionals($tasks);       
     }
-    
-    /**
-     * Returns tasks with parameters which was added in function getTask()
-     * 
-     * @param array $tasks
-     * @return array
-     */
-    public function getResultTasksArray($tasks)
-    {
-        $result = [];
-        
-        if ($tasks) {
-            foreach ($tasks as $task) {
-                $result[] = $this->getTask($task->id);          
-            }      
-        }
-        
-        return $result;   
-    }    
+       
 }

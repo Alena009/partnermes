@@ -51,7 +51,7 @@ function appInit() {
 			});
 		}
 	});
-	mainSidebar.cells("warehouse").setActive(true);
+	mainSidebar.cells("zlecenia").setActive(true);
         return;
 	//window.dhx4.callEvent("onSelect","projects");
 	//debugger;
@@ -247,8 +247,7 @@ function ajaxDelete(url, params, callback) {
 //    return data;
 //}
 
-function axiosQuery(method, url, params, callback, inputHeaders = {}) {  
-
+function axiosQuery(method, url, params, callback, inputHeaders = {}) { 
     var headers = inputHeaders;
     headers.Authorization = 'Bearer ' + localStorage.token;
    
@@ -375,6 +374,6 @@ window.onhashchange = function() {
         console.log(hash);
         window.mainSidebar.cells(hash).setActive(true);
     }
-};
+};          
 
 

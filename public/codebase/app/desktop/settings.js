@@ -1181,7 +1181,7 @@ function createWindow (caption, height, width) {
             caption: _(caption),
             header: true,
             onClose:function(){
-                dhxWins.unload();
+                this.unload();
             }            
     });
     
@@ -1262,6 +1262,7 @@ function createForm(formStruct, windowObj){
             };break;            
             case 'cancel':{
                 myForm.clear();
+                
             };break;
         }
     });
@@ -1274,7 +1275,40 @@ Date.prototype.getWeekNumber = function(){
     d.setHours(0,0,0,0);
     d.setDate(d.getDate()+4-(d.getDay()||7));
     return Math.ceil((((d-new Date(d.getFullYear(),0,1))/8.64e7)+1)/7);
-};
+};               
+
+//dhtmlXGridObject.prototype._in_header_stat_total_sum=function(tag,index,data){//'stat_rowcount'-counter name
+//    var calc=function(){                       // function used for calculations
+//        var total_sum = 0;
+//        var data;
+//        this.forEachRow(function(id){
+//            data = this.getRowData(id);
+//            total_sum += (data.price * data.amount); 
+//        });
+//        return total_sum;
+//    };
+//    this._stat_in_header(tag,calc,index,data); // default statistics handler processor
+//}; 
+                            
+//function regExpFilter(input, colIdx, gridObj) {
+//                                input = input.trim().toLowerCase().split(' ');
+//                                return function(value, id){
+//                                    //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
+//                                        var val = gridObj.cells(id, colIdx).getValue(); // gets the value of the current                                                    
+//                                        //making pattern string for regexp
+//                                        var searchStr = '';
+//                                        for (var i = 0; i < input.length; i++) {
+//                                            searchStr = searchStr + input[i] + "(.*)";                                                                
+//                                            //var searchStr = /^zz(.+)np(.+)/ig;
+//                                        }
+//                                        var regExp = new RegExp("^" + searchStr, "ig");                                                          
+//                                        if (val.toLowerCase().match(regExp)){                                                             
+//                                            return true;
+//                                        }                                                    
+//                                    //}
+//                                    return false;
+//                                };    
+//}                            
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 	if (id == "settings") {

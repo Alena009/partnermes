@@ -37,6 +37,8 @@ Route::group([
     Route::resource('/operations', 'OperationController'); 
 
     Route::get('/orders/beguntasks/{orderId}', 'OrderController@beguntasks');
+    Route::get('/orders/positions/{orderId}', 'OrderController@positions');
+    Route::get('/orders/history/{orderId}', 'OrderController@history');
     Route::resource('/orders', 'OrderController');    
     
     Route::resource('/permissions', 'PermissionController');
@@ -61,6 +63,7 @@ Route::group([
     Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup');     
     Route::get('/products/deleteseveral/{products}', 'ProductController@deleteSeveralProducts');     
     Route::get('/products/deletetask/{product}/{task}', 'ProductController@deleteTask');  
+    Route::get('/products/tasks/changepriority/{product}/{stask}/{ttask}', 'ProductController@changePriorityTask');  
     Route::get('/products/tasks/{product}/{task}/edit', 'ProductController@editTask');  
     Route::get('/products/components/{product}', 'ProductController@getListComponents');  
     Route::get('/products/tasks/{product}', 'ProductController@getListTasks');  

@@ -16,7 +16,9 @@ function projectsInit(cell) {
 		projectsLayout.cells("b").setWidth(330);
 		projectsLayout.cells("c").setHeight(350);
 		projectsLayout.setAutoSize("a;c", "a;b");
-
+/**
+ * A
+ */
 		var projectsGridToolBar = projectsLayout.cells("a").attachToolbar({
                     iconset: "awesome",
                     items: [
@@ -30,9 +32,9 @@ function projectsInit(cell) {
 //                                            {id: "all", type: "obj", text: _("Wszystkie")}		
 //                                    ]},                                
 //                                {type: "separator",   id: "sep"},
-                        {type: "text",        id: "find",   text: _("Find:")},				
-                        {type: "buttonInput", id: "szukaj", text: _(""), width: 100},
-                        {type: "separator",   id: "sep2"},                                
+//                        {type: "text",        id: "find",   text: _("Find:")},				
+//                        {type: "buttonInput", id: "szukaj", text: _(""), width: 100},
+//                        {type: "separator",   id: "sep2"},                                
                         {id: "Add",  type: "button", img: "fa fa-plus-square "},
                         {id: "Edit", type: "button", img: "fa fa-edit"},
                         {id: "Del",  type: "button", img: "fa fa-minus-square"}
@@ -45,7 +47,7 @@ function projectsInit(cell) {
 //                    projectsGrid.fill(amountRecords);                  
 //                });
                 var newProjectFormStruct = [
-                    {type:"fieldset",  offsetTop:0, label:_("Zamowienie"), list:[
+                    
                         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
                         {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
                         {type: "input", name: "kod",       required: true, label: _("Kod zamowienia")},
@@ -60,11 +62,8 @@ function projectsInit(cell) {
                             options:[],
                             note: {text: _("Numer tygodnia kiedy zamowienie musi byc zakonczone. Jest obowiazkowe.")}},
                         {type: "block", blockOffset: 0, position: "label-left", list: [
-                            {type: "button", name: "save",   value: "Zapisz", offsetTop:18},
-                            {type: "newcolumn"},
-                            {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
+                            {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            
                         ]}	
-                    ]}
 		];
                 projectsGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
@@ -189,9 +188,9 @@ function projectsInit(cell) {
                 projectsGrid.setColumnHidden(4,true);
                 projectsGrid.enableValidation(true);
                 projectsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty","MotEmpty"]);
-                var searchElem = projectsGridToolBar.getInput('szukaj');
-                projectsGrid.makeFilter(searchElem, 0, true);                
-                projectsGrid.filterByAll();
+//                var searchElem = projectsGridToolBar.getInput('szukaj');
+//                projectsGrid.makeFilter(searchElem, 0, true);                
+//                projectsGrid.filterByAll();
 //                var clientsCombo = projectsGrid.getCombo(2);                
 //                ajaxGet("api/clients", '', function(data) {
 //                    if (data.success && data.data) {
@@ -202,8 +201,8 @@ function projectsInit(cell) {
 //                });       
 		projectsGrid.attachEvent("onRowSelect", function() {
                     var id = projectsGrid.getSelectedRowId();
-                    historyGrid.filterBy(3,id);
-                    positionsGrid.filterBy(9,id);
+                    historyGrid.fill(id);
+                    positionsGrid.fill(id);
                 });
 		projectsGrid.attachEvent("onRowInserted", function(r, index){
 		    projectsGrid.setCellTextStyle(projectsGrid.getRowId(index), projectsGrid.getColIndexById("project"), "font-weight:bold;");
@@ -258,24 +257,58 @@ function projectsInit(cell) {
                     if (id == 'Hide') {
                         projectsLayout.cells("b").collapse();                        
                     }                    
+                });                  
+                var projectsForm = projectsLayout.cells("b").attachForm(newProjectFormStruct);
+		projectsForm.bind(projectsGrid);
+                projectsForm.attachEvent("onButtonClick", function(name){
+                    switch (name){
+                        case 'save':{   
+                            if (projectsGrid.getSelectedRowId()) {    
+                                var data = projectsForm.getFormData();   
+                                data.date_start = projectsForm.getCalendar("date_start").getDate(true);                                                                              
+                                ajaxGet("api/orders/" + data.id + "/edit", data, function(data){                                            
+                                    if (data && data.success) {
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Zapisane")
+                                        });
+                                        projectsGrid.fill();                                                                                              
+                                    } else {
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Błąd! Zmiany nie zostały zapisane")
+                                        });
+                                    }
+                                });
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Wybierz zamówienie, które chcesz zmienic!")
+                                });  
+                            }
+                        };break;
+                    }
                 }); 
-                
-		var projectFormStruct = [
-                    {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
-                    {type: "input", name: "client_name", label: _("Klient"),              readonly: true},		
-                    {type: "input", name: "kod",         label: _("Kod zamowienia"),      readonly: true},
-                    {type: "input", name: "name",        label: _("Zamowienie"),          readonly: true,
-                       tooltip: _("Imie zamowienia"),    info: true},
-                    {type: "input", name: "description", label: _("Opis"), rows: 3,       readonly: true},
-                    {type: "calendar", name: "date_start",  label: _("Data zamowienia"),  readonly: true,
-                        dateFormat: "%Y-%m-%d"},
-                    {type: "calendar", name: "date_end",    label: _("Termin wykonania"), readonly: true,
-                        dateFormat: "%Y-%m-%d"},
-                    {type: "input", name: "status", label: _("Status zamowienia"),        readonly: true}		
-		];                 
-                var projectsForm = projectsLayout.cells("b").attachForm(projectFormStruct);            
-		projectsForm.bind(projectsGrid);   
-                                                            
+                var clientsCombo = projectsForm.getCombo("client_id");                
+                var dateEndCombo = projectsForm.getCombo("num_week");
+                if (dateEndCombo) {
+                    var numCurrentWeek = new Date().getWeekNumber();
+                    for (var i = 1; i <= 53; i++) {
+                        dateEndCombo.addOption(i, "" + i);
+                    }
+                    dateEndCombo.attachEvent("onChange", function(value, text){
+                        if (value < numCurrentWeek) {
+                            if (!projectsForm.isItem("on_next_year")) {
+                                projectsForm.addItem(null, {type: "label", name: "on_next_year", label: _("Na nastepny rok")}, null, 1);
+                            }
+                        } else {
+                            projectsForm.removeItem("on_next_year");
+                        }
+                    });  
+                }                
+/**
+ * C
+ */                                                            
                 positionsLayoutToolBar = projectsLayout.cells("c").attachToolbar({
 			iconset: "awesome",
 			items: [
@@ -326,8 +359,9 @@ function projectsInit(cell) {
                                             data.order_id = orderId;
                                             ajaxPost("api/positions", data, function(data){                                                   
                                                 if (data.success && data.data) {
-                                                    positionsGrid.fill(projectsGrid.getSelectedRowId());
-                                                    positionsWindow.hide();
+                                                    positionsGrid.fill(projectsGrid.getSelectedRowId()); 
+                                                    //var data = data.data;
+                                                    //positionsGrid.addRow(data.id, [data.kod, data.product_name, data.amount, data.price]);
                                                 } else {
                                                     dhtmlx.alert({
                                                         title:_("Wiadomość"),
@@ -475,15 +509,15 @@ function projectsInit(cell) {
                         var data = positionsGrid.getRowData(rId);                       
                         positionsGrid.cells(rId,4).setValue(data.price * data.amount);
                     });                    
-                    positionsGrid.fill = function(){
+                    positionsGrid.fill = function(id){
                         positionsGrid.clearAll();
-                        ajaxGet("api/positions", '', function(data){
+                        ajaxGet("api/orders/positions/" + id, '', function(data){
                             if (data.data && data.success){			    
                                 positionsGrid.parse(data.data, "js");
                             }
                         });			
                     };
-                    positionsGrid.fill();
+
   
                 var historyGrid = projectsTabbar.tabs("history").attachGrid({
                     image_path:'codebase/imgs/',
@@ -496,15 +530,14 @@ function projectsInit(cell) {
 			multiselect: true                    
                 });     
                 historyGrid.setColumnHidden(3,true);
-                historyGrid.fill = function(){
-		    ajaxGet("api/history", '', function(data){
+                historyGrid.fill = function(id){
+		    ajaxGet("api/orders/history/" + id, '', function(data){
 		        if (data.data && data.success){			    
                             historyGrid.clearAll();
                             historyGrid.parse(data.data, "js");
                         }
                     });			
 		}; 
-                historyGrid.fill();
                 
                 var orderPositionFormStruct = [
                     {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		
@@ -524,7 +557,16 @@ function projectsInit(cell) {
                         {type: "newcolumn"},
                         {type:"button", name:"cancel", value:"Anuluj", offsetTop:18}
                     ]}                    
-                ];                 
+                ]; 
+             
+            ajaxGet("api/clients", '', function(data) {
+                if (data.success && data.data) {
+                    data.data.forEach(function(rec){
+                        //typeProductCombo.put(rec.id, rec.name);
+                    });
+                    clientsCombo.addOption(data.data); 
+                }
+            });   
 	}	
 }
 

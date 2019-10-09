@@ -134,6 +134,21 @@ class OrderController extends BaseController
         return response()->json(['data' => $positions, 'success' => (boolean)count($positions)]);        
     }
     
+    public function history($orderId)
+    {
+        $order = [];
+        $order = $this->repository->getWithAdditionals($orderId);
+        $history = $order->history;
+        foreach ($history as $rec) {
+            $status = $rec->status;
+            $rec->name = $status->name;
+            $rec->description = $status->description;
+        }        
+        
+        return $this->getResponseResult($history);
+    }
+
+
     /**
      * Gets list begun tasks for order 
      * 

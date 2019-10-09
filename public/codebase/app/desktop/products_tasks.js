@@ -34,28 +34,28 @@ function productsTasksInit(cell) {
                 {
                     label: _("Kod"),                    
                     id: "kod",
-                    type: "ed", 
+                    type: "ro", 
                     sort: "str", 
                     align: "left"
                 },
                 {
                     label: _("Imie produktu"),                    
                     id: "name",
-                    type: "ed", 
+                    type: "ro", 
                     sort: "str", 
                     align: "left"
                 },
                 {
                     label: _("Typ produktu"),                    
                     id: "product_type_name",
-                    type: "ed", 
+                    type: "ro", 
                     sort: "str", 
                     align: "left"
                 },
                 {
                     label: _("Grupa produktu"),                    
                     id: "product_group_name",
-                    type: "ed", 
+                    type: "ro", 
                     sort: "str", 
                     align: "left"
                 }                          
@@ -142,9 +142,11 @@ function productsTasksInit(cell) {
                     if (selectedId) {
                         var editWindow = createWindow(_("Zadania do produktow"), 300, 300);
                         var editForm = createForm(formStruct, editWindow);
+                        var rowData = zadaniaGrid.getRowData(selectedId);
                         var tasksCombo = editForm.getCombo("task_id");
-                        ajaxGet("api/products/availabletasks/" + selectedProductId, '', function(data){
+                        ajaxGet("api/tasks", '', function(data){
                             tasksCombo.addOption(data.data);
+                            tasksCombo.selectOption(tasksCombo.getIndexByValue(rowData.task_id));
                         });
                         editForm.bind(zadaniaGrid);
                         editForm.unbind(zadaniaGrid);
@@ -164,14 +166,32 @@ function productsTasksInit(cell) {
                 };break;                
                 case "Del": {
                     var selectedId = zadaniaGrid.getSelectedRowId();
-                    var rowData = zadaniaGrid.getRowData(selectedId);
                     if (selectedId) {
-                        ajaxGet("api/products/deletetask/" + rowData.product_id + "/" + rowData.task_id, "", function(data){
-                            if (data && data.success) {
-                                zadaniaGrid.deleteRow(selectedId);
+                        dhtmlx.confirm({
+                            title: _("Ostrożność"),                                    
+                            text: _("Czy na pewno chcesz usunąć zadanie?"),
+                            callback: function(result){
+                                if (result) {                                        
+                                    var rowData = zadaniaGrid.getRowData(selectedId);
+                                    ajaxGet("api/products/deletetask/" + rowData.product_id + "/" + rowData.task_id, "", function(data){
+                                        if (data && data.success) {
+                                            zadaniaGrid.deleteRow(selectedId);
+                                        } else {
+                                            dhtmlx.alert({
+                                                title:_("Wiadomość"),
+                                                text:_("Nie udało się usunąć zadanie!")
+                                            });
+                                        }
+                                    });                            
+                                }
                             }
-                        });    
-                    }                            
+                        });                     
+                    } else {
+                        dhtmlx.alert({
+                            title:_("Wiadomość"),
+                            text:_("Wybierz zadanie, które chcesz usunąć!")
+                        }); 
+                    }
                 };break;
             }
         });  
@@ -189,7 +209,7 @@ function productsTasksInit(cell) {
                 {
                     label: _("Zadanie"),                    
                     id: "name",
-                    type: "coro", 
+                    type: "ro", 
                     width: 150,
                     sort: "str", 
                     align: "left"
@@ -205,7 +225,7 @@ function productsTasksInit(cell) {
                 {                                     
                     label: _("Kolejnosc"),                 
                     id: "priority",
-                    type: "ed",
+                    type: "ro",
                     width: 50,
                     sort: "str", 
                     align: "left"                    
@@ -215,11 +235,30 @@ function productsTasksInit(cell) {
             ]
                 
         });        
-        zadaniaGrid.setColumnHidden(4);
-        zadaniaGrid.setColumnHidden(5);
+        zadaniaGrid.setColumnHidden(4,true);
+        zadaniaGrid.setColumnHidden(5,true);
         zadaniaGrid.attachHeader("#select_filter,#select_filter");		
         zadaniaGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]); 
         zadaniaGrid.enableDragAndDrop(true);
+        zadaniaGrid.attachEvent("onKeyPress", function(code,cFlag,sFlag){
+            if (code == 13) {
+                var id = zadaniaGrid.getSelectedRowId();
+                if (id) {
+                    var data = zadaniaGrid.getRowData(id);
+                    ajaxGet("api/products/tasks/" + data.product_id + "/" + id + "/edit", data, function(data){ 
+                        if (data && data.success) {
+                            console.log(data);
+                        } else {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Zmiany nie zostały zapisane. \n\
+                                        Wprowadź zmiany ponownie!")
+                            });
+                        }
+                    });
+                }
+            }                    
+        });          
         zadaniaGrid.fill = function(id = 0){	
             zadaniaGrid.clearAll();					
             ajaxGet("api/products/tasks/" + id, '', function(data){                                     
@@ -228,29 +267,20 @@ function productsTasksInit(cell) {
                 }
             });                        
         };  
-//        zadaniaGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
-//            console.log("zadaniaGrid.onDrop", arguments);
-//            var data = {};
-//            data.id = sId;
-//            data.priority = tObj.getUserData(tId, "priority");
-//            ajaxGet("api/productstasks/" + sId + "/edit", data, function(data){                                                            
-//                console.log(data);
-//            });   
-//        });
-//        var dpZleceniaForProductGrid = new dataProcessor("api/productstasks", "js");                
-//        dpZleceniaForProductGrid.init(zadaniaGrid);
-//        dpZleceniaForProductGrid.enableDataNames(true);
-//        dpZleceniaForProductGrid.setTransactionMode("REST");
-//        dpZleceniaForProductGrid.enablePartialDataSend(true);
-//        dpZleceniaForProductGrid.enableDebug(true);
-//        dpZleceniaForProductGrid.setUpdateMode("row", true);
-//        dpZleceniaForProductGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-//            data.id = id;
-//            data.task_id = data.task_name;
-//            ajaxGet("api/productstasks/" + id + "/edit", data, function(data){                                                            
-//                console.log(data);
-//            });
-//        });
+        zadaniaGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
+            var productId = productsGrid.getSelectedRowId();           
+            ajaxGet("api/products/tasks/changepriority/" + productId + "/" + sId + "/" + tId, "", function(data){ 
+                if (data && data.success) {
+                    console.log(data);
+                } else {
+                    dhtmlx.alert({
+                        title:_("Wiadomość"),
+                        text:_("Zmiany nie zostały zapisane. \n\
+                                Wprowadź zmiany ponownie!")
+                    });
+                }
+            });            
+        });
 //        var tasksCombo = zadaniaGrid.getCombo(1);
 //        ajaxGet("api/tasks", "", function(data){                                                            
 //            if (data.success && data.data) {
@@ -258,7 +288,8 @@ function productsTasksInit(cell) {
 //                    tasksCombo.put(task.id, task.name);
 //                });
 //            }
-//        });        
+//        });    
+        
         zadaniaGrid.attachFooter(
             [_("Ilosc czasu na wykonanie, min: "),"#cspan","#stat_total"],
             ["text-align:right;","text-align:center"]

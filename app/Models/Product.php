@@ -31,7 +31,8 @@ class Product extends BaseModel
     {
         return $this->belongsToMany('App\Models\Task', 'product_tasks', 'product_id', 'task_id')
                 ->withPivot('duration', 'priority')
-                ->withTimestamps();        
+                ->withTimestamps()
+                ->orderBy("priority", "asc");        
     }     
     
     public function components()

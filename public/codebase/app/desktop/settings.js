@@ -1225,9 +1225,12 @@ function createForm(formStruct, windowObj){
     });
                     
     myForm.attachEvent("onChange", function (name, value, state){
-        if (name.indexOf("price") !== -1) {
+        if ((name.indexOf("price") !== -1) ||                
+                (name.indexOf("weight") !== -1) ||
+                (name.indexOf("area") !== -1)) {
             //var re = /^\d[0-9,]+\d$/;
-            var re = /^\d{1,8}([,\.])?\d{1,2}$/;
+            //var re = /^\d{1,8}([,\.])?\d{1,2}$/;
+            var re = /^\d{1,8}([\.])?\d{1,2}$/;
             if (!re.test(value)) {
                 myForm.setItemValue(name, "");
             }            
@@ -1244,11 +1247,13 @@ function createForm(formStruct, windowObj){
     if (dateEndCombo) {
         var numCurrentWeek = new Date().getWeekNumber();
         for (var i = 1; i <= 53; i++) {
-            dateEndCombo.addOption(i, _("tydzień ") + i);
+            dateEndCombo.addOption(i, "" + i);
         }
         dateEndCombo.attachEvent("onChange", function(value, text){
             if (value < numCurrentWeek) {
-                myForm.addItem(null, {type: "label", name: "on_next_year", label: _("Na nastepny rok")}, null, 1);
+                if (!myForm.isItem("on_next_year")) {
+                    myForm.addItem(null, {type: "label", name: "on_next_year", label: _("Na nastepny rok")}, null, 1);
+                }
             } else {
                 myForm.removeItem("on_next_year");
             }

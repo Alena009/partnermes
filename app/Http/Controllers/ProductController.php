@@ -132,6 +132,8 @@ class ProductController extends BaseController
                 $task->task_name= $task->name;
                 $task->product_id = $product->id;
                 $task->task_id    = $task->id;
+                $task->text  = $task->name;  
+                $task->value = (string)$task->id;                
             }        
         }
         return $this->getResponseResult($tasks);       
@@ -298,6 +300,31 @@ class ProductController extends BaseController
         
         return response()->json(['success' => (boolean)$result, 'data' => $result]);     
     }    
+    
+    public function changePriorityTask($productId, $sTaskId, $tTaskId)
+    {        
+        $product = $this->repository->get($productId);
+        $tasks = $product->tasks;
+        
+        foreach ($tasks as $task) {
+            if ($task->id == $sTaskId) {
+                $sTaskPriority = $task->pivot->priority;
+            } elseif ($task->id == $tTaskId) {
+                $tTaskPriority = $task->pivot->priority;
+            }
+        }
+        
+        $result = DB::table('product_tasks')
+            ->where("product_id", "=", $productId)
+            ->where("task_id", "=", $sTaskId)
+            ->update(['priority' => $tTaskPriority]); 
+        $result = DB::table('product_tasks')
+            ->where("product_id", "=", $productId)
+            ->where("task_id", "=", $tTaskId)
+            ->update(['priority' => $sTaskPriority]);        
+        
+        return response()->json(['success' => (boolean)$result, 'data' => $result]);     
+    }       
     
     
     /**

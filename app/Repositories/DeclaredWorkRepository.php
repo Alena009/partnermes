@@ -44,6 +44,9 @@ class DeclaredWorkRepository extends BaseRepository
             $declaredWork->value             = $task->id; 
             $declaredWork->closed            = $closed;
             $declaredWork->checked           = $checked;
+            $declaredWork->damount = $model::where('kod', '=', $declaredWork->kod)
+                    ->where('task_id', '=', $declaredWork->task->id)
+                    ->sum('declared_amount'); 
         }
         
         return $declaredWork; 
@@ -60,7 +63,7 @@ class DeclaredWorkRepository extends BaseRepository
         $model    = $this->model();
         $declaredWorks = $model::whereIn('task_id', $tasksIds)
                 ->orderBy('id', 'desc')
-                ->selectRaw('*, sum(declared_amount) as damount')
+                //->selectRaw('*, sum(declared_amount) as damount')
                 ->groupBy('kod', 'product_id', 'task_id')                    
                 ->get();
         
@@ -76,7 +79,8 @@ class DeclaredWorkRepository extends BaseRepository
     {
         $model = $this->model();
         $declaredWorks = $model::orderBy('id', 'desc')
-                    ->selectRaw('*, sum(declared_amount) as declared_amount')
+                    ->orderBy('id', 'desc')
+                    //->selectRaw('*, sum(declared_amount) as damount')
                     ->groupBy('kod', 'product_id', 'task_id')                    
                     ->get();
         

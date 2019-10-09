@@ -34,7 +34,12 @@ class OrderController extends BaseController
             $order['text']        = $order->kod;
             $order['value']       = $order->id;
             $date = new \DateTime($order->date_end);
-            $order['num_week'] = $date->format("W");
+            $order['num_week']    = $date->format("W");
+            $order['available']   = 1;
+            $tasks = $this->getTasks($order->id);
+            if (count($tasks)) {
+                $order['available'] = 0;
+            }
         }
         
         return response()->json(['data' => $orders, 'success' => (boolean)count($orders)]);        
@@ -128,7 +133,12 @@ class OrderController extends BaseController
             $position['text']         = $productName;
             $position['value']        = $position['id'];
             $date = new \DateTime($position->date_delivery);
-            $position['num_week'] = $date->format("W");    
+            $position['num_week'] = $date->format("W"); 
+            $position['available']   = 1;
+            $tasks = DeclaredWork::where("order_position_id", "=", $position->id)->get();
+            if (count($tasks)) {
+                $position['available'] = 0;
+            }            
         }
 
         return response()->json(['data' => $positions, 'success' => (boolean)count($positions)]);        
@@ -156,14 +166,25 @@ class OrderController extends BaseController
      * @return type
      */
     public function beguntasks($orderId)
-    {
-        $tasks        = [];
-        $order        = Order::find($orderId);
-        $positions    = $order->positions;
-        $positionsIds = $positions->pluck('id');
-        
-        $tasks = DeclaredWork::whereIn("order_position_id", $positionsIds)->get();
+    {        
+        $tasks = $this->getTasks($orderId);
                         
         return response()->json(['data' => $tasks, 'success' => (boolean)count($tasks)]);         
     }
+    
+    public function getTasks($orderId) 
+    {
+        $result = [];
+        $order = []; 
+        $order = Order::find($orderId);
+        
+        if ($order) {
+            $positions    = $order->positions;
+            $positionsIds = $positions->pluck('id');
+            $result = DeclaredWork::whereIn("order_position_id", $positionsIds)->get();
+        }
+        
+        return $result;
+    }
+    
 }

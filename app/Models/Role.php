@@ -6,7 +6,7 @@ use \App\Models\BaseModel;
 
 class Role extends BaseModel
 {
-    use \Dimsav\Translatable\Translatable;
+    use \Astrotomic\Translatable\Translatable;
     
     protected $table = "roles";
     

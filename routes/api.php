@@ -28,6 +28,7 @@ Route::group([
     Route::get('/declaredworks/makegeneral/{works}', 'DeclaredWorkController@makeGeneral');   
     Route::get('/declaredworks/listforzlecenie/{workId}', 'DeclaredWorkController@listWorksForZlecenie');   
     Route::get('/declaredworks/delzlec/{selectedWorks}', 'DeclaredWorkController@deleteZlecenie');   
+    Route::get('/declaredworks/group', 'DeclaredWorkController@groupedworks');   
     Route::resource('/declaredworks', 'DeclaredWorkController'); 
     
     Route::get('/departaments/grupytree', 'DepartamentController@buildTree');
@@ -49,6 +50,7 @@ Route::group([
     Route::get('/positions/list/tasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/beguntasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/componenttasks', 'OrderPositionController@listTasksForPositionComponent');
+    Route::get('/positions/components/{position}', 'OrderPositionController@positionComponents');
     Route::resource('/positions', 'OrderPositionController');      
     
     Route::resource('/prodtypes', 'ProductTypeController'); 

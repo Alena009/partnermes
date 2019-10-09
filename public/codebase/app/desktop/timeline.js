@@ -100,6 +100,13 @@ function timelineInit(cell) {
         scheduler.config.multi_day = true;
         scheduler.config.time_step = 1;
         
+        ajaxGet("api/declaredworks/group", "", function(data){
+            console.log(data.data);
+            if (data && data.success) {
+                scheduler.updateCollection("zlecenia", data.data);
+            }
+        });      
+        
         scheduler.config.lightbox.sections=[	
             {name:"Pracownik",  type:"timeline", options:scheduler.serverList("users") , map_to:"user_id" }, //type should be the same as name of the tab
             //{name:"Pracownik", height:40, map_to:"id_user", type:"select", options:scheduler.serverList("pracownicy")},
@@ -107,7 +114,7 @@ function timelineInit(cell) {
             //{name:"Zlecenie",  map_to:"kod", type:"zlecenieEditor",onchange:changeZlecenia},
             {name:"Zlecenie", type:"combo", filtering:true, height:50, width: 150,
                 options:scheduler.serverList("zlecenia"), 
-                map_to:"order_position_id", 
+                map_to:"declared_work_id", 
                 onchange:changeZlecenia},
 //            {name:"Zadanie", type:"combo", filtering:true, height:50, width: 150,
 //                options:scheduler.serverList("tasks"), 
@@ -124,9 +131,7 @@ function timelineInit(cell) {
 //                map_to:"auto", time_format:["%Y","%m","%d","%H:%i"]}
         ];           
         
-        ajaxGet("api/declaredworks", "", function(data){
-            scheduler.updateCollection("zlecenia", data.data);
-        }); 
+ 
         
         function changeZadania(){
                 console.log(this);

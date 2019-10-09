@@ -6,27 +6,11 @@ function productsTasksInit(cell) {
         productsTasksLayout.cells("a").hideHeader();
         productsTasksLayout.cells("b").hideHeader();
     
-        var productsGridToolBar = productsTasksLayout.cells("a").attachToolbar({
+        productsGridToolBar = productsTasksLayout.cells("a").attachToolbar({
                 iconset: "awesome",
                 items: [
-                        {type: "text", id: "title", text: _("Produkty")},
-                        {type: "spacer"},
-                       // {id: "Del", type: "button", img: "fa fa-minus-square"}				                               
+                        {type: "text", id: "title", text: _("Produkty")}				                               
                 ]                    
-        });
-        productsGridToolBar.attachEvent("onClick", function(name) {
-            switch (name){                
-                case 'Del': {
-                    var selectedId = productsGrid.getSelectedRowId();
-                    if (selectedId) {                                 
-                        ajaxDelete("api/products/" + selectedId,'', function(data){
-                            if (data && data.success) {
-                                productsGrid.deleteRow(selectedId);
-                            }
-                        });                           
-                    }
-                };break;                        
-            }
         });
         var productsGrid = productsTasksLayout.cells("a").attachGrid({
             image_path:'codebase/imgs/',
@@ -133,6 +117,11 @@ function productsTasksInit(cell) {
                                     }
                                 });
                             }
+                        });
+                    } else {
+                        dhtmlx.alert({
+                            title:_("Wiadomość"),
+                            text:_("Wybierz produkt, do którego chcesz dodać zadania!")
                         });
                     }
                 };break;

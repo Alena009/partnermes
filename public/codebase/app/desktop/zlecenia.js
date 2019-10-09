@@ -241,7 +241,7 @@ function zleceniaInit(cell) {
                                 } else {
                                     ordersPositionsGridToolbar.enableItem("Add");
                                 }                          
-                                componentsGrid.filterBy(7,id);                                  
+                                componentsGrid.fill(id);                                  
                             });    
                             
                             ordersPositionsGrid.getFilterElement(5)._filter = function (){
@@ -408,14 +408,14 @@ function zleceniaInit(cell) {
                                 }
                             });                                     
                             
-                            componentsGrid.fill = function(positionId) {                                    
-                                ajaxGet("api/positions/list/components", "", function(data){
+                            componentsGrid.fill = function(positionId) { 
+                                componentsGrid.clearAll();
+                                ajaxGet("api/positions/components/" + positionId, "", function(data){
                                     if (data.success && data.data) {																										
                                         componentsGrid.parse((data.data), "js");
                                     }
                                 });
                             };                              
-                            componentsGrid.fill();
                             
                             var formStructure = [
                                 {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		
@@ -747,8 +747,8 @@ function zleceniaInit(cell) {
                         {label: "Imie produktu",       id:'product_name',      width: 200, type: "ro", sort: "str",  align: "left"},
                         //{label: "Typ produktu",        id:'product_type_name', width: 200, type: "ro", sort: "str",  align: "left"},
                         {label: "Ilość produktu",      id:'amount',            width: 60,  type: "ro",sort: "str",  align: "right"},
-                        {label: "Zadeklarowana ilość", id:'declared_amount',   width: 60,  type: "edn",sort: "str",  align: "right"},
-                        {label: "Zrobiona ilość",      id:'done_amount',       width: 60,  type: "edn",sort: "str",  align: "right"},
+                        {label: "Zadeklarowana ilość robot", id:'damount',   width: 60,  type: "edn",sort: "str",  align: "right"},
+                        {label: "Zrobiona ilość robot",      id:'done_amount',       width: 60,  type: "edn",sort: "str",  align: "right"},
                         {label: "Zamknięte",           id:'closed',            width: 30,  type: "ch", align: "center"},
                         {label: "Data dodania",        id:'created_at',        width: 120, type: "ro", sort: "date", align: "center"},
                         {label: "Data zamkniecia",     id:'date_closing',      width: 120, type: "ro", sort: "date", align: "center"},

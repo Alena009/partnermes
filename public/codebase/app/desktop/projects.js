@@ -53,8 +53,8 @@ function projectsInit(cell) {
                         {type: "input", name: "kod",       required: true, label: _("Kod zamowienia")},
                         {type: "input", name: "name",      required: true, label: _("Zamowienie"),                           
                            note: {text: _("Dodaj imie zamowienia. Jest obowiazkowe.")}},
-                        {type: "input", name: "description", label: _("Opis"), rows: 3,
-                           note: {text: _("Dodaj opis zamowienia. Nie jest obowiazkowe.")}},
+                        {type: "input", name: "description",required: true, label: _("Opis"), rows: 3,
+                           note: {text: _("Dodaj opis zamowienia. Obowiazkowe.")}},
                         {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 
                             required: true, dateFormat: "%Y-%m-%d", enableTodayButton: true,
                             note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},                       
@@ -136,30 +136,16 @@ function projectsInit(cell) {
                         case 'Del': {                            
                             var orderId = projectsGrid.getSelectedRowId();                            
                             if (orderId) {
-                                var rowData = projectsGrid.getRowData(orderId);
-                                //ajaxGet("api/orders/beguntasks/" + orderId, "", function (data){
-                                    if (rowData.available == 0) {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Nie mozna usunąć zamowienie. \n\
-                                                    Juz sa zlecenia dla tego zamowienia.")
-                                        });                                            
-                                    } else {                                
-                                        dhtmlx.confirm({
-                                            title: _("Ostrożność"),                                    
-                                            text: _("Czy na pewno chcesz usunąć zamowienie?"),
-                                            callback: function(result){
-                                                if (result) {                                
-                                                    ajaxDelete("api/orders/" + orderId, "", function(data){
-                                                        if (data && data.success) {
-
-                                                        }
-                                                    }); 
-                                                }
-                                            }
-                                        });
-                                    }
-                                //});
+                                var rowData = projectsGrid.getRowData(orderId);                                
+                                if (rowData.available == 0) {
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        text:_("Nie mozna usunąć zamowienie. \n\
+                                                Juz sa zlecenia dla tego zamowienia.")
+                                    });                                            
+                                } else { 
+                                    projectsGrid.deleteMyRecordById("api/orders/");
+                                }
                             } else {
                                 dhtmlx.alert({
                                     title:_("Wiadomość"),

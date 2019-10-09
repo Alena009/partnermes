@@ -71,7 +71,17 @@ function productsInit(cell) {
                                             if (name == "save") {
                                                 ajaxPost("api/products/addtask", data, function(data){
                                                     if(data && data.success){
-                                                        tasksGrid.fill(selectedProductId);                                                        
+                                                        tasksGrid.fill(selectedProductId);  
+                                                        dhtmlx.alert({
+                                                            title:_("Wiadomość"),
+                                                            text:_("Zapisane!")
+                                                        });                                                        
+                                                    } else {
+                                                        dhtmlx.alert({
+                                                            title:_("Wiadomość"),
+                                                            text:_("Zmiany nie zostały zapisane. \n\
+                                                                    Wprowadź zmiany ponownie!")
+                                                        });                                                         
                                                     }
                                                 });
                                             }
@@ -321,7 +331,17 @@ function productsInit(cell) {
                             case 'save':{ 
                                 ajaxPost("api/products", productForm.getFormData(), function(data) {
                                     if (data && data.success) {
-                                        productsGrid.fill();                                       
+                                        productsGrid.fill();
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Zapisane!")
+                                        });                                          
+                                    } else {
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Zmiany nie zostały zapisane. \n\
+                                                    Wprowadź ponownie!")
+                                        });                                         
                                     }
                                 }); 
                             };break;
@@ -371,32 +391,7 @@ function productsInit(cell) {
                     }
                 };break;
                 case 'Del': {
-                    var selectedRows = productsGrid.getSelectedRowId();                                       
-                        if (selectedRows) {
-                        dhtmlx.confirm({
-                            title: _("Ostrożność"),                                    
-                            text: _("Czy na pewno chcesz usunąć ten produkt/produkty?"),
-                            callback: function(result){
-                                if (result) {                                     
-                                    ajaxGet("api/products/deleteseveral/" + selectedRows,'', function(data){
-                                        if (data && data.success) {
-                                            productsGrid.deleteSelectedRows();
-                                        } else {
-                                            dhtmlx.alert({
-                                                title:_("Wiadomość"),
-                                                text:_("Nie udało się usunąć produkt!")
-                                            }); 
-                                        }
-                                    }); 
-                                }
-                            }
-                        });                                                  
-                    } else {
-                        dhtmlx.alert({
-                            title:_("Wiadomość"),
-                            text:_("Wybierz produkt/produkty, który chcesz usunąć!")
-                        });                        
-                    }
+                        productsGrid.deleteMyRecordById("api/products/");
                 };break;   
                 case 'Redo': {
                     productsGrid.fill();
@@ -460,6 +455,12 @@ function productsInit(cell) {
             ajaxGet("api/products", '', function(data){                                     
                 if (data && data.success){                                    
                     productsGrid.parse(data.data, "js");
+                } else {
+                    dhtmlx.alert({
+                        title:_("Wiadomość"),
+                        text:_("Komponenty nie zostały załadowane. \n\
+                                Odśwież stronę!")
+                    });                    
                 }
             });                        
         };                

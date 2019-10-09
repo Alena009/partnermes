@@ -57,6 +57,13 @@ class OrderPositionController extends BaseController
     }
     
     
+    public function positionComponents($positionId)
+    {
+        $components = $this->getComponentsForPosition($positionId);
+        
+        return $this->getResponseResult($components);        
+    }
+    
     public function getComponentsForPosition($positionId)
     {
         $position   = $this->repository->getPositionWithAdditionalFields($positionId);

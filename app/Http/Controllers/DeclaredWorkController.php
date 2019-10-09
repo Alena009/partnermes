@@ -16,6 +16,21 @@ class DeclaredWorkController extends BaseController
         $this->setRepository($rep);
     }
     
+    public function index() {
+        return $this->getResponseResult($this->repository->getAllDeclaredWorks());
+    }
+    
+    
+    public function groupedWorks()
+    {
+        $groupedWorks = $this->repository->getDeclaredWorksGroupByKod();
+        foreach ($groupedWorks as $work) {
+            $work['key']   = $work['id'];
+            $work['label'] = $work['kod'];
+        }
+        return $this->getResponseResult($groupedWorks);
+    }
+    
     /**
      * Get list of declared works by task groups ids
      * 
@@ -28,7 +43,7 @@ class DeclaredWorkController extends BaseController
             return $this->getResponseResult($this->
                     getDeclaredWorksByTaskGroups($groupsIds));     
         } else {
-            return $this->getResponseResult($this->getAllDeclaredWorks());    
+            return $this->getResponseResult($this->repository->getAllDeclaredWorks());    
         }        
     }  
     
@@ -60,10 +75,10 @@ class DeclaredWorkController extends BaseController
      * 
      * @return array
      */
-    public function getAllDeclaredWorks()
-    {
-        return $this->repository->getAllDeclaredWorks();
-    }
+//    public function getAllDeclaredWorks()
+//    {
+//        return $this->repository->getAllDeclaredWorks();
+//    }
     
     /**
      * Gets declared works by tasks groups ids

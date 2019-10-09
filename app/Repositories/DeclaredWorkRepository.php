@@ -60,7 +60,7 @@ class DeclaredWorkRepository extends BaseRepository
         $model    = $this->model();
         $declaredWorks = $model::whereIn('task_id', $tasksIds)
                 ->orderBy('id', 'desc')
-                ->selectRaw('*, sum(declared_amount) as declared_amount')
+                ->selectRaw('*, sum(declared_amount) as damount')
                 ->groupBy('kod', 'product_id', 'task_id')                    
                 ->get();
         
@@ -151,6 +151,11 @@ class DeclaredWorkRepository extends BaseRepository
     {
         $zleceniaCodes = $this->getDeclaredWorksKodsByIds($worksIds);
         return $this->getAllDeclaredWorksByKods($zleceniaCodes);  
+    }
+    
+    public function getDeclaredWorksGroupByKod()
+    {
+        return $this->model::groupBy("kod")->get();
     }
 
     /**

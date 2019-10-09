@@ -76,8 +76,7 @@ function settingsInit(cell) {
                                         ajaxPost("api/roles", form.getFormData(), function(data){ 
                                             if (data.success) {
                                                 ajaxPost("api/rolespermissions/fillRole/" + data.data.id, '', '');                                                   
-                                                rolesTree.addItem(data.data.id, data.data.name);
-                                                windowForm.close();                                                                                                                                                            
+                                                rolesTree.addItem(data.data.id, data.data.name);                                                                                                                                                            
                                             } else {
                                                 dhtmlx.message({
                                                     title:_("Wiadomość"),
@@ -106,7 +105,6 @@ function settingsInit(cell) {
                                             ajaxGet("api/roles/" + roleId + "/edit", form.getFormData(), function(data){                                                            
                                                 if (data.success) {                                                 
                                                     rolesTree.setItemText(roleId, data.data.name);
-                                                    windowForm.close();
                                                 } 
                                             });
                                         };break;
@@ -1280,7 +1278,53 @@ Date.prototype.getWeekNumber = function(){
     d.setHours(0,0,0,0);
     d.setDate(d.getDate()+4-(d.getDay()||7));
     return Math.ceil((((d-new Date(d.getFullYear(),0,1))/8.64e7)+1)/7);
-};               
+};   
+
+dhtmlXGridObject.prototype.deleteMyRecordById = function(url){
+    var thisGrid = this;
+    var id = thisGrid.getSelectedRowId();                                       
+    if (id) {
+        dhtmlx.confirm({
+            title: _("Ostrożność"),                                    
+            text: _("Czy na pewno chcesz usunąć te informacje?"),
+            callback: function(result){
+                if (result) {                                     
+                    ajaxDelete(url + id,'', function(data){
+                        if (data && data.success) {
+                            thisGrid.deleteRow(id);
+                        } else {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Nie udało się usunąć informacje!")
+                            }); 
+                        }
+                    }); 
+                }
+            }
+        });                                                  
+    } else {
+        dhtmlx.alert({
+            title:_("Wiadomość"),
+            text:_("Wybierz co chcesz usunąć!")
+        });                        
+    }
+};
+
+//dhtmlXGridObject.prototype.fill = function(url) {
+//    var thisGrid = this;
+//    thisGrid.clearAll();
+//    ajaxGet(url, '', function(data){                                     
+//        if (data && data.success){                                    
+//            thisGrid.parse(data.data, "js");
+//        } else {
+//            dhtmlx.alert({
+//                title:_("Wiadomość"),
+//                text:_("Komponenty nie zostały załadowane. \n\
+//                        Odśwież stronę!")
+//            });                    
+//        }
+//    });     
+//};
 
 //dhtmlXGridObject.prototype._in_header_stat_total_sum=function(tag,index,data){//'stat_rowcount'-counter name
 //    var calc=function(){                       // function used for calculations
@@ -1294,26 +1338,7 @@ Date.prototype.getWeekNumber = function(){
 //    };
 //    this._stat_in_header(tag,calc,index,data); // default statistics handler processor
 //}; 
-                            
-//function regExpFilter(input, colIdx, gridObj) {
-//                                input = input.trim().toLowerCase().split(' ');
-//                                return function(value, id){
-//                                    //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
-//                                        var val = gridObj.cells(id, colIdx).getValue(); // gets the value of the current                                                    
-//                                        //making pattern string for regexp
-//                                        var searchStr = '';
-//                                        for (var i = 0; i < input.length; i++) {
-//                                            searchStr = searchStr + input[i] + "(.*)";                                                                
-//                                            //var searchStr = /^zz(.+)np(.+)/ig;
-//                                        }
-//                                        var regExp = new RegExp("^" + searchStr, "ig");                                                          
-//                                        if (val.toLowerCase().match(regExp)){                                                             
-//                                            return true;
-//                                        }                                                    
-//                                    //}
-//                                    return false;
-//                                };    
-//}                            
+                                                    
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 	if (id == "settings") {

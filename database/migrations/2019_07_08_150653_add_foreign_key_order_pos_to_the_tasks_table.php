@@ -15,7 +15,7 @@ class AddForeignKeyOrderPosToTheTasksTable extends Migration
     {
         Schema::table('tasks', function (Blueprint $table) {
             $table->unsignedInteger('order_position_id')->change();
-            $table->foreign('order_position_id')->references('id')->on('orders_positions')->onDelete('cascade');
+            //$table->foreign('order_position_id')->references('id')->on('orders_positions')->onDelete('cascade');
         });
     }
 

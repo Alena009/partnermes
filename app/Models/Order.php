@@ -7,7 +7,7 @@ use \App\Http\Controllers\OrderHistoryController;
 
 class Order extends BaseModel
 {    
-    use \Dimsav\Translatable\Translatable;
+    use \Astrotomic\Translatable\Translatable;
     
     protected $table = "orders";
     

@@ -6,7 +6,7 @@ use \App\Models\BaseModel;
 
 class Product extends BaseModel
 {
-    use \Dimsav\Translatable\Translatable;
+    use \Astrotomic\Translatable\Translatable;
     
     protected $table = "products";
     

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddProductIdOrdersPositions extends Migration
+class ChangeParentIdFieldAtTasksGroupsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class AddProductIdOrdersPositions extends Migration
      */
     public function up()
     {
-        Schema::table('orders_positions', function (Blueprint $table) {
-            $table->UnsignedInteger('product_id')->after('order_id');  
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+        Schema::table('tasks_groups', function (Blueprint $table) {
+            $table->dropForeign('tasks_groups_parent_id_foreign');  
         });
     }
 
@@ -26,7 +25,8 @@ class AddProductIdOrdersPositions extends Migration
      */
     public function down()
     {
-        Schema::table('orders_positions', function (Blueprint $table) {
+        Schema::table('tasks_groups', function (Blueprint $table) {
+            //
         });
     }
 }

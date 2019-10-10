@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class DropColumnsAtTasksTable extends Migration
+class AddForeignKeyOrderPosToTheTasksTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,8 @@ class DropColumnsAtTasksTable extends Migration
     public function up()
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->dropColumn('order_position_id');
-            $table->dropColumn('product_id');
+            $table->unsignedInteger('order_position_id')->change();
+            $table->foreign('order_position_id')->references('id')->on('orders_positions')->onDelete('cascade');
         });
     }
 

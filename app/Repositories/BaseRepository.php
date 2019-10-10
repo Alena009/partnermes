@@ -269,7 +269,7 @@ class BaseRepository
         return $this->withAdditionals($data);
     }
 
-    private function withAdditionals($data)
+    public function withAdditionals($data)
     {
         $result = [];
         

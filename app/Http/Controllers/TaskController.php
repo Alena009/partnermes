@@ -71,7 +71,7 @@ class TaskController extends BaseController
             $groupsIds = explode(',', $groups);
             return $this->getResponseResult($this->repository->getListTasksByGroups($groupsIds));                      
         } else {
-            return $this->getResponseResult($this->allWithAdditionals());                              
+            return $this->getResponseResult($this->repository->allWithAdditionals());                              
         }            
     }
 }

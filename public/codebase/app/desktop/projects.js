@@ -273,10 +273,22 @@ function projectsInit(cell) {
                                     }
                                 });
                             } else {
-                                dhtmlx.alert({
-                                    title:_("Wiadomość"),
-                                    text:_("Wybierz zamówienie, które chcesz zmienic!")
-                                });  
+                                var data = projectsForm.getFormData();
+                                data.date_start = projectsForm.getCalendar("date_start").getDate(true);                                         
+                                ajaxPost("api/orders", data, function(data){
+                                    if (data && data.success) {
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Zapisane")
+                                        });
+                                        projectsGrid.fill();                                                                                                
+                                    } else {
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Błąd! Zmiany nie zostały zapisane")
+                                        });
+                                    }
+                                }); 
                             }
                         };break;
                     }

@@ -41,22 +41,22 @@ class TaskGroupController extends BaseController
      */
     public function store(Request $request)
     {
-        $task_group = [];
-        $result = [];
+        $taskGroup = [];
         $locale = app()->getLocale();
         
-        $task_group = new \App\Models\TaskGroup();                
-        $task_group->parent_id = $request['parent_id']; 
-        $task_group->save();
+        $taskGroup = new \App\Models\TaskGroup();                        
+        if ($request['parent_id']) {
+            $taskGroup->parent_id = $request['parent_id'];        
+        } 
+        $taskGroup->save();
+        
 
         //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-        $task_group->translateOrNew($locale)->name = $request['name'];                        
+        $taskGroup->translateOrNew($locale)->name = $request['name'];                        
         //}
 
-        $task_group->save();
+        $taskGroup->save();
 
-        $result = ['data' => $task_group, 'success' => true];
-
-        return response()->json($result);
+        return $this->getResponseResult($taskGroup);
     }    
 }

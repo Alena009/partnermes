@@ -21,13 +21,4 @@ class OrderHistoryController extends BaseController
     {
         return $this->getResponseResult($this->repository->allWithStatuses());
     }
-    
-    public static function changeOrderStatus($orderId, $statusId)
-    {
-        $orderHistory = new OrderHistory();
-        $orderHistory->order_id  = $orderId;
-        $orderHistory->status_id = $statusId;
-        
-        return $orderHistory->save();         
-    }
 }

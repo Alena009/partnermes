@@ -40,21 +40,20 @@ class ProductGroupController extends BaseController
     public function store(Request $request)
     {
         $productGroup = [];
-        $result = [];
         $locale = app()->getLocale();
         
         $productGroup = new ProductGroup();
-        $productGroup->parent_id = $request['parent_id'];               
+        if ($request['parent_id']) {
+            $productGroup->parent_id = $request['parent_id'];        
+        } 
         $productGroup->save();
-
+        
         //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
         $productGroup->translateOrNew($locale)->name = $request['name'];             
         //}
 
         $productGroup->save();
-        
-        $result = ['data' => $productGroup, 'success' => true];
 
-        return response()->json($result);
+        return $this->getResponseResult($productGroup);
     }
 }

@@ -3,7 +3,8 @@
 namespace App\Models;
 
 use \App\Models\BaseModel;
-use \App\Http\Controllers\OrderHistoryController;
+use App\Models\OrderHistory;
+use App\Models\Status;
 
 class Order extends BaseModel
 {    
@@ -34,8 +35,14 @@ class Order extends BaseModel
         return $this->hasMany('App\Models\OrderPosition');
     }
     
-    public function changeStatus($orderId, $statusId)
-    {
-        OrderHistoryController::changeOrderStatus($orderId, $statusId);
+    public function changeStatus()
+    {        
+        $statuses = Status::all()->first();
+        
+        $orderHistory = new OrderHistory;
+        $orderHistory->order_id = $this->id;
+        $orderHistory->status_id = $statuses->id;
+        
+        return $orderHistory->save(); 
     }
 }

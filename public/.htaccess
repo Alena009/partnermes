@@ -1,12 +1,12 @@
-<FilesMatch \.php$>
+#<FilesMatch \.php$>
     # Apache 2.4.10+ can proxy to unix socket
-    SetHandler "proxy:unix:/var/run/php/php7.2-fpm.sock|fcgi://localhost/"
-</FilesMatch>
+    # SetHandler "proxy:unix:/var/run/php/php7.2-fpm.sock|fcgi://localhost/"
+#</FilesMatch>
 
 <IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
+    #<IfModule mod_negotiation.c>
+    #    Options -MultiViews -Indexes
+    #</IfModule>
 
     RewriteEngine On
 

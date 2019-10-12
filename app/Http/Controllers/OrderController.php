@@ -75,8 +75,8 @@ class OrderController extends BaseController
                 $order->translateOrNew($locale)->name        = $request['name'];            
                 $order->translateOrNew($locale)->description = $request['description'];            
             //}
-            $order->save(); 
-            $order->changeStatus($order->id, 1);
+            $order->save();             
+            $order->changeStatus();
         }     
 
         return response()->json(['data' => $order, 'success' => true]);        

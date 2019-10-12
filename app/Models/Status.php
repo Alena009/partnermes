@@ -11,7 +11,7 @@ class Status extends BaseModel
     protected $table = "statuses";
     
     protected $fillable = [
-        'name'
+        'name', 'description'
     ];
     
     /* fields for translating */    

@@ -455,12 +455,6 @@ function productsInit(cell) {
             ajaxGet("api/products", '', function(data){                                     
                 if (data && data.success){                                    
                     productsGrid.parse(data.data, "js");
-                } else {
-                    dhtmlx.alert({
-                        title:_("Wiadomość"),
-                        text:_("Komponenty nie zostały załadowane. \n\
-                                Odśwież stronę!")
-                    });                    
                 }
             });                        
         };                
@@ -522,10 +516,21 @@ function productsInit(cell) {
                             });
                         }
                     } else {
-                            dhtmlx.alert({
-                                title:_("Wiadomość"),
-                                text:_("Wybierz produkt, który chcesz zmienic!")
-                            });                        
+                        ajaxPost("api/products", productForm.getFormData(), function(data) {
+                            if (data && data.success) {
+                                productsGrid.fill();
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Zapisane!")
+                                });                                          
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Zmiany nie zostały zapisane. \n\
+                                            Wprowadź ponownie!")
+                                });                                         
+                            }
+                        });                      
                     }
                 };break;              
             }

@@ -49,11 +49,12 @@ class DepartamentController extends BaseController
     public function store(Request $request)
     {
         $departament = [];
-        $success = false;
         $locale = app()->getLocale();
         
         $departament = new Departament();
-        $departament->parent_id = $request['parent_id'];                
+        if ($request['parent_id']) {
+            $departament->parent_id = $request['parent_id'];        
+        } 
         $departament->save();        
         
         $departament->translateOrNew($locale)->name = $request['name'];            
@@ -62,13 +63,9 @@ class DepartamentController extends BaseController
 //            $departament->translateOrNew($locale)->name = $request['name'];            
 //        }
 
-        $departament->save();
-        
-        if (!empty((array)$departament)) {
-            $success = true;
-        }
+        $departament->save();              
 
-        return response()->json(['data' => $departament, 'success' => $success]);
+        return $this->getResponseResult($departament);
     }
     
     /**

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class DropColumnsOrderPosProductIdAtTasksTable extends Migration
+class AddForeignKeyOnParentIdFieldInTheDepartamentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class DropColumnsOrderPosProductIdAtTasksTable extends Migration
      */
     public function up()
     {
-        Schema::table('tasks', function (Blueprint $table) {            
-            $table->dropColumn('order_position_id');            
-            $table->dropColumn('product_id');
+        Schema::table('departaments', function (Blueprint $table) {
+            $table->unsignedInteger('parent_id')->change();
+            $table->foreign('parent_id')->references('id')->on('departaments')->onDelete('cascade');
         });
     }
 
@@ -26,7 +26,7 @@ class DropColumnsOrderPosProductIdAtTasksTable extends Migration
      */
     public function down()
     {
-        Schema::table('tasks', function (Blueprint $table) {
+        Schema::table('departaments', function (Blueprint $table) {
             //
         });
     }

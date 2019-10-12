@@ -142,7 +142,7 @@ class BaseController extends Controller
      */    
     public function buildTree() {
         $model = $this->repository->getModel();
-        $parents = $model::where('parent_id', '=', 0)->get('id', 'name');   
+        $parents = $model::where('parent_id', '=', null)->get('id', 'name');   
         $tree = [];
         
         foreach ($parents as $parent) {             

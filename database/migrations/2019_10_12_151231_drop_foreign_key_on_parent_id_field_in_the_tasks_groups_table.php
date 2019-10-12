@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class ChangeParentIdFieldAtProductGroupsTable extends Migration
+class DropForeignKeyOnParentIdFieldInTheTasksGroupsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class ChangeParentIdFieldAtProductGroupsTable extends Migration
      */
     public function up()
     {
-        Schema::table('product_groups', function (Blueprint $table) {
-            $table->dropForeign('product_groups_parent_id_foreign');  
+        Schema::table('tasks_groups', function (Blueprint $table) {
+            $table->dropForeign(['parent_id']);            
         });
     }
 
@@ -25,7 +25,7 @@ class ChangeParentIdFieldAtProductGroupsTable extends Migration
      */
     public function down()
     {
-        Schema::table('product_groups', function (Blueprint $table) {
+        Schema::table('tasks_groups', function (Blueprint $table) {
             //
         });
     }

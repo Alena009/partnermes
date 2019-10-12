@@ -81,6 +81,8 @@ Route::group([
     Route::post('/rolespermissions/addToRoles/{permissionId}', 'RolePermissionController@addNewPermissionToRoles');
     Route::resource('/rolespermissions', 'RolePermissionController');    
     
+    Route::resource('/statuses', 'StatusController');
+    
     Route::get('/tasks/listbygroups/{groups?}', 'TaskController@listByGroups');    
     Route::resource('/tasks', 'TaskController');    
     

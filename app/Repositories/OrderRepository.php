@@ -8,4 +8,13 @@ class OrderRepository extends BaseRepository
     {
         return "App\Models\Order";
     }
+    
+    public function getStatus($step)
+    {
+        if ($step == "new") {
+            
+        }
+        
+        return $statusId;
+    }
 }

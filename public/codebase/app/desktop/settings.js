@@ -17,6 +17,7 @@ function settingsInit(cell) {
                 mainTabbar.addTab("a4", _("Typy produktów"));
                 mainTabbar.addTab("a5", _("Grupy pracowników"));
                 mainTabbar.addTab("a6", _("Klienty"));
+                mainTabbar.addTab("a7", _("Statusy zamówień"));
                 //Tabs
                 var rolesLayout = mainTabbar.tabs("a1").attachLayout("3W");
                     rolesLayout.cells("a").hideHeader();
@@ -53,6 +54,9 @@ function settingsInit(cell) {
                     clientsLayout.cells("a").hideHeader();
                     clientsLayout.cells("b").hideHeader();
                     clientsLayout.cells("b").setWidth(280);
+                    
+                var statusesLayout = mainTabbar.tabs("a7").attachLayout("1C");
+                    statusesLayout.cells("a").hideHeader();                    
         
                 /**
                  * 
@@ -1291,7 +1295,106 @@ function settingsInit(cell) {
 
                         };break;
                     }
-                });                
+                }); 
+/**
+ * Statuses
+ */                
+                statusesGridToolBar = statusesLayout.cells("a").attachToolbar({
+                        iconset: "awesome",
+                        items: [
+                                {type: "text", id: "title", text: _("Statusy zamówień")},
+                                {type: "spacer"},
+                                {id: "Add", type: "button", img: "fa fa-plus-square "},				
+                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                        ]
+                });
+                statusesGridToolBar.attachEvent("onClick", function(btn) {
+                    switch (btn){
+                            case 'Add':{
+                                var addingWindow = createWindow(_("Dodaj status"), 300, 300);
+                                var addingForm = createForm([
+                                    {type:"fieldset",  offsetTop:0, label:_("Nowy status"), width:250, list:[                                                                          
+                                            {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
+                                            {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
+                                            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                                {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                                                {type: "newcolumn"},
+                                                {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                                            ]}
+                                    ]}                                    
+                                ], addingWindow);
+                                addingForm.attachEvent("onButtonClick", function(name){
+                                    if (name == 'save') {
+                                        ajaxPost("api/statuses", addingForm.getFormData(), function(data){
+                                            if (data && data.success) {
+                                                statusesGrid.addRow(data.data.id, [data.data.name, data.data.description]);  
+                                                addingWindow.close();
+                                            }
+                                        });
+                                    }
+                                });                                
+                            };break;
+                            case 'Del':{
+                                var id = statusesGrid.getSelectedRowId();
+                                if (id) {
+                                    ajaxDelete("api/statuses/" + id, "", function(data){
+                                        if (data && data.success){
+                                            statusesGrid.deleteRow(id);
+                                        }
+                                    });    
+                                } else {
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        text:_("Wybierz status który chcesz usunąć!")
+                                    });
+                                }
+                            };break;
+                    }
+                });               
+                var statusesGrid = statusesLayout.cells("a").attachGrid({
+                    image_path:'codebase/imgs/',
+                    columns: [
+                        {
+                            label: _("Imie"),
+                            id: "name",
+                            width: 100,
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"     
+                        },                                                
+                        {
+                            label: _("Opis"),
+                            id: "description",
+                            width: 300,
+                            type: "txt", 
+                            sort: "str", 
+                            align: "left"     
+                        }                          
+                    ],
+                    multiselect: true                    
+                });
+                statusesGrid.fill = function() {              
+                    ajaxGet("api/statuses", "", function(data){
+                        if (data && data.success){                    
+                            statusesGrid.parse(data.data, "js");
+                        }
+                    });	                    
+                };                  
+                statusesGrid.fill();
+                var dpStatusesProductsGrid = new dataProcessor("api/statuses", "js");                
+                dpStatusesProductsGrid.init(typesProductsGrid);
+                dpStatusesProductsGrid.enableDataNames(true);
+                dpStatusesProductsGrid.setTransactionMode("REST");
+                dpStatusesProductsGrid.enablePartialDataSend(true);
+                dpStatusesProductsGrid.enableDebug(true);
+                dpStatusesProductsGrid.setUpdateMode("row", true);
+                dpStatusesProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                    data.id = id;
+                    ajaxGet("api/statuses/" + id + "/edit", data, function(data){                                                            
+                        console.log(data);
+                    });
+                }); 
+                
 	}
 	
 }

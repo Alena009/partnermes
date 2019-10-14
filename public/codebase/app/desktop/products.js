@@ -5,26 +5,23 @@ var productsForm;
 function productsInit(cell) {
     if (productsLayout == null) {      
         var productsLayout = cell.attachLayout("2U");
-        productsLayout.cells("a").hideHeader();
-        productsLayout.cells("b").hideHeader(); 
-        productsLayout.cells("b").setCollapsedText(_("Informacja o produktu")); 
+        productsLayout.cells("a").setText(_("Produkty"));
+        productsLayout.cells("b").setText(_("Informacja o produktu"));         
         productsLayout.cells("b").setWidth(300);   
 /**
  * A
  */       
         productsGridToolBar = productsLayout.cells("a").attachToolbar({
                 iconset: "awesome",
-                items: [
-                        {type: "text", id: "title", text: _("Produkty")},
-                        {type: "spacer"},
-                        {id: "Tasks", type: "button", img: "fa fa-file-text-o "},
-                        {id: "Components", type: "button", img: "fa fa-puzzle-piece "},
-                        {type: "separator",   id: "sep2"},      
-                        {id: "Add", type: "button", img: "fa fa-plus-square "},
-                        {id: "Edit", type: "button", img: "fa fa-edit"},
-                        {id: "Del", type: "button", img: "fa fa-minus-square"},
+                items: [                           
+                        {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                        {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
                         {type: "separator",   id: "sep4"}, 
-                        {id: "Redo",     type: "button", img: "fa fa-refresh"}
+                        {id: "Tasks",     text: _("Zadania"),    type: "button", img: "fa fa-file-text-o "},
+                        {id: "Components",text: _("Komponenty"), type: "button", img: "fa fa-puzzle-piece "},
+                        {type: "separator",   id: "sep2"},                           
+                        {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
                 ]                    
         });  
         productsGridToolBar.attachEvent("onClick", function(name) {           
@@ -39,130 +36,92 @@ function productsInit(cell) {
                                 iconset: "awesome",
                                 items: [                                 
                                     {id:"Add", type:"button", text: _("Dodaj"),  img: "fa fa-plus-square"},
-                                    //{id:"Edit",type:"button", text: _("Edytuj"), img: "fa fa-edit"},
+                                    {id:"Edit",type:"button", text: _("Edytuj"), img: "fa fa-edit"},
                                     {id:"Del", type:"button", text: _("Usun"),   img: "fa fa-minus-square"}
                                 ]                    
                         });
                         tasksGridToolbar.attachEvent("onClick", function(name) {
-                            var formStruct = [
-                                            {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
-                                            {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
-                                            {type: "input", name: "duration", required: true, label: _("Czas")},
-                                            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                                                {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
-                                                {type: "newcolumn"},
-                                                {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
-                                            ]}              
-                                        ];
                             switch(name) {
                                 case "Add": {
-                                    var selectedProductId = productsGrid.getSelectedRowId();
-                                    if (selectedProductId) {
-                                        var addingWindow = createWindow(_("Componenty"), 300, 300);
-                                        var addingForm = createForm(formStruct, addingWindow);
-                                        var tasksCombo = addingForm.getCombo("task_id");
-                                        tasksCombo.enableFilteringMode(true);
-                                        ajaxGet("api/tasks", '', function(data){
-                                            tasksCombo.addOption(data.data);
-                                        });
-                                        addingForm.attachEvent("onButtonClick", function(name){
-                                            var data = this.getFormData();
-                                            data.product_id = selectedProductId;
-                                            if (name == "save") {
-                                                ajaxPost("api/products/addtask", data, function(data){
-                                                    if(data && data.success){
-                                                        tasksGrid.fill(selectedProductId);  
-                                                        dhtmlx.alert({
-                                                            title:_("Wiadomość"),
-                                                            text:_("Zapisane!")
-                                                        });                                                        
-                                                    } else {
-                                                        dhtmlx.alert({
-                                                            title:_("Wiadomość"),
-                                                            text:_("Zmiany nie zostały zapisane. \n\
-                                                                    Wprowadź zmiany ponownie!")
-                                                        });                                                         
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
+                                    var productId = productsGrid.getSelectedRowId();
+                                    addTaskForProduct(productId, tasksGrid);
                                 };break;
-                                case "Del": {
+                                case "Edit": {
                                     var selectedId = tasksGrid.getSelectedRowId();
-                                    if (selectedId) {
-                                        ajaxDelete("api/productstasks/" + selectedId, "", function(data){
-                                            if (data && data.success) {
-                                                tasksGrid.deleteRow();
-                                            }
-                                        });    
-                                    }                            
+                                    var selectedProductId = productsGrid.getSelectedRowId();
+                                    editTaskForProduct(selectedId, selectedProductId, tasksGrid);                          
+                                };break;                                 
+                                case "Del": {
+                                    var productId = tasksGrid.getSelectedRowId();
+                                    deleteTaskForProduct(productId, tasksGrid);                           
                                 };break;
                             }
-                        });                         
+                        });     
+                        var tasksGrid = tasksLayout.cells("a").attachGrid({
+                            image_path:'codebase/imgs/',
+                            columns: [                        
+                                {label: _("Kod"),width: 100,id: "task_kod", type: "ro", sort: "str", align: "left"},
+                                {label: _("Zadania"),width: 100, id: "task_name", type: "ro", sort: "str", align: "left"},
+                                {label: _("Czasy, min"), width: 100,  id: "duration", type: "ed", sort: "str", align: "left"},
+                                {id: "product_id"},
+                                {id: "task_id"},
+                                {id: "priority"},
+                                {label: _("Kolejnosc"), id: "priority", type: "ro", width: 50, sort: "str", align: "left"},                            
+                            ],
+                                multiselect: true
+                        }); 
+                        tasksGrid.setColumnHidden(3,true);
+                        tasksGrid.setColumnHidden(4,true);
+                        tasksGrid.setColumnHidden(5,true);
+                        tasksGrid.enableDragAndDrop(true);
+                        tasksGrid.attachEvent("onKeyPress", function(code,cFlag,sFlag){
+                            if (code == 13) {
+                                var id = tasksGrid.getSelectedRowId();
+                                if (id) {
+                                    var data = tasksGrid.getRowData(id);
+                                    ajaxGet("api/products/tasks/" + data.product_id + "/" + id + "/edit", data, function(data){ 
+                                        if (data && data.success) {
+                                            console.log(data);
+                                        } else {
+                                            dhtmlx.alert({
+                                                title:_("Wiadomość"),
+                                                text:_("Zmiany nie zostały zapisane. \n\
+                                                        Wprowadź zmiany ponownie!")
+                                            });
+                                        }
+                                    });
+                                }
+                            }                    
+                        });    
+                        tasksGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
+                            var productId = productsGrid.getSelectedRowId();           
+                            ajaxGet("api/products/tasks/changepriority/" + productId + "/" + sId + "/" + tId, "", function(data){ 
+                                if (data && data.success) {
+                                    console.log(data);
+                                } else {
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        text:_("Zmiany nie zostały zapisane. \n\
+                                                Wprowadź zmiany ponownie!")
+                                    });
+                                }
+                            });            
+                        });                                      
+                        tasksGrid.fill = function(id){	
+                            tasksGrid.clearAll();
+                            ajaxGet("api/products/tasks/" + id, '', function(data){                                     
+                                if (data && data.success){
+                                    tasksGrid.parse((data.data), "js");
+                                }
+                            });                        
+                        };    
+                        tasksGrid.fill(productId);                        
                     } else {
                         dhtmlx.alert({
                             title:_("Wiadomość"),
                             text:_("Wybierz produkt!")
                         });  
-                    } 
-                    var tasksGrid = tasksLayout.cells("a").attachGrid({
-                        image_path:'codebase/imgs/',
-                        columns: [                        
-                            {label: _("Kod"),width: 100,id: "task_kod", type: "ro", sort: "str", align: "left"},
-                            {label: _("Zadania"),width: 100, id: "task_name", type: "ro", sort: "str", align: "left"},
-                            {label: _("Czasy, min"), width: 100,  id: "duration", type: "ed", sort: "str", align: "left"},
-                            {id: "product_id"},
-                            {id: "priority"},
-                            {label: _("Kolejnosc"), id: "priority", type: "ro", width: 50, sort: "str", align: "left"},                            
-                        ],
-                            multiselect: true
-                    }); 
-                    tasksGrid.setColumnHidden(3,true);
-                    tasksGrid.setColumnHidden(4,true);
-                    tasksGrid.enableDragAndDrop(true);
-                    tasksGrid.attachEvent("onKeyPress", function(code,cFlag,sFlag){
-                        if (code == 13) {
-                            var id = tasksGrid.getSelectedRowId();
-                            if (id) {
-                                var data = tasksGrid.getRowData(id);
-                                ajaxGet("api/products/tasks/" + data.product_id + "/" + id + "/edit", data, function(data){ 
-                                    if (data && data.success) {
-                                        console.log(data);
-                                    } else {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Zmiany nie zostały zapisane. \n\
-                                                    Wprowadź zmiany ponownie!")
-                                        });
-                                    }
-                                });
-                            }
-                        }                    
-                    });    
-                    tasksGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
-                        var productId = productsGrid.getSelectedRowId();           
-                        ajaxGet("api/products/tasks/changepriority/" + productId + "/" + sId + "/" + tId, "", function(data){ 
-                            if (data && data.success) {
-                                console.log(data);
-                            } else {
-                                dhtmlx.alert({
-                                    title:_("Wiadomość"),
-                                    text:_("Zmiany nie zostały zapisane. \n\
-                                            Wprowadź zmiany ponownie!")
-                                });
-                            }
-                        });            
-                    });                                      
-                    tasksGrid.fill = function(id){	
-                        tasksGrid.clearAll();
-                        ajaxGet("api/products/tasks/" + id, '', function(data){                                     
-                            if (data && data.success){
-                                tasksGrid.parse((data.data), "js");
-                            }
-                        });                        
-                    };    
-                    tasksGrid.fill(productId);                    
+                    }                     
                 };break;
                 case 'Components': {
                     var productId = productsGrid.getSelectedRowId();
@@ -352,7 +311,7 @@ function productsInit(cell) {
                     var selectedId = productsGrid.getSelectedRowId();
                     if (selectedId) {                        
                         var productWindow = createWindow(_("Produkt"), 550, 400);
-                        var productForm = createForm(newProductFormStruct, productWindow); 
+                        var productForm = createForm(productFormStruct, productWindow); 
                         var rowData = productsGrid.getRowData(selectedId);
                         var productTypeCombo = productForm.getCombo("product_type_id");
                         ajaxGet("api/prodtypes", "", function(data){
@@ -374,10 +333,12 @@ function productsInit(cell) {
                             switch (name){
                                 case 'save': {                                    
                                     var data = productForm.getFormData(); 
-                                    console.log(data);
                                     ajaxGet("api/products/" + selectedId + "/edit", data, function(data){
                                         if (data && data.success) {
-                                           console.log(data.data);
+                                            dhtmlx.alert({
+                                                title:_("Wiadomość"),
+                                                text:_("Zapisane!")
+                                            });  
                                         }
                                     });                                                                
                                 };break;
@@ -462,19 +423,7 @@ function productsInit(cell) {
 /**
  * B
  */        
-        productFormToolBar = productsLayout.cells("b").attachToolbar({
-                iconset: "awesome",
-                items: [
-                        {type: "text", id: "title", text: _("Informacja o produktu")},
-                        {type: "spacer"},								
-                        {id: "Hide", type: "button", img: "fa fa-arrow-right"} 
-                ]                    
-        });  
-        productFormToolBar.attachEvent("onClick", function(id) { 
-            if (id == 'Hide') {
-                productsLayout.cells("b").collapse();
-            }                    
-        }); 
+
         var productFormStruct = [
             {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                 
             {type: "combo", name: "product_group_id",  required:true,  label: _("Grupa produktu"), options: []},		
@@ -555,6 +504,127 @@ function productsInit(cell) {
             }
         });         
     }
+}
+
+function addProduct() {
+    
+}
+
+function addComponentForProduct() {
+    
+}
+
+function addTaskForProduct(productId, tasksGrid) {    
+    if (productId) {
+        var formStruct = [
+            {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
+            {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
+            {type: "input", name: "duration", required: true, label: _("Czas")},
+            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
+                {type: "newcolumn"},
+                {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
+            ]}              
+        ];        
+        var addingWindow = createWindow(_("Zadania"), 300, 300);
+        var addingForm = createForm(formStruct, addingWindow);
+        var tasksCombo = addingForm.getCombo("task_id");
+        ajaxGet("api/tasks", '', function(data){
+            tasksCombo.addOption(data.data);
+        });
+        addingForm.attachEvent("onButtonClick", function(name){
+            var data = this.getFormData();
+            data.product_id = productId;
+            if (name == "save") {
+                ajaxPost("api/products/addtask", data, function(data){
+                    if(data && data.success){
+                        tasksGrid.fill(productId);                                                        
+                    } else {
+                        dhtmlx.alert({
+                            title:_("Wiadomość"),
+                            text:_("Zmiany nie zostały zapisane. \n\
+                                    Wprowadź zmiany ponownie!")
+                        });                                                         
+                    }
+                });
+            }
+        });
+    } else {
+        dhtmlx.alert({
+            title:_("Wiadomość"),
+            text:_("Wybierz produkt do którego chcesz dołączyć zadania!")
+        });       
+    }   
+}
+
+function deleteTaskForProduct(id, tasksGrid) {
+    if (id) {
+        dhtmlx.confirm({
+            title: _("Ostrożność"),                                    
+            text: _("Czy na pewno chcesz usunąć zadanie?"),
+            callback: function(result){
+                if (result) {                                        
+                    var rowData = tasksGrid.getRowData(id);
+                    ajaxGet("api/products/deletetask/" + rowData.product_id + "/" + rowData.task_id, "", function(data){
+                        if (data && data.success) {
+                            tasksGrid.deleteRow(id);
+                        } else {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Nie udało się usunąć zadanie!")
+                            });
+                        }
+                    });                            
+                }
+            }
+        });                     
+    } else {
+        dhtmlx.alert({
+            title:_("Wiadomość"),
+            text:_("Wybierz zadanie, które chcesz usunąć!")
+        }); 
+    }    
+} 
+
+function editTaskForProduct(id, productId, tasksGrid) {
+    if (id) {
+        var formStruct = [
+            {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
+            {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
+            {type: "input", name: "duration", required: true, label: _("Czas")},
+            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
+                {type: "newcolumn"},
+                {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
+            ]}              
+        ];         
+        var editWindow = createWindow(_("Zadania do produktow"), 300, 300);
+        var editForm = createForm(formStruct, editWindow);
+        var rowData = tasksGrid.getRowData(id);
+        var tasksCombo = editForm.getCombo("task_id");
+        ajaxGet("api/tasks", '', function(data){
+            tasksCombo.addOption(data.data);
+            tasksCombo.selectOption(tasksCombo.getIndexByValue(rowData.task_id));
+        });
+        editForm.setFormData(rowData);
+        editForm.attachEvent("onButtonClick", function(name){
+            var data = this.getFormData();
+            data.product_id = productId;
+            if (name == "save") {
+                ajaxGet("api/products/tasks/" + productId +"/" + 
+                        rowData.task_id + "/edit", data, function(data){
+                    if (data && data.success){
+                        tasksGrid.fill(productId);                                        
+                    }
+                });
+            }
+        });
+    } else {
+        dhtmlx.alert({
+            title:_("Wiadomość"),
+            text:_("Wybierz zadanie, które chcesz edytować!")
+        });           
+    }     
 }
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {

@@ -8,11 +8,9 @@ var projectsForm;
 function projectsInit(cell) {	
 	if (projectsLayout == null) {		
 		var projectsLayout = cell.attachLayout("3J");
-		projectsLayout.cells("a").hideHeader();
-		projectsLayout.cells("b").hideHeader();
-                projectsLayout.cells("b").setCollapsedText(_("Informacja o zamowieniu"));
-		projectsLayout.cells("c").hideHeader();
-                projectsLayout.cells("c").setCollapsedText(_("Pozycji"));
+		projectsLayout.cells("a").setText(_("Zamowienia"));
+                projectsLayout.cells("b").setText(_("Informacja o zamowieniu"));
+                projectsLayout.cells("c").setText(_("Pozycje"));
 		projectsLayout.cells("b").setWidth(330);
 		projectsLayout.cells("c").setHeight(350);
 		projectsLayout.setAutoSize("a;c", "a;b");
@@ -22,8 +20,6 @@ function projectsInit(cell) {
 		var projectsGridToolBar = projectsLayout.cells("a").attachToolbar({
                     iconset: "awesome",
                     items: [
-                        {type: "text", id: "title", text: _("Zamowienia")},                                
-                        {type: "spacer"},
 //                                {type: "text", id: "show_records", text: _("Ilosc wyswietlonych wpisow:")},				
 //                                {type: "buttonSelect", id: "amount_show", text: _("10"), options:[
 //                                            {id: "10",  type: "obj", text: _("Ostatnie 10")},
@@ -35,9 +31,9 @@ function projectsInit(cell) {
 //                        {type: "text",        id: "find",   text: _("Find:")},				
 //                        {type: "buttonInput", id: "szukaj", text: _(""), width: 100},
 //                        {type: "separator",   id: "sep2"},                                
-                        {id: "Add",  type: "button", img: "fa fa-plus-square "},
-                        {id: "Edit", type: "button", img: "fa fa-edit"},
-                        {id: "Del",  type: "button", img: "fa fa-minus-square"}
+                        {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                        {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"}
                     ]
 		});        
 //                projectsGridToolBar.attachEvent("onButtonSelectHide", function(id){
@@ -236,20 +232,7 @@ function projectsInit(cell) {
                 projectsGrid.fill();                           
 /**
  * B
- */		                
-                projectFormToolBar = projectsLayout.cells("b").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Informacja o zamowieniu")},
-				{type: "spacer"},				
-				{id: "Hide", type: "button", img: "fa fa-arrow-right"}
-			]
-		});   
-                projectFormToolBar.attachEvent("onClick", function(id) { 
-                    if (id == 'Hide') {
-                        projectsLayout.cells("b").collapse();                        
-                    }                    
-                });                  
+ */		                                
                 var projectsForm = projectsLayout.cells("b").attachForm(newProjectFormStruct);
 		projectsForm.bind(projectsGrid);
                 projectsForm.attachEvent("onButtonClick", function(name){
@@ -313,20 +296,7 @@ function projectsInit(cell) {
 /**
  * C
  */                                                            
-                positionsLayoutToolBar = projectsLayout.cells("c").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Pozycji")},
-				{type: "spacer"},				
-				{id: "Hide", type: "button", img: "fa fa-arrow-down"}
-			]
-		});   
-                positionsLayoutToolBar.attachEvent("onClick", function(id) { 
-                    if (id == 'Hide') {
-                        projectsLayout.cells("c").collapse();
-                    }                    
-                });                              
-		var projectsTabbar = projectsLayout.cells("c").attachTabbar({
+                var projectsTabbar = projectsLayout.cells("c").attachTabbar({
 			arrows_mode: "auto",
 			tabs: [
 				{id: "positions", text: _("Pozycje"), selected: 1},
@@ -532,14 +502,6 @@ function projectsInit(cell) {
                         });			
                     };
                     
-                    tasksGridToolbar = projectsTabbar.tabs("tasks").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                {id:"Add", type:"button",  text: _("Dodaj"),  img: "fa fa-plus-square"},
-                                {id:"Edit", type:"button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id:"Del",  type:"button",text: _("Usun"),   img: "fa fa-minus-square"}
-                            ]
-                    });  
                     var tasksGrid = projectsTabbar.tabs("tasks").attachGrid({
                         image_path:'codebase/imgs/',
                         columns: [

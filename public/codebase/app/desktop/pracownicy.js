@@ -6,12 +6,10 @@ function pracownicyInit(cell) {
 
 	if (pracownicyLayout == null) {
 		// init layout
-		var pracownicyLayout = cell.attachLayout("3W");
-		    pracownicyLayout.cells("a").hideHeader();
-                    pracownicyLayout.cells("a").setCollapsedText(_("Grupy pracownikow"));                    
-		    pracownicyLayout.cells("b").hideHeader();
-                    pracownicyLayout.cells("c").hideHeader();
-                    pracownicyLayout.cells("c").setCollapsedText(_("Informacja o pracowniku"));
+		var pracownicyLayout = cell.attachLayout("3W");		    
+                    pracownicyLayout.cells("a").setText(_("Grupy pracownikow"));                    
+		    pracownicyLayout.cells("b").setText(_("Pracownicy"));
+                    pracownicyLayout.cells("c").setText(_("Informacja o pracowniku"));
 		    pracownicyLayout.cells("a").setWidth(280);		
 		    pracownicyLayout.setAutoSize("a");   
                 
@@ -76,122 +74,43 @@ function pracownicyInit(cell) {
                 var grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar({
 			iconset: "awesome",
 			items: [
-				{type: "text", id: "title", text: _("Grupy")},
-				{type: "spacer"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"},				
-				{id: "Hide", type: "button", img: "fa fa-arrow-left"}                                
+				{id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},                            
 			]
 		});                 
                 grupyTreeToolBar.attachEvent("onClick", function(id) {                        		
 			switch (id){
-				case 'Add':{
-					console.log('Dodaj grupe');    
-                                        var grupyWindow = createWindow(_("Grupy pracownikow"), 350, 300);
-                                        var grupyForm = createForm(grupyFormAddData, grupyWindow);
-                                        var dhxCombo = grupyForm.getCombo("parent_id");                             
-                                        ajaxGet("api/departaments", '', function(data) {                    
-                                            dhxCombo.addOption(data.data);
-                                        });                                        
-                                        grupyForm.attachEvent("onButtonClick", function(name){
-                                            switch (name){
-                                                case 'save':{                                                           
-                                                        ajaxPost("api/departaments", grupyForm.getFormData(), function(data){                                                            
-                                                            grupyTree.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
-                                                            grupyTree.openItem(data.data.parent_id);
-                                                            grupyTree.selectItem(data.data.id);
-                                                        });
-                                                };break;
-                                                case 'cancel':{
-                                                    grupyForm.clear();
-                                                };break;
-                                            }
-                                        });
-					//grupyForm.bind(tree);
-				};break;
-				case 'Edit':{                                        				
-                                        var id = grupyTree.getSelectedId();                                        
-                                        if (id) {                                            
-                                            var data = {
-                                                id: id,
-                                                name: grupyTree.getItemText(id)
-                                            };
-                                            var grupyWindow = createWindow(_("Grupy pracownikow"), 250, 200);
-                                            var grupyForm = createForm(grupyFormEditData, grupyWindow);                                                                                       
-                                            grupyForm.setFormData(data);                                                                                                                   
-                                            grupyForm.attachEvent("onButtonClick", function(name){
-                                                switch (name){
-                                                    case 'save':{                                                        
-                                                        ajaxGet("api/departaments/" + id +"/edit", grupyForm.getFormData(), function(data) {                                                                                                        
-                                                            if (data.success) {                                                                
-                                                                grupyTree.setItemText(id, data.data.name);
-                                                            }   
-                                                        });
-                                                    };break;
-                                                    case 'cancel':{                                                            
-                                                        grupyForm.setFormData(data);                                                        
-                                                    };break;
-                                                }
-                                            });
-                                        } else {
-                                            dhtmlx.alert({
-                                                title:_("Wiadomość"),
-                                                type:"alert",
-                                                text:_("Wybierz grupe, która chcesz edytować!")
-                                            });
-                                        }                                     
-				};break;
-				case 'Del':{					
-                                        var id = grupyTree.getSelectedId();
-                                        if (id) {
-                                            dhtmlx.confirm({
-                                            title:_("Ostrożność"),                                    
-                                            text:_("Czy na pewno chcesz usunąć grupe?"),
-                                            callback: function(result){
-                                                        if (result) {
-                                                            ajaxDelete("api/departaments/" + id,'', function(data) {
-                                                                if (data.success) {
-                                                                    grupyTree.deleteItem(id);                                                    
-                                                                } else {
-                                                                    dhtmlx.alert({
-                                                                        title:_("Błąd!"),
-                                                                        type:"alert-error",
-                                                                        text:data.message
-                                                                    });
-                                                                }
-                                                            }); 
-                                                        }
-                                                    }
-                                                });
-                                        }  else {
-                                            dhtmlx.alert({
-                                                title:_("Wiadomość"),
-                                                type:"alert",
-                                                text:_("Wybierz grupe, która chcesz usunąć!")
-                                            });
-                                        }
-				};break;
-                                case 'Hide':{
-                                    pracownicyLayout.cells("a").collapse();                        
-                                };break;    
+                            case 'Add':{			                                        
+                                    createAddEditGroupWindow("api/departaments", "api/departaments", grupyTree, 0);
+                            };break;
+                            case 'Edit':{
+                                var id = grupyTree.getSelectedId();
+                                if (id) {                                        
+                                    createAddEditGroupWindow("api/departaments", "api/departaments/" + id + "/edit", grupyTree, id);
+                                }
+                            };break;
+                            case 'Del':{
+                                var id = grupyTree.getSelectedId();
+                                if (id) {
+                                    deleteNodeFromTree(grupyTree, "api/departaments/" + id);
+                                }
+                            };break;    
 			}
 		});               
                 var pracownicyGridToolBar = pracownicyLayout.cells("b").attachToolbar({
 			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Pracownicy")},
-				{type: "spacer"},
-				{type: "text", id: "find", text: _("Find:")},				
-				{type: "buttonInput", id: "szukaj", text: "", width: 100},
-				{type: "separator", id: "sep2"},
-                                {id: "Cog", type: "button", img: "fa fa-spin fa-cog "},
+         		items: [
+//				{type: "text", id: "find", text: _("Find:")},				
+//				{type: "buttonInput", id: "szukaj", text: "", width: 100},
+//				{type: "separator", id: "sep2"},
+				{id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep2"},  
+                                {id: "Cog", type: "button",  text: _("Dodaj do departamentu"), img: "fa fa-spin fa-cog "},                              
                                 {type: "separator", id: "sep3"},
-				{id: "Add", type: "button", img: "fa fa-plus-square "},
-				{id: "Edit", type: "button", img: "fa fa-edit"},
-				{id: "Del", type: "button", img: "fa fa-minus-square"},
-                                {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", img: "fa fa-refresh"}
+                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
 			]
 		}); 
                 pracownicyGridToolBar.attachEvent("onClick", function(id) { 
@@ -370,7 +289,7 @@ function pracownicyInit(cell) {
 			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;                        
 			var new_data = ajaxGet("api/workerslist/" + ids, '', function(data){                                     
 				if (data && data.success){
-                                    console.log(data.data);
+                                    console.log(data);
                                     pracownicyGrid.parse((data.data), "js");
                                 }
 			});                        
@@ -407,11 +326,11 @@ function pracownicyInit(cell) {
 //                        pracownicyForm.fillAvatar(selectedId);  
 //                });
                 
-                var searchElem = pracownicyGridToolBar.getInput('szukaj');
-                pracownicyGrid.makeFilter(searchElem, 0, true);
-                pracownicyGrid.makeFilter(searchElem, 1, true);                                 
-                pracownicyGrid.makeFilter(searchElem, 2, true);                                 
-                pracownicyGrid.filterByAll();                
+//                var searchElem = pracownicyGridToolBar.getInput('szukaj');
+//                pracownicyGrid.makeFilter(searchElem, 0, true);
+//                pracownicyGrid.makeFilter(searchElem, 1, true);                                 
+//                pracownicyGrid.makeFilter(searchElem, 2, true);                                 
+//                pracownicyGrid.filterByAll();                
                 
 		var grupyFormAddData = [
 			{type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
@@ -454,21 +373,7 @@ function pracownicyInit(cell) {
                             {type: "newcolumn"},
 			    {type: "button",   name: "cancel", value:_("Anuluj"), offsetTop:18}
                         ]}                  
-		]; 
-                
-                pracownikFormToolBar = pracownicyLayout.cells("c").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{type: "text", id: "title", text: _("Pracownik")},
-				{type: "spacer"},				
-				{id: "Hide", type: "button", img: "fa fa-arrow-right"}
-			]
-		});                
-                pracownikFormToolBar.attachEvent("onClick", function(id) { 
-                    if (id == 'Hide') {
-                        pracownicyLayout.cells("c").collapse();
-                    }                    
-                });               
+		];               
                 
                 var pracownicyForm = pracownicyLayout.cells("c").attachForm(pracownikFormStruct);               
                 pracownicyForm.bind(pracownicyGrid); 

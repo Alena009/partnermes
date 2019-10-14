@@ -3,15 +3,9 @@ var productsTasksLayout;
 function productsTasksInit(cell) {
     if (productsTasksLayout == null) {
         var productsTasksLayout = cell.attachLayout("2U");
-        productsTasksLayout.cells("a").hideHeader();
-        productsTasksLayout.cells("b").hideHeader();
+        productsTasksLayout.cells("a").setText(_("Produkty"));
+        productsTasksLayout.cells("b").setText(_("Zadania"));
     
-        productsGridToolBar = productsTasksLayout.cells("a").attachToolbar({
-                iconset: "awesome",
-                items: [
-                        {type: "text", id: "title", text: _("Produkty")}				                               
-                ]                    
-        });
         var productsGrid = productsTasksLayout.cells("a").attachGrid({
             image_path:'codebase/imgs/',
             columns: [                        
@@ -77,11 +71,13 @@ function productsTasksInit(cell) {
         var zadaniaToolBar = productsTasksLayout.cells("b").attachToolbar({
                 iconset: "awesome",
                 items: [
-                        {type: "text", id: "title", text: _("Zadania")},
-                        {type: "spacer"},
-                        {id: "Add", type: "button", img: "fa fa-plus-square "},
-                        {id: "Edit", type: "button", img: "fa fa-edit"},
-                        {id: "Del", type: "button", img: "fa fa-minus-square"}				                               
+                        {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                        {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                        {type: "separator", id: "sep2"},
+                        {id: "Cog", type: "button", text: _("Zmień kolejność"), img: "fa fa-spin fa-cog "},
+                        {type: "separator", id: "sep3"},
+                        {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
                 ]                    
         });   
         zadaniaToolBar.attachEvent("onClick", function(name) {
@@ -96,92 +92,32 @@ function productsTasksInit(cell) {
                                 {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
                             ]}              
                         ];
-            switch(name) {
-                case "Add": {
-                    var selectedProductId = productsGrid.getSelectedRowId();
-                    if (selectedProductId) {
-                        var addingWindow = createWindow(_("Zadania do produktow"), 300, 300);
-                        var addingForm = createForm(formStruct, addingWindow);
-                        var tasksCombo = addingForm.getCombo("task_id");
-                        ajaxGet("api/products/availabletasks/" + selectedProductId, '', function(data){
-                            tasksCombo.addOption(data.data);
-                        });
-                        addingForm.attachEvent("onButtonClick", function(name){
-                            var data = this.getFormData();
-                            data.product_id = selectedProductId;
-                            if (name == "save") {
-                                ajaxPost("api/products/addtask", data, function(data){
-                                    if (data && data.success){
-                                        zadaniaGrid.fill(selectedProductId);
-                                        addingForm.setItemFocus("task_id");
-                                    }
-                                });
-                            }
-                        });
-                    } else {
-                        dhtmlx.alert({
-                            title:_("Wiadomość"),
-                            text:_("Wybierz produkt, do którego chcesz dodać zadania!")
-                        });
-                    }
+            
+            switch(name) {                
+                case "Add": { 
+                    var productId = productsGrid.getSelectedRowId();
+                    addTaskForProduct(productId, zadaniaGrid);                        
                 };break;
                 case "Edit": {
                     var selectedId = zadaniaGrid.getSelectedRowId();
                     var selectedProductId = productsGrid.getSelectedRowId();
-                    if (selectedId) {
-                        var editWindow = createWindow(_("Zadania do produktow"), 300, 300);
-                        var editForm = createForm(formStruct, editWindow);
-                        var rowData = zadaniaGrid.getRowData(selectedId);
-                        var tasksCombo = editForm.getCombo("task_id");
-                        ajaxGet("api/tasks", '', function(data){
-                            tasksCombo.addOption(data.data);
-                            tasksCombo.selectOption(tasksCombo.getIndexByValue(rowData.task_id));
-                        });
-                        editForm.setFormData(rowData);
-                        editForm.attachEvent("onButtonClick", function(name){
-                            var data = this.getFormData();
-                            data.product_id = selectedProductId;
-                            if (name == "save") {
-                                ajaxGet("api/products/tasks/" + selectedProductId +"/" + 
-                                        rowData.task_id + "/edit", data, function(data){
-                                    if (data && data.success){
-                                        zadaniaGrid.fill(selectedProductId);
-                                        addingForm.setItemFocus("task_id");
-                                    }
-                                });
-                            }
-                        });
-                    }                          
+                    editTaskForProduct(selectedId, selectedProductId, zadaniaGrid);                          
                 };break;                
-                case "Del": {
-                    var selectedId = zadaniaGrid.getSelectedRowId();
-                    if (selectedId) {
-                        dhtmlx.confirm({
-                            title: _("Ostrożność"),                                    
-                            text: _("Czy na pewno chcesz usunąć zadanie?"),
-                            callback: function(result){
-                                if (result) {                                        
-                                    var rowData = zadaniaGrid.getRowData(selectedId);
-                                    ajaxGet("api/products/deletetask/" + rowData.product_id + "/" + rowData.task_id, "", function(data){
-                                        if (data && data.success) {
-                                            zadaniaGrid.deleteRow(selectedId);
-                                        } else {
-                                            dhtmlx.alert({
-                                                title:_("Wiadomość"),
-                                                text:_("Nie udało się usunąć zadanie!")
-                                            });
-                                        }
-                                    });                            
-                                }
-                            }
-                        });                     
-                    } else {
-                        dhtmlx.alert({
-                            title:_("Wiadomość"),
-                            text:_("Wybierz zadanie, które chcesz usunąć!")
-                        }); 
-                    }
+                case "Del": {                    
+                    var id = zadaniaGrid.getSelectedRowId();
+                    deleteTaskForProduct(id, zadaniaGrid);
                 };break;
+                case "Cog": {                    
+                    dhtmlx.alert({
+                        title:_("Wiadomość"),
+                        text:_("Dla zmiany kolejności wykonywania zadań \n\
+                                przesuń zadanie w tabeli na potrzebne miejsce")
+                    }); 
+                };break;  
+                case "Redo": {
+                    var productId = productsGrid.getSelectedRowId();
+                    zadaniaGrid.fill(productId);
+                };break;            
             }
         });  
         var zadaniaGrid = productsTasksLayout.cells("b").attachGrid({
@@ -224,6 +160,7 @@ function productsTasksInit(cell) {
             ]
                 
         });        
+        zadaniaGrid.setColumnHidden(3,true);
         zadaniaGrid.setColumnHidden(4,true);
         zadaniaGrid.setColumnHidden(5,true);
         zadaniaGrid.attachHeader("#select_filter,#select_filter");		

@@ -6,19 +6,16 @@ function warehouseInit(cell) {
     if (warehouseLayout == null) {
         // init layout
         var warehouseLayout = cell.attachLayout("2U");                  
-        warehouseLayout.cells("a").hideHeader();
-        warehouseLayout.cells("b").hideHeader();                
+        warehouseLayout.cells("a").setText(_("Grupy produktow"));
+        warehouseLayout.cells("b").setText( _("Produkty"));                
         warehouseLayout.cells("a").setWidth(280);		                
         warehouseLayout.setAutoSize("a", "a;b");
         var productsTreeToolBar = warehouseLayout.cells("a").attachToolbar({
                 iconset: "awesome",
-                items: [
-                        {type: "text", id: "title", text: _("Grupy produktow")},
-                        {type: "spacer"},                                                       
-                        {id: "Add", type: "button", img: "fa fa-plus-square "},
-                        {id: "Edit", type: "button", img: "fa fa-edit"},
-                        {id: "Del", type: "button", img: "fa fa-minus-square"},
-                        {id: "Hide", type: "button", img: "fa fa-arrow-left"}
+                items: [                                                       
+                        {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                        {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"}
                 ]
         }); 
         var grupyFormAddData = [
@@ -129,9 +126,6 @@ function warehouseInit(cell) {
                                     });
                                 }   
                 };break;
-                case 'Hide': {
-                        warehouseLayout.cells("a").collapse();
-                };break; 
             }                    
         });        
         var productsTree = warehouseLayout.cells("a").attachTreeView({
@@ -179,29 +173,44 @@ function warehouseInit(cell) {
                 }
             });
         };
-        productsTree.build();        
+        productsTree.build(); 
+        
         productsGridToolBar = warehouseLayout.cells("b").attachToolbar({
             iconset: "awesome",
             items: [
-                {type: "text", id: "title", text: _("Produkty")},
-                {type: "spacer"},
-                {type: "text", id: "find", text: _("Find:")},				
-                {type: "buttonInput", id: "szukaj", text: "", width: 100},
-                {type: "separator", id: "sep2"},                                
-                {id: "Add", type: "button", img: "fa fa-plus-square "},
+//                {type: "text", id: "find", text: _("Find:")},				
+//                {type: "buttonInput", id: "szukaj", text: "", width: 100},
+//                {type: "separator", id: "sep2"},                                
+                {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
 //                {id: "Edit", type: "button", img: "fa fa-edit"},
 //                {id: "Del", type: "button", img: "fa fa-minus-square"}
                 {type: "separator", id: "sep1"},
-                {id: "Redo", type: "button", img: "fa fa-refresh"}
+                {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
             ]
         });
         productsGridToolBar.attachEvent("onClick", function(name){
             switch (name){
                 case 'Add':{
                     var addingWindow = createWindow(_("Dodaj informacje"), 400, 300);
-                    var addingForm = createForm(addingFormStruct, addingWindow);
-                    var productGroupsCombo = addingForm.getCombo("product_group_id");                           
-                    addingForm.adjustParentSize();                            
+                    var addingForm = createForm([
+                            {type:"fieldset",  offsetTop: 0, offsetBottom: 20, label:_("Informacja"), width:350, list:[                                			
+                                {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		                
+                                {type: "combo", name: "type_operation",   required: true, label: _("Operacja"), options: [
+                                        {text: _("Dodaj do magazynu"), value: "1"},
+                                        {text: _("Zabierz z magazynu"), value: "-1"}
+                                ]},
+                                {type: "combo", name: "product_group_id", required: true, label: _("Grupa"), options: []},
+                                {type: "combo", name: "product_id",       required: true, label: _("Produkt"), options: []},
+                                {type: "input", name: "available_amount", readonly: true, label: _("Ilość dostępna")},
+                                {type: "input", name: "amount",           required: true, label: _("Ilosc")},
+                                {type: "block", blockOffset: 0, position: "label-left", list: [
+                                    {type: "button", name: "save",   value: _("Zapisz"), offsetTop:18},
+                                    {type: "newcolumn"},
+                                    {type:"button", name:"cancel", value: _("Anuluj"), offsetTop:18}
+                                ]}
+                            ]}
+                        ], addingWindow);                    
+                    var productGroupsCombo = addingForm.getCombo("product_group_id");                                                     
                     productGroupsCombo.enableFilteringMode(true);                            
 
                     //filling combobox with products groups
@@ -358,27 +367,7 @@ function warehouseInit(cell) {
             ajaxGet("api/warehouse/" + id + "/edit", data, function(data){                                                            
                 console.log(data);
             });
-        });        
-        
-        //auxiliary variables and functions
-        var addingFormStruct = [
-            {type:"fieldset",  offsetTop: 0, offsetBottom: 20, label:_("Informacja"), width:350, list:[                                			
-                {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		                
-                {type: "combo", name: "type_operation",   required: true, label: _("Operacja"), options: [
-                        {text: _("Dodaj do magazynu"), value: "1"},
-                        {text: _("Zabierz z magazynu"), value: "-1"}
-                ]},
-                {type: "combo", name: "product_group_id", required: true, label: _("Grupa"), options: []},
-                {type: "combo", name: "product_id",       required: true, label: _("Produkt"), options: []},
-                {type: "input", name: "available_amount", readonly: true, label: _("Ilość dostępna")},
-                {type: "input", name: "amount",           required: true, label: _("Ilosc")},
-                {type: "block", blockOffset: 0, position: "label-left", list: [
-                    {type: "button", name: "save",   value: _("Zapisz"), offsetTop:18},
-                    {type: "newcolumn"},
-                    {type:"button", name:"cancel", value: _("Anuluj"), offsetTop:18}
-                ]}
-            ]}
-        ];                        
+        });                               
     }	    
 }
 

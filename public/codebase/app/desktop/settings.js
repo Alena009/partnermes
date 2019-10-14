@@ -20,29 +20,19 @@ function settingsInit(cell) {
                 mainTabbar.addTab("a7", _("Statusy zamówień"));
                 //Tabs
                 var rolesLayout = mainTabbar.tabs("a1").attachLayout("3W");
-                    rolesLayout.cells("a").hideHeader();
-                    rolesLayout.cells("a").setCollapsedText(_("Role"));
-                    rolesLayout.cells("b").hideHeader(); 
-                    rolesLayout.cells("b").setCollapsedText(_("Użytkownik"));
-                    rolesLayout.cells("c").hideHeader(); 
-                    rolesLayout.cells("c").setCollapsedText("Uprawnienia");
+                    rolesLayout.cells("a").setText(_("Role"));                    
+                    rolesLayout.cells("b").setText(_("Użytkownik"));                    
+                    rolesLayout.cells("c").setText("Uprawnienia");                     
                     rolesLayout.setAutoSize("a", "a;b;c");               
 
                 var tasksGroupsLayout = mainTabbar.tabs("a2").attachLayout("2U"); 
-                    tasksGroupsLayout.cells("a").hideHeader(); 
-                    tasksGroupsLayout.cells("a").setCollapsedText(_("Grupy zadań"));
-                    tasksGroupsLayout.cells("b").hideHeader();
-                    tasksGroupsLayout.cells("b").setCollapsedText(_("Zadania"));
+                    tasksGroupsLayout.cells("a").setText(_("Grupy zadań"));
+                    tasksGroupsLayout.cells("b").setText(_("Zadania"));
                     tasksGroupsLayout.cells("a").setWidth(280);
                     tasksGroupsLayout.setAutoSize("a", "a;b");                
 
                 var productsGroupsLayout = mainTabbar.tabs("a3").attachLayout("1C"); 
-                    productsGroupsLayout.cells("a").hideHeader(); 
-                    productsGroupsLayout.cells("a").setCollapsedText(_("Grupy produktów"));
-//                    productsGroupsLayout.cells("b").hideHeader();
-//                    productsGroupsLayout.cells("b").setCollapsedText(_("Produkty"));
-//                    productsGroupsLayout.cells("a").setWidth(280);
-//                    productsGroupsLayout.setAutoSize("a", "a;b"); 
+                    productsGroupsLayout.cells("a").hideHeader();
 
                 var typesProductsLayout = mainTabbar.tabs("a4").attachLayout("1C");
                     typesProductsLayout.cells("a").hideHeader();
@@ -51,28 +41,24 @@ function settingsInit(cell) {
                     workersGroupsLayout.cells("a").hideHeader();
 
                 var clientsLayout = mainTabbar.tabs("a6").attachLayout("2U");
-                    clientsLayout.cells("a").hideHeader();
-                    clientsLayout.cells("b").hideHeader();
+                    clientsLayout.cells("a").setText(_("Klienty"));
+                    clientsLayout.cells("b").setText(_("Informacja"));
                     clientsLayout.cells("b").setWidth(280);
                     
                 var statusesLayout = mainTabbar.tabs("a7").attachLayout("1C");
                     statusesLayout.cells("a").hideHeader();                    
         
-                /**
-                 * 
-                 * Roles tab
-                 * 
-                 */
+/**
+ * 
+ * Roles tab
+ * 
+ */
                 var rolesToolBar = rolesLayout.cells("a").attachToolbar({
                         iconset: "awesome",
                         items: [
-                                {type: "text", id: "title", text: _("Role")},
-                                {type: "spacer"},
-                                {id: "Add", type: "button", img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", img: "fa fa-edit"},
-                                {id: "Del", type: "button", img: "fa fa-minus-square"},
-                                {type: "separator", id: "sep3"},
-                                {id: "Hide", type: "button", img: "fa fa-arrow-left"} 
+                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
                         ]
                 });
                 rolesToolBar.attachEvent("onClick", function(id) { 
@@ -165,15 +151,12 @@ function settingsInit(cell) {
                             }
 
                         };break;  
-                        case 'Hide':{
-                            rolesLayout.cells("a").collapse();                        
-                        };break; 
                     };
                 }); 
                 var roleForm = [
                     {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
                             {type:"input",  name:"name",   label:_("Nazwa"), offsetTop:13, labelWidth:80}, 
-                            {type: "block", blockOffset: 0, position: "laabel-left", list: [
+                            {type: "block", blockOffset: 0, position: "label-left", list: [
                                 {type:"button", name:"save",   value:_("Zapisz"),     offsetTop:18},
                                 {type: "newcolumn"},
                                 {type:"button", name:"cancel", value:_("Anuluj"),     offsetTop:18}
@@ -182,17 +165,10 @@ function settingsInit(cell) {
                 ]; 
                 var usersToolBar = rolesLayout.cells("b").attachToolbar({
                         iconset: "awesome",
-                        items: [
-                                {type: "text", id: "title", text: _("Uzytkowniki")},
-                                {type: "spacer"},                                
-                                {type: "text", id: "find", text: _("Find:")},
-                                {type: "buttonInput", id: "szukaj", text: "Szukaj", width: 100},
-                                {type: "separator", id: "sep2"},
-                                {id: "Cog", type: "button", img: "fa fa-spin fa-cog "},
+                        items: [                                
+                                {id: "Cog", type: "button", text: _("Dodaj do roli"), img: "fa fa-spin fa-cog "},
                                 {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", img: "fa fa-refresh"},
-                                {type: "separator", id: "sep4"},
-                                {id: "Hide", type: "button", img: "fa fa-arrow-left"} 
+                                {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
                         ]
                 });
                 usersToolBar.attachEvent("onClick", function(id) { 
@@ -264,15 +240,9 @@ function settingsInit(cell) {
                                 });
                                 ajaxGet("api/roles/0/users", '', function(data){                                     
                                     if (data && data.success){ 
-                                        //remember array of all workers
                                         var allUsers = data.data;
-                                        //asking array of workers for choosen departament
                                         ajaxGet("api/roles/" + roleId + "/users", '', function(data2){
-                                            //remember array of workers in departament
                                             var departamentUsers = data2.data;
-                                            //for every worker from all workers array we are checking:
-                                            //does this worker is in choosen departament, if he is - then we
-                                            //do marking "in_departament" for him
                                             allUsers.forEach(function(element){
                                                 if (departamentUsers.find(x => x.id === element.id)) {
                                                     element.in_departament = true;
@@ -296,23 +266,16 @@ function settingsInit(cell) {
                                 usersGrid.fill(0);
                                 permissionsGrid.fill(0);
                         };break; 
-                        case 'Hide': {
-                            rolesLayout.cells("b").collapse();   
-                        };break;
                     }
                 });
                 var permissionsToolBar = rolesLayout.cells("c").attachToolbar({
                         iconset: "awesome",
                         items: [
-                                {type: "text", id: "title", text: _("Uprawnienia")},
-                                {type: "spacer"},
-                                {id: "Add", type: "button", img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", img: "fa fa-edit"},
-                                {id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
                                 {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", img: "fa fa-refresh"},
-                                {type: "separator", id: "sep4"},
-                                {id: "Hide", type: "button", img: "fa fa-arrow-right"} 
+                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
                         ]
                 });
                 permissionsToolBar.attachEvent("onClick", function(id) { 
@@ -401,9 +364,6 @@ function settingsInit(cell) {
                                 usersGrid.fill(0);
                                 permissionsGrid.fill(0);
                         };break;
-                        case 'Hide': {
-                            rolesLayout.cells("c").collapse();   
-                        };break;
                     }
                 });
                 var permissionForm = [
@@ -418,8 +378,8 @@ function settingsInit(cell) {
                     skin: "dhx_skyblue",    // string, optional, treeview's skin
                         iconset: "font_awesome", // string, optional, sets the font-awesome icons
                         multiselect: false,           // boolean, optional, enables multiselect
-                        //checkboxes: true,           // boolean, optional, enables checkboxes
-                        //dnd: true,           // boolean, optional, enables drag-and-drop
+                        checkboxes: true,           // boolean, optional, enables checkboxes
+                        dnd: true,           // boolean, optional, enables drag-and-drop
                         context_menu: true,  
                 }); 
                 rolesTree.load = function(){ 
@@ -435,7 +395,6 @@ function settingsInit(cell) {
                         permissionsGrid.clearAll();			
                         usersGrid.fill(id);
                         permissionsGrid.fill(id);			
-                        console.log(id);
                         return true;                        
                     }
                 });
@@ -477,10 +436,6 @@ function settingsInit(cell) {
                         }
                     });
                 };
-                var searchElem = usersToolBar.getInput('szukaj');
-                     usersGrid.makeFilter(searchElem, 0, true);
-                     usersGrid.makeFilter(searchElem, 1, true);                                 
-                     usersGrid.filterByAll();
                 var permissionsGrid = rolesLayout.cells("c").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [
@@ -532,21 +487,17 @@ function settingsInit(cell) {
                 usersGrid.fill(0);                 
                 permissionsGrid.fill(0);                             
 
-                /**
-                 * 
-                 * Tasks groups tab
-                 * 
-                 */                
+/**
+ * 
+ * Tasks groups tab
+ * 
+ */                
                 var tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar({
                         iconset: "awesome",
-                        items: [
-                                {type: "text", id: "title", text: _("Grupy zadan")},
-                                {type: "spacer"},
-                                {id: "Add", type: "button", img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", img: "fa fa-edit"},
-                                {id: "Del", type: "button", img: "fa fa-minus-square"},
-                                {type: "separator", id: "sep3"},
-                                {id: "Hide", type: "button", img: "fa fa-arrow-left"} 
+                        items: [                             
+                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
                         ]
                 });
                 tasksGroupsToolBar.attachEvent("onClick", function(btn) {
@@ -565,9 +516,6 @@ function settingsInit(cell) {
                                 if (id) {
                                     deleteNodeFromTree(tasksGroupsTree, "api/taskgroups/" + id);
                                 }
-                            };break;
-                            case 'Hide':{
-                                tasksGroupsLayout.cells("a").collapse();                        
                             };break;
                     }
                 });
@@ -616,15 +564,11 @@ function settingsInit(cell) {
                 var tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar({
                         iconset: "awesome",
                         items: [
-                                {type: "text", id: "title", text: _("Zadania")},
-                                {type: "spacer"},
-                                {id: "Add", type: "button", img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", img: "fa fa-edit"},
-                                {id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"),  img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"),    img: "fa fa-minus-square"},
                                 {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", img: "fa fa-refresh"},
-                                {type: "separator", id: "sep4"},
-                                {id: "Hide", type: "button", img: "fa fa-arrow-right"} 
+                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"},
                         ]
                 });                               
                 tasksGridToolBar.attachEvent("onClick", function(id) {
@@ -668,9 +612,6 @@ function settingsInit(cell) {
                         case 'Redo': {
                             tasksGroupsTree.fill();
                             tasksGrid.fill(0);     
-                        };break;
-                        case 'Hide':{
-                                tasksGroupsLayout.cells("b").collapse();                        
                         };break;
                     }
                 }); 
@@ -744,19 +685,17 @@ function settingsInit(cell) {
                 }); 
 
 
-                /**
-                 * 
-                 * Products by groups tab
-                 * 
-                 */                            
+/**
+ * 
+ * Products by groups tab
+ * 
+ */                            
                 var productsGroupsToolBar = productsGroupsLayout.cells("a").attachToolbar({
                         iconset: "awesome",
                         items: [
-                                {type: "text", id: "title", text: _("Grupy")},
-                                {type: "spacer"},
-                                {id: "Add", type: "button", img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", img: "fa fa-edit"},
-                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
                         ]
                 });
                 productsGroupsToolBar.attachEvent("onClick", function(btn) {
@@ -906,20 +845,18 @@ function settingsInit(cell) {
 //                productsByGroupsGrid.fill(0);                                
 
 
-                /**
-                 * 
-                 * Types of products tab
-                 * 
-                 */
+/**
+ * 
+ * Types of products tab
+ * 
+ */
 
                 var typesProductsGridToolBar = typesProductsLayout.cells("a").attachToolbar({
                         iconset: "awesome",
                         items: [
-                                {type: "text", id: "title", text: _("Typy produktow")},
-                                {type: "spacer"},
-                                {id: "Add", type: "button", img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", img: "fa fa-edit"},
-                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
                         ]
                 });
                 typesProductsGridToolBar.attachEvent("onClick", function(btn) {
@@ -1062,19 +999,17 @@ function settingsInit(cell) {
                 });                                 
 
 
-                /**
-                 * 
-                 * Groups of workers tab 
-                 * 
-                 */
+/**
+ * 
+ * Groups of workers tab 
+ * 
+ */
                 var workersGroupsToolBar = workersGroupsLayout.cells("a").attachToolbar({
                         iconset: "awesome",
                         items: [
-                                {type: "text", id: "title", text: _("Grupy")},
-                                {type: "spacer"},
-                                {id: "Add", type: "button", img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", img: "fa fa-edit"},
-                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
                         ]
                 });
                 workersGroupsToolBar.attachEvent("onClick", function(btn) {
@@ -1129,13 +1064,11 @@ function settingsInit(cell) {
                 clientsGridToolBar = clientsLayout.cells("a").attachToolbar({
                         iconset: "awesome",
                         items: [
-                                {type: "text", id: "title", text: _("Klienty")},
-                                {type: "spacer"},
-                                {id: "Add", type: "button", img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", img: "fa fa-edit"},
-                                {id: "Del", type: "button", img: "fa fa-minus-square"},
+                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
                                 {type: "separator",   id: "sep4"}, 
-                                {id: "Redo",     type: "button", img: "fa fa-refresh"}
+                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
                         ]                    
                 });
                 clientsGridToolBar.attachEvent("onClick", function(id) {
@@ -1289,22 +1222,7 @@ function settingsInit(cell) {
                     });	                    
                 };                
                 clientsGrid.fill();
-                
-                clientFormToolBar = clientsLayout.cells("b").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                                {type: "text", id: "title", text: _("Informacja")},
-                                {type: "spacer"},
-                                {id: "Hide", type: "button", img: "fa fa-arrow-right"} 
-                        ]                    
-                });    
-                clientFormToolBar.attachEvent("onClick", function(id) {
-                    switch (id){                        
-                        case 'Hide':{
-                            clientsLayout.cells("b").collapse();                        
-                        };break;
-                    }
-                });     
+                     
                 var clientFormStruct = [                    
                         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
                         //{type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
@@ -1361,10 +1279,11 @@ function settingsInit(cell) {
                 statusesGridToolBar = statusesLayout.cells("a").attachToolbar({
                         iconset: "awesome",
                         items: [
-                                {type: "text", id: "title", text: _("Statusy zamówień")},
-                                {type: "spacer"},
-                                {id: "Add", type: "button", img: "fa fa-plus-square "},				
-                                {id: "Del", type: "button", img: "fa fa-minus-square"}
+                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                                {type: "separator",   id: "sep4"}, 
+                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
                         ]
                 });
                 statusesGridToolBar.attachEvent("onClick", function(btn) {
@@ -1393,6 +1312,40 @@ function settingsInit(cell) {
                                     }
                                 });                                
                             };break;
+                            case 'Edit': {
+                                var id = statusesGrid.getSelectedRowId();
+                                if (id) {
+                                    var addingWindow = createWindow(_("Edytuj status"), 300, 300);
+                                    var addingForm = createForm([
+                                        {type:"fieldset",  offsetTop:0, label:_("Status"), width:250, list:[                                                                          
+                                                {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
+                                                {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
+                                                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                                    {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                                                    {type: "newcolumn"},
+                                                    {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                                                ]}
+                                        ]}                                    
+                                    ], addingWindow);
+                                    var rowData = statusesGrid.getRowData(id);
+                                    addingForm.setFormData(rowData);
+                                    addingForm.attachEvent("onButtonClick", function(name){
+                                        if (name == 'save') {
+                                            ajaxGet("api/statuses/" + statusesGrid.getSelectedRowId() + "/edit", addingForm.getFormData(), function(data){
+                                                if (data && data.success) {
+                                                    statusesGrid.fill();
+                                                    addingWindow.close();
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        text:_("Wybierz status który chcesz edytować!")
+                                    });
+                                }
+                            };break; 
                             case 'Del':{
                                 var id = statusesGrid.getSelectedRowId();
                                 if (id) {
@@ -1408,6 +1361,9 @@ function settingsInit(cell) {
                                     });
                                 }
                             };break;
+                            case 'Redo': {
+                                    statusesGrid.fill();
+                            } 
                     }
                 });               
                 var statusesGrid = statusesLayout.cells("a").attachGrid({
@@ -1432,7 +1388,8 @@ function settingsInit(cell) {
                     ],
                     multiselect: true                    
                 });
-                statusesGrid.fill = function() {              
+                statusesGrid.fill = function() {   
+                    this.clearAll();
                     ajaxGet("api/statuses", "", function(data){
                         if (data && data.success){                    
                             statusesGrid.parse(data.data, "js");
@@ -1734,6 +1691,7 @@ function createForm(formStruct, windowObj){
             };break;
         }
     });
+    myForm.adjustParentSize();
     
     return myForm;         
 }
@@ -1804,6 +1762,8 @@ dhtmlXGridObject.prototype.deleteMyRecordById = function(url){
 //    this._stat_in_header(tag,calc,index,data); // default statistics handler processor
 //}; 
                                                     
+
+
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 	if (id == "settings") {

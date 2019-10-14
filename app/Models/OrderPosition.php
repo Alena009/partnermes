@@ -25,5 +25,5 @@ class OrderPosition extends BaseModel
     public function works()
     {
         return $this->belongsTo('App\Models\DeclaredWork', "product_id", "product_id")->pluck("order_position_id");
-    }
+    }  
 }

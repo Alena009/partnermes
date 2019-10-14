@@ -917,7 +917,8 @@ function settingsInit(cell) {
                         items: [
                                 {type: "text", id: "title", text: _("Typy produktow")},
                                 {type: "spacer"},
-                                {id: "Add", type: "button", img: "fa fa-plus-square "},				
+                                {id: "Add", type: "button", img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", img: "fa fa-edit"},
                                 {id: "Del", type: "button", img: "fa fa-minus-square"}
                         ]
                 });
@@ -941,19 +942,76 @@ function settingsInit(cell) {
                                         ajaxPost("api/prodtypes", addingForm.getFormData(), function(data){
                                             if (data && data.success) {
                                                 typesProductsGrid.addRow(data.data.id, [data.data.name, data.data.description]);   
+                                            } else {
+                                                dhtmlx.alert({
+                                                    title:_("Wiadomość"),
+                                                    text:_("Błąd! Zmiany nie zostały zapisane")
+                                                });
                                             }
                                         });
                                     }
                                 });                                
                             };break;
+                            case 'Edit':{
+                                var id = typesProductsGrid.getSelectedRowId();
+                                if (id) {
+                                    var addingWindow = createWindow(_("Edytuj typ produktu"), 300, 300);
+                                    var addingForm = createForm([
+                                        {type:"fieldset",  offsetTop:0, label:_("Edytuj typ produktu"), width:250, list:[                                                                          
+                                                {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
+                                                {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
+                                                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                                    {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                                                    {type: "newcolumn"},
+                                                    {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                                                ]}
+                                        ]}                                    
+                                    ], addingWindow);
+                                    var rowData = typesProductsGrid.getRowData(typesProductsGrid.getSelectedRowId());
+                                    addingForm.setFormData(rowData);
+                                    addingForm.attachEvent("onButtonClick", function(name){
+                                        if (name == 'save') {
+                                            ajaxGet("api/prodtypes/" + typesProductsGrid.getSelectedRowId() + "/edit", addingForm.getFormData(), function(data){
+                                                if (data && data.success) {
+                                                    //typesProductsGrid.addRow(data.data.id, [data.data.name, data.data.description]);   
+                                                    typesProductsGrid.fill();
+                                                    addingWindow.close();
+                                                } else {
+                                                    dhtmlx.alert({
+                                                        title:_("Wiadomość"),
+                                                        text:_("Błąd! Zmiany nie zostały zapisane")
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });  
+                                } else {
+                                    dhtmlx.message({
+                                        title:_("Wiadomość"),
+                                        type:"alert",
+                                        text:_("Wybierz pozycję w tabeli!")
+                                    });                                     
+                                }
+                            };break;                            
                             case 'Del':{
                                 var id = typesProductsGrid.getSelectedRowId();
                                 if (id) {
                                     ajaxDelete("api/prodtypes/" + id, "", function(data){
                                         if (data && data.success){
                                             typesProductsGrid.deleteRow(id);
+                                        } else {
+                                            dhtmlx.alert({
+                                                title:_("Wiadomość"),
+                                                text:_("Błąd! Zmiany nie zostały zapisane")
+                                            });                                            
                                         }
                                     });    
+                                } else {
+                                    dhtmlx.message({
+                                        title:_("Wiadomość"),
+                                        type:"alert",
+                                        text:_("Wybierz pozycję w tabeli!")
+                                    });                                    
                                 }
                             };break;
                     }
@@ -980,7 +1038,8 @@ function settingsInit(cell) {
                     ],
                     multiselect: true                    
                 });
-                typesProductsGrid.fill = function() {              
+                typesProductsGrid.fill = function() {    
+                    this.clearAll();
                     ajaxGet("api/prodtypes", "", function(data){
                         if (data && data.success){                    
                             typesProductsGrid.parse(data.data, "js");
@@ -1382,7 +1441,7 @@ function settingsInit(cell) {
                 };                  
                 statusesGrid.fill();
                 var dpStatusesProductsGrid = new dataProcessor("api/statuses", "js");                
-                dpStatusesProductsGrid.init(typesProductsGrid);
+                dpStatusesProductsGrid.init(statusesGrid);
                 dpStatusesProductsGrid.enableDataNames(true);
                 dpStatusesProductsGrid.setTransactionMode("REST");
                 dpStatusesProductsGrid.enablePartialDataSend(true);
@@ -1391,7 +1450,7 @@ function settingsInit(cell) {
                 dpStatusesProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
                     data.id = id;
                     ajaxGet("api/statuses/" + id + "/edit", data, function(data){                                                            
-                        console.log(data);
+                        
                     });
                 }); 
                 
@@ -1440,7 +1499,55 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
         ajaxGet(urlForParentCombo, '', function(data) {                    
                 dhxCombo.addOption(data.data);
         });  
-    }
+    } 
+    grupyForm.attachEvent("onKeyUp",function(inp, ev, name, value){
+        if (name == 'name') {
+            if (grupyForm.getItemValue('name') !== '') {                
+                if (ev.code == 'Enter') {
+                    if (id) {                    
+                        ajaxGet(urlForSaveButton, grupyForm.getFormData(), function(data){  
+                            if (data && data.success) {             
+                                grupyWindow.close();
+                                treeObj.setItemText(id, data.data.name);
+                                if (data.data.parent_id) {
+                                    treeObj.openItem(data.data.parent_id);
+                                }
+                                treeObj.selectItem(data.data.id);
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Zapisane")
+                                });                                
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Błąd! Zmiany nie zostały zapisane")
+                                });  
+                            }
+                        });
+                    } else {                   
+                        ajaxPost(urlForSaveButton, grupyForm.getFormData(), function(data){
+                            if (data.success) {                                               
+                                treeObj.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
+                                if (data.data.parent_id) {
+                                    treeObj.openItem(data.data.parent_id);
+                                }
+                                treeObj.selectItem(data.data.id);
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Zapisane")
+                                });
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Błąd! Informacja nie została zapisana")
+                                });  
+                            }
+                        });                
+                    }
+                }                
+            }
+        }
+    });    
     grupyForm.attachEvent("onButtonClick", function(name){
         switch (name){
             case 'save':{
@@ -1452,7 +1559,11 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
                             if (data.data.parent_id) {
                                 treeObj.openItem(data.data.parent_id);
                             }
-                            treeObj.selectItem(data.data.id);                            
+                            treeObj.selectItem(data.data.id);   
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Zapisane")
+                            });                             
                         } else {
                             dhtmlx.alert({
                                 title:_("Wiadomość"),
@@ -1462,13 +1573,16 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
                     });
                 } else {                   
                     ajaxPost(urlForSaveButton, grupyForm.getFormData(), function(data){
-                        if (data.success) {               
-                            grupyWindow.close();                            
+                        if (data.success) {                                         
                             treeObj.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
                             if (data.data.parent_id) {
                                 treeObj.openItem(data.data.parent_id);
                             }
                             treeObj.selectItem(data.data.id);
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Zapisane")
+                            });                            
                         } else {
                             dhtmlx.alert({
                                 title:_("Wiadomość"),
@@ -1479,7 +1593,7 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
                 }
             };break;         
             case 'cancel':{
-                grupyForm.clear();
+                grupyForm.reset();
             };break;
         }
     });

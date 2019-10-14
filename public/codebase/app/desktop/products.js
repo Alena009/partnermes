@@ -484,7 +484,7 @@ function productsInit(cell) {
             {type: "input", name: "height",             label: _("Wysokość, mm")},
             {type: "input", name: "width",     required:true,          label: _("Szerokość, mm")},
             {type: "input", name: "length",             label: _("Długość, mm")},
-            {type: "input", name: "weight",             label: _("Masa, kg"), numberFormat:"0,000.00"},
+            {type: "input", name: "weight",    required: true,         label: _("Masa, kg"), numberFormat:"0,000.00"},
             {type: "input", name: "area",      required:true,          label: _("Powierzchnia, m2"), numberFormat:"0,000.00"},
             {type: "input", name: "pack",        required:true,        label: _("Opakowanie")},
             {type: "input", name: "description",  required:true,       label: _("Opis"), rows: 3},

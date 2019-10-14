@@ -137,13 +137,13 @@ function productsTasksInit(cell) {
                             tasksCombo.addOption(data.data);
                             tasksCombo.selectOption(tasksCombo.getIndexByValue(rowData.task_id));
                         });
-                        editForm.bind(zadaniaGrid);
-                        editForm.unbind(zadaniaGrid);
+                        editForm.setFormData(rowData);
                         editForm.attachEvent("onButtonClick", function(name){
                             var data = this.getFormData();
                             data.product_id = selectedProductId;
                             if (name == "save") {
-                                ajaxGet("api/products/edittask/" + selectedId, data, function(data){
+                                ajaxGet("api/products/tasks/" + selectedProductId +"/" + 
+                                        rowData.task_id + "/edit", data, function(data){
                                     if (data && data.success){
                                         zadaniaGrid.fill(selectedProductId);
                                         addingForm.setItemFocus("task_id");

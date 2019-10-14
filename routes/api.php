@@ -59,6 +59,7 @@ Route::group([
     Route::resource('/prodgroups', 'ProductGroupController');
     
     Route::post('/products/addtask', 'ProductController@addTaskForProduct');    
+    
     Route::get('/products/availabletasks/{productId}', 'ProductController@listAvailableTasks');    
     Route::get('/products/tasks/{product?}', 'ProductController@listTasksForProduct');   
     Route::get('/products/listbygroups/{prodGroups}', 'ProductController@listProductsByProductGroup');  

@@ -39,7 +39,6 @@ class ProductTypeController extends BaseController
     public function store(Request $request)
     {
         $productType = [];
-        $result = [];
         $locale = app()->getLocale();
         
         $productType = new \App\Models\ProductType();
@@ -50,8 +49,22 @@ class ProductTypeController extends BaseController
         
         $productType->save();
 
-        $result = ['data' => $productType, 'success' => true];
-
-        return response()->json($result);
+        return $this->getResponseResult($productType);
     }    
+    
+    public function edit(Request $request, $id)
+    {
+        $productType = [];
+        $locale = app()->getLocale();
+        
+        $productType = ProductType::find($id);
+        $productType->save();
+        
+        $productType->translateOrNew($locale)->name = $request['name'];            
+        $productType->translateOrNew($locale)->description = $request['description'];            
+        
+        $productType->save();
+
+        return $this->getResponseResult($productType);
+    }     
 }

@@ -152,6 +152,7 @@ class OrderPositionController extends BaseController
      */
     public function store(Request $request)
     {     
+        $orderPosition = [];
         $currentWeekNum = date("W");
         $currentYear    = date("Y");
         if ($request['num_week'] < $currentWeekNum) {
@@ -173,7 +174,7 @@ class OrderPositionController extends BaseController
         $orderPosition->date_delivery = $date_end;
         $orderPosition->save();
 
-        return response()->json(['data' => $orderPosition, 'success' => (boolean)count($orderPosition)]);        
+        return $this->getResponseResult($orderPosition);        
     }     
     
     /**

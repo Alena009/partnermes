@@ -45,7 +45,7 @@ function pracownicyInit(cell) {
 		grupyTree.attachEvent("onDrop",function(id){
                     //console.log("grupyTree.onDrop", arguments);
                     var parent_id = arguments[1];
-                    parent_id = (parent_id) ? parent_id+'' : 0;
+                    parent_id = (parent_id) ? parent_id+'' : '';
                     var data = {
                         id: id,
                         parent_id: parent_id

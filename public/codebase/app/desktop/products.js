@@ -51,7 +51,7 @@ function productsInit(cell) {
         });                 
         productsGroupsTree.attachEvent("onDrop",function(id){			
                 var parent_id = arguments[1];
-                parent_id = (parent_id) ? parent_id+'' : 0;
+                parent_id = (parent_id) ? parent_id+'' : '';
                 var data = {
                     id: id,
                     parent_id: parent_id
@@ -239,9 +239,11 @@ function productsInit(cell) {
         productsGridToolBar = productsLayout.cells("c").attachToolbar({
                 iconset: "awesome",
                 items: [                           
-                        {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                        {id: "Add",  type: "button", text: _("Dodaj"),  img: "fa fa-plus-square "},
                         {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
                         {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
+                        {type: "separator",   id: "sep3"}, 
+                        {id: "Copy", type: "button", text: _("Kopiuj"), img: "fa fa-clone"},
                         {type: "separator",   id: "sep4"}, 
                         {id: "Tasks",     text: _("Zadania"),    type: "button", img: "fa fa-file-text-o "},
                         {id: "Components",text: _("Komponenty"), type: "button", img: "fa fa-puzzle-piece "},
@@ -251,6 +253,56 @@ function productsInit(cell) {
         });  
         productsGridToolBar.attachEvent("onClick", function(name) {           
             switch (name){
+                case 'Copy': {
+                    var selectedId = productsGrid.getSelectedRowId();
+                    if (selectedId) {                        
+                        var productWindow = createWindow(_("Produkt"), 550, 400);
+                        var productForm = createForm(productFormStruct, productWindow); 
+                        var rowData = productsGrid.getRowData(selectedId);
+                        var productTypeCombo = productForm.getCombo("product_type_id");
+                        ajaxGet("api/prodtypes", "", function(data){
+                            if (data && data.success) {                        
+                                productTypeCombo.addOption(data.data); 
+                                productTypeCombo.selectOption(productTypeCombo.getIndexByValue(rowData.product_type_id));
+                            }
+                        });
+                        var productGroupCombo = productForm.getCombo("product_group_id");
+                        ajaxGet("api/prodgroups", "", function(data){
+                            if (data && data.success) {
+                                productGroupCombo.addOption(data.data);
+                                productGroupCombo.selectOption(productGroupCombo.getIndexByValue(rowData.product_group_id));
+                            }
+                        });                         
+                        productForm.setFormData(rowData);
+                        productForm.setItemValue("kod", "");
+                        productForm.attachEvent("onButtonClick", function(name){
+                            switch (name){
+                                case 'save': {                                    
+                                    ajaxPost("api/products", productForm.getFormData(), function(data) {
+                                    if (data && data.success) {
+                                        productsGrid.fill();
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Zapisane!")
+                                        });                                          
+                                    } else {
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Zmiany nie zostały zapisane. \n\
+                                                    Wprowadź ponownie!")
+                                        });                                         
+                                    }
+                                });                                                                 
+                                };break;
+                            }
+                        });
+                    } else {
+                        dhtmlx.alert({
+                            title:_("Wiadomość"),
+                            text:_("Wybierz produkt!")
+                        });                         
+                    }                                                                
+                };break; 
                 case 'Tasks': {
                     var productId = productsGrid.getSelectedRowId();
                     if (productId) {

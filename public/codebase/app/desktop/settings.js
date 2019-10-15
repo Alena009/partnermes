@@ -536,7 +536,7 @@ function settingsInit(cell) {
                 tasksGroupsTree.fill();
                 tasksGroupsTree.attachEvent("onSelect",function(id, mode){  
                     if (mode) {
-                        var grupy=productsGroupsTree.getAllChecked();
+                        var grupy=tasksGroupsTree.getAllChecked();
                         grupy[grupy.length]=id;                      
                         tasksGrid.clearAll();
                         tasksGrid.fill(grupy);                          
@@ -544,7 +544,7 @@ function settingsInit(cell) {
                     }
                 });
                 tasksGroupsTree.attachEvent("onCheck",function(id){
-                        var grupy=productsGroupsTree.getAllChecked(); 
+                        var grupy=tasksGroupsTree.getAllChecked(); 
                         tasksGrid.clearAll();
                         tasksGrid.fill(grupy);                        
                         return true;

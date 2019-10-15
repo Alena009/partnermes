@@ -314,7 +314,7 @@ function warehouseInit(cell) {
             ],
             multiline: true
         });
-        productsGrid.attachHeader("#select_filter,#text_filter,#select_filter");
+        productsGrid.attachHeader("#select_filter,#text_filter,#text_filter");
         productsGrid.attachFooter(
             [_("Ilosc: "),"#cspan","#cspan","#stat_total"],
             ["text-align:right;","text-align:center"]
@@ -352,9 +352,10 @@ function warehouseInit(cell) {
             };
         };     
         
-        var searchElem = productsGridToolBar.getInput('szukaj');
-        productsGrid.makeFilter(searchElem, 1, true);                                                                  
-        productsGrid.filterByAll();         
+       
+//        var searchElem = productsGridToolBar.getInput('szukaj');
+//        productsGrid.makeFilter(searchElem, 1, true);                                                                  
+//        productsGrid.filterByAll();         
         var dpProductsGrid = new dataProcessor("api/warehouse", "js");                
         dpProductsGrid.init(productsGrid);
         dpProductsGrid.enableDataNames(true);

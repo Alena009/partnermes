@@ -33,7 +33,9 @@ function projectsInit(cell) {
 //                        {type: "separator",   id: "sep2"},                                
                         {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
                         {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                        {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"}
+                        {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
+                        {type: "separator", id: "sep3"},
+                        {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
                     ]
 		});        
 //                projectsGridToolBar.attachEvent("onButtonSelectHide", function(id){
@@ -149,6 +151,9 @@ function projectsInit(cell) {
                                 });
                             }                            
                         };break; 
+                        case 'Redo': {
+                            projectsGrid.fill();
+                        };break;
                     }
                 });                 
                 
@@ -309,7 +314,9 @@ function projectsInit(cell) {
                             items: [
                                 {id:"Add", type:"button",  text: _("Dodaj"),  img: "fa fa-plus-square"},
                                 {id:"Edit", type:"button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id:"Del",  type:"button",text: _("Usun"),   img: "fa fa-minus-square"}
+                                {id:"Del",  type:"button",text: _("Usun"),   img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
                             ]
                     });                 
                     positionsGridToolbar.attachEvent("onClick", function(id) { 
@@ -432,6 +439,12 @@ function projectsInit(cell) {
                                         text:_("Wybierz pozycje, która chcesz usunąć!")
                                     });
                                 }                                    
+                            };break;
+                            case 'Redo': {
+                                var orderId = projectsGrid.getSelectedRowId();
+                                if (orderId) {
+                                    positionsGrid.fill(orderId);
+                                }
                             };break;
                         };
                     });                

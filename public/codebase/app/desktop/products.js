@@ -4,14 +4,239 @@ var productsForm;
 
 function productsInit(cell) {
     if (productsLayout == null) {      
-        var productsLayout = cell.attachLayout("2U");
-        productsLayout.cells("a").setText(_("Produkty"));
-        productsLayout.cells("b").setText(_("Informacja o produktu"));         
-        productsLayout.cells("b").setWidth(300);   
+        var productsLayout = cell.attachLayout("4A");
+        productsLayout.cells("a").setText(_("Grupy produktów")); 
+        productsLayout.cells("b").setText(_("Typy produktów"));
+        productsLayout.cells("b").setWidth(280);        
+        productsLayout.cells("c").setText(_("Produkty"));        
+        productsLayout.cells("d").setText(_("Informacja o produktu"));         
+        productsLayout.cells("d").setWidth(300);  
 /**
  * A
  */       
-        productsGridToolBar = productsLayout.cells("a").attachToolbar({
+        var productsGroupsToolBar = productsLayout.cells("a").attachToolbar({
+                iconset: "awesome",
+                items: [
+                        {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                        {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                ]
+        });
+        productsGroupsToolBar.attachEvent("onClick", function(btn) {
+            switch (btn){
+                    case 'Add':{			                                        
+                            createAddEditGroupWindow("api/prodgroups", "api/prodgroups", productsGroupsTree, 0);
+                    };break;
+                    case 'Edit':{
+                        var id = productsGroupsTree.getSelectedId();
+                        if (id) {                                        
+                            createAddEditGroupWindow("api/prodgroups", "api/prodgroups/" + id + "/edit", productsGroupsTree, id);
+                        }
+                    };break;
+                    case 'Del':{
+                        var id = productsGroupsTree.getSelectedId();
+                        if (id) {
+                            deleteNodeFromTree(productsGroupsTree, "api/prodgroups/" + id);
+                        }
+                    };break;
+            }
+        });
+        var productsGroupsTree = productsLayout.cells("a").attachTreeView({
+                skin: "dhx_web",    // string, optional, treeview's skin
+                iconset: "font_awesome", // string, optional, sets the font-awesome icons
+                multiselect: false,           // boolean, optional, enables multiselect
+                //checkboxes: true,           // boolean, optional, enables checkboxes
+                dnd: true,           // boolean, optional, enables drag-and-drop
+                context_menu: true           // boolean, optional, enables context menu			
+        });                 
+        productsGroupsTree.attachEvent("onDrop",function(id){			
+                var parent_id = arguments[1];
+                parent_id = (parent_id) ? parent_id+'' : 0;
+                var data = {
+                    id: id,
+                    parent_id: parent_id
+                };                        
+                ajaxGet("api/prodgroups/" + id + "/edit?", data, ''); 
+                return true;
+        });  
+        productsGroupsTree.attachEvent("onSelect",function(id, mode){  
+            if (mode) {
+                if (typesProductsGrid.getSelectedRowId()) {
+                    productsGrid.filterBy(2, typesProductsGrid.getSelectedRowId());
+                }
+                productsGrid.filterBy(3, id);
+                return true;                        
+            }
+        });    
+        productsGroupsTree.fill = function(i=null){	
+            ajaxGet("api/prodgroups/grupytree", '', function(data) {                    
+                if (data && data.success){      
+                    productsGroupsTree.clearAll();                            
+                    productsGroupsTree.loadStruct(data.data);                           
+                }                    
+            });
+        };
+        productsGroupsTree.fill();      
+/**
+ * B
+ */        
+        var typesProductsGridToolBar = productsLayout.cells("b").attachToolbar({
+                iconset: "awesome",
+                items: [
+                        {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                        {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                ]
+        });
+        typesProductsGridToolBar.attachEvent("onClick", function(btn) {
+            switch (btn){
+                    case 'Add':{
+                        var addingWindow = createWindow(_("Dodaj typ produktu"), 300, 300);
+                        var addingForm = createForm([
+                            {type:"fieldset",  offsetTop:0, label:_("Nowy typ produktu"), width:250, list:[                                                                          
+                                    {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
+                                    {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
+                                    {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                        {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                                        {type: "newcolumn"},
+                                        {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                                    ]}
+                            ]}                                    
+                        ], addingWindow);
+                        addingForm.attachEvent("onButtonClick", function(name){
+                            if (name == 'save') {
+                                ajaxPost("api/prodtypes", addingForm.getFormData(), function(data){
+                                    if (data && data.success) {
+                                        typesProductsGrid.addRow(data.data.id, [data.data.name, data.data.description]);   
+                                    } else {
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Błąd! Zmiany nie zostały zapisane")
+                                        });
+                                    }
+                                });
+                            }
+                        });                                
+                    };break;
+                    case 'Edit':{
+                        var id = typesProductsGrid.getSelectedRowId();
+                        if (id) {
+                            var addingWindow = createWindow(_("Edytuj typ produktu"), 300, 300);
+                            var addingForm = createForm([
+                                {type:"fieldset",  offsetTop:0, label:_("Edytuj typ produktu"), width:250, list:[                                                                          
+                                        {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
+                                        {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
+                                        {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                            {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                                            {type: "newcolumn"},
+                                            {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                                        ]}
+                                ]}                                    
+                            ], addingWindow);
+                            var rowData = typesProductsGrid.getRowData(typesProductsGrid.getSelectedRowId());
+                            addingForm.setFormData(rowData);
+                            addingForm.attachEvent("onButtonClick", function(name){
+                                if (name == 'save') {
+                                    ajaxGet("api/prodtypes/" + typesProductsGrid.getSelectedRowId() + "/edit", addingForm.getFormData(), function(data){
+                                        if (data && data.success) {
+                                            //typesProductsGrid.addRow(data.data.id, [data.data.name, data.data.description]);   
+                                            typesProductsGrid.fill();
+                                            addingWindow.close();
+                                        } else {
+                                            dhtmlx.alert({
+                                                title:_("Wiadomość"),
+                                                text:_("Błąd! Zmiany nie zostały zapisane")
+                                            });
+                                        }
+                                    });
+                                }
+                            });  
+                        } else {
+                            dhtmlx.message({
+                                title:_("Wiadomość"),
+                                type:"alert",
+                                text:_("Wybierz pozycję w tabeli!")
+                            });                                     
+                        }
+                    };break;                            
+                    case 'Del':{
+                        var id = typesProductsGrid.getSelectedRowId();
+                        if (id) {
+                            ajaxDelete("api/prodtypes/" + id, "", function(data){
+                                if (data && data.success){
+                                    typesProductsGrid.deleteRow(id);
+                                } else {
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        text:_("Błąd! Zmiany nie zostały zapisane")
+                                    });                                            
+                                }
+                            });    
+                        } else {
+                            dhtmlx.message({
+                                title:_("Wiadomość"),
+                                type:"alert",
+                                text:_("Wybierz pozycję w tabeli!")
+                            });                                    
+                        }
+                    };break;
+            }
+        });               
+        var typesProductsGrid = productsLayout.cells("b").attachGrid({
+            image_path:'codebase/imgs/',
+            columns: [
+                {
+                    label: _("Imie"),
+                    id: "name",
+                    width: 100,
+                    type: "ed", 
+                    sort: "str", 
+                    align: "left"     
+                },                                                
+                {
+                    label: _("Opis"),
+                    id: "description",
+                    width: 300,
+                    type: "txt", 
+                    sort: "str", 
+                    align: "left"     
+                }                          
+            ],
+            multiselect: true                    
+        });
+        typesProductsGrid.attachEvent("onRowSelect", function() {
+            var id = typesProductsGrid.getSelectedRowId();
+            if (productsGroupsTree.getSelectedId()) {
+                productsGrid.filterBy(3, productsGroupsTree.getSelectedId());
+            }
+            productsGrid.filterBy(2, id);
+        });        
+        typesProductsGrid.fill = function() {    
+            this.clearAll();
+            ajaxGet("api/prodtypes", "", function(data){
+                if (data && data.success){                    
+                    typesProductsGrid.parse(data.data, "js");
+                }
+            });	                    
+        };                  
+        typesProductsGrid.fill();
+        var dptypesProductsGrid = new dataProcessor("api/products", "js");                
+        dptypesProductsGrid.init(typesProductsGrid);
+        dptypesProductsGrid.enableDataNames(true);
+        dptypesProductsGrid.setTransactionMode("REST");
+        dptypesProductsGrid.enablePartialDataSend(true);
+        dptypesProductsGrid.enableDebug(true);
+        dptypesProductsGrid.setUpdateMode("row", true);
+        dptypesProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+            data.id = id;
+            ajaxGet("api/prodtypes/" + id + "/edit", data, function(data){                                                            
+                console.log(data);
+            });
+        });
+/**
+ * C
+ */       
+        productsGridToolBar = productsLayout.cells("c").attachToolbar({
                 iconset: "awesome",
                 items: [                           
                         {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
@@ -356,10 +581,12 @@ function productsInit(cell) {
                 };break;   
                 case 'Redo': {
                     productsGrid.fill();
+                    productsGroupsTree.unselectItem(productsGroupsTree.getSelectedId());
+                    typesProductsGrid.fill();
                 };break;
             }
         });        
-        var productsGrid = productsLayout.cells("a").attachGrid({
+        var productsGrid = productsLayout.cells("c").attachGrid({
             image_path:'codebase/imgs/',
             columns: [  
                 //{id: "checked", type:"ch", width: 25},
@@ -408,9 +635,7 @@ function productsInit(cell) {
                     });
                 }
             }                    
-        });       
-        var typeProductCombo = productsGrid.getCombo(2); 
-        var groupProductCombo = productsGrid.getCombo(3);         
+        });                
         productsGrid.fill = function(){	
             this.clearAll();
             ajaxGet("api/products", '', function(data){                                     
@@ -421,7 +646,7 @@ function productsInit(cell) {
         };                
         productsGrid.fill(); 
 /**
- * B
+ * D
  */        
 
         var productFormStruct = [
@@ -441,7 +666,7 @@ function productsInit(cell) {
                 {type: "button", name: "save",   value: _("Zapisz"), offsetTop:18},                              
             ]}
         ];         
-        var productForm = productsLayout.cells("b").attachForm(productFormStruct);
+        var productForm = productsLayout.cells("d").attachForm(productFormStruct);
         var productTypeCombo = productForm.getCombo("product_type_id");
         var productGroupCombo = productForm.getCombo("product_group_id"); 
         productForm.attachEvent("onButtonClick", function(name){
@@ -486,7 +711,8 @@ function productsInit(cell) {
         });        
         productForm.bind(productsGrid); 
        
-        
+        var typeProductCombo = productsGrid.getCombo(2); 
+        var groupProductCombo = productsGrid.getCombo(3);        
         ajaxGet("api/prodtypes", '', function(data) {
             if (data.success && data.data) {
                 data.data.forEach(function(rec){

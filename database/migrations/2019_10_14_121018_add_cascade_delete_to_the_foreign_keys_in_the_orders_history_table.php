@@ -14,8 +14,12 @@ class AddCascadeDeleteToTheForeignKeysInTheOrdersHistoryTable extends Migration
     public function up()
     {
         Schema::table('orders_history', function (Blueprint $table) {
-            $table->integer('order_id')->onDelete('cascade')->change();
-            $table->integer('order_id')->onDelete('cascade')->change();
+            $table->dropForeign(['order_id']); 
+            $table->unsignedInteger('order_id')->change();
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->dropForeign(['status_id']); 
+            $table->unsignedInteger('status_id')->change();
+            $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade');
         });
     }
 

@@ -14,10 +14,10 @@ function settingsInit(cell) {
                 mainTabbar.addTab("a1", _("Role"), null, null, true);               
                 mainTabbar.addTab("a2", _("Statusy zamówień"));
                 //Tabs
-                var rolesLayout = mainTabbar.tabs("a1").attachLayout("3W");
+                var rolesLayout = mainTabbar.tabs("a1").attachLayout("3U");
                     rolesLayout.cells("a").setText(_("Role"));                    
-                    rolesLayout.cells("b").setText(_("Użytkownik"));                    
-                    rolesLayout.cells("c").setText("Uprawnienia");                     
+                    rolesLayout.cells("b").setText(_("Uprawnienia"));                    
+                    rolesLayout.cells("c").setText("Użytkownik");                     
                     rolesLayout.setAutoSize("a", "a;b;c");                                             
                     
                 var statusesLayout = mainTabbar.tabs("a2").attachLayout("1C");
@@ -138,7 +138,7 @@ function settingsInit(cell) {
                             ]}
                     ]}
                 ]; 
-                var usersToolBar = rolesLayout.cells("b").attachToolbar({
+                var usersToolBar = rolesLayout.cells("c").attachToolbar({
                         iconset: "awesome",
                         items: [                                
                                 {id: "Cog", type: "button", text: _("Dodaj do roli"), img: "fa fa-spin fa-cog "},
@@ -243,7 +243,7 @@ function settingsInit(cell) {
                         };break; 
                     }
                 });
-                var permissionsToolBar = rolesLayout.cells("c").attachToolbar({
+                var permissionsToolBar = rolesLayout.cells("b").attachToolbar({
                         iconset: "awesome",
                         items: [
                                 {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
@@ -344,6 +344,15 @@ function settingsInit(cell) {
                 var permissionForm = [
                     {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
                             {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:100},                                                                				                            
+//                            {type:"combo",  name:"name",        label:_("Nazwa rozdzialu"), options:[
+//                                    {text: "Gant", value: "gantt"},
+//                                    {text: "Gant", value: "timeline"},
+//                                    {text: "Gant", value: "zlecenia"},
+//                                    {text: "Gant", value: "pracownicy"},
+//                                    {text: "Gant", value: "clients"},
+//                                    {text: "Gant", value: "clients"},
+//                                    {text: "Gant", value: "clients"},
+//                                ], offsetTop:13, labelWidth:100},               
                             {type:"input",  name:"description", label:_("Opis"), offsetTop:13, labelWidth:100},                                                                				                            
                             {type:"button", name:"save",        value:_("Zapisz"),     offsetTop:18},
                             {type:"button", name:"cancel",      value:_("Anuluj"),     offsetTop:18}
@@ -373,45 +382,7 @@ function settingsInit(cell) {
                         return true;                        
                     }
                 });
-                var usersGrid = rolesLayout.cells("b").attachGrid({
-                    image_path:'codebase/imgs/',
-                    columns: [                        
-                        {
-                            label: _("Nazwisko"),
-                            width: 100,
-                            id: "firstname",
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Imie"),
-                            width: 100,
-                            id: "lastname",
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Role"),
-                            width: 100,
-                            id: "role_name",
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        }                        
-                    ],
-                        multiselect: true
-                });               
-                usersGrid.fill = function(id) {
-                    ajaxGet("api/roles/" + id + "/users", '', function(data){                                     
-                        if (data && data.success){
-                            usersGrid.clearAll();
-                            usersGrid.parse((data.data), "js");
-                        }
-                    });
-                };
-                var permissionsGrid = rolesLayout.cells("c").attachGrid({
+                var permissionsGrid = rolesLayout.cells("b").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [
                         {
@@ -458,7 +429,45 @@ function settingsInit(cell) {
                         permissionsGrid.fill(roleId);                          
                     }                                 
                 });
-                rolesTree.load();                                                           
+                rolesTree.load();                                                  
+                var usersGrid = rolesLayout.cells("c").attachGrid({
+                    image_path:'codebase/imgs/',
+                    columns: [                        
+                        {
+                            label: _("Nazwisko"),
+                            width: 100,
+                            id: "firstname",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Imie"),
+                            width: 100,
+                            id: "lastname",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        },
+                        {
+                            label: _("Role"),
+                            width: 100,
+                            id: "role_name",
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"
+                        }                        
+                    ],
+                        multiselect: true
+                });               
+                usersGrid.fill = function(id) {
+                    ajaxGet("api/roles/" + id + "/users", '', function(data){                                     
+                        if (data && data.success){
+                            usersGrid.clearAll();
+                            usersGrid.parse((data.data), "js");
+                        }
+                    });
+                };                
                 usersGrid.fill(0);                 
                 permissionsGrid.fill(0);                                         
 /**

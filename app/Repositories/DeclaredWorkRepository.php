@@ -38,8 +38,8 @@ class DeclaredWorkRepository extends BaseRepository
             $declaredWork->amount            = $orderPosition->amount;
             $date = new \DateTime($orderPosition->date_delivery);
             $declaredWork->num_week          = $date->format("W");
-            $declaredWork->key               = $orderPosition->id;
-            $declaredWork->label             = $orderPosition->kod;
+            $declaredWork->key               = $task->id;
+            $declaredWork->label             = $task->name;
             $declaredWork->text              = $task->name;
             $declaredWork->value             = $task->id; 
             $declaredWork->closed            = $closed;

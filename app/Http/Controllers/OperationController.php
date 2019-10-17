@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Repositories\OperationRepository;
 use App\Models\Operation;
 use App\Models\Order;
+use App\Models\DeclaredWork;
+use App\Models\Task;
+use Illuminate\Support\Facades\DB;
 
 class OperationController extends BaseController
 {
@@ -27,17 +30,39 @@ class OperationController extends BaseController
         
         if ($operations) {
             foreach ($operations as $operation){
-                $task = $operation->task;
-                $user = $operation->user;            
-                //for timeline view
-                $operation['text']       = $task->name;   
-                $operation['task_name']  = $operation['text'];
-                $operation['user_name']  = $user->name;
+                $task     = $operation->zlecenie->task;
+                $taskName = $task->name;
+                $user     = $operation->user;       
+                $zlecenie = $operation->zlecenie;
+
+                $operation->zlecenie_id = $zlecenie->id;
+                $operation->user_name  = $user->name;   
+                $operation->task_name  = $taskName;
+                $operation->text       = $taskName;                   
+                $operation->kod        = $zlecenie->kod;
             }
         }
         
         return response()->json(['success' => true, 'data' => $operations]);
     }
+    
+    public function store(Request $request) 
+    {
+        $declaredWork = DeclaredWork::find($request['declared_work_id']);
+        $duration = DB::table("product_tasks")
+                ->where("product_id", "=", $declaredWork->product_id)
+                ->where("task_id", "=", $declaredWork->task_id)
+                ->pluck("duration");
+        $dateStart = date('Y-m-d H:i:s');
+        $dateEnd = date('Y-m-d H:i:s', strtotime($dateStart. ' + ' . $duration[0] * $declaredWork->declared_amount . ' minute'));
+        
+        $request["start_date"] = $dateStart;
+        $request["end_date"]   = $dateEnd;
+    
+        return parent::store($request);
+    }
+
+
     
     /**
      * Get list tasks by groups

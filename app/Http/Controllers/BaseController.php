@@ -135,12 +135,20 @@ class BaseController extends Controller
         return array_get(explode('.', Route::currentRouteName()), 0);
     }
     
+    public function buildTree()
+    {
+        $data = $this->tree();        
+        return $this->getResponseResult($data);
+    }
+    
+
+
     /**
      * Build struct for tree view on front-end
      * 
      * @return json 
      */    
-    public function buildTree() {
+    public function tree() {
         $model = $this->repository->getModel();
         $parents = $model::where('parent_id', '=', null)->get('id', 'name');   
         $tree = [];
@@ -152,15 +160,19 @@ class BaseController extends Controller
             } 
             $item = [
                 'items' => $kids, 
+                'children' => $kids,
                 'id' => $parent['id'], 
                 'text' => $parent['name'], 
-                'value' => $parent['id']
+                'value' => $parent['id'],
+                'key' => $parent['id'],
+                'label' => $parent['name']
             ];
+
 
             $tree[] = $item;
         }                     
         
-        return response()->json(['data' => $tree, 'success' => true]);        
+        return $tree;        
     }
     
     /**
@@ -173,18 +185,19 @@ class BaseController extends Controller
     {
         $kids = [];  
         $kid = [];
-        
+       
         foreach ($item->kids as $arr) {
             $kid = [                     
                     'id' => $arr['id'], 
                     'text' => $arr['name'], 
-                    'value' => $arr['id']
+                    'value' => $arr['id'],
+                    'key' => $arr['id'],
+                    'label' => $arr['name'] 
                 ];                
             //if kid has his own kids - use recursion
             if (count($arr->kids)) {                   
-                $kid['items'] = $this->kidTree($arr);
-            }      
-            
+                $kid['items']    = $this->kidTree($arr);
+            }
             $kids[] = $kid;
         }
         

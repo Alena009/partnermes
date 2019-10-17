@@ -21,7 +21,7 @@ Route::group([
        
     Route::resource('/components', 'ComponentController');  
     
-    Route::get('/declaredworks/byorderpos/{pos}', 'DeclaredWorkController@listWorksForOrderPos');   
+//    Route::get('/declaredworks/byorderpos/{pos}', 'DeclaredWorkController@listWorksForOrderPos');   
     Route::get('/declaredworks/fortimeline', 'DeclaredWorkController@listWorksForTimeline');   
     Route::get('/declaredworks/list/{groups}', 'DeclaredWorkController@listWorksByGroups');   
     Route::get('/declaredworks/mainlist/{groups}', 'DeclaredWorkController@mainListWorksByGroups');   
@@ -31,6 +31,7 @@ Route::group([
     Route::get('/declaredworks/group', 'DeclaredWorkController@groupedworks');   
     Route::resource('/declaredworks', 'DeclaredWorkController'); 
     
+    Route::get('/departaments/scheduler', 'DepartamentController@buildScheduler');
     Route::get('/departaments/grupytree', 'DepartamentController@buildTree');
     Route::resource('/departaments', 'DepartamentController'); 
     
@@ -100,6 +101,7 @@ Route::group([
     //Route::get('/workerslist', 'DepartamentController@workersList');     
     Route::get('/workerdep/del', 'WorkerDepartamentController@deleteRel');
     Route::resource('/workerdep', 'WorkerDepartamentController');
+    
     Route::get('/warehouse/amountproduct/{productId}', 'WarehouseController@amountProductInWarehouse');  
     Route::get('/warehouse/list/{grupy?}', 'WarehouseController@listProducts');  
     Route::resource('/warehouse', 'WarehouseController'); 

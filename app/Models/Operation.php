@@ -27,6 +27,11 @@ class Operation extends BaseModel
         return $this->belongsTo('App\Models\User', 'user_id', 'id');
     } 
     
+    public function zlecenie()
+    {
+        return $this->belongsTo('App\Models\DeclaredWork', 'declared_work_id', 'id');
+    }     
+    
 //    public function orderPosition()
 //    {
 //        return $this->belongsTo('App\Models\OrderPosition', 'order_position_id', 'id');

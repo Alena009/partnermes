@@ -91,5 +91,43 @@ class DepartamentController extends BaseController
         
         return response()->json(['data' => $result, 'success' => true]);        
     }
+    
+    public function buildScheduler()
+    {  
+        $departaments = [];        
+        $departaments = Departament::where('parent_id', '=', null)->get();
+        
+        foreach ($departaments as $dep) {
+            $dep->key      = $dep->id;
+            $dep->label    = $dep->name;
+            $dep->children = $this->kids($dep);
+            $dep->open     = true;            
+        }
+        
+        return $this->getResponseResult($departaments);
+    }
+    
+    public function kids($departament) 
+    {
+        $kids = [];
+        
+        if (count($departament->kids)) {
+            $kids = $departament->kids;
+            foreach ($kids as $kid) {
+                $kid->key      = $kid->id * 1000;
+                $kid->label    = $kid->name;
+                $kid->children = $this->kids($kid);
+                $kid->open     = true;
+            }
+        } else {
+            $kids = $departament->workers;
+            foreach ($kids as $kid) {
+                $kid->key      = $kid->id;
+                $kid->label    = $kid->name;               
+            }
+        }
+        
+        return $kids;
+    }
 
 }

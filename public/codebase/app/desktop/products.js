@@ -808,7 +808,15 @@ function addTaskForProduct(productId, tasksGrid) {
         var addingForm = createForm(formStruct, addingWindow);
         var tasksCombo = addingForm.getCombo("task_id");
         ajaxGet("api/tasks", '', function(data){
-            tasksCombo.addOption(data.data);
+            if (data && data.success) {
+                tasksCombo.addOption(data.data);
+            } else {
+                dhtmlx.alert({
+                    title:_("Wiadomość"),
+                    text:_("Listę zadań nie było otrzymano. Wypełnij listę zadań \n\
+                            w rozdziale 'Zadania' albo odswież stronę.")
+                });                 
+            }
         });
         addingForm.attachEvent("onButtonClick", function(name){
             var data = this.getFormData();

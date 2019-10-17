@@ -30,6 +30,10 @@ function clientsInit(cell) {
                                             if (data && data.success) {
                                                 clientsGrid.fill();
                                                 windowForm.close();
+                                                dhtmlx.alert({
+                                                    title:_("Wiadomość"),
+                                                    text:_("Zapisane!")
+                                                });
                                             } else {
                                                 dhtmlx.alert({
                                                     title:_("Wiadomość"),
@@ -58,6 +62,10 @@ function clientsInit(cell) {
                                                 if (data && data.success) {
                                                     clientsGrid.fill();
                                                     windowForm.close();
+                                                    dhtmlx.alert({
+                                                        title:_("Wiadomość"),
+                                                        text:_("Zapisane!")
+                                                    });                                                    
                                                 } else {
                                                     dhtmlx.alert({
                                                         title:_("Wiadomość"),
@@ -78,14 +86,27 @@ function clientsInit(cell) {
                                 });                            
                             }
                         };break;
-                        case 'Del': {
+                        case 'Del': {                               
                             var selectedId = clientsGrid.getSelectedRowId();
                             if (selectedId) {
-                                ajaxDelete("api/clients/" + selectedId, "", function(data){
-                                    if (data && data.success){
-                                        clientsGrid.deleteRow(selectedId);
+                                dhtmlx.confirm({
+                                    title: _("Ostrożność"),                                    
+                                    text: _("Czy na pewno chcesz usunąć?"),
+                                    callback: function(result){
+                                        if (result) {                                                                                    
+                                            ajaxDelete("api/clients/" + selectedId, "", function(data){
+                                                if (data && data.success){
+                                                    clientsGrid.deleteRow(selectedId);
+                                                } else {
+                                                    dhtmlx.alert({
+                                                        title:_("Wiadomość"),
+                                                        text:_("Nie udało się usunąć!")
+                                                    });
+                                                }
+                                            });                           
+                                        }
                                     }
-                                });    
+                                });                                     
                             } else {
                                 dhtmlx.alert({
                                     title:_("Wiadomość"),
@@ -196,7 +217,10 @@ function clientsInit(cell) {
                             if (selectedClient) {                                
                                 ajaxGet("api/clients/" + data.id + "/edit", data, function(data){                                                                                                        
                                     if (data && data.success) {
-
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Zapisane!")
+                                        });
                                     } else {
                                         dhtmlx.alert({
                                             title:_("Wiadomość"),
@@ -208,6 +232,10 @@ function clientsInit(cell) {
                                 ajaxPost("api/clients", data, function(data){                                                                                                        
                                     if (data && data.success) {
                                         clientsGrid.fill();
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Zapisane!")
+                                        });                                        
                                     } else {
                                         dhtmlx.alert({
                                             title:_("Wiadomość"),

@@ -40,7 +40,7 @@ class UserController extends \App\Http\Controllers\BaseController
     {              
         $validator = Validator::make($request->all(), [
                     'name' => 'required',
-                    'email' => 'email',
+                    //'email' => 'email',
                     'password' => 'required',
                     'kod' => 'required',
                     'firstname' => 'required',
@@ -59,6 +59,41 @@ class UserController extends \App\Http\Controllers\BaseController
         
         return response()->json(['success' => $success, 'data' => $user]);
     }
+    
+    /**
+     * Editing information about user
+     */
+    public function edit(Request $request, $id)
+    {        
+        $validator = Validator::make($request->all(), [
+                    'name' => 'required',
+                    //'email' => 'email',
+                    //'password' => 'required',
+                    'kod' => 'required',
+                    'firstname' => 'required',
+                    'lastname' => 'required',
+                    'login' => 'required',
+                    'is_worker' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 402);
+        }
+        $input = $request->all();
+
+        if (!empty($input['password'])){
+            $input['password'] = bcrypt($input['password']);
+        } else {
+            unset($input['password']);
+        }
+        
+        $user = User::find($id);
+        
+        if ($user->fill($input)->save()) {
+            return response()->json(['success' => true, 'data' => $user]);
+        } else {
+            return response()->json(['success' => false, 'data' => []]);
+        }        
+    }    
 
     /**
      * Loading users avatars
@@ -126,20 +161,6 @@ class UserController extends \App\Http\Controllers\BaseController
         $token->revoke();
 
         return response()->json(['success' => 'You have been successfully logged out!'], $this->successStatus);
-    }
-    
-    /**
-     * Editing information about user
-     */
-    public function edit(Request $request, $id)
-    {        
-        $user = User::find($id);
-        
-        if ($user->fill($request->all())->save()) {
-            return response()->json(['success' => true, 'data' => $user]);
-        } else {
-            return response()->json(['success' => false, 'data' => []]);
-        }        
     }
     
     /*

@@ -284,7 +284,8 @@ function pracownicyInit(cell) {
 			multiselect: true
                 });        
                 pracownicyGrid.attachHeader("#text_filter,#text_filter,#text_filter");
-		pracownicyGrid.zaladuj = function(i){
+		pracownicyGrid.zaladuj = function(i = 0){
+                    this.clearAll();
 			var ids = Array();
 			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;                        
 			var new_data = ajaxGet("api/workerslist/" + ids, '', function(data){                                     
@@ -360,8 +361,8 @@ function pracownicyInit(cell) {
 		 	{type: "input",    name: "firstname",  label: _("First name"),labelAlign: "left", required: true},
                         {type: "input",    name: "lastname",   label: _("Last name"), labelAlign: "left", required: true},
                         {type: "input",    name: "name",       label: _("User name"), labelAlign: "left"},
-                        {type: "input",    name: "login",      label: _("Login"),     labelAlign: "left"},
-                        {type: "password", name: "password",   label: _("Password"),  labelAlign: "left"},
+                        {type: "input",    name: "login",      label: _("Login"),     labelAlign: "left", required: true},
+                        {type: "password", name: "password",   label: _("Password"),  labelAlign: "left", required: true},
 		 	{type: "input",    name: "email",      label: _("E-mail"),    labelAlign: "left"},
 		 	{type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},		 	                                                                        
                         {type: "label",                        label: _("Is worker")},
@@ -383,8 +384,19 @@ function pracownicyInit(cell) {
                             var data = pracownicyForm.getFormData();
                             var userId = data.id;
                             if (userId){
-                                ajaxGet("api/users/" + userId + "/edit", data, "");                                 
-                                pracownicyGrid.zaladuj(grupyTree.getSelectedId());
+                                ajaxGet("api/users/" + userId + "/edit", data, function(data){
+                                    if (data && data.success){
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                             text:_("Zapisane!")
+                                        });
+                                    }
+                                });    
+                                if (grupyTree.getSelectedId()) {
+                                    pracownicyGrid.zaladuj(grupyTree.getSelectedId());                                
+                                } else {
+                                    pracownicyGrid.zaladuj(0);                                
+                                }
                             } else {
                                 userOperation("api/users", data);
                             }
@@ -452,6 +464,11 @@ function pracownicyInit(cell) {
                                 formData.append("image", file);                        
                                 ajaxPost('api/users/avatar/load/' + id, formData, function(data) {console.log(data)}, headers);                      
                             };       
+                        } else {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                 text:_("Zapisane!")
+                            });
                         }
                     });                     
                 }

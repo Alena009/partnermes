@@ -86,6 +86,8 @@ function productsInit(cell) {
                         {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
                         {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
                         {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                        {type: "separator", id: "sep3"},
+                        {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
                 ]
         });
         typesProductsGridToolBar.attachEvent("onClick", function(btn) {
@@ -162,16 +164,24 @@ function productsInit(cell) {
                     case 'Del':{
                         var id = typesProductsGrid.getSelectedRowId();
                         if (id) {
-                            ajaxDelete("api/prodtypes/" + id, "", function(data){
-                                if (data && data.success){
-                                    typesProductsGrid.deleteRow(id);
-                                } else {
-                                    dhtmlx.alert({
-                                        title:_("Wiadomość"),
-                                        text:_("Błąd! Zmiany nie zostały zapisane")
-                                    });                                            
-                                }
-                            });    
+                            dhtmlx.confirm({
+                            title:_("Ostrożność"),                                    
+                            text:_("Czy na pewno chcesz usunąć typ?"),
+                            callback: function(result){
+                                        if (result) {
+                                            ajaxDelete("api/prodtypes/" + id, "", function(data){
+                                                if (data && data.success){
+                                                    typesProductsGrid.deleteRow(id);
+                                                } else {
+                                                    dhtmlx.alert({
+                                                        title:_("Wiadomość"),
+                                                        text:_("Błąd! Zmiany nie zostały zapisane")
+                                                    });                                            
+                                                }
+                                            }); 
+                                        }
+                                    }
+                                });                                
                         } else {
                             dhtmlx.message({
                                 title:_("Wiadomość"),
@@ -179,6 +189,9 @@ function productsInit(cell) {
                                 text:_("Wybierz pozycję w tabeli!")
                             });                                    
                         }
+                    };break;
+                    case 'Redo': {
+                            typesProductsGrid.fill();
                     };break;
             }
         });               

@@ -65,6 +65,7 @@ function productsInit(cell) {
                     productsGrid.filterBy(2, typesProductsGrid.getSelectedRowId());
                 }
                 productsGrid.filterBy(3, id);
+                console.log("here");
                 return true;                        
             }
         });    
@@ -645,9 +646,10 @@ function productsInit(cell) {
                         productsGrid.deleteMyRecordById("api/products/");
                 };break;   
                 case 'Redo': {
-                    productsGrid.fill();
+                    productsGridToolBar.setItemImage("Redo", "fa fa-spinner");
+                    productsGrid.fill();                    
                     productsGroupsTree.unselectItem(productsGroupsTree.getSelectedId());
-                    typesProductsGrid.fill();
+                    typesProductsGrid.fill();                    
                 };break;
             }
         });        
@@ -706,6 +708,7 @@ function productsInit(cell) {
             ajaxGet("api/products", '', function(data){                                     
                 if (data && data.success){                                    
                     productsGrid.parse(data.data, "js");
+                    productsGridToolBar.setItemImage("Redo", "fa fa-refresh");
                 }
             });                        
         };                

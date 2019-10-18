@@ -120,7 +120,7 @@ function pracownicyInit(cell) {
                             pracownicyForm.setItemFocus("firstname");
                             pracownicyForm.fillAvatar(0);
                             pracownicyForm.showItem("buttonblock");
-                            pracownicyLayout.cells("c").expand();                            
+                            pracownicyLayout.cells("c").expand();                              
                         };break;
                         case 'Edit':{
                             pracownicyLayout.cells("c").expand();   
@@ -463,11 +463,15 @@ function pracownicyInit(cell) {
                                 var id = data.data.id;
                                 formData.append("image", file);                        
                                 ajaxPost('api/users/avatar/load/' + id, formData, function(data) {console.log(data)}, headers);                      
-                            };       
-                        } else {
+                            }; 
                             dhtmlx.alert({
                                 title:_("Wiadomość"),
                                  text:_("Zapisane!")
+                            });
+                        } else {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Błąd! Zmiany nie zostały zapisane!")
                             });
                         }
                     });                     

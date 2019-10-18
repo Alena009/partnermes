@@ -841,24 +841,24 @@ function createForm(formStruct, windowObj){
         };           
     });
                     
-    myForm.attachEvent("onChange", function (name, value, state){
-        if ((name.indexOf("price") !== -1) ||                
-                (name.indexOf("weight") !== -1) ||
-                (name.indexOf("area") !== -1)) {
-            //var re = /^\d[0-9,]+\d$/;
-            //var re = /^\d{1,8}([,\.])?\d{1,2}$/;
-            var re = /^\d{1,8}([\.])?\d{1,2}$/;
-            if (!re.test(value)) {
-                myForm.setItemValue(name, "");
-            }            
-        } else if (name.indexOf("amount") !== -1) {
-            var re = /^\d+$/;            
-            if (!re.test(value)) {
-                myForm.setItemValue(name, "");
-            }            
-        }        
-    });  
-    
+//    myForm.attachEvent("onChange", function (name, value, state){
+//        if ((name.indexOf("price") !== -1) ||                
+//                (name.indexOf("weight") !== -1) ||
+//                (name.indexOf("area") !== -1)) {
+//            //var re = /^\d[0-9,]+\d$/;
+//            //var re = /^\d{1,8}([,\.])?\d{1,2}$/;
+//            var re = /^\d{1,8}([\.])?\d{1,2}$/;
+//            if (!re.test(value)) {
+//                myForm.setItemValue(name, "");
+//            }            
+//        } else if (name.indexOf("amount") !== -1) {
+//            var re = /^\d+$/;            
+//            if (!re.test(value)) {
+//                myForm.setItemValue(name, "");
+//            }            
+//        }        
+//    });  
+//    
     var dateEndCombo   = myForm.getCombo("num_week");
     if (dateEndCombo) {
         var numCurrentWeek = new Date().getWeekNumber();

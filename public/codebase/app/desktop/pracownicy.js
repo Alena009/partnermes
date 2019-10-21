@@ -363,8 +363,11 @@ function pracownicyInit(cell) {
                         {type: "input",    name: "name",       label: _("User name"), labelAlign: "left"},
                         {type: "input",    name: "login",      label: _("Login"),     labelAlign: "left", required: true},
                         {type: "password", name: "password",   label: _("Password"),  labelAlign: "left", required: true},
+                        {type: "combo",    name: "country",    label: _("Kraj"),  options:[]},
+                        {type: "combo",    name: "language",   label: _("Język"), options:[]},
 		 	{type: "input",    name: "email",      label: _("E-mail"),    labelAlign: "left"},
-		 	{type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},		 	                                                                        
+		 	{type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},
+                        
                         {type: "label",                        label: _("Is worker")},
                         {type: "radio",    name: "is_worker",  label: _("Tak"), value: 1,  checked: true},
                         {type: "radio",    name: "is_worker",  label: _("Nie"),  value: 0},                        
@@ -405,7 +408,19 @@ function pracownicyInit(cell) {
                             //pracownicyForm.updateValues();                   
                         };break;
                     }
-                });                                                                                                                                                        
+                });    
+                var countryCombo = pracownicyForm.getCombo("country");
+                var languageCombo = pracownicyForm.getCombo("language");
+                ajaxGet('api/country', '', function(data){
+                    if (data && data.success) {
+                        countryCombo.addOption(data.data);
+                    }
+                });                
+                ajaxGet('api/language', '', function(data){
+                    if (data && data.success) {
+                        languageCombo.addOption(data.data);
+                    }
+                });
                 pracownicyForm.fillAvatar = function(id = 0) {                    
                     ajaxGet('api/users/avatar/' + id, '', function(data) {
                         var url = data.data;

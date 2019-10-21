@@ -645,8 +645,7 @@ function productsInit(cell) {
                 case 'Del': {
                         productsGrid.deleteMyRecordById("api/products/");
                 };break;   
-                case 'Redo': {
-                    productsGridToolBar.setItemImage("Redo", "fa fa-spinner");
+                case 'Redo': {                    
                     productsGrid.fill();                    
                     productsGroupsTree.unselectItem(productsGroupsTree.getSelectedId());
                     typesProductsGrid.fill();                    
@@ -704,6 +703,7 @@ function productsInit(cell) {
             }                    
         });                
         productsGrid.fill = function(){	
+            productsGridToolBar.setItemImage("Redo", "fa fa-spin fa-spinner");
             this.clearAll();
             ajaxGet("api/products", '', function(data){                                     
                 if (data && data.success){                                    

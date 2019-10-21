@@ -17,9 +17,10 @@ Route::group([
     'middleware' => ['auth:api']
         ], function () {
     
-    Route::resource('/clients', 'ClientController');
-       
+    Route::resource('/clients',    'ClientController');         
     Route::resource('/components', 'ComponentController');  
+    Route::resource('/country',    'CountryController');
+    Route::resource('/language',   'LanguageController');
     
 //    Route::get('/declaredworks/byorderpos/{pos}', 'DeclaredWorkController@listWorksForOrderPos');   
     Route::get('/declaredworks/fortimeline', 'DeclaredWorkController@listWorksForTimeline');   

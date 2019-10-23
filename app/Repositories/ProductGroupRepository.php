@@ -8,4 +8,11 @@ class ProductGroupRepository extends BaseRepository
     {
         return "App\Models\ProductGroup";
     }
+    
+    public function get($id) 
+    {
+        $model = $this->getModel();
+        
+        return $model::find($id);
+    }
 }

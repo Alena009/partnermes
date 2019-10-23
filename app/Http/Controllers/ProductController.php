@@ -199,8 +199,13 @@ class ProductController extends BaseController
         
         if ($groupsProducts) {  
             $groupsIds = explode(',', $groupsProducts);
-            $products = Product::whereIn("product_group_id", $groupsIds)->get();
+            
+            $products = Product::whereIn("product_group_id", $groupsIds)->get();                    
+        } else {
+            $products = Product::all();        
+        }
         
+        if ($products) {
             foreach ($products as $product) {
                 $product['product_name'] = $product['name'];
                 $product['product_kod'] = $product['kod'];
@@ -208,10 +213,7 @@ class ProductController extends BaseController
                 $product['value'] = $product['id'];
                 $product['product_type_name']  = $product->type['name'];
                 $product['product_group_name'] = $product->group['name'];
-            }
-                    
-        } else {
-            $products = $this->index();        
+            }            
         }
 
         return response()->json(['success' => true, 'data' => $products]);     

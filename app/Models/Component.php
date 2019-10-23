@@ -9,7 +9,7 @@ class Component extends BaseModel
     protected $table = "components";
     
     protected $fillable = [
-        'product_id', 'component_id', 'amount'
+        'product_id', 'component_id', 'amount', 'height', 'width'
     ];  
     
     public function product() 

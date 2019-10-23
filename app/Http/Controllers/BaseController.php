@@ -148,9 +148,13 @@ class BaseController extends Controller
      * 
      * @return json 
      */    
-    public function tree() {
+    public function tree($parentId = 0) {
         $model = $this->repository->getModel();
-        $parents = $model::where('parent_id', '=', null)->get('id', 'name');   
+        if ($parentId) {
+            $parents = $model::where('parent_id', '=', $parentId)->get('id', 'name');   
+        } else {
+            $parents = $model::where('parent_id', '=', null)->get('id', 'name');   
+        }
         $tree = [];
         
         foreach ($parents as $parent) {             
@@ -167,7 +171,6 @@ class BaseController extends Controller
                 'key' => $parent['id'],
                 'label' => $parent['name']
             ];
-
 
             $tree[] = $item;
         }                     
@@ -204,6 +207,39 @@ class BaseController extends Controller
         return $kids;
     }
     
+    public function getAllChildsIds($parentId)
+    {
+        $result = [];
+        $model = $this->repository->getModel();
+        $item = $model::find($parentId);    
+        
+       
+            $kids = [];
+            if ($item->kids) {
+                $kids = $this->t($item);                
+            }
+            $result[] = $kids;
+        
+        
+        return $result;
+    }
+
+public function t($item) 
+{
+        $kids = [];  
+        $kid = [];
+       
+        foreach ($item->kids as $arr) {                            
+            if (count($arr->kids)) {                   
+                $kid[] = $this->t($arr);
+            }
+            $kids[] = $kid;
+        }
+        
+        return $kids;    
+}    
+
+
     /**
      * Returns result in response format
      * 

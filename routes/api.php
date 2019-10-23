@@ -57,14 +57,14 @@ Route::group([
     
     Route::resource('/prodtypes', 'ProductTypeController'); 
     
-    Route::get('/prodgroups/grupytree', 'ProductGroupController@buildTree');    
+    Route::get('/prodgroups/grupytree', 'ProductGroupController@buildTree');   
+    Route::get('/prodgroups/products/{groups}', 'ProductGroupController@products');   
     Route::resource('/prodgroups', 'ProductGroupController');
     
-    Route::post('/products/addtask', 'ProductController@addTaskForProduct');    
-    
+    Route::post('/products/addtask', 'ProductController@addTaskForProduct');        
     Route::get('/products/availabletasks/{productId}', 'ProductController@listAvailableTasks');    
     Route::get('/products/tasks/{product?}', 'ProductController@listTasksForProduct');   
-    Route::get('/products/listbygroups/{prodGroups}', 'ProductController@listProductsByProductGroup');  
+    //Route::get('/products/listbygroups/{prodGroups}', 'ProductController@listProductsByProductGroup');  
     Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup');     
     Route::get('/products/deleteseveral/{products}', 'ProductController@deleteSeveralProducts');     
     Route::get('/products/deletetask/{product}/{task}', 'ProductController@deleteTask');  

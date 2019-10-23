@@ -63,9 +63,8 @@ function productsInit(cell) {
             if (mode) {
                 if (typesProductsGrid.getSelectedRowId()) {
                     productsGrid.filterBy(2, typesProductsGrid.getSelectedRowId());
-                }
-                productsGrid.filterBy(3, id);
-                console.log("here");
+                }         
+                productsGrid.fill(id);
                 return true;                        
             }
         });    
@@ -77,7 +76,7 @@ function productsInit(cell) {
                 }                    
             });
         };
-        productsGroupsTree.fill();      
+        productsGroupsTree.fill();  
 /**
  * B
  */        
@@ -433,6 +432,8 @@ function productsInit(cell) {
                                             {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
                                             {type: "combo", name: "component_id", required: true, label: _("Produkt"), options: []},		
                                             {type: "input", name: "amount",     required: true, label: _("Ilosc")},
+                                            {type: "input", name: "height",     required: true, label: _("Wymiar 1")},
+                                            {type: "input", name: "width",      required: true, label: _("Wymiar 2")},
                                             {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                                                 {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
                                                 {type: "newcolumn"},
@@ -510,13 +511,15 @@ function productsInit(cell) {
                                 {label: _("Nazwa komponentu"), width: 100, id: "name", type: "ro", sort: "str", align: "left"},
                                 {label: _("Typ"), width: 100, id: "product_type_name", type: "ro", sort: "str", align: "left"},
                                 {label: _("Group"),width: 100,id: "product_group_name",type: "ro", sort: "str", align: "left"},                        
-                                {label: _("Ilość"),width: 100,id: "amount",type: "ed", sort: "str", align: "left"},
+                                {label: _("Ilość"),width: 50,id: "amount",type: "ed", sort: "str", align: "left"},
+                                {label: _("Wymiar 1"),width: 50,id: "height",type: "ed", sort: "str", align: "left"},
+                                {label: _("Wymiar 2"),width: 50,id: "width",type: "ed", sort: "str", align: "left"},
                                 {id: "product_id"},
                                 {id: 'component_id'}
                             ]
                         });  
-                        componentsGrid.setColumnHidden(5,true);
-                        componentsGrid.setColumnHidden(6,true);
+                        componentsGrid.setColumnHidden(7,true);
+                        componentsGrid.setColumnHidden(8,true);
                         var dpComponentsGrid = new dataProcessor("api/components", "js");                
                         dpComponentsGrid.init(componentsGrid);
                         dpComponentsGrid.enableDataNames(true);
@@ -646,7 +649,7 @@ function productsInit(cell) {
                         productsGrid.deleteMyRecordById("api/products/");
                 };break;   
                 case 'Redo': {                    
-                    productsGrid.fill();                    
+                    productsGrid.fill(0);                    
                     productsGroupsTree.unselectItem(productsGroupsTree.getSelectedId());
                     typesProductsGrid.fill();                    
                 };break;
@@ -669,9 +672,49 @@ function productsInit(cell) {
                 {label: _("Powierzchnia, m2"), width: 50, id: "area", type: "edn", sort: "str", align: "left"}
             ],
             multiselect: true
-        });
+        });       
         productsGrid.setColValidators(["NotEmpty","NotEmpty"]);    
-        productsGrid.attachHeader("#select_filter,#text_filter,#select_filter,#select_filter");
+        productsGrid.attachHeader("#text_filter,#text_filter,#select_filter,#select_filter");
+        productsGrid.getFilterElement(0)._filter = function (){
+            var input = this.value; // gets the text of the filter input
+            input = input.trim().toLowerCase().split(' ');
+            return function(value, id){
+                //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
+                    var val = productsGrid.cells(id, 0).getValue(); // gets the value of the current                                                    
+                    //making pattern string for regexp
+                    var searchStr = '';
+                    for (var i = 0; i < input.length; i++) {
+                        searchStr = searchStr + input[i] + "(.*)";                                                                
+                        //var searchStr = /^zz(.+)np(.+)/ig;
+                    }
+                    var regExp = new RegExp("^" + searchStr, "ig");                                                          
+                    if (val.toLowerCase().match(regExp)){                                                             
+                        return true;
+                    }                                                    
+                //}
+                return false;
+            };
+        };        
+        productsGrid.getFilterElement(1)._filter = function (){
+            var input = this.value; // gets the text of the filter input
+            input = input.trim().toLowerCase().split(' ');
+            return function(value, id){
+                //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
+                    var val = productsGrid.cells(id, 1).getValue(); // gets the value of the current                                                    
+                    //making pattern string for regexp
+                    var searchStr = '';
+                    for (var i = 0; i < input.length; i++) {
+                        searchStr = searchStr + input[i] + "(.*)";                                                                
+                        //var searchStr = /^zz(.+)np(.+)/ig;
+                    }
+                    var regExp = new RegExp("^" + searchStr, "ig");                                                          
+                    if (val.toLowerCase().match(regExp)){                                                             
+                        return true;
+                    }                                                    
+                //}
+                return false;
+            };
+        };           
         var dpProductsGrid = new dataProcessor("api/products", "js");                
         dpProductsGrid.init(productsGrid);
         dpProductsGrid.enableDataNames(true);
@@ -702,17 +745,16 @@ function productsInit(cell) {
                 }
             }                    
         });                
-        productsGrid.fill = function(){	
+        productsGrid.fill = function(i = 0){	
             productsGridToolBar.setItemImage("Redo", "fa fa-spin fa-spinner");
             this.clearAll();
-            ajaxGet("api/products", '', function(data){                                     
+            ajaxGet("api/prodgroups/products/" + i, '', function(data){                                     
                 if (data && data.success){                                    
                     productsGrid.parse(data.data, "js");
                     productsGridToolBar.setItemImage("Redo", "fa fa-refresh");
                 }
             });                        
         };                
-        productsGrid.fill(); 
 /**
  * D
  */        

@@ -343,7 +343,7 @@ function warehouseInit(cell) {
                     searchStr = searchStr + input[i] + "(.*)";                                                                
                     //var searchStr = /^zz(.+)np(.+)/ig;
                 }
-                var regExp = new RegExp("^" + searchStr, "ig");                                                          
+                var regExp = new RegExp(searchStr, "ig");                                                          
                 if (val.toLowerCase().match(regExp)){                                                             
                     return true;
                 }                                                    

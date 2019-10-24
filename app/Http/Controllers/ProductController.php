@@ -26,9 +26,7 @@ class ProductController extends BaseController
     public function index($locale = 'pl')
     {   
         app()->setLocale($locale);  
-        
-
-        
+                
         $products = DB::table('products')
         ->join('product_translations', function ($join) {
             $join->on('product_translations.product_id', '=', 'products.id')
@@ -45,8 +43,10 @@ class ProductController extends BaseController
         ->select('products.*', 'product_translations.name', 'product_translations.description',
                 'product_translations.pack', 'product_group_translations.name as product_group_name',
                 'product_type_translations.name as product_type_name', 
-                'products.kod as text', 'products.id as value')
+                'products.kod as text', 'products.id as value', 
+                'products.kod as product_kod', 'product_translations.name as product_name')
         ->get();
+        
         return $this->getResponseResult($products);
         //return $this->getResponseResult($this->repository->allWithAdditionals());                        
     }

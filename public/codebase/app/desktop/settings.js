@@ -1089,7 +1089,7 @@ function createForm(formStruct, windowObj){
                             mask = mask + input[i] + "(.*)";                                                                                                                        
                         }                       
                         myCombo.filter(function(opt){
-                            return opt.text.match(new RegExp("^"+mask.toLowerCase(),"ig"))!=null;
+                            return opt.text.match(new RegExp(mask,"ig"))!=null;
                         }, true);                       
                     }
                 });

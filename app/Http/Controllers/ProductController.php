@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends BaseController
 {
     private $rep;
-    public $productsList;
     
     public function __construct(ProductRepository $rep)
     {
@@ -26,8 +25,30 @@ class ProductController extends BaseController
      */
     public function index($locale = 'pl')
     {   
-        app()->setLocale($locale);        
-        return $this->getResponseResult($this->repository->allWithAdditionals());                        
+        app()->setLocale($locale);  
+        
+
+        
+        $products = DB::table('products')
+        ->join('product_translations', function ($join) {
+            $join->on('product_translations.product_id', '=', 'products.id')
+                 ->where('product_translations.locale', '=', 'pl');
+        })
+        ->join('product_group_translations', function ($join) {
+            $join->on('product_group_translations.product_group_id', '=', 'products.product_group_id')
+                 ->where('product_group_translations.locale', '=', 'pl');
+        }) 
+        ->join('product_type_translations', function ($join) {
+            $join->on('product_type_translations.product_type_id', '=', 'products.product_type_id')
+                 ->where('product_type_translations.locale', '=', 'pl');
+        })         
+        ->select('products.*', 'product_translations.name', 'product_translations.description',
+                'product_translations.pack', 'product_group_translations.name as product_group_name',
+                'product_type_translations.name as product_type_name', 
+                'products.kod as text', 'products.id as value')
+        ->get();
+        return $this->getResponseResult($products);
+        //return $this->getResponseResult($this->repository->allWithAdditionals());                        
     }
     
     public function show(Request $request, $id)

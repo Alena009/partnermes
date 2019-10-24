@@ -4,7 +4,7 @@ var w1;
 
 window.dhx_globalImgPath = 'codebase/imgs/dhxtree_web/';
 
-function appInit() {
+function appInit() {  
 	mainSidebar = new dhtmlXSideBar({
 		parent: document.body,
 		icons_path: "imgs/sidebar/",

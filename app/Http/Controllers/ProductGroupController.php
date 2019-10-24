@@ -58,17 +58,18 @@ class ProductGroupController extends BaseController
     }
     
     public function products($groups) 
-    {       
-        $groups = explode(",", $groups);
+    {   
+        if ($groups) {
+            $groups = explode(",", $groups);
 //        foreach($groups as $group) {
 //            
 //            $ids[] = $this->getAllChildsIds($group);
 //        }
 //        
 //        print_r($ids);
-        $products = \App\Models\Product::whereIn("product_group_id", $groups)->get(); 
-       
-        
-        return $this->getResponseResult($products);
+            return(\App\Models\Product::whereIn("product_group_id", $groups)->get()); 
+        } else {
+            return $this->getResponseResult(\App\Models\Product::all()); 
+        }
     }
 }

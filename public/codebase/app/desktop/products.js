@@ -1,9 +1,11 @@
 var productsGrid;
 var productsLayout;
 var productsForm;
+var products;
 
 function productsInit(cell) {
-    if (productsLayout == null) {      
+    if (productsLayout == null) {           
+        
         var productsLayout = cell.attachLayout("4A");
         productsLayout.cells("a").setText(_("Grupy produktów")); 
         productsLayout.cells("b").setText(_("Typy produktów"));
@@ -748,6 +750,7 @@ function productsInit(cell) {
         productsGrid.fill = function(i = 0){	
             productsGridToolBar.setItemImage("Redo", "fa fa-spin fa-spinner");
             this.clearAll();
+            //productsGrid.parse(products, "js");
             ajaxGet("api/prodgroups/products/" + i, '', function(data){                                     
                 if (data && data.success){                                    
                     productsGrid.parse(data.data, "js");
@@ -838,7 +841,10 @@ function productsInit(cell) {
                 });
                 productGroupCombo.addOption(data.data);
             }
-        });         
+        });        
+        
+        
+
     }
 }
 

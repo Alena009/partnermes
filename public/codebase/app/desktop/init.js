@@ -36,12 +36,16 @@ function appInit() {
 		items: [
 			{type: "text", id: "title", text: "&nbsp;"},
 			{type: "spacer"},
+                        {type: "text",   id: "user",     text: ""},	
+                        {type: "text",   id: "language", text: ""},	
 			{type: "button", id: "logoout", img: "logout.png"}
 		]
 	});
 
 	mainSidebar.attachEvent("onSelect", function(id){
 		mainToolbar.setItemText("title", window.dhx4.template("<span style='font-weight: bold; font-size: 14px;'>#text#</span>", {text:mainSidebar.cells(id).getText().text}));
+                mainToolbar.setItemText("user", localStorage.user);
+                mainToolbar.setItemText("language", localStorage.language);
 		window.dhx4.callEvent("onSidebarSelect", [id, this.cells(id)]);
 	});
 	mainToolbar.attachEvent("onClick", function(id) {
@@ -108,7 +112,9 @@ function loginFormShow(callback2={}){
 			ajaxPost("api/login","login="+data.login+"&password="+data.password,function(data){
                             console.log(data);
 				if (data.success===true){
-                                    localStorage.setItem('token',data.token);                                   
+                                    localStorage.setItem('token',data.token);   
+                                    localStorage.setItem("user", data.user.name);
+                                    localStorage.setItem("language",  data.user.language?  data.user.language:'pl');
 					w1.hide();
 					if (loginForm.callback.success && isFunction(loginForm.callback.success)){
 						loginForm.callback['success']();
@@ -144,13 +150,13 @@ function loginFormShow(callback2={}){
 	}
 }
 
-function logged(){    
-	//dhx.ajax.post("logged","_token="+csrf_token,function(r){
+function logged(){    	
         ajaxPost("api/logged",'',function(data){
 		//var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
 		if (data.success===true){
-			console.log('Zalogowany');                        
-			appInit();
+			console.log(data);      
+                        
+			appInit();                        
 			//window.dhx4.attachEvent("onload", loginFormShow);
 			this.isLogged = !0;
 		}else{

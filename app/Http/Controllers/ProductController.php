@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends BaseController
 {
     private $rep;
+    public $productsList;
     
     public function __construct(ProductRepository $rep)
     {
@@ -24,9 +25,9 @@ class ProductController extends BaseController
      * Get products list with translations
      */
     public function index($locale = 'pl')
-    {      
-        app()->setLocale($locale);
-        return $this->getResponseResult($this->repository->allWithAdditionals());       
+    {   
+        app()->setLocale($locale);        
+        return $this->getResponseResult($this->repository->allWithAdditionals());                        
     }
     
     public function show(Request $request, $id)

@@ -135,20 +135,19 @@ class BaseController extends Controller
         return array_get(explode('.', Route::currentRouteName()), 0);
     }
     
-    public function buildTree()
+    public function buildTree($locale = 'pl')
     {
-        $data = $this->tree();        
+        $data = $this->tree(0, $locale);        
         return $this->getResponseResult($data);
     }
-    
-
 
     /**
      * Build struct for tree view on front-end
      * 
      * @return json 
      */    
-    public function tree($parentId = 0) {
+    public function tree($parentId = 0, $locale = 'pl') {        
+        app()->setLocale($locale);
         $model = $this->repository->getModel();
         if ($parentId) {
             $parents = $model::where('parent_id', '=', $parentId)->get('id', 'name');   

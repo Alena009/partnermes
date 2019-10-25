@@ -4,17 +4,14 @@ var settingsForm;
 
 function settingsInit(cell) {
 	
-	if (settingsLayout == null) {
-		
+	if (settingsLayout == null) {		
             // init layout
             var settingsLayout = cell.attachLayout("1C");                
                 settingsLayout.cells("a").hideHeader();
-
             var mainTabbar = settingsLayout.cells("a").attachTabbar();
                 mainTabbar.addTab("a1", _("Role"), null, null, true);               
                 mainTabbar.addTab("a2", _("Statusy zamówień"));
                 mainTabbar.addTab("a3", _("Kraj, język"));
-                //Tabs
                 var rolesLayout = mainTabbar.tabs("a1").attachLayout("3U");
                     rolesLayout.cells("a").setText(_("Role"));                    
                     rolesLayout.cells("b").setText(_("Uprawnienia"));                    
@@ -24,8 +21,7 @@ function settingsInit(cell) {
                     statusesLayout.cells("a").hideHeader();       
                 var countriesLayout = mainTabbar.tabs("a3").attachLayout("2U");
                     countriesLayout.cells("a").setText(_("Kraj"));                    
-                    countriesLayout.cells("b").setText(_("Język"));                     
-        
+                    countriesLayout.cells("b").setText(_("Język"));                             
 /**
  * 
  * Roles tab
@@ -1185,21 +1181,44 @@ dhtmlXGridObject.prototype.deleteMyRecordById = function(url){
     }
 };
 
-//dhtmlXGridObject.prototype.fill = function(url) {
-//    var thisGrid = this;
-//    thisGrid.clearAll();
-//    ajaxGet(url, '', function(data){                                     
-//        if (data && data.success){                                    
-//            thisGrid.parse(data.data, "js");
-//        } else {
-//            dhtmlx.alert({
-//                title:_("Wiadomość"),
-//                text:_("Komponenty nie zostały załadowane. \n\
-//                        Odśwież stronę!")
-//            });                    
-//        }
-//    });     
-//};
+dhtmlXGridObject.prototype.setRegFilter = function(gridObj, colIdx) {
+    gridObj.getFilterElement(colIdx)._filter = function (){
+        var input = this.value; // gets the text of the filter input
+        input = input.trim().toLowerCase().split(' ');
+        return function(value, id){
+            //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
+                var val = gridObj.cells(id, colIdx).getValue(); // gets the value of the current                                                    
+                //making pattern string for regexp
+                var searchStr = '';
+                for (var i = 0; i < input.length; i++) {
+                    searchStr = searchStr + input[i] + "(.*)";                                                                
+                    //var searchStr = /^zz(.+)np(.+)/ig;
+                }
+                var regExp = new RegExp(searchStr, "ig");                                                          
+                if (val.toLowerCase().match(regExp)){                                                             
+                    return true;
+                }                                                    
+            //}
+            return false;
+        };
+    };
+}
+        
+dhtmlXGridObject.prototype.fill = function(url) {
+    var thisGrid = this;
+    thisGrid.clearAll();
+    ajaxGet(url, '', function(data){                                     
+        if (data && data.success){                                    
+            thisGrid.parse(data.data, "js");
+        } else {
+            dhtmlx.alert({
+                title:_("Wiadomość"),
+                text:_("Komponenty nie zostały załadowane. \n\
+                        Odśwież stronę!")
+            });                    
+        }
+    });     
+};
 
 //dhtmlXGridObject.prototype._in_header_stat_total_sum=function(tag,index,data){//'stat_rowcount'-counter name
 //    var calc=function(){                       // function used for calculations

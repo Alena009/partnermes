@@ -10,28 +10,32 @@ class OrderPositionRepository extends BaseRepository
         return "App\Models\OrderPosition";
     }
 
-    public function getPositionWithAdditionalFields($id)
+    public function getPositionWithAdditionalFields($ids)
     {
-        $position = $this->find($id);
+        $positions = $this->find($ids);
         
-        if ($position) {
-            $product                      = $position->product;
-            $position->text               = $product->name;
-            $position->value              = $position->id;             
-            $position->product_name       = $product->name;
-            $position->product_kod        = $position->product->kod;
-            $position->order_kod          = $position->order->kod;            
-            $position->order_name         = $position->order->name;       
-            $position->order_position_id  = $position->id;      
-            $position->order_position_kod = $position->kod;                
-            $position->key                = $position->id;
-            $position->label              = $position->kod;
-            $date = new \DateTime($position->date_delivery);
-            $position->num_week           = $date->format("W");
-            $position->summa              = $position->price * $position->amount;            
+        if ($positions) {
+            foreach ($positions as $position) {
+                $product                      = $position->product;
+                $position->text               = $product->name;
+                $position->value              = $position->id;        
+                $position->product_id         = $product->id;
+                $position->product_name       = $product->name;
+                $position->product_kod        = $position->product->kod;
+                $position->order_kod          = $position->order->kod;            
+                $position->order_name         = $position->order->name;       
+                $position->order_position_id  = $position->id;      
+                $position->order_position_kod = $position->kod;                
+                $position->key                = $position->id;
+                $position->label              = $position->kod;
+                $date = new \DateTime($position->date_delivery);
+                $position->num_week           = $date->format("W");
+                $position->summa              = $position->price * $position->amount;        
+                $position->countWorks         = count($position->works);
+            }
         }
         
-        return $position;        
+        return $positions;        
     }  
   
     
@@ -43,20 +47,9 @@ class OrderPositionRepository extends BaseRepository
      */
     public function getAllPositionsWithAdditionalFields()
     {        
-        return $this->getResultPositionsWithAdditionalFields($this->model::all());
+        return $this->getPositionWithAdditionalFields($this->model::all()->pluck("id"));
     }
-    
-    /**
-     * Returns list positions by ids
-     * 
-     * @param array $positionsIds
-     * @return array
-     */
-    public function getPositionsByIdsWithAdditionalFields($positionsIds)
-    {
-        return $this->getPositionsByIds($this->getAllPositions());
-    }   
-    
+     
     /**
      * Returns list of orders positions which does not have zlecenia 
      * 
@@ -70,10 +63,33 @@ class OrderPositionRepository extends BaseRepository
                                             where pos.id not in 
                                             (select order_position_id from declared_works 
                                             where product_id = pos.product_id)");
-        $positions = $model::find(array_column($freePositions, "id"));
-        
-        return $positions;
+        $positions = $model::find(array_column($freePositions, "id"))->pluck("id");
+        if ($positions) {
+            return $this->getPositionWithAdditionalFields($positions);
+        } else {
+            return $positions;
+        }        
     }    
+    
+    
+    public function isPositionAvailableForCreatingZlecenie($position)
+    {
+        $product     = $position->product;
+        $components  = $product->components;
+
+        if ($components) {
+            foreach ($components as $component) {
+                $availableAmount = Warehouse::where('product_id', '=', $component->component_id)
+                        ->sum('amount');
+                $neededAmount = $position->amount * $component->amount;
+                if ($neededAmount > $availableAmount) {
+                    return 0;
+                }
+            }  
+        }
+        
+        return 1;
+    }     
     
     /**
      * Returns result array

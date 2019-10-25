@@ -676,47 +676,9 @@ function productsInit(cell) {
             multiselect: true
         });       
         productsGrid.setColValidators(["NotEmpty","NotEmpty"]);    
-        productsGrid.attachHeader("#text_filter,#text_filter,#select_filter,#select_filter");
-        productsGrid.getFilterElement(0)._filter = function (){
-            var input = this.value; // gets the text of the filter input
-            input = input.trim().toLowerCase().split(' ');
-            return function(value, id){
-                //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
-                    var val = productsGrid.cells(id, 0).getValue(); // gets the value of the current                                                    
-                    //making pattern string for regexp
-                    var searchStr = '';
-                    for (var i = 0; i < input.length; i++) {
-                        searchStr = searchStr + input[i] + "(.*)";                                                                
-                        //var searchStr = /^zz(.+)np(.+)/ig;
-                    }
-                    var regExp = new RegExp(searchStr, "ig");                                                          
-                    if (val.toLowerCase().match(regExp)){                                                             
-                        return true;
-                    }                                                    
-                //}
-                return false;
-            };
-        };        
-        productsGrid.getFilterElement(1)._filter = function (){
-            var input = this.value; // gets the text of the filter input
-            input = input.trim().toLowerCase().split(' ');
-            return function(value, id){
-                //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
-                    var val = productsGrid.cells(id, 1).getValue(); // gets the value of the current                                                    
-                    //making pattern string for regexp
-                    var searchStr = '';
-                    for (var i = 0; i < input.length; i++) {
-                        searchStr = searchStr + input[i] + "(.*)";                                                                
-                        //var searchStr = /^zz(.+)np(.+)/ig;
-                    }
-                    var regExp = new RegExp(searchStr, "ig");                                                          
-                    if (val.toLowerCase().match(regExp)){                                                             
-                        return true;
-                    }                                                    
-                //}
-                return false;
-            };
-        };           
+        productsGrid.attachHeader("#text_filter,#text_filter,#select_filter,#select_filter");        
+        productsGrid.setRegFilter(productsGrid, 0);    
+        productsGrid.setRegFilter(productsGrid, 1);                   
         var dpProductsGrid = new dataProcessor("api/products", "js");                
         dpProductsGrid.init(productsGrid);
         dpProductsGrid.enableDataNames(true);
@@ -751,13 +713,14 @@ function productsInit(cell) {
             productsGridToolBar.setItemImage("Redo", "fa fa-spin fa-spinner");
             this.clearAll();
             //productsGrid.parse(products, "js");
-            ajaxGet("api/prodgroups/products/" + i, '', function(data){                                     
+            ajaxGet("api/products/group/" + i + "/" + localStorage.language, '', function(data){                                     
                 if (data && data.success){                                    
                     productsGrid.parse(data.data, "js");
                     productsGridToolBar.setItemImage("Redo", "fa fa-refresh");
                 }
             });                        
-        };                
+        }; 
+        productsGrid.fill(0);
 /**
  * D
  */        

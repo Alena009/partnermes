@@ -83,7 +83,7 @@ function projectsInit(cell) {
                                                     title:_("Wiadomość"),
                                                     text:_("Zapisane")
                                                 });
-                                                projectsGrid.fill();                                                
+                                                projectsGrid.fill("api/orders");                                                
                                                 newOrderWindow.hide();                                                
                                             } else {
                                                 dhtmlx.alert({
@@ -152,7 +152,7 @@ function projectsInit(cell) {
                             }                            
                         };break; 
                         case 'Redo': {
-                            projectsGrid.fill();
+                            projectsGrid.fill("api/orders"); 
                         };break;
                     }
                 });                 
@@ -194,10 +194,6 @@ function projectsInit(cell) {
 		projectsGrid.attachEvent("onRowInserted", function(r, index){
 		    projectsGrid.setCellTextStyle(projectsGrid.getRowId(index), projectsGrid.getColIndexById("project"), "font-weight:bold;");
 		});                
-//		projectsGrid.load(A.server+"projects.xml?type="+A.deviceType, function(){
-//			projectsGrid.selectRow(0, true);
-//		});
-                //projectsGrid.load("api/orders");
                 var dpProjectsGrid = new dataProcessor("api/orders", "js");                
                 dpProjectsGrid.init(projectsGrid);
                 dpProjectsGrid.enableDataNames(true);
@@ -226,15 +222,7 @@ function projectsInit(cell) {
                         dpProjectsGrid.sendData();
                     }                    
                 });
-                projectsGrid.fill = function(){
-                    projectsGrid.clearAll();
-		    ajaxGet("api/orders", '', function(data){
-		        if (data.data && data.success){                           
-                            projectsGrid.parse(data.data, "js");
-                        }
-                    });			
-		};
-                projectsGrid.fill();                           
+                projectsGrid.fill("api/orders");                           
 /**
  * B
  */		                                
@@ -452,6 +440,7 @@ function projectsInit(cell) {
                         image_path:'codebase/imgs/',
                         columns: [
                             {label: _("Kod pozycji"), id: "kod",          type: "ed", sort: "str", align: "left", width: 50},
+                            {label: _("Produkt Kod"), id: "product_kod",  type: "ro", sort: "str", align: "left", width: 150},
                             {label: _("Produkt"),     id: "product_name", type: "ro", sort: "str", align: "left", width: 150},
                             {label: _("Ilosc"),       id: "amount",       type: "ed", sort: "str", align: "left", width: 50},
                             {label: _("Cena"),        id: "price",        type: "ed", sort: "str", align: "left", width: 50},
@@ -461,26 +450,25 @@ function projectsInit(cell) {
                             {id: "product_id"},
                             {id: "id"},
                             {id: "order_id"}, 
-                            {id: "available"}
-                        ],
-                        multiselect: true                    
+                            {id: "countWorks"}
+                        ]                   
                     });  
-                    positionsGrid.setColumnHidden(7,true);
                     positionsGrid.setColumnHidden(8,true);
                     positionsGrid.setColumnHidden(9,true);
                     positionsGrid.setColumnHidden(10,true);
-                    positionsGrid.attachHeader("#select_filter,#text_filter");
+                    positionsGrid.setColumnHidden(11,true);
+                    positionsGrid.attachHeader("#text_filter,#text_filter,#text_filter");
                     positionsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]);
                     positionsGrid.attachFooter(
-                        [_("Ilosc produktow: "),"#cspan","#stat_total","",""],
+                        [_("Ilosc produktow: "),"#cspan","","#stat_total","",""],
                         ["text-align:right;","text-align:center"]
                     );                       
                     positionsGrid.attachFooter(
-                        [_("Ilosc pozycji: "),"#cspan","","#stat_count",""],
+                        [_("Ilosc pozycji: "),"#cspan","","#stat_count","",""],
                         ["text-align:right;","text-align:center"]
                     );                
                     positionsGrid.attachFooter(
-                        [_("Suma: "),"#cspan","","","#stat_total"],
+                        [_("Suma: "),"#cspan","","","","#stat_total"],
                         ["text-align:right;","text-align:center"]
                     );                     
                     var dpPositionsGrid = new dataProcessor("api/positions", "js");                
@@ -498,17 +486,19 @@ function projectsInit(cell) {
                     });      
                     positionsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                         var data = positionsGrid.getRowData(rId);                       
-                        positionsGrid.cells(rId,4).setValue(data.price * data.amount);
+                        positionsGrid.cells(rId,5).setValue(data.price * data.amount);
                     });          
                     positionsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                         var data = positionsGrid.getRowData(rId);
-                        if (data.available == 0) {
+                        if (data.countWorks != 0) {
                             positionsGrid.setRowColor(rId,"yellow");
                         }
                     });                     
                     positionsGrid.fill = function(id){
+                        positionsGrid.setRegFilter(positionsGrid, 1);
+                        positionsGrid.setRegFilter(positionsGrid, 2);
                         positionsGrid.clearAll();
-                        ajaxGet("api/orders/positions/" + id, '', function(data){
+                        ajaxGet("api/positions/byorder/" + id, '', function(data){
                             if (data.data && data.success){			    
                                 positionsGrid.parse(data.data, "js");
                             }

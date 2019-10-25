@@ -8,7 +8,8 @@ use App\Repositories\ProductRepository;
 use App\Models\Product;
 use App\Models\ProductGroup;
 use App\Models\Task;
-use Illuminate\Support\Facades\DB;
+use \Illuminate\Support\Facades\DB;
+
 
 class ProductController extends BaseController
 {
@@ -26,33 +27,26 @@ class ProductController extends BaseController
     public function index($locale = 'pl')
     {   
         app()->setLocale($locale);  
-                
-        $products = DB::table('products')
-        ->join('product_translations', function ($join) {
-            $join->on('product_translations.product_id', '=', 'products.id')
-                 ->where('product_translations.locale', '=', 'pl');
-        })
-        ->join('product_group_translations', function ($join) {
-            $join->on('product_group_translations.product_group_id', '=', 'products.product_group_id')
-                 ->where('product_group_translations.locale', '=', 'pl');
-        }) 
-        ->join('product_type_translations', function ($join) {
-            $join->on('product_type_translations.product_type_id', '=', 'products.product_type_id')
-                 ->where('product_type_translations.locale', '=', 'pl');
-        })         
-        ->select('products.*', 'product_translations.name', 'product_translations.description',
-                'product_translations.pack', 'product_group_translations.name as product_group_name',
-                'product_type_translations.name as product_type_name', 
-                'products.kod as text', 'products.id as value', 
-                'products.kod as product_kod', 'product_translations.name as product_name')
-        ->get();
-        
-        return $this->getResponseResult($products);
-        //return $this->getResponseResult($this->repository->allWithAdditionals());                        
+        return $this->getResponseResult($this->repository->allProducts($locale));                        
     }
     
-    public function show(Request $request, $id)
+    /**
+     * Get products list with translations
+     */
+    public function productsByGroups($groups, $locale = 'pl')
+    {   
+        app()->setLocale($locale);          
+        if ($groups) {
+            $groups = explode(",", $groups);
+            return $this->getResponseResult($this->repository->productsByGroups($groups, $locale));
+        } else {
+            return $this->getResponseResult($this->repository->allProducts($locale)); 
+        }                    
+    }    
+    
+    public function show(Request $request, $id, $locale = 'pl')
     {
+        app()->setLocale($locale);
         return $this->getResponseResult($this->repository->getWithAdditionals($id));
     }
 
@@ -183,6 +177,7 @@ class ProductController extends BaseController
                     $task->task_name  = $task->name;
                     $task->product_id = $product->id;
                     $task->task_id    = $task->id;
+                    $task->checked    = true;
                     $result[] = $task;
                 }  
             }
@@ -210,35 +205,6 @@ class ProductController extends BaseController
         }
         
         return response()->json(['success' => (boolean)$products, 'data' => $products]);  
-    }    
-    
-    /**
-     * Get list products by products groups
-     */
-    public function listProductsByProductGroup($groupsProducts = 0)
-    {   
-        $products = [];
-        
-        if ($groupsProducts) {  
-            $groupsIds = explode(',', $groupsProducts);
-            
-            $products = Product::whereIn("product_group_id", $groupsIds)->get();                    
-        } else {
-            $products = Product::all();        
-        }
-        
-        if ($products) {
-            foreach ($products as $product) {
-                $product['product_name'] = $product['name'];
-                $product['product_kod'] = $product['kod'];
-                $product['text'] = $product['name'];
-                $product['value'] = $product['id'];
-                $product['product_type_name']  = $product->type['name'];
-                $product['product_group_name'] = $product->group['name'];
-            }            
-        }
-
-        return response()->json(['success' => true, 'data' => $products]);     
     }    
     
     /**
@@ -278,6 +244,7 @@ class ProductController extends BaseController
                 $task->task_name= $task->name;
                 $task->product_id = $product->id;
                 $task->task_id    = $task->id;
+                $task->checked    = true;
             }
         }
         return $tasks;        

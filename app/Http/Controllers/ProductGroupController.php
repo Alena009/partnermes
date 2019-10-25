@@ -56,20 +56,4 @@ class ProductGroupController extends BaseController
 
         return $this->getResponseResult($productGroup);
     }
-    
-    public function products($groups) 
-    {   
-        if ($groups) {
-            $groups = explode(",", $groups);
-//        foreach($groups as $group) {
-//            
-//            $ids[] = $this->getAllChildsIds($group);
-//        }
-//        
-//        print_r($ids);
-            return(\App\Models\Product::whereIn("product_group_id", $groups)->get()); 
-        } else {
-            return $this->getResponseResult(\App\Models\Product::all()); 
-        }
-    }
 }

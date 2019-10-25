@@ -114,35 +114,6 @@ class OrderController extends BaseController
         
         return response()->json(['data' => $order, 'success' => (boolean)count($order)]);                
     }
-
-    
-    public function positions($orderId)
-    {
-        $order     = [];
-        $positions = [];
-        
-        $order     = \App\Models\Order::find($orderId);
-        $positions = $order->positions;
-        
-        foreach ($positions as $position) {
-            $product     = $position->product;
-            $productName = $product->name;
-            
-            $position['product_id']   = $product['id'];
-            $position['product_name'] = $productName;
-            $position['text']         = $productName;
-            $position['value']        = $position['id'];
-            $date = new \DateTime($position->date_delivery);
-            $position['num_week'] = $date->format("W"); 
-            $position['available']   = 1;
-            $tasks = DeclaredWork::where("order_position_id", "=", $position->id)->get();
-            if (count($tasks)) {
-                $position['available'] = 0;
-            }            
-        }
-
-        return response()->json(['data' => $positions, 'success' => (boolean)count($positions)]);        
-    }
     
     public function history($orderId)
     {

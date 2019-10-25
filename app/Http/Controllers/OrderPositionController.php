@@ -109,43 +109,16 @@ class OrderPositionController extends BaseController
      */    
     public function freePositionsList()
     {        
-        $data = [];
-        $positions = $this->repository->getFreePositions();
         
-        if ($positions) {            
-            $data = $this->repository->getResultPositionsWithAdditionalFields($positions);
-            foreach ($data as $position) {
-                $position->available = $this->isPositionAvailableForCreatingZlecenie($position);
-            }
-        }
+//        if ($positions) {            
+//            $data = $this->repository->getResultPositionsWithAdditionalFields($positions);
+//            foreach ($data as $position) {
+//                $position->available = $this->isPositionAvailableForCreatingZlecenie($position);
+//            }
+//        }
         
-        return $this->getResponseResult($data);        
-    }
-    
-    /**
-     * Checks do we have all components that position needs. 
-     * 
-     * @param obj $position
-     * @return int
-     */
-    public function isPositionAvailableForCreatingZlecenie($position)
-    {
-        $product     = $position->product;
-        $components  = $product->components;
-
-        if ($components) {
-            foreach ($components as $component) {
-                $availableAmount = Warehouse::where('product_id', '=', $component->component_id)
-                        ->sum('amount');
-                $neededAmount = $position->amount * $component->amount;
-                if ($neededAmount > $availableAmount) {
-                    return 0;
-                }
-            }  
-        }
-        
-        return 1;
-    }    
+        return $this->getResponseResult($this->repository->getFreePositions());        
+    }   
     
     /**
      * create new order position
@@ -304,5 +277,15 @@ class OrderPositionController extends BaseController
         }        
         
         return response()->json(['data' => $orderPosition, 'success' => (boolean)count($orderPosition)]);                
-    }    
+    }
+    
+    public function getPositionsByOrder($orderId)
+    {
+        $positions = [];
+        $positionsIds = OrderPosition::where("order_id", "=", $orderId)->pluck("id");
+        
+        return $this->getResponseResult($this->repository->
+                getPositionWithAdditionalFields($positionsIds));        
+    }
+
 }

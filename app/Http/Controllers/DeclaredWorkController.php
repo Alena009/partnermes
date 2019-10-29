@@ -123,7 +123,8 @@ class DeclaredWorkController extends BaseController
      */    
     public function store(Request $request) 
     {        
-        $request['kod'] = 'T-' . idate('U'); 
+        //$request['kod'] = 'T-' . idate('U'); 
+        $request['kod'] = $request['order_position_id'] . $request['product_id']; 
         return parent::store($request);          
     } 
     

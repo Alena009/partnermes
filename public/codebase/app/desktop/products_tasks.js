@@ -261,7 +261,9 @@ function productsTasksInit(cell) {
                     });                        
                 };                
                 productsGrid.fill();
-                productsGrid.attachHeader("#select_filter,#text_filter,#select_filter,#select_filter");		
+                productsGrid.attachHeader("#text_filter,#text_filter,#select_filter,#select_filter");	
+                productsGrid.setRegFilter(productsGrid, 0);
+                productsGrid.setRegFilter(productsGrid, 1);
                 productsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty","NotEmpty"]);        
                 var dpProductsGrid = new dataProcessor("api/products", "js");                
                 dpProductsGrid.init(productsGrid);

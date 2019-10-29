@@ -54,6 +54,7 @@ Route::group([
     Route::get('/positions/list/beguntasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/componenttasks', 'OrderPositionController@listTasksForPositionComponent');
     Route::get('/positions/components/{position}', 'OrderPositionController@positionComponents');
+    Route::get('/positions/tasks/{position}', 'OrderPositionController@positionTasks');
     Route::resource('/positions', 'OrderPositionController');      
     
     Route::resource('/prodtypes', 'ProductTypeController'); 
@@ -63,15 +64,15 @@ Route::group([
     
     Route::post('/products/addtask', 'ProductController@addTaskForProduct');        
     Route::get('/products/availabletasks/{productId}', 'ProductController@listAvailableTasks');    
-    Route::get('/products/tasks/{product?}', 'ProductController@listTasksForProduct');       
+   // Route::get('/products/tasks/{product?}', 'ProductController@listTasksForProduct');       
     Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup');     
     Route::get('/products/deleteseveral/{products}', 'ProductController@deleteSeveralProducts');     
     Route::get('/products/deletetask/{product}/{task}', 'ProductController@deleteTask');  
-    Route::get('/products/tasks/changepriority/{product}/{stask}/{ttask}', 'ProductController@changePriorityTask');  
+    Route::get('/products/tasks/changepriority/{product}/{stask}/{task}', 'ProductController@changePriorityTask');  
     Route::get('/products/tasks/{product}/{task}/edit', 'ProductController@editTask');  
     Route::get('/products/components/{product}', 'ProductController@getListComponents');  
     Route::get('/products/tasks/{product}', 'ProductController@getListTasks');      
-    Route::get('/products/group/{groups}/{locale?}', 'ProductController@productsByGroups');  
+    Route::get('/products/group/{groups}/{locale?}', 'ProductController@productsByGroups');      
     Route::resource('/products', 'ProductController');  
  
     

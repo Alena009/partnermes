@@ -5,9 +5,10 @@ var zleceniaForm;
 function zleceniaInit(cell) {
 	if (zleceniaLayout == null) {
 		// init layout
-		var zleceniaLayout = cell.attachLayout("2U");
+		var zleceniaLayout = cell.attachLayout("3L");
 		zleceniaLayout.cells("a").setText(_("Grupy zadań"));
 		zleceniaLayout.cells("b").setText(_("Zlecenia"));
+                zleceniaLayout.cells("c").setText(_("Zadania"));
 		zleceniaLayout.cells("a").setWidth(280);			                       
 		
 		var grupyTreeToolBar = zleceniaLayout.cells("a").attachToolbar({
@@ -89,8 +90,8 @@ function zleceniaInit(cell) {
 				{id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
                                 {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
                                 {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
-                                {id: "sep2",     type: "separator"},
-                                {id: "AddTotal", type: "button", text: _("Zrobić wspólne zlecenie"), img: "fa fa-check-square"},
+                                //{id: "sep2",     type: "separator"},
+                                //{id: "AddTotal", type: "button", text: _("Zrobić wspólne zlecenie"), img: "fa fa-check-square"},
                                 {id: "sep3",     type: "separator"},
                                 {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
 			]
@@ -103,305 +104,186 @@ function zleceniaInit(cell) {
                             var newZlecenieLayoutTabbar = newZlecenieLayout.cells("a").attachTabbar();
                                 newZlecenieLayoutTabbar.addTab("a1", _("Zlecenie na zamówienie"), null, null, true);               
                                 newZlecenieLayoutTabbar.addTab("a2", _("Wewnętrzne zlecenie"));                                  
-                            var newOrderZlecenieLayout = newZlecenieLayoutTabbar.tabs("a1").attachLayout("3J");
+                            var newOrderZlecenieLayout = newZlecenieLayoutTabbar.tabs("a1").attachLayout("3L");
                             newOrderZlecenieLayout.cells("a").setText(_("Pozycji zamowien"));                            
-                            newOrderZlecenieLayout.cells("b").setText(_("Informacja"));
-                            newOrderZlecenieLayout.cells("c").setText(_("Komponenty"));   
-                            
-                            ordersPositionsGridToolbar = newOrderZlecenieLayout.cells("a").attachToolbar({
-                                    iconset: "awesome",
-                                    items: [                                        
-                                        {id:"Add",  type: "button", text: _("Zapisz zlecenie"), img: "fa fa-plus-square"}
-                                    ]
-                            }); 
-                            ordersPositionsGridToolbar.attachEvent("onClick", function(id) { 
-                                if (id == 'Add') {                                    
-                                        var selectedPosition = ordersPositionsGrid.getSelectedRowId();
-                                        if (selectedPosition) {
-                                            var data = ordersPositionsGrid.getRowData(selectedPosition);
-                                            if (data.available == 1) {
-                                                var newZlecenieForMainProductWindow = createWindow(_("Dodaj zlecenie do produktu"), 500, 400);                                                                       
-                                                var newZlecenieForMainProductLayout = newZlecenieForMainProductWindow.attachLayout("1C");
-                                                newZlecenieForMainProductLayout.cells("a").setText(_("Zadania"));
-                                                newZlecenieForMainProductToolbar = newZlecenieForMainProductLayout.cells("a").attachToolbar({
-                                                        iconset: "awesome",
-                                                        items: [                                        
-                                                            {id:"Add",  type: "button", text: _("Zapisz zlecenie"), img: "fa fa-plus-square"}
-                                                        ]
-                                                }); 
-                                                newZlecenieForMainProductToolbar.attachEvent("onClick", function(id) { 
-                                                    if (id == 'Add') {
-                                                            var checkedTasksForMainProduct = tasksForMainProductGrid.getCheckedRows(0);
-                                                            checkedTasksForMainProduct = checkedTasksForMainProduct.split(",");
-                                                            checkedTasksForMainProduct.forEach(function(element) {                                                    
-                                                                var data = tasksForMainProductGrid.getRowData(element);                                                  
-                                                                ajaxPost("api/declaredworks", data, function(data){
-                                                                    if (data && data.success) {
-                                                                        newZlecenieForMainProductWindow.hide();
-                                                                        zleceniaGrid.zaladuj(0);
-                                                                    } else {
-                                                                        dhtmlx.alert({
-                                                                            title:_("Wiadomość"),
-                                                                            text:_("Błąd! Zmiany nie zostały zapisane")
-                                                                        });                                                                    
-                                                                    }
-                                                                });                                                           
-                                                            }); 
-                                                            ordersPositionsGrid.deleteSelectedRows();                                                        
-                                                    }
-                                                });
-                                                var tasksForMainProductGrid = newZlecenieForMainProductLayout.cells("a").attachGrid({
-                                                    image_path:'codebase/imgs/',
-                                                    columns: [    
-                                                        {label: _(""),                  id: "checked",           type: "ch", sort: "str", align: "left", width: 20},                                                                       
-                                                        {label: _("Zamowienie Kod"),    id: "order_kod",         type: "ro", sort: "str", align: "left", width: 50},                                    
-                                                        {label: _("Pozycja Kod"),       id: "position_kod",      type: "ro", sort: "str", align: "left", width: 50},
-                                                        {label: _("Produkt Kod"),       id: "product_kod",       type: "ro", sort: "str", align: "left", width: 50},
-                                                        {label: _("Produkt"),           id: "product_name",      type: "ro", sort: "str", align: "left", width: 50},                                   
-                                                        {label: _("Zadanie Kod"),       id: "kod",               type: "ro", sort: "str", align: "left", width: 100},
-                                                        {label: _("Zadanie"),           id: "name",              type: "ro", sort: "str", align: "left", width: 200},                                                                        
-                                                        {label: _("Ilosc"),             id: "declared_amount",   type: "ed", sort: "str", align: "left", width: 50},
-                                                        {id: "task_id"},
-                                                        {id: "order_position_id"},
-                                                        {id: "product_id"}
-                                                    ]
-                                                });         
-                                                tasksForMainProductGrid.setColumnHidden(1,true);
-                                                tasksForMainProductGrid.setColumnHidden(2,true);
-                                                tasksForMainProductGrid.setColumnHidden(3,true);
-                                                tasksForMainProductGrid.setColumnHidden(4,true);
-                                                tasksForMainProductGrid.setColumnHidden(8,true);
-                                                tasksForMainProductGrid.setColumnHidden(9,true);                            
-                                                tasksForMainProductGrid.setColumnHidden(10,true);                                              
-                                                tasksForMainProductGrid.attachEvent("onCheck", function(rId,cInd,state){
-                                                    if (state=='0'){                                    
-                                                        tasksForMainProductGrid.setRowTextStyle(rId, 
-                                                        "background-color: lightgray; color: gray; font-family: italy;");                                    
-                                                    } else if (state=='1'){
-                                                        tasksForMainProductGrid.setRowTextStyle(rId, 
-                                                        "background-color: white; color: black; font-family: arial;");
-                                                    }                                        
-                                                });  
-                                                tasksForMainProductGrid.fill = function(positionId) {                                    
-                                                    this.clearAll();                                                                               
-                                                    ajaxGet("api/positions/list/tasks/" + positionId, "", function(data){
-                                                        if (data.success && data.data) {																										
-                                                            tasksForMainProductGrid.parse(data.data, "js");
-                                                        }
-                                                    });                                
-                                                };   
-                                                tasksForMainProductGrid.fill(selectedPosition);                                                 
-                                            } else {
-                                                dhtmlx.message({
-                                                    title:_("Wiadomość"),
-                                                    type:"alert",
-                                                    text:_("Nie wystarcza komponentów na \n\
-                                                            magazynie dla utworzenia tego produktu! \n\
-                                                            Najpierw utwórz zlecenia dla komponentów")
-                                                });
-                                            }                                                                      
-                                        } else {
-                                            dhtmlx.message({
-                                                title:_("Wiadomość"),
-                                                type:"alert",
-                                                text:_("Wybierz pozycję w tabeli!")
-                                            }); 
-                                        }                                    
-                                }
-                            });
+                            newOrderZlecenieLayout.cells("b").setText(_("Komponenty"));
+                            newOrderZlecenieLayout.cells("c").setText(_("Zlecenia do wybranych produktów"));   
+                            newOrderZlecenieLayout.cells("c").setHeight(100);
+                            newOrderZlecenieLayout.setAutoSize("a", "a;b;c");
                             var ordersPositionsGrid = newOrderZlecenieLayout.cells("a").attachGrid({
                                 image_path:'codebase/imgs/',
                                 columns: [   
-                                    {id: "product_id"},                                    
-                                    {label: _("Zamowienie Kod"), id: "order_kod",          type: "ro", sort: "str", align: "left", width: 50},
-                                    {label: _("Zamowienie"),     id: "order_name",         type: "ro", sort: "str", align: "left", width: 50},
+                                    {id: "checked", type: "ch", width: 30},                                                                     
+                                    {label: _("Zamowienie Kod"), id: "order_kod",          type: "ro", sort: "str", align: "left", width: 50},                                    
                                     {label: _("Pozycja Kod"),    id: "order_position_kod", type: "ro", sort: "str", align: "left", width: 50},
                                     {label: _("Produkt Kod"),    id: "product_kod",        type: "ro", sort: "str", align: "left", width: 50},                                                                        
                                     {label: _("Produkt"),        id: "product_name",       type: "ro", sort: "str", align: "left", width: 150},                                  
                                     {label: _("Ilosc"),          id: "amount",             type: "ro", sort: "str", align: "left", width: 50},
                                     {label: _("Cena"),           id: "price",              type: "ro", sort: "str", align: "left", width: 50},
-                                    {label: _("Suma"),           id: "summa",              type: "ro", sort: "str", align: "left", width: 50},
+                                    {label: _("Suma"),           id: "summa",              type: "ro", sort: "str", align: "left", width: 50},                                    
+                                    {label: _("Opis"),           id: "description",        type: "ro", sort: "str", align: "left", width: 150},
                                     {id: "date_delivery"},
                                     {id: "description"},												
-                                    {id: "available"}												                                    
+                                    {id: "available"},
+                                    {id: "product_id"}   
                                 ]
                             });  
-                            ordersPositionsGrid.attachHeader(",#select_filter,#select_filter,#text_filter,#select_filter,#text_filter");
-                            ordersPositionsGrid.setColumnHidden(0,true);
+                            ordersPositionsGrid.attachHeader(",#select_filter,,#select_filter");
+                            ordersPositionsGrid.attachFooter(
+                                [_("Ilosc: "),"#cspan","#cspan","#cspan","#cspan","#stat_total","","#stat_total"],
+                                ["text-align:right;","text-align:center"]
+                            ); 
                             ordersPositionsGrid.setColumnHidden(9,true);
                             ordersPositionsGrid.setColumnHidden(10,true);
-                            ordersPositionsGrid.setColumnHidden(11,true);        
-                            ordersPositionsGrid.attachEvent("onRowSelect", function(id,ind){                        
-                                componentsGrid.fill(id);                                  
-                            });    
-                            ordersPositionsGrid.setRegFilter(ordersPositionsGrid, 3);                                                       
-                            ordersPositionsGrid.setRegFilter(ordersPositionsGrid, 5);                                                       
-                            ordersPositionsGrid.fill("api/positions/freepositions"); 
-                                                                                                                                                                                                  
-                            componentsGridToolbar = newOrderZlecenieLayout.cells("c").attachToolbar({
-                                    iconset: "awesome",
-                                    items: [                                        
-                                        {id:"Add",  type: "button",  text: _("Zapisz zlecenie"), img: "fa fa-plus-square"}
-                                    ]
-                            });    
-                            componentsGridToolbar.attachEvent("onClick", function(id) { 
-                                if (id == 'Add') {
-                                        var selectedPositionId    = ordersPositionsGrid.getSelectedRowId();
-                                        var selectedComponentId   = componentsGrid.getSelectedRowId();
-                                        if (selectedPositionId && selectedComponentId) { 
-                                            var rowData = componentsGrid.getRowData(selectedComponentId);
-                                            if (rowData.available == 0) {
-                                                var selectedComponentData = componentsGrid.getRowData(componentsGrid.getSelectedRowId());
-                                                selectedComponentData.order_position_id = selectedPositionId;                                             
-                                                var newZlecenieForCOmponentWindow = createWindow(_("Dodaj zlecenie do komponentu"), 400, 500);
-                                                var newZlecenieForComponentLayout = newZlecenieForCOmponentWindow.attachLayout("1C");
-                                                newZlecenieForComponentLayout.cells("a").setText(_("Zadania"));
-
-                                                var tasksForComponentGrid = newZlecenieForComponentLayout.cells("a").attachGrid({
-                                                    image_path:'codebase/imgs/',
-                                                    columns: [    
-                                                        {label: _(""),              id: "checked",         type: "ch", sort: "str", align: "left", width: 20},                                                                                        
-                                                        {label: _("Pozycja Kod"),   id: "position_kod",    type: "ro", sort: "str", align: "left", width: 50},                                    
-                                                        {label: _("Komponent Kod"), id: "product_kod",   type: "ro", sort: "str", align: "left", width: 50},
-                                                        {label: _("Komponent"),     id: "product_name",  type: "ro", sort: "str", align: "left", width: 150},                                    
-                                                        {label: _("Zadanie Kod"),   id: "kod",             type: "ro", sort: "str", align: "left", width: 50},
-                                                        {label: _("Zadanie"),       id: "name",            type: "ro", sort: "str", align: "left", width: 150},                                                                                                                            
-                                                        {label: _("Ilosc"),         id: "declared_amount", type: "ed", sort: "str", align: "left", width: 50},
-                                                        {id: "task_id"},
-                                                        {id: "order_position_id"},
-                                                        {id: "order_kod"},
-                                                        {id: "product_id"}                                                    
-                                                    ]
-                                                }); 
-                                                tasksForComponentGrid.setColumnHidden(7,true);
-                                                tasksForComponentGrid.setColumnHidden(8,true);                            
-                                                tasksForComponentGrid.setColumnHidden(9,true);
-                                                tasksForComponentGrid.setColumnHidden(10,true);
-                                                tasksForComponentGrid.attachEvent("onCheck", function(rId,cInd,state){
-                                                    if (state=='0'){                                    
-                                                        this.setRowTextStyle(rId, "background-color: lightgray; color: gray; font-family: italy;");                                                    
-                                                    } else if (state=='1'){
-                                                        this.setRowTextStyle(rId, "background-color: white; color: black; font-family: arial;");
-                                                    }                                        
-                                                });     
-                                                tasksForComponentGrid.fill = function(data) {                                    
-                                                    this.clearAll();                                                                               
-                                                    ajaxGet("api/positions/list/componenttasks", data, function(data){
-                                                        if (data.success && data.data) {																										
-                                                            tasksForComponentGrid.parse(data.data, "js");
-                                                        }
-                                                    });
-                                                };                                             
-                                                var data = {};
-                                                data.position_id  = selectedPositionId;
-                                                data.component_id = selectedComponentData.component_id;
-                                                data.amount       = selectedComponentData.amount_need; 
-                                                tasksForComponentGrid.fill(data);   
-                                                
-                                                newZlecenieForComponentToolbar = newZlecenieForComponentLayout.cells("a").attachToolbar({
-                                                        iconset: "awesome",
-                                                        items: [                                        
-                                                            {id:"Add",  type: "button", text: _("Zapisz zlecenie"), img: "fa fa-plus-square"}
-                                                        ]
-                                                }); 
-                                                newZlecenieForComponentToolbar.attachEvent("onClick", function(id) { 
-                                                    if (id == 'Add') {
-                                                        var checkedTasksForComponent = tasksForComponentGrid.getCheckedRows(0);
-                                                        checkedTasksForComponent = checkedTasksForComponent.split(",");
-                                                        checkedTasksForComponent.forEach(function(element) {                                                    
-                                                            var data = tasksForComponentGrid.getRowData(element);                                                  
-                                                            ajaxPost("api/declaredworks", data, function(data) {
-                                                                if (data && data.success) {
-                                                                    newZlecenieForCOmponentWindow.hide();
-                                                                    zleceniaGrid.zaladuj(0);
-                                                                    componentsGrid.fill(selectedPositionId);
-                                                                } else {
-                                                                    dhtmlx.alert({
-                                                                        title:_("Wiadomość"),
-                                                                        text:_("Błąd! Zmiany nie zostały zapisane")
-                                                                    });
-                                                                }
-                                                            });                                                            
-                                                        });  
-                                                        componentsGrid.deleteSelectedRows();                                                        
-                                                    }
-                                                });                                                
-                                            } else {
-                                                dhtmlx.message({
-                                                    title:_("Wiadomość"),
-                                                    type:"alert",
-                                                    text:_("Tego komponentu wystarcza na magazynie, \n\
-                                                            nie potrzebuje wyprodukowania!")
-                                                }); 
-                                            }
-                                        } else {
-                                            dhtmlx.message({
-                                                title:_("Wiadomość"),
-                                                type:"alert",
-                                                text:_("Wybierz pozycję w tabeli!")
-                                            });                                                 
-                                        }
-                                }                                
-                            });                            
-                            var componentsGrid = newOrderZlecenieLayout.cells("c").attachGrid({
+                            ordersPositionsGrid.setColumnHidden(11,true);
+                            ordersPositionsGrid.setColumnHidden(12,true);        
+                            ordersPositionsGrid.attachEvent("onCheck", function(rId,cInd,state){
+                                var productsIds = [];
+                                var ids = ordersPositionsGrid.getCheckedRows(0);
+                                ids.split(',').forEach(function(elem){
+                                    var data = ordersPositionsGrid.getRowData(elem);
+                                    productsIds.push(data.product_id);   
+                                });                             
+                                
+                                componentsGrid.fill(ids); 
+                            });                                                                                   
+                            ordersPositionsGrid.fill("api/positions/freepositions");                        
+                            var componentsGrid = newOrderZlecenieLayout.cells("b").attachGrid({
                                 image_path:'codebase/imgs/',
-                                columns: [                                                                           
-                                    {label: _("Komponent Kod"),       id: "component_kod",      type: "ro", sort: "str", align: "left", width: 100},                                                                        
-                                    {label: _("Komponent"),           id: "component_name",     type: "ro", sort: "str", align: "left", width: 150},                                  
-                                    {label: _("Wymagana ilość"),      id: "amount_need",        type: "ro", sort: "str", align: "left", width: 50},                                    
-                                    {label: _("Dostępna ilość"),      id: "amount_available",   type: "ro", sort: "str", align: "left", width: 50},
-                                    {label: _("Zlecenie"),            id: "zlecenie",           type: "ro", sort: "str", align: "left", width: 100},												
+                                columns: [ 
+                                    {id: "checked", type: "ch", width: 30},
+                                    {label: _("Komponent Kod"),       id: "kod",      type: "ro", sort: "str", align: "left", width: 100},                                                                        
+                                    {label: _("Komponent"),           id: "name",     type: "ro", sort: "str", align: "left", width: 150},                                  
+                                    {label: _("Wymagana ilość"),      id: "amount1",   type: "ro", sort: "str", align: "left", width: 50},                                    
+                                    {label: _("Ilość na magazynie"),  id: "available",type: "ro", sort: "str", align: "left", width: 50},
+                                    {label: _("Ilość do produkowania"),  id: "amount1",   type: "ed", sort: "str", align: "left", width: 50},
+                                    //{label: _("Zlecenie"),            id: "zlecenie", type: "ro", sort: "str", align: "left", width: 100},												
                                     {id: "component_id"},												
                                     {id: "available"},
                                     {id: "order_position_id"}
                                 ]
                             });   
-                            componentsGrid.attachHeader(",#text_filter,#select_filter");
-                            componentsGrid.setColumnHidden(5,true);
+                            componentsGrid.attachHeader("#master_checkbox,#text_filter,#text_filter");
+                            componentsGrid.setRegFilter(componentsGrid, 1);
+                            componentsGrid.setRegFilter(componentsGrid, 2);                            
                             componentsGrid.setColumnHidden(6,true);
                             componentsGrid.setColumnHidden(7,true);
-                            componentsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
-                                var data = componentsGrid.getRowData(rId);
-                                if (data.available == 0) {
-                                    componentsGrid.setRowColor(rId,"pink");
-                                } else if(data.available == 2) {
-                                    componentsGrid.setRowColor(rId,"yellow");
-                                }
-                            });   
-                            componentsGrid.attachEvent("onRowSelect", function(id,ind){
-                                var data = componentsGrid.getRowData(componentsGrid.getSelectedRowId());                                                                        
-                                if (data.available == 0) {                                    
-                                    componentsGridToolbar.enableItem("Add");
-                                } else {
-                                    componentsGridToolbar.disableItem("Add");
-                                }
-                            });                                                                 
-                            componentsGrid.fill = function(positionId) { 
+                            componentsGrid.setColumnHidden(8,true);                                   
+                            componentsGrid.fill = function(positionsId) { 
                                 componentsGrid.clearAll();
-                                ajaxGet("api/positions/components/" + positionId, "", function(data){
+                                ajaxGet("api/positions/components/" + positionsId, "", function(data){
                                     if (data.success && data.data) {																										
                                         componentsGrid.parse((data.data), "js");
                                     }
                                 });
-                            };                              
-                            
-                            var formStructure = [
-                                {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		
-                                {type: "input",  name: "order_kod",          label: _("Zamowienie Kod"), readonly: true},
-                                {type: "input",  name: "order_name",         label: _("Zamowienie"), readonly: true},
-                                {type: "input",  name: "order_position_kod", label: _("Pozycja Kod"), readonly: true},
-                                {type: "input",  name: "product_kod",        label: _("Produkt Kod"), readonly: true},
-                                {type: "input",  name: "product_name",       label: _("Produkt"), readonly: true},
-                                {type: "input",  name: "amount",             label: _("Ilosc"), readonly: true},
-                                {type: "input",  name: "price",              label: _("Cena"), readonly: true},
-                                {type: "input",  name: "summa",              label: _("Suma"), readonly: true},
-                                {type: "input",  name: "num_week",           label: _("Data dostawy"),
-                                    note: {text: _("Numer tygodnia kiedy produkt byc gotowy.")}
-                                },
-                                {type: "input",  name: "description",        label: _("Opis"), rows: 3, readonly: true}                              
-                            ];                            
-                            var informationFormPosition = newOrderZlecenieLayout.cells("b").attachForm(formStructure);
-                            informationFormPosition.bind(ordersPositionsGrid);   
+                            };                            
+                            var form = newOrderZlecenieLayout.cells("c").attachForm([
+                                {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		                                
+                                {type: "button", name: "save",   value: _("Zapisz"), offsetTop:18}                              
+                            ]);  
+                            form.attachEvent("onButtonClick", function(name){
+                                if (name == "save") {                                    
+                                    var zlecWin = createWindow(_("Zlecenia do wybranych produktów"), 500, 500);
+                                    var zlecLayout = zlecWin.attachLayout("2U");
+                                    zlecLayout.cells("a").setText(_("Zlecenia"));
+                                    zlecLayout.cells("b").setText(_("Funkcje"));
+                                    var mySidebar = zlecLayout.cells("a").attachSidebar();  
+                                    var checkedMainProducts = ordersPositionsGrid.getCheckedRows(0);
+                                    checkedMainProducts.split(',').forEach(function(elem) {
+                                        var data = ordersPositionsGrid.getRowData(elem);
+                                        mySidebar.addItem({
+                                            id: elem,
+                                            text: data.product_kod + ' ' + data.product_name + ' - ' + data.amount
+                                        });
+                                        var myGrid = mySidebar.cells(elem).attachGrid({
+                                            image_path:'codebase/imgs/',
+                                            columns: [                                            
+                                                {type: "ch", id: "checked", width: 30},                                                                                        
+                                                {label: "Column A",id: "task_kod",width: 100, type: "ro", sort: "int", align: "right"},
+                                                {label: "Column B",id: "task_name",width: 150, type: "ed", sort: "str", align: "left"},
+                                                {label: "Column B",id: "declared_amount",width: 50, type: "ed", sort: "str", align: "left"},
+                                                {label: "Column B",id: "task_id",width: 50, type: "ed", sort: "str", align: "left"},
+                                                {label: "Column B",id: "product_id",width: 50, type: "ed", sort: "str", align: "left"},
+                                                {label: "Column B",id: "order_position_id",width: 50, type: "ed", sort: "str", align: "left"}
+                                            ]                                        
+                                        });                                        
+                                        myGrid.fill = function(product, amount, orderPosId) { 
+                                            this.clearAll();
+                                            ajaxGet("api/products/tasks/" + product, "", function(data){
+                                                if (data.success && data.data) { 
+                                                    data.data.forEach(function(elem){
+                                                        elem.declared_amount = amount;
+                                                        elem.checked = true;
+                                                        elem.order_position_id = orderPosId;
+                                                    });
+                                                    myGrid.parse((data.data), "js");                                        
+                                                }
+                                            });                                
+                                        };                                         
+                                        myGrid.fill(data.product_id, data.amount, elem);                                         
+                                    });
+                                    var checkedComponents = componentsGrid.getCheckedRows(0);                                    
+                                    checkedComponents.split(',').forEach(function(elem) {
+                                        var data = componentsGrid.getRowData(elem);
+                                        mySidebar.addItem({
+                                            id: elem,
+                                            text: data.kod + ' ' + data.name + ' - ' + data.amount1
+                                        });
+                                        var myGrid = mySidebar.cells(elem).attachGrid({
+                                            image_path:'codebase/imgs/',
+                                            columns: [                                            
+                                                {type: "ch", id: "checked", width: 30},                                                                                        
+                                                {label: "Column A",id: "task_kod",width: 100, type: "ro", sort: "int", align: "right"},
+                                                {label: "Column B",id: "task_name",width: 150, type: "ed", sort: "str", align: "left"},
+                                                {label: "Column B",id: "declared_amount",width: 50, type: "ed", sort: "str", align: "left"},
+                                                {label: "Column B",id: "task_id",width: 50, type: "ed", sort: "str", align: "left"},
+                                                {label: "Column B",id: "product_id",width: 50, type: "ed", sort: "str", align: "left"},
+                                                {label: "Column B",id: "order_position_id",width: 50, type: "ed", sort: "str", align: "left"}
+                                            ]                                        
+                                        });
+//                                        componentsGrid.setColumnHidden(6,true);
+//                            componentsGrid.setColumnHidden(7,true);
+//                                        componentsGrid.setColumnHidden(8,true); 
+                                        myGrid.fill = function(product, amount, orderPosId) { 
+                                            this.clearAll();
+                                            ajaxGet("api/products/tasks/" + product, "", function(data){
+                                                if (data.success && data.data) { 
+                                                    data.data.forEach(function(elem){
+                                                        elem.declared_amount = amount;
+                                                        elem.checked = true;   
+                                                        elem.order_position_id = orderPosId;
+                                                    });
+                                                    myGrid.parse((data.data), "js");                                        
+                                                }
+                                            });                                
+                                        };                                         
+                                        myGrid.fill(data.component_id, data.amount1, data.order_position_id);                                        
+                                    });                                     
+                                    
+                                    var formSaveAllZlec = zlecLayout.cells("b").attachForm([
+                                        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		                                
+                                        {type: "button", name: "saveall",   value: _("Zapisz wrzystkie zlecenia"), offsetTop:18}                              
+                                    ]); 
+                                    formSaveAllZlec.attachEvent("onButtonClick", function(name){
+                                        if (name == "saveall") {
+                                            mySidebar.forEachCell(function(item){                                                
+                                                var obj = mySidebar.cells(item.getId()).getAttachedObject();
+                                                if (obj instanceof dhtmlXGridObject && obj.getRowsNum()) {
+                                                    var checkedTasks = obj.getCheckedRows(0);
+                                                    checkedTasks.split(',').forEach(function(checkedTaskId) {
+                                                        var taskData = obj.getRowData(checkedTaskId);
+                                                        ajaxPost("api/declaredworks", taskData, function(data){
+                                                            console.log(data.data);
+                                                        });
+                                                    });
+                                                } else {                                                    
+                                                    return;
+                                                }                                                
+                                            });
+                                        }
+                                    });
+                                }
+                            });                          
                             
                             var newIntroZlecenieLayout = newZlecenieLayoutTabbar.tabs("a2").attachLayout("3L");
                             newIntroZlecenieLayout.cells("a").setText(_("Produkty"));                              
@@ -467,8 +349,7 @@ function zleceniaInit(cell) {
                                         });                                        
                                     }                                       
                                 }
-                            });
-                            
+                            });                            
 			};break;
                         case 'Edit':{                            
                             var selectedZlecenieId   = zleceniaGrid.getSelectedRowId();                                                        
@@ -756,20 +637,21 @@ function zleceniaInit(cell) {
                             grupyTree.unselectItem(grupyTree.getSelectedId());
                         };break;
 		    }
-		});     
-                //var searchElem = zleceniaGridToolBar.getInput('szukaj');               
+		});                     
 		var zleceniaGrid = zleceniaLayout.cells("b").attachGrid({
 		    image_path:'codebase/imgs/',
 		    columns: [  
                         {label: "",                    id:'checked',           width: 30,  type: "ch", align: "center"},                        
+                        {label: "Zmówienie Kod",       id:'order_kod',         width: 50, type: "ro", sort: "str",  align: "center"},
+                        {label: "Pozycja Kod",         id:'position_kod',   width: 50, type: "ro", sort: "str",  align: "center"},
                         {label: "Zlecenie Kod",        id:'kod',               width: 100, type: "ro", sort: "str",  align: "center"},
-                        {label: "Zadanie Kod",         id:'task_kod',          width: 100, type: "ro", sort: "str",  align: "left"},                        
-                        {label: "Zadanie",             id:'task_name',         width: 200, type: "ro", sort: "str",  align: "left"},                        
+                        //{label: "Zadanie Kod",         id:'task_kod',          width: 100, type: "ro", sort: "str",  align: "left"},                        
+                        //{label: "Zadanie",             id:'task_name',         width: 200, type: "ro", sort: "str",  align: "left"},                        
                         {label: "Produkt Kod",         id:'product_kod',       width: 100, type: "ro", sort: "str",  align: "left"},
                         {label: "Imie produktu",       id:'product_name',      width: 200, type: "ro", sort: "str",  align: "left"},
                         //{label: "Typ produktu",        id:'product_type_name', width: 200, type: "ro", sort: "str",  align: "left"},
-                        {label: "Ilość produktu",      id:'amount',            width: 60,  type: "ro",sort: "str",  align: "right"},
-                        {label: "Zadeklarowana ilość robot", id:'damount',   width: 60,  type: "edn",sort: "str",  align: "right"},
+                        {label: "Ilość produktu",      id:'declared_amount',            width: 60,  type: "ro",sort: "str",  align: "right"},
+                        //{label: "Zadeklarowana ilość robot", id:'damount',   width: 60,  type: "edn",sort: "str",  align: "right"},
                         {label: "Zrobiona ilość robot",      id:'done_amount',       width: 60,  type: "edn",sort: "str",  align: "right"},
                         {label: "Zamknięte",           id:'closed',            width: 30,  type: "ch", align: "center"},
                         {label: "Data dodania",        id:'created_at',        width: 120, type: "ro", sort: "date", align: "center"},
@@ -780,28 +662,11 @@ function zleceniaInit(cell) {
                     multiline: true,
                     multiselect: true
 		});  
-                zleceniaGrid.setColumnHidden(13,true);
-                zleceniaGrid.attachHeader("#master_checkbox,#select_filter,#select_filter,#select_filter,#select_filter,#select_filter,#numeric_filter,#text_search,#text_search,#text_search,#text_search,#text_search,#text_search");
-                zleceniaGrid.getFilterElement(5)._filter = function (){
-                    var input = this.value; // gets the text of the filter input
-                    input = input.trim().toLowerCase().split(' ');
-                    return function(value, id){
-                        //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
-                            var val = zleceniaGrid.cells(id, 5).getValue(); // gets the value of the current                                                    
-                            //making pattern string for regexp
-                            var searchStr = '';
-                            for (var i = 0; i < input.length; i++) {
-                                searchStr = searchStr + input[i] + "(.*)";                           
-                                //var searchStr = /^zz(.+)np(.+)/ig;
-                            }
-                            var regExp = new RegExp(searchStr, "ig");                                                          
-                            if (val.toLowerCase().match(regExp)){                                                             
-                                return true;
-                            }                                                    
-                        //}
-                        return false;
-                    };
-                };             
+                zleceniaGrid.setColumnHidden(12,true);
+                zleceniaGrid.attachHeader("#master_checkbox,#select_filter,#select_filter,#text_filter,#text_filter,#text_filter");
+                zleceniaGrid.setRegFilter(zleceniaGrid, 3);
+                zleceniaGrid.setRegFilter(zleceniaGrid, 4);
+                zleceniaGrid.setRegFilter(zleceniaGrid, 5);
                 zleceniaGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                     var data = zleceniaGrid.getRowData(rId);                    
                     if (data.closed == 0) {
@@ -829,7 +694,10 @@ function zleceniaInit(cell) {
                             }
                         });                                                  
                     }                   
-                });                 
+                });  
+                zleceniaGrid.attachEvent("onRowSelect", function(id,ind) {
+                    zadaniaGrid.zaladuj(id);
+                }); 
                 zleceniaGrid.setColumnColor("white,white,white,white,white,white,#d5f1ff");
 		zleceniaGrid.setDateFormat("%Y-%m-%d","%Y-%m-%d");                
 		zleceniaGrid.zaladuj = function(i = 0){
@@ -842,19 +710,39 @@ function zleceniaInit(cell) {
                             }
                         });			
 		};    
-//		var dpZleceniaGrid = new dataProcessor("api/declaredworks",'json');
-//		dpZleceniaGrid.init(zleceniaGrid);
-//		dpZleceniaGrid.enableDataNames(true);
-//		dpZleceniaGrid.setTransactionMode("REST");
-//		dpZleceniaGrid.enablePartialDataSend(true);
-//		dpZleceniaGrid.enableDebug(true);
-//		dpZleceniaGrid.setUpdateMode("row", true);
-//                dpZleceniaGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-//                    data.id = id;
-//                    ajaxGet("api/declaredworks/" + id + "/edit", data, function(data){                                                            
-//                        console.log(data);
-//                    });
-//                });                 
+                
+		var zadaniaGrid = zleceniaLayout.cells("c").attachGrid({
+		    image_path:'codebase/imgs/',
+		    columns: [  
+                        //{label: "",                    id:'checked',           width: 30,  type: "ch", align: "center"},                        
+                        //{label: "Zlecenie Kod",        id:'kod',               width: 100, type: "ro", sort: "str",  align: "center"},
+                        {label: "Zadanie Kod",         id:'task_kod',          width: 100, type: "ro", sort: "str",  align: "left"},                        
+                        {label: "Zadanie",             id:'task_name',         width: 200, type: "ro", sort: "str",  align: "left"},                        
+                        //{label: "Produkt Kod",         id:'product_kod',       width: 100, type: "ro", sort: "str",  align: "left"},
+                        //{label: "Imie produktu",       id:'product_name',      width: 200, type: "ro", sort: "str",  align: "left"},
+                        //{label: "Typ produktu",        id:'product_type_name', width: 200, type: "ro", sort: "str",  align: "left"},
+                        //{label: "Ilość produktu",      id:'declared_amount',            width: 60,  type: "ro",sort: "str",  align: "right"},
+                        {label: "Zadeklarowana ilość robot", id:'damount',   width: 60,  type: "edn",sort: "str",  align: "right"},
+                        {label: "Zrobiona ilość robot",      id:'done_amount',       width: 60,  type: "edn",sort: "str",  align: "right"},
+                        {label: "Zamknięte",           id:'closed',            width: 30,  type: "ch", align: "center"},
+                        {label: "Data dodania",        id:'created_at',        width: 120, type: "ro", sort: "date", align: "center"},
+                        {label: "Data zamkniecia",     id:'date_closing',      width: 120, type: "ro", sort: "date", align: "center"},
+                        {label: "Data dostawy",        id:'num_week',          width: 120, type: "ro", align: "center"},
+                        {id:'product_id'}
+                    ],
+                    multiline: true,
+                    multiselect: true
+		});  
+		zadaniaGrid.zaladuj = function(i = 0){
+                    this.clearAll();
+                    var ids = Array();
+                    ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
+                    var new_data = ajaxGet("api/declaredworks/listforzlecenie/" + ids, "", function(data){
+                        if (data && data.success){                            
+                                zadaniaGrid.parse(data.data, "js");
+                            }
+                        });			
+		};                                
 	}
 	grupyTree.zaladuj();
 	zleceniaGrid.zaladuj(0);

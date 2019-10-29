@@ -64,7 +64,7 @@ class DeclaredWorkRepository extends BaseRepository
         $declaredWorks = $model::whereIn('task_id', $tasksIds)
                 ->orderBy('id', 'desc')
                 //->selectRaw('*, sum(declared_amount) as damount')
-                ->groupBy('kod', 'product_id', 'task_id')                    
+                ->groupBy('kod')                    
                 ->get();
         
         return $this->getResult($declaredWorks, 0, false);
@@ -80,7 +80,7 @@ class DeclaredWorkRepository extends BaseRepository
         $model = $this->model();
         $declaredWorks = $model::orderBy('id', 'desc')
                     ->orderBy('id', 'desc')
-                    ->groupBy('kod', 'product_id', 'task_id')                    
+                    ->groupBy('kod')                    
                     ->get();
         
         return $this->getResult($declaredWorks, 0, false);

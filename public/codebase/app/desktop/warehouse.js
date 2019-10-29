@@ -210,10 +210,7 @@ function warehouseInit(cell) {
                                 ]}
                             ]}
                         ], addingWindow);                    
-                    var productGroupsCombo = addingForm.getCombo("product_group_id");                                                     
-                    productGroupsCombo.enableFilteringMode(true);                            
-
-                    //filling combobox with products groups
+                    var productGroupsCombo = addingForm.getCombo("product_group_id");                                                                            
                     ajaxGet("api/prodgroups", '', function(data) {                    
                             productGroupsCombo.addOption(data.data);
                     });
@@ -221,8 +218,8 @@ function warehouseInit(cell) {
                     productGroupsCombo.attachEvent("onChange", function(value, text){
                         var selectedGroupId = productGroupsCombo.getSelectedValue();
                         var productsCombo = addingForm.getCombo("product_id"); 
-                        productsCombo.enableFilteringMode(true); 
-                        ajaxGet("api/products/listbygroups/" + selectedGroupId, '', function(data) {                    
+                        ajaxGet("api/products/group/" + selectedGroupId + "/" + localStorage.language, '', function(data) {                    
+                            productsCombo.clearAll();
                             productsCombo.addOption(data.data);
                         }); 
                         //occurs when some value has selected in the products combobox
@@ -329,28 +326,8 @@ function warehouseInit(cell) {
                 }
             });	                    
         };
-        productsGrid.fill(0); 
-        //filtering by column filter
-        productsGrid.getFilterElement(1)._filter = function (filterElem){
-            var input = this.value; // gets the text of the filter input
-            input = input.trim().toLowerCase().split(' ');
-            return function(value, id){
-                //for(var i = 0; i<ordersPositionsGrid.getColumnsNum(); i++){ // iterating through the columns
-                var val = productsGrid.cells(id, 1).getValue(); // gets the value of the current                                                    
-                //making pattern string for regexp
-                var searchStr = '';
-                for (var i = 0; i < input.length; i++) {
-                    searchStr = searchStr + input[i] + "(.*)";                                                                
-                    //var searchStr = /^zz(.+)np(.+)/ig;
-                }
-                var regExp = new RegExp(searchStr, "ig");                                                          
-                if (val.toLowerCase().match(regExp)){                                                             
-                    return true;
-                }                                                    
-                //}
-                return false;
-            };
-        };     
+        productsGrid.fill(0);         
+        productsGrid.setRegFilter(1);    
         
        
 //        var searchElem = productsGridToolBar.getInput('szukaj');

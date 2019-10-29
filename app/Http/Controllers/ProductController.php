@@ -29,6 +29,7 @@ class ProductController extends BaseController
         app()->setLocale($locale);  
         return $this->getResponseResult($this->repository->allProducts($locale));                        
     }
+            
     
     /**
      * Get products list with translations
@@ -121,38 +122,55 @@ class ProductController extends BaseController
         return $this->getResponseResult(Product::destroy($arrayIds));       
     }
     
-    public function getListComponents($id)
+    public function getListComponents($ids)
     {
-        $product    = $this->repository->get($id);
-        $components = $product->components;
-        foreach ($components as $component) {
-            $componentProduct              = $component->product;
-            $component->kod                = $componentProduct->kod; 
-            $component->name               = $componentProduct->name;
-            $component->product_type_name  = $componentProduct->type->name;
-            $component->product_group_name = $componentProduct->group->name;
-        }
+        $result= [];
+        $ids = explode(",", $ids);
+        $products = Product::find($ids);
+        if ($products) {
+            foreach ($products as $product) {
+                $components = $product->components;
+                foreach ($components as $component) {
+                    $componentProduct              = $component->product;
+                    $component->kod                = $componentProduct->kod; 
+                    $component->name               = $componentProduct->name;
+                    $component->product_type_name  = $componentProduct->type->name;
+                    $component->product_group_name = $componentProduct->group->name;
+                    $result[] = $component;
+                }                
+            }
+        }        
         
-        return $this->getResponseResult($components);       
+        return $this->getResponseResult($result);       
     }
     
-    public function getListTasks($id)
+    public function getListTasks($ids)
     {
-        $product = $this->repository->get($id);
-        $tasks   = $product->tasks;
-        if ($tasks) {
-            foreach ($tasks as $task) {
-                $task->duration = $task->pivot->duration;
-                $task->priority = $task->pivot->priority;
-                $task->task_kod = $task->kod;                
-                $task->task_name= $task->name;
-                $task->product_id = $product->id;
-                $task->task_id    = $task->id;
-                $task->text  = $task->name;  
-                $task->value = (string)$task->id;                
-            }        
+        $result= [];
+        $ids = explode(",", $ids);
+        $products = Product::find($ids);
+        
+        if ($products) {
+            foreach ($products as $product) {
+                $tasks = $product->tasks;
+                if ($tasks) {
+                    foreach ($tasks as $task) {                        
+                        $task->duration     = $task->pivot->duration;
+                        $task->priority     = $task->pivot->priority;
+                        $task->task_kod     = $task->kod;                
+                        $task->task_name    = $task->name;
+                        $task->product_id   = $product->id;
+                        $task->product_name = $product->name;
+                        $task->product_kod  = $product->kod;
+                        $task->task_id      = $task->id;
+                        $task->text         = $task->name;  
+                        $task->value        = (string)$task->id;
+                        $result[] = $task;
+                    }        
+                }
+            }
         }
-        return $this->getResponseResult($tasks);       
+        return $this->getResponseResult($result);       
     }
     
  //--------------------------------------------------------------------------   
@@ -297,24 +315,27 @@ class ProductController extends BaseController
         $product = $this->repository->get($productId);
         $tasks = $product->tasks;
         
-        foreach ($tasks as $task) {
-            if ($task->id == $sTaskId) {
-                $sTaskPriority = $task->pivot->priority;
-            } elseif ($task->id == $tTaskId) {
-                $tTaskPriority = $task->pivot->priority;
+        if ($tasks) {
+            foreach ($tasks as $task) {
+                if ($task->id == $sTaskId) {
+                    $sTaskPriority = $task->pivot->priority;
+                } elseif ($task->id == $tTaskId) {
+                    $tTaskPriority = $task->pivot->priority;
+                }
             }
-        }
+
+            $result = DB::table('product_tasks')
+                ->where("product_id", "=", $productId)
+                ->where("task_id", "=", $sTaskId)
+                ->update(['priority' => $tTaskPriority]); 
+            $result = DB::table('product_tasks')
+                ->where("product_id", "=", $productId)
+                ->where("task_id", "=", $tTaskId)
+                ->update(['priority' => $sTaskPriority]);              
+        }      
         
-        $result = DB::table('product_tasks')
-            ->where("product_id", "=", $productId)
-            ->where("task_id", "=", $sTaskId)
-            ->update(['priority' => $tTaskPriority]); 
-        $result = DB::table('product_tasks')
-            ->where("product_id", "=", $productId)
-            ->where("task_id", "=", $tTaskId)
-            ->update(['priority' => $sTaskPriority]);        
-        
-        return response()->json(['success' => (boolean)$result, 'data' => $result]);     
+        return response()->json(['success' => (boolean)$tasks, 'data' => ["targetpriority"=>$tTaskPriority,
+            "sourcepriority" => $sTaskPriority]]);     
     }       
     
     

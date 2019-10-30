@@ -139,7 +139,8 @@ function timelineInit(cell) {
         });      
         
         scheduler.config.lightbox.sections=[	
-            {name:"Pracownik",  type:"timeline", options:scheduler.serverList("users") , map_to:"user_id" }, //type should be the same as name of the tab
+            {name:"Pracownik",  type:"timeline", 
+                options:scheduler.serverList("users") , map_to:"user_id" }, //type should be the same as name of the tab
             {name:"Zlecenie", type:"combo", filtering:true, 
                 options:scheduler.serverList("zlecenia"), 
                 map_to:"zlecenie_id", 
@@ -152,14 +153,14 @@ function timelineInit(cell) {
             {name:"Szt",      type:"sztEditor",  
                 map_to:"done_amount",   onchange:changeSzt},
 
-            {name:"template", height: 40, type:"template", map_to:"text"},
+//            {name:"template", height: 40, type:"template", map_to:"text"},
             //{name:"template", height: 40, type:"template", map_to:"text"},
             //{name:"time", height:72, type:"time", map_to:"auto"}
         ];           
-        scheduler.locale.labels.section_Zlecenie = "Zlecenie";    
-        scheduler.locale.labels.section_template = 'Task';
-        scheduler.locale.labels.section_time = 'Time';
-        
+//        scheduler.locale.labels.section_Zlecenie = "Zlecenie";    
+//        scheduler.locale.labels.section_template = 'Task';
+//        scheduler.locale.labels.section_time = 'Time';
+//        
         var update_select_options = function(select, options) { // helper function                 
                 select.options.length = 0;
                 for (var i=0; i<options.length; i++) {
@@ -168,8 +169,8 @@ function timelineInit(cell) {
                 }
         }; 
         var update_template_value = function(value) {
-            var template = scheduler.formSection('template').control;
-            template.innerText = value;
+            //var template = scheduler.formSection('template').control;
+            //template.innerText = value;
         };
         scheduler.attachEvent("onBeforeLightbox", function(id){                      
             update_select_options(scheduler.formSection('Zadanie').control, []);           
@@ -193,8 +194,9 @@ function timelineInit(cell) {
         }
         function changeZadania(){
             console.log(this);
-            console.log(arguments);            
-            update_template_value(this.selectedOptions[0].innerText);
+            console.log(arguments);       
+            console.log(this.selectedOptions[0].value);
+            //update_template_value(this.selectedOptions[0].innerText);
         }        
         function changeRuckmeld(){
             var me = this;

@@ -44,14 +44,13 @@ function projectsInit(cell) {
 //                    if (amountRecords == "all") {amountRecords = 0};
 //                    projectsGrid.fill(amountRecords);                  
 //                });
-                var newProjectFormStruct = [
-                    
-                        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
+                var newProjectFormStruct = [                    
+                        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},                        
                         {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
                         {type: "input", name: "kod",       required: true, label: _("Kod zamowienia")},
                         {type: "input", name: "name",      required: true, label: _("Zamowienie"),                           
                            note: {text: _("Dodaj imie zamowienia. Jest obowiazkowe.")}},
-                        {type: "input", name: "description",required: true, label: _("Opis"), rows: 3,
+                        {type: "input", name: "description", label: _("Opis"), rows: 3,
                            note: {text: _("Dodaj opis zamowienia. Obowiazkowe.")}},
                         {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 
                             required: true, dateFormat: "%Y-%m-%d", enableTodayButton: true,
@@ -225,6 +224,7 @@ function projectsInit(cell) {
                 projectsGrid.fill("api/orders");                           
 /**
  * B
+ * 
  */		                                
                 var projectsForm = projectsLayout.cells("b").attachForm(newProjectFormStruct);
 		projectsForm.bind(projectsGrid);
@@ -268,7 +268,7 @@ function projectsInit(cell) {
                             }
                         };break;
                     }
-                }); 
+                });                 
                 var clientsCombo = projectsForm.getCombo("client_id");                
                 var dateEndCombo = projectsForm.getCombo("num_week");
                 if (dateEndCombo) {

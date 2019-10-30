@@ -878,10 +878,7 @@ var groupFormStruct = [
 
 var taskFormStruct = [
         {type:"fieldset",  offsetTop:0, label:_("Nowe zlecenie"), width:253, list:[  
-                {type:"combo",  name: "task_group_id", label:_("Grupa"), options: [], inputWidth: 150},                                                
-                {type: "combo", label: "Potrzebuje zamowienia", name: "for_order", options:[
-                    {text: "Tak", value: "1", selected: true},
-                    {text: "Nie", value: "0"}]},
+                {type:"combo",  name: "task_group_id", label:_("Grupa"), options: [], inputWidth: 150},                                                                
                 {type:"input",  name:"kod",          label:_("Kod"),         offsetTop:13, labelWidth:80},                                                                				
                 {type:"input",  name:"name",         label:_("Imie"),        offsetTop:13, labelWidth:80},                 
                 {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [

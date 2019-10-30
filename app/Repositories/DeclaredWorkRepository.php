@@ -29,7 +29,7 @@ class DeclaredWorkRepository extends BaseRepository
             $declaredWork->product_type_name = $productType->name;
             $declaredWork->task_id           = $task->id;
             $declaredWork->task_name         = $task->name;
-            $declaredWork->task_kod          = $task->kod;
+            $declaredWork->task_kod          = $task->kod;            
             $declaredWork->order_name        = $order->name;
             $declaredWork->order_kod         = $order->kod;
             $declaredWork->order_description = $order->description;

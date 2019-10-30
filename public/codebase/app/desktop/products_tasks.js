@@ -165,13 +165,6 @@ function productsTasksInit(cell) {
                             align: "left"     
                         },
                         {
-                            label: _("Potrzebuje zamowienia"),
-                            id: "for_order",
-                            width: 100,
-                            type: "ch",                            
-                            align: "center"     
-                        },
-                        {
                             label: _("Grupa"),
                             id: "task_group_name",
                             width: 150,

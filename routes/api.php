@@ -48,7 +48,7 @@ Route::group([
     Route::resource('/history', 'OrderHistoryController');
     
     Route::get('/positions/byorder/{order}', 'OrderPositionController@getPositionsByOrder');    
-    Route::get('/positions/freepositions', 'OrderPositionController@freePositionsList');    
+    Route::get('/positions/free', 'OrderPositionController@freePositionsList');    
     Route::get('/positions/list/components', 'OrderPositionController@getAllComponentsForFreePositions');
     Route::get('/positions/list/tasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/beguntasks/{position}', 'OrderPositionController@listTasksForPosition');

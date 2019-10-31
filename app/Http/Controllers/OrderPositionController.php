@@ -40,18 +40,20 @@ class OrderPositionController extends BaseController
      */
     public function getAllComponentsForFreePositions()
     {
-        $data = [];
-        $positions = $this->repository->getFreePositions();
-        if ($positions) {
-            foreach ($positions as $position) {
-                $components = $this->getComponentsForPosition($position->id);
-                if ($components) {
-                    foreach ($components as $component) {
-                        $data[] = $component;
-                    }
-                }
-            }
-        }
+//        $data = [];
+//        $positions = $this->repository->getFreePositions();
+//        if ($positions) {
+//            foreach ($positions as $position) {
+//                $components = $this->getComponentsForPosition($position->id);
+//                if ($components) {
+//                    foreach ($components as $component) {
+//                        $data[] = $component;
+//                    }
+//                }
+//            }
+//        }
+        
+
         
         return $this->getResponseResult($data);
     }
@@ -89,7 +91,7 @@ class OrderPositionController extends BaseController
                 $component->name  = $componentProduct->name;
                 $component->available = Warehouse::where('product_id', '=', $component->component_id)
                                     ->sum('amount');
-                $component->checked   = true;
+                //$component->checked   = true;
                 $result[] = $component;
             }                
         }
@@ -104,13 +106,19 @@ class OrderPositionController extends BaseController
         $positions    = OrderPosition::find($positionsIds);
         
         foreach ($positions as $position) {
-            $product    = Product::find($position->product_id);
+            $product    = $position->product;
             $tasks      = $product->tasks;
+            $operations = $position->operations;
             if ($tasks) {
                 foreach ($tasks as $task) { 
-                    $task->product_kod = $product->kod;
                     $task->amount      = $position->amount;
-                    $task->id          = $task->pivot->id;
+                    $task->duration    = $position->amount * $task->pivot->duration;
+                    $task->key         = $task->id;
+                    $task->label       = $task->name;
+                    $task->done        = $operations->where("task_id", "=", $task->id)
+                            ->sum("done_amount");
+                    $task->countWorks  = $operations->where("task_id", "=", $task->id)
+                            ->count("id");  
                     $result[] = $task;
                 }                
             }
@@ -348,11 +356,13 @@ class OrderPositionController extends BaseController
         $orderPosition->price         = $request['price'];
         $orderPosition->description   = $request['description'];
         $orderPosition->date_delivery = $date_end;
+        $orderPosition->status        = $request['status'];
+        $orderPosition->date_status   = $request['date_status'];
         if ($orderPosition->save()) {
             return response()->json(['data' => OrderPosition::find($id), 'success' => true]);                
         } else {
             return response()->json(['data' => [], 'success' => false]);                
-        }                
+        }  
     }
     
     public function getPositionsByOrder($orderId)

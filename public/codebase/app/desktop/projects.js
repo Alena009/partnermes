@@ -19,18 +19,7 @@ function projectsInit(cell) {
  */
 		var projectsGridToolBar = projectsLayout.cells("a").attachToolbar({
                     iconset: "awesome",
-                    items: [
-//                                {type: "text", id: "show_records", text: _("Ilosc wyswietlonych wpisow:")},				
-//                                {type: "buttonSelect", id: "amount_show", text: _("10"), options:[
-//                                            {id: "10",  type: "obj", text: _("Ostatnie 10")},
-//                                            {id: "20",  type: "obj", text: _("Ostatnie 20")},
-//                                            {id: "50",  type: "obj", text: _("Ostatnie 50")},
-//                                            {id: "all", type: "obj", text: _("Wszystkie")}		
-//                                    ]},                                
-//                                {type: "separator",   id: "sep"},
-//                        {type: "text",        id: "find",   text: _("Find:")},				
-//                        {type: "buttonInput", id: "szukaj", text: _(""), width: 100},
-//                        {type: "separator",   id: "sep2"},                                
+                    items: [                        
                         {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
                         {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
                         {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
@@ -38,30 +27,6 @@ function projectsInit(cell) {
                         {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
                     ]
 		});        
-//                projectsGridToolBar.attachEvent("onButtonSelectHide", function(id){
-//                    var amountRecords = projectsGridToolBar.getListOptionSelected("amount_show");
-//                    projectsGridToolBar.setItemText("amount_show", amountRecords);
-//                    if (amountRecords == "all") {amountRecords = 0};
-//                    projectsGrid.fill(amountRecords);                  
-//                });
-                var newProjectFormStruct = [                    
-                        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},                        
-                        {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
-                        {type: "input", name: "kod",       required: true, label: _("Kod zamowienia")},
-                        {type: "input", name: "name",      required: true, label: _("Zamowienie"),                           
-                           note: {text: _("Dodaj imie zamowienia. Jest obowiazkowe.")}},
-                        {type: "input", name: "description", label: _("Opis"), rows: 3,
-                           note: {text: _("Dodaj opis zamowienia. Obowiazkowe.")}},
-                        {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 
-                            required: true, dateFormat: "%Y-%m-%d", enableTodayButton: true,
-                            note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},                       
-                        {type: "combo", name: "num_week", required: true, label: _("Termin wykonania"), 
-                            options:[],
-                            note: {text: _("Numer tygodnia kiedy zamowienie musi byc zakonczone. Jest obowiazkowe.")}},
-                        {type: "block", blockOffset: 0, position: "label-left", list: [
-                            {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            
-                        ]}	
-		];
                 projectsGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{   
@@ -172,18 +137,7 @@ function projectsInit(cell) {
                 projectsGrid.setColumnHidden(4,true);
                 projectsGrid.setColumnHidden(5,true);
                 projectsGrid.enableValidation(true);
-                projectsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty","MotEmpty"]);
-//                var searchElem = projectsGridToolBar.getInput('szukaj');
-//                projectsGrid.makeFilter(searchElem, 0, true);                
-//                projectsGrid.filterByAll();
-//                var clientsCombo = projectsGrid.getCombo(2);                
-//                ajaxGet("api/clients", '', function(data) {
-//                    if (data.success && data.data) {
-//                        data.data.forEach(function(client){
-//                            clientsCombo.put(client.id, client.name);
-//                        });
-//                    }
-//                });       
+                projectsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty","MotEmpty"]);     
 		projectsGrid.attachEvent("onRowSelect", function() {
                     var id = projectsGrid.getSelectedRowId();
                     historyGrid.fill(id);
@@ -572,6 +526,25 @@ function projectsInit(cell) {
             });   
 	}	
 }
+
+newProjectFormStruct = [                    
+        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},                        
+        {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
+        {type: "input", name: "kod",       required: true, label: _("Kod zamowienia")},
+        {type: "input", name: "name",      required: true, label: _("Zamowienie"),                           
+           note: {text: _("Dodaj imie zamowienia. Jest obowiazkowe.")}},
+        {type: "input", name: "description", label: _("Opis"), rows: 3,
+           note: {text: _("Dodaj opis zamowienia. Obowiazkowe.")}},
+        {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 
+            required: true, dateFormat: "%Y-%m-%d", enableTodayButton: true,
+            note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},                       
+        {type: "combo", name: "num_week", required: true, label: _("Termin wykonania"), 
+            options:[],
+            note: {text: _("Numer tygodnia kiedy zamowienie musi byc zakonczone. Jest obowiazkowe.")}},
+        {type: "block", blockOffset: 0, position: "label-left", list: [
+            {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            
+        ]}	
+];
 
 function updateChart(id) {
 	if (projectsTabbar.getActiveTab() != "stats") return;

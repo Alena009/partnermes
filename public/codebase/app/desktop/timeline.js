@@ -131,7 +131,7 @@ function timelineInit(cell) {
         scheduler.config.multi_day = true;
         scheduler.config.time_step = 1;
         
-        ajaxGet("api/declaredworks/group", "", function(data){
+        ajaxGet("api/positions/free", "", function(data){
             console.log(data.data);
             if (data && data.success) {
                 scheduler.updateCollection("zlecenia", data.data);
@@ -143,24 +143,39 @@ function timelineInit(cell) {
                 options:scheduler.serverList("users") , map_to:"user_id" }, //type should be the same as name of the tab
             {name:"Zlecenie", type:"combo", filtering:true, 
                 options:scheduler.serverList("zlecenia"), 
-                map_to:"zlecenie_id", 
+                map_to:"order_position_id", 
                 onchange:changeZlecenia}, 
             {name:"Zadanie",  type:"select", options:[],    
-                map_to:"declared_work_id",
+                map_to:"task_id",
                 onchange:changeZadania}, 
 //            {name:"Ruckmeld", type:"ruckmeldEditor", 
 //                map_to:"ruckmeld", onchange:changeRuckmeld},
-            {name:"Szt",      type:"sztEditor",  
-                map_to:"done_amount",   onchange:changeSzt},
-
-//            {name:"template", height: 40, type:"template", map_to:"text"},
-            //{name:"template", height: 40, type:"template", map_to:"text"},
-            //{name:"time", height:72, type:"time", map_to:"auto"}
+            {name:"Zadeklarowano",      type:"sztEditor",  
+                map_to:"start_amount",   onchange:changeSzt},
+            {name:"Zrobiono",      type:"sztEditor",  
+                map_to:"done_amount",   onchange:changeSzt},            
         ];           
-//        scheduler.locale.labels.section_Zlecenie = "Zlecenie";    
-//        scheduler.locale.labels.section_template = 'Task';
-//        scheduler.locale.labels.section_time = 'Time';
-//        
+        scheduler.config.buttons_right = ["dhx_cancel_btn", "dhx_edit_btn", "dhx_save_btn",];
+        scheduler.config.buttons_left = ["dhx_delete_btn"];   
+        scheduler.locale.labels["dhx_edit_btn"] = "Edit";        
+        scheduler.attachEvent("onLightboxButton", function(button_id, node, e){
+            if(button_id == "dhx_edit_btn"){               
+                var evId = scheduler.getState().lightbox_id;
+                //var evData = scheduler.getEvent(evId);
+                var data = {};
+                data.done_amount = scheduler.formSection('Szt').getValue();                              
+                ajaxGet("api/operations/" + evId + "/edit", data, function(data) {
+                    if(data && data.success) {               
+                        console.log(data);
+                    } else {
+                        dhtmlx.alert({
+                            title:_("Wiadomość"),
+                            text:_(data.message)
+                        });
+                    }
+                });                
+            }
+        });        
         var update_select_options = function(select, options) { // helper function                 
                 select.options.length = 0;
                 for (var i=0; i<options.length; i++) {
@@ -172,14 +187,14 @@ function timelineInit(cell) {
             //var template = scheduler.formSection('template').control;
             //template.innerText = value;
         };
-        scheduler.attachEvent("onBeforeLightbox", function(id){                      
-            update_select_options(scheduler.formSection('Zadanie').control, []);           
-            return true;
-        });        
+//        scheduler.attachEvent("onBeforeLightbox", function(id){                      
+//            update_select_options(scheduler.formSection('Zadanie').control, []);           
+//            return true;
+//        });        
         function changeZlecenia(el){
             var me = this;
             console.log(this.getSelectedValue());
-            ajaxGet("api/declaredworks/listforzlecenie/"+this.getSelectedValue(), "",
+            ajaxGet("api/positions/tasks/"+this.getSelectedValue(), "",
                 {
                     'success':function(data){                            
                         update_select_options(scheduler.formSection('Zadanie').control, data.data);	
@@ -295,14 +310,19 @@ function timelineInit(cell) {
         
         scheduler.attachEvent("onEventSave",function(id,ev,is_new){
             console.log(ev);
-                if (!ev.declared_work_id) {
+                if (!ev.task_id) {
                         alert("Choose the task");
                         return false;
                 } else {
                     ajaxPost("api/operations", ev, function(data) {
                         if(data && data.success) {               
                             console.log(data);
-                        } 
+                        } else {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_(data.message)
+                            });
+                        }
                     }); 
                 }
             return true;
@@ -362,7 +382,7 @@ function timelineInit(cell) {
                 {id:"kod",width:100, align:'right', sort:'int'},
                 {id:"user_name",width:'*',align:'left'},
                 {id:"task_name",width:'*',align:'left'},                
-                {id:"ruckmeld",width:'*',align:'left'},
+                {id:"amount",width:'*',align:'left'},
                 {id:"start_date",width:180},
                 {id:"end_date",width:180}
             ],
@@ -381,7 +401,7 @@ function timelineInit(cell) {
 //        schedulerDP.init(scheduler); 
 //        //schedulerDP.setTransactionMode("JSON");     
 //        schedulerDP.setTransactionMode("REST");
-        timelineLayout.cells("a").attachScheduler(null, "timeline", sTabs);
+
 
 
 //    scheduler.on_load = function (loader) {
@@ -423,16 +443,17 @@ function timelineInit(cell) {
 //                return event.text2;
 //        };
 //		
-//        scheduler.templates.tooltip_text = function(start,end,event) {
-//                return "<b>Pracownik :</b> "+event.pracownik+"<br/>"
-//                                +"<b>Zadanie:</b> "+event.zadanie+"<br/>"
-//                                +"<b>Zlecenie :</b> "+event.zlecenie+"<br/>"
-//                                +"<b>Ruckmeld :</b> "+event.ruckmeld+"<br/>"
-//                                +"<b>Start :</b> "+event.start+"<br/>"
-//                                +"<b>Stop:</b> "+event.end;                        
-//
-//        };                
-//        scheduler.setLoadMode("day");                   
+        scheduler.templates.tooltip_text = function(start,end,event) {
+                return "<b>Pracownik :</b> "+event.user_name+"<br/>"
+                                +"<b>Zadanie:</b> "+event.kod+"-"+event.task_name+"<br/>"
+                                +"<b>Zlecenie :</b> "+event.order_position+"<br/>"                                
+                                +"<b>Zlrobiona iłość :</b> "+event.done_amount+"<br/>"                                
+                                +"<b>Start :</b> "+event.start_date+"<br/>"
+                                +"<b>Stop:</b> "+event.end_date;                        
+
+        };                
+        scheduler.setLoadMode("day");    
+        timelineLayout.cells("a").attachScheduler(null, "timeline", sTabs);        
     }
 }
 

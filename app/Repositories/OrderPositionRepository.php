@@ -31,7 +31,13 @@ class OrderPositionRepository extends BaseRepository
                 $date = new \DateTime($position->date_delivery);
                 $position->num_week           = $date->format("W");
                 $position->summa              = $position->price * $position->amount;        
-                $position->countWorks         = count($position->works);
+                $position->countWorks         = $position->operations->sum("done_amount");
+                $position->declared           = $position->product->tasks->count() * $position->amount;
+                $position->closed             = false; 
+                if ($position->declared == $position->countWorks) {
+                    $position->closed = true; 
+                }
+                               
             }
         }
         
@@ -57,18 +63,31 @@ class OrderPositionRepository extends BaseRepository
      */
     public function getFreePositions()
     {
-        $positions = [];
-        $model = $this->getModel();
-        $freePositions = DB::select("SELECT * FROM orders_positions pos
-                                            where pos.id not in 
-                                            (select order_position_id from declared_works 
-                                            where product_id = pos.product_id)");
-        $positions = $model::find(array_column($freePositions, "id"))->pluck("id");
-        if ($positions) {
-            return $this->getPositionWithAdditionalFields($positions);
-        } else {
-            return $positions;
-        }        
+//        $positions = [];
+//        $model = $this->getModel();
+//        $freePositions = DB::select("SELECT * FROM orders_positions pos
+//                                            where pos.id not in 
+//                                            (select order_position_id from declared_works 
+//                                            where product_id = pos.product_id)");
+//        $positions = $model::find(array_column($freePositions, "id"))->pluck("id");
+//        if ($positions) {
+//            return $this->getPositionWithAdditionalFields($positions);
+//        } else {
+//            return $positions;
+//        }    
+//        $positions = [];
+//        $model = $this->getModel();
+//        $positions = $model::doesntHave('operations')->pluck("id");        
+//        if ($positions) {
+//            return $this->getPositionWithAdditionalFields($positions);
+//        } else {
+//            return $positions;
+//        } 
+        
+        $data = [];
+        $positionsIds = $this->model::where("status", "=", 1)->pluck("id");
+        $data = $this->getPositionWithAdditionalFields($positionsIds);
+        return $data;        
     }    
     
     

@@ -31,7 +31,7 @@ class OrderPositionRepository extends BaseRepository
                 $date = new \DateTime($position->date_delivery);
                 $position->num_week           = $date->format("W");
                 $position->summa              = $position->price * $position->amount;        
-                $position->countWorks         = $position->operations->sum("done_amount");
+                $position->countWorks         = $position->operations->count("id");
                 $position->declared           = $position->product->tasks->count() * $position->amount;
                 $position->closed             = false; 
                 if ($position->declared == $position->countWorks) {
@@ -61,7 +61,7 @@ class OrderPositionRepository extends BaseRepository
      * 
      * @return array
      */
-    public function getFreePositions()
+    public function getForManufacturingPositions()
     {
 //        $positions = [];
 //        $model = $this->getModel();
@@ -88,8 +88,7 @@ class OrderPositionRepository extends BaseRepository
         $positionsIds = $this->model::where("status", "=", 1)->pluck("id");
         $data = $this->getPositionWithAdditionalFields($positionsIds);
         return $data;        
-    }    
-    
+    }     
     
     public function isPositionAvailableForCreatingZlecenie($position)
     {

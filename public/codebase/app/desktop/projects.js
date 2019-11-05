@@ -142,7 +142,7 @@ function projectsInit(cell) {
                     var id = projectsGrid.getSelectedRowId();
                     historyGrid.fill(id);
                     positionsGrid.fill(id);
-                    tasksGrid.fill(id);
+                    //tasksGrid.fill(id);
                 });
 		projectsGrid.attachEvent("onRowInserted", function(r, index){
 		    projectsGrid.setCellTextStyle(projectsGrid.getRowId(index), projectsGrid.getColIndexById("project"), "font-weight:bold;");
@@ -247,7 +247,7 @@ function projectsInit(cell) {
 			arrows_mode: "auto",
 			tabs: [
 				{id: "positions", text: _("Pozycje"), selected: 1},
-                                {id: "tasks", text: _("Zlecenia")},
+                                //{id: "tasks", text: _("Zlecenia")},
                                 {id: "history", text: _("Historia")}                                
 			]
 		});  
@@ -258,6 +258,9 @@ function projectsInit(cell) {
                                 {id:"Edit", type:"button", text: _("Edytuj"), img: "fa fa-edit"},
                                 {id:"Del",  type:"button",text: _("Usun"),   img: "fa fa-minus-square"},
                                 {type: "separator", id: "sep3"},
+                                {id: "Block",text: _("Blokuj"), type: "button", img: "fa fa-lock"},                            
+                                {id: "UnBlock",text: _("Odblokuj"), type: "button", img: "fa fa-unlock"},                            
+                                {type: "separator", id: "sep2"},
                                 {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
                             ]
                     });                 
@@ -271,7 +274,9 @@ function projectsInit(cell) {
                                     var positionsForm = createForm(orderPositionFormStruct, 
                                         positionsWindow);
                                     positionsForm.setItemFocus("kod");
-                                    var productsCombo = positionsForm.getCombo("product_id");                
+                                    var productsCombo = positionsForm.getCombo("product_id");
+                                    var numWeekCombo = positionsForm.getCombo("num_week");
+                                    numWeekCombo.selectOption(numWeekCombo.getIndexByValue(order.num_week));
                                     ajaxGet("api/products", '', function(data) {
                                         if (data.success && data.data) {
                                             productsCombo.addOption(data.data);                                    
@@ -382,6 +387,26 @@ function projectsInit(cell) {
                                     });
                                 }                                    
                             };break;
+                            case 'UnBlock':{
+                                var data = positionsGrid.getRowData(positionsGrid.getSelectedRowId());
+                                data.status = 0;
+                                data.date_status = new Date();
+                                ajaxGet("api/positions/" + data.id + "/edit", data, function(data){
+                                    if (data.success && data.data) {                            
+                                        positionsGrid.fill(projectsGrid.getSelectedRowId());
+                                    }
+                                });                                                        
+                            };break;                         
+                            case 'Block':{
+                                var data = positionsGrid.getRowData(positionsGrid.getSelectedRowId());
+                                data.status = 2;
+                                data.date_status = new Date();
+                                ajaxGet("api/positions/" + data.id + "/edit", data, function(data){
+                                    if (data.success && data.data) {                            
+                                        positionsGrid.fill(projectsGrid.getSelectedRowId());
+                                    }
+                                });                         
+                            };break;                              
                             case 'Redo': {
                                 var orderId = projectsGrid.getSelectedRowId();
                                 if (orderId) {
@@ -404,13 +429,17 @@ function projectsInit(cell) {
                             {id: "product_id"},
                             {id: "id"},
                             {id: "order_id"}, 
-                            {id: "countWorks"}
+                            {id: "countWorks"},
+                            {id: "status"},
+                            {id: "date_status"}
                         ]                   
                     });  
                     positionsGrid.setColumnHidden(8,true);
                     positionsGrid.setColumnHidden(9,true);
                     positionsGrid.setColumnHidden(10,true);
                     positionsGrid.setColumnHidden(11,true);
+                    positionsGrid.setColumnHidden(12,true);
+                    positionsGrid.setColumnHidden(13,true);                    
                     positionsGrid.attachHeader("#text_filter,#text_filter,#text_filter");
                     positionsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]);
                     positionsGrid.attachFooter(
@@ -437,16 +466,22 @@ function projectsInit(cell) {
                         ajaxGet("api/positions/" + id + "/edit", data, function(data){                                                            
                             console.log(data);
                         });
-                    });      
-                    positionsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
-                        var data = positionsGrid.getRowData(rId);                       
-                        positionsGrid.cells(rId,5).setValue(data.price * data.amount);
-                    });          
+                    });           
                     positionsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                         var data = positionsGrid.getRowData(rId);
-                        if (data.countWorks != 0) {
+                        positionsGrid.cells(rId,5).setValue(data.price * data.amount);
+                        //inprogress
+                        if (data.countWorks > 0) {
                             positionsGrid.setRowColor(rId,"yellow");
                         }
+                        //blocked task
+                        if (data.status == 2) {
+                            positionsGrid.setRowColor(rId,"lightgray");
+                        } 
+                        //for producting
+                        if (data.status == 1) {
+                            positionsGrid.setRowColor(rId,"lightyellow");
+                        }                         
                     });                     
                     positionsGrid.fill = function(id){
                         positionsGrid.setRegFilter(positionsGrid, 1);
@@ -459,22 +494,22 @@ function projectsInit(cell) {
                         });			
                     };
                     
-                    var tasksGrid = projectsTabbar.tabs("tasks").attachGrid({
-                        image_path:'codebase/imgs/',
-                        columns: [
-                            {label: _("Kod zlecenia"),id: "kod",          type: "ro", sort: "str", align: "left", width: 150},
-                            {label: _("Data zlecenia"),id: "created_at",  type: "ro", sort: "str", align: "left", width: 150}
-                        ],
-                        multiselect: true                    
-                    }); 
-                    tasksGrid.fill = function(id){
-                        tasksGrid.clearAll();
-                        ajaxGet("api/orders/beguntasks/" + id, '', function(data){
-                            if (data.data && data.success){			                                    
-                                tasksGrid.parse(data.data, "js");
-                            }
-                        });			
-                    };
+//                    var tasksGrid = projectsTabbar.tabs("tasks").attachGrid({
+//                        image_path:'codebase/imgs/',
+//                        columns: [
+//                            {label: _("Kod zlecenia"),id: "kod",          type: "ro", sort: "str", align: "left", width: 150},
+//                            {label: _("Data zlecenia"),id: "created_at",  type: "ro", sort: "str", align: "left", width: 150}
+//                        ],
+//                        multiselect: true                    
+//                    }); 
+//                    tasksGrid.fill = function(id){
+//                        tasksGrid.clearAll();
+//                        ajaxGet("api/orders/beguntasks/" + id, '', function(data){
+//                            if (data.data && data.success){			                                    
+//                                tasksGrid.parse(data.data, "js");
+//                            }
+//                        });			
+//                    };
   
                     var historyGrid = projectsTabbar.tabs("history").attachGrid({
                         image_path:'codebase/imgs/',

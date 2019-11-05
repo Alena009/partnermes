@@ -27,4 +27,9 @@ class OrderPosition extends BaseModel
     {
         return $this->hasMany('App\Models\Operation', "order_position_id", "id");
     }  
+    
+    public function declaredworks()
+    {        
+        return $this->hasMany('App\Models\DeclaredWork', "order_position_id", "id");
+    }      
 }

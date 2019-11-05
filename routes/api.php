@@ -22,20 +22,22 @@ Route::group([
     Route::resource('/country',    'CountryController');
     Route::resource('/language',   'LanguageController');
     
-//    Route::get('/declaredworks/byorderpos/{pos}', 'DeclaredWorkController@listWorksForOrderPos');   
-    Route::get('/declaredworks/fortimeline', 'DeclaredWorkController@listWorksForTimeline');   
-    Route::get('/declaredworks/list/{groups}', 'DeclaredWorkController@listWorksByGroups');   
-    Route::get('/declaredworks/mainlist/{groups}', 'DeclaredWorkController@mainListWorksByGroups');   
-    Route::get('/declaredworks/makegeneral/{works}', 'DeclaredWorkController@makeGeneral');   
-    Route::get('/declaredworks/listforzlecenie/{workId}', 'DeclaredWorkController@listWorksForZlecenie');   
-    Route::get('/declaredworks/delzlec/{selectedWorks}', 'DeclaredWorkController@deleteZlecenie');   
-    Route::get('/declaredworks/group', 'DeclaredWorkController@groupedworks');   
+//    Route::get('/declaredworks/fortimeline', 'DeclaredWorkController@listWorksForTimeline');   
+//    Route::get('/declaredworks/list/{groups}', 'DeclaredWorkController@listWorksByGroups');   
+//    Route::get('/declaredworks/mainlist/{groups}', 'DeclaredWorkController@mainListWorksByGroups');   
+//    Route::get('/declaredworks/makegeneral/{works}', 'DeclaredWorkController@makeGeneral');   
+//    Route::get('/declaredworks/listforzlecenie/{workId}', 'DeclaredWorkController@listWorksForZlecenie');   
+//    Route::get('/declaredworks/delzlec/{selectedWorks}', 'DeclaredWorkController@deleteZlecenie');   
+//    Route::get('/declaredworks/group', 'DeclaredWorkController@groupedworks');   
+    Route::get('/declaredworks/savework', 'DeclaredWorkController@savework'); 
     Route::resource('/declaredworks', 'DeclaredWorkController'); 
     
     Route::get('/departaments/scheduler', 'DepartamentController@buildScheduler');
     Route::get('/departaments/grupytree', 'DepartamentController@buildTree');
     Route::resource('/departaments', 'DepartamentController'); 
     
+    Route::get('/operations/save', 'OperationController@save');      
+    Route::get('/operations/taskchange', 'OperationController@taskchange');      
     Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
     Route::resource('/operations', 'OperationController'); 
 
@@ -48,7 +50,8 @@ Route::group([
     Route::resource('/history', 'OrderHistoryController');
     
     Route::get('/positions/byorder/{order}', 'OrderPositionController@getPositionsByOrder');    
-    Route::get('/positions/free', 'OrderPositionController@freePositionsList');    
+    Route::get('/positions/forprod', 'OrderPositionController@forManufacturing');    
+    Route::get('/positions/forzlec', 'OrderPositionController@forZlecenia');    
     Route::get('/positions/list/components', 'OrderPositionController@getAllComponentsForFreePositions');
     Route::get('/positions/list/tasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/beguntasks/{position}', 'OrderPositionController@listTasksForPosition');

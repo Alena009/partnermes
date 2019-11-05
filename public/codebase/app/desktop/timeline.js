@@ -131,12 +131,18 @@ function timelineInit(cell) {
         scheduler.config.multi_day = true;
         scheduler.config.time_step = 1;
         
-        ajaxGet("api/positions/free", "", function(data){
+        ajaxGet("api/positions/forprod", "", function(data){
             console.log(data.data);
             if (data && data.success) {
                 scheduler.updateCollection("zlecenia", data.data);
             }
-        });      
+        });  
+        ajaxGet("api/tasks", "", function(data){
+            console.log(data.data);
+            if (data && data.success) {
+                scheduler.updateCollection("zadania", data.data);
+            }
+        });
         
         scheduler.config.lightbox.sections=[	
             {name:"Pracownik",  type:"timeline", 
@@ -145,25 +151,40 @@ function timelineInit(cell) {
                 options:scheduler.serverList("zlecenia"), 
                 map_to:"order_position_id", 
                 onchange:changeZlecenia}, 
-            {name:"Zadanie",  type:"select", options:[],    
+            {name:"Zadanie", type:"combo", filtering:true, 
+                options:scheduler.serverList("zadania"), 
                 map_to:"task_id",
-                onchange:changeZadania}, 
+                onchange:changeZadania},             
+//            {name:"Zadanie",  type:"select", options:[],    
+//                map_to:"task_id",
+//                onchange:changeZadania}, 
 //            {name:"Ruckmeld", type:"ruckmeldEditor", 
 //                map_to:"ruckmeld", onchange:changeRuckmeld},
-            {name:"Zadeklarowano",      type:"sztEditor",  
-                map_to:"start_amount",   onchange:changeSzt},
+            {name:"Zadeklarowano",      type:"textarea",  
+                map_to:"start_amount", height:50},
             {name:"Zrobiono",      type:"sztEditor",  
-                map_to:"done_amount",   onchange:changeSzt},            
+                map_to:"done_amount"},    
+            {name:"Zamknięte", map_to:"closed", type:"checkbox", 
+                checked_value: "1", unchecked_value: "0", height:40 }
         ];           
-        scheduler.config.buttons_right = ["dhx_cancel_btn", "dhx_edit_btn", "dhx_save_btn",];
+        //scheduler.config.buttons_right = ["dhx_cancel_btn", "dhx_close_btn", "dhx_save_btn",];
+        scheduler.config.buttons_right = ["dhx_cancel_btn", "dhx_save_btn",];
         scheduler.config.buttons_left = ["dhx_delete_btn"];   
-        scheduler.locale.labels["dhx_edit_btn"] = "Edit";        
+        //scheduler.locale.labels["dhx_close_btn"] = _("Close");    
+        scheduler.attachEvent("onLightbox", function(){
+           var declared = scheduler.formSection("Zadeklarowano");
+           declared.control.disabled = true;
+           scheduler.formSection("Zrobiono").setValue("0");           
+           var cb = document.querySelector(".dhx_cal_wide_checkbox input");
+           cb.disabled = true;
+        });        
         scheduler.attachEvent("onLightboxButton", function(button_id, node, e){
-            if(button_id == "dhx_edit_btn"){               
-                var evId = scheduler.getState().lightbox_id;
-                //var evData = scheduler.getEvent(evId);
+            if(button_id == "dhx_close_btn"){               
+                var evId = scheduler.getState().lightbox_id;               
                 var data = {};
-                data.done_amount = scheduler.formSection('Szt').getValue();                              
+                data.done_amount = scheduler.formSection('Zrobiono').getValue();    
+                data.closed = 1;
+                console.log(data);
                 ajaxGet("api/operations/" + evId + "/edit", data, function(data) {
                     if(data && data.success) {               
                         console.log(data);
@@ -192,12 +213,36 @@ function timelineInit(cell) {
 //            return true;
 //        });        
         function changeZlecenia(el){
+//            var me = this;
+//            console.log(this.getSelectedValue());
+//            ajaxGet("api/positions/"+this.getSelectedValue(), "",
+//                {
+//                    'success':function(data){                            
+//                        scheduler.formSection('Zadeklarowano').setValue(data.data.amount);	
+//                        
+//                    },
+//                    'failure':function(data){
+////                            me.ev.zlecenie='';
+////                            me.ev.id_zlecenie='';
+////                            if(me.nextSibling) me.nextSibling.value = "BRAK ZLECENIA!!!";				
+//                    }
+//                }
+//            );
+        }
+        function changeZadania(el){
+            console.log(this);
+            console.log(arguments);       
+            //console.log(this.selectedOptions[0].value);
             var me = this;
             console.log(this.getSelectedValue());
-            ajaxGet("api/positions/tasks/"+this.getSelectedValue(), "",
+            var data = {};
+            data.order_position_id = scheduler.formSection('Zlecenie').getValue();
+            data.task_id = this.getSelectedValue();
+            ajaxGet("api/operations/taskchange", data,
                 {
                     'success':function(data){                            
-                        update_select_options(scheduler.formSection('Zadanie').control, data.data);	
+                        scheduler.formSection('Zadeklarowano').setValue(data.data);	
+                        
                     },
                     'failure':function(data){
 //                            me.ev.zlecenie='';
@@ -205,12 +250,7 @@ function timelineInit(cell) {
 //                            if(me.nextSibling) me.nextSibling.value = "BRAK ZLECENIA!!!";				
                     }
                 }
-            );
-        }
-        function changeZadania(){
-            console.log(this);
-            console.log(arguments);       
-            console.log(this.selectedOptions[0].value);
+            );            
             //update_template_value(this.selectedOptions[0].innerText);
         }        
         function changeRuckmeld(){
@@ -307,14 +347,14 @@ function timelineInit(cell) {
                 }
 
         };
-        
+              
         scheduler.attachEvent("onEventSave",function(id,ev,is_new){
             console.log(ev);
                 if (!ev.task_id) {
                         alert("Choose the task");
                         return false;
-                } else {
-                    ajaxPost("api/operations", ev, function(data) {
+                } else {                    
+                    ajaxGet("api/operations/save", ev, function(data) {
                         if(data && data.success) {               
                             console.log(data);
                         } else {
@@ -445,14 +485,17 @@ function timelineInit(cell) {
 //		
         scheduler.templates.tooltip_text = function(start,end,event) {
                 return "<b>Pracownik :</b> "+event.user_name+"<br/>"
-                                +"<b>Zadanie:</b> "+event.kod+"-"+event.task_name+"<br/>"
-                                +"<b>Zlecenie :</b> "+event.order_position+"<br/>"                                
-                                +"<b>Zlrobiona iłość :</b> "+event.done_amount+"<br/>"                                
-                                +"<b>Start :</b> "+event.start_date+"<br/>"
-                                +"<b>Stop:</b> "+event.end_date;                        
+                    +"<b>Zadanie:</b> "+event.kod+"-"+event.task_name+"<br/>"
+                    +"<b>Zlecenie :</b> "+event.order_position+"<br/>"                                
+                    +"<b>Wymagana iłość :</b> "+event.start_amount+"<br/>"                                    
+                    +"<b>Zrobiona iłość :</b> "+event.done_amount+"<br/>"                                                        
+                    +"<b>Start :</b> "+new Date(event.start_date.toISOString())+"<br/>"
+                    +"<b>Stop:</b> "+new Date(event.end_date.toISOString())+"<br/>"   
+                    +"<b>Status:</b> "+event.closed;    
 
         };                
-        scheduler.setLoadMode("day");    
+        scheduler.setLoadMode("day");   
+        
         timelineLayout.cells("a").attachScheduler(null, "timeline", sTabs);        
     }
 }

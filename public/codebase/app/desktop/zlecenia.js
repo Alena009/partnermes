@@ -5,92 +5,91 @@ var zleceniaForm;
 function zleceniaInit(cell) {
 	if (zleceniaLayout == null) {
 		// init layout
-		var zleceniaLayout = cell.attachLayout("4H");
-		zleceniaLayout.cells("a").setText(_("Grupy zadań"));
-		zleceniaLayout.cells("b").setText(_("Zlecenia"));
-                zleceniaLayout.cells("c").setText(_("Zadania"));
-                zleceniaLayout.cells("d").setText(_("Komponenty"));
-		zleceniaLayout.cells("a").setWidth(280);
-                zleceniaLayout.cells("d").setWidth(280);
-                zleceniaLayout.cells("c").setHeight(180);
+		var zleceniaLayout = cell.attachLayout("3L");
+		//zleceniaLayout.cells("a").setText(_("Grupy zadań"));
+		zleceniaLayout.cells("a").setText(_("Zlecenia"));
+                zleceniaLayout.cells("b").setText(_("Zadania"));
+                zleceniaLayout.cells("c").setText(_("Komponenty"));
+//		zleceniaLayout.cells("a").setWidth(280);
+//                zleceniaLayout.cells("d").setWidth(280);
+//                zleceniaLayout.cells("c").setHeight(180);
 //Groups tasks tree		
-		var grupyTreeToolBar = zleceniaLayout.cells("a").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
-			]
-		});
-		grupyTreeToolBar.attachEvent("onClick", function(btn) {
-                    switch (btn){
-                            case 'Add':{
-                                    createAddEditGroupWindow("api/taskgroups", 
-                                    "api/taskgroups", grupyTree, 0);
-                            };break;
-                            case 'Edit':{
-                                var id = grupyTree.getSelectedId();
-                                if (id) {                                        
-                                    createAddEditGroupWindow("api/taskgroups", 
-                                    "api/taskgroups/" + id + "/edit", grupyTree, id);
-                                }
-                            };break;
-                            case 'Del':{
-                                var id = grupyTree.getSelectedId();
-                                if (id) {
-                                    deleteNodeFromTree(grupyTree, "api/taskgroups/" + id);
-                                }
-                            };break;
-                    }
-		});
-                var grupyTree = zleceniaLayout.cells("a").attachTreeView({
-			skin: "dhx_web",    // string, optional, treeview's skin
-			iconset: "font_awesome", // string, optional, sets the font-awesome icons
-			multiselect: false,           // boolean, optional, enables multiselect
-			checkboxes: true,           // boolean, optional, enables checkboxes
-			dnd: true,           // boolean, optional, enables drag-and-drop
-			context_menu: true           // boolean, optional, enables context menu			
-		}); 
-                grupyTree.enableDragAndDrop(true);
-		grupyTree.attachEvent("onDrop",function(id){			
-                        var parent_id = arguments[1];
-                        parent_id = (parent_id) ? parent_id+'' : 0;
-                        var data = {
-                            id: id,
-                            parent_id: parent_id
-                        };                        
-                        ajaxGet("api/taskgroups/" + id + "/edit?", data);
-			return true;
-		});                 
-		grupyTree.attachEvent("onSelect",function(id, mode){  
-                    if (mode) {
-                        var grupy=grupyTree.getAllChecked();
-                        grupy[grupy.length]=id;
-			zleceniaGrid.zaladuj(grupy);
-			return true;                        
-                    }
-		});
-		grupyTree.attachEvent("onCheck",function(id){
-			var grupy=grupyTree.getAllChecked(); 
-			zleceniaGrid.zaladuj(grupy);
-			return true;
-		});                
-		grupyTree.zaladuj = function(i=null){	
-                    var treeStruct = ajaxGet("api/taskgroups/grupytree", '', function(data) {                    
-                        if (data && data.success){      
-                            grupyTree.clearAll();                            
-                            grupyTree.loadStruct(data.data);                           
-                        }                    
-                    });
-                };         
+//		var grupyTreeToolBar = zleceniaLayout.cells("a").attachToolbar({
+//			iconset: "awesome",
+//			items: [
+//				{id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+//                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+//                                {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
+//			]
+//		});
+//		grupyTreeToolBar.attachEvent("onClick", function(btn) {
+//                    switch (btn){
+//                            case 'Add':{
+//                                    createAddEditGroupWindow("api/taskgroups", 
+//                                    "api/taskgroups", grupyTree, 0);
+//                            };break;
+//                            case 'Edit':{
+//                                var id = grupyTree.getSelectedId();
+//                                if (id) {                                        
+//                                    createAddEditGroupWindow("api/taskgroups", 
+//                                    "api/taskgroups/" + id + "/edit", grupyTree, id);
+//                                }
+//                            };break;
+//                            case 'Del':{
+//                                var id = grupyTree.getSelectedId();
+//                                if (id) {
+//                                    deleteNodeFromTree(grupyTree, "api/taskgroups/" + id);
+//                                }
+//                            };break;
+//                    }
+//		});
+//                var grupyTree = zleceniaLayout.cells("a").attachTreeView({
+//			skin: "dhx_web",    // string, optional, treeview's skin
+//			iconset: "font_awesome", // string, optional, sets the font-awesome icons
+//			multiselect: false,           // boolean, optional, enables multiselect
+//			checkboxes: true,           // boolean, optional, enables checkboxes
+//			dnd: true,           // boolean, optional, enables drag-and-drop
+//			context_menu: true           // boolean, optional, enables context menu			
+//		}); 
+//                grupyTree.enableDragAndDrop(true);
+//		grupyTree.attachEvent("onDrop",function(id){			
+//                        var parent_id = arguments[1];
+//                        parent_id = (parent_id) ? parent_id+'' : 0;
+//                        var data = {
+//                            id: id,
+//                            parent_id: parent_id
+//                        };                        
+//                        ajaxGet("api/taskgroups/" + id + "/edit?", data);
+//			return true;
+//		});                 
+//		grupyTree.attachEvent("onSelect",function(id, mode){  
+//                    if (mode) {
+//                        var grupy=grupyTree.getAllChecked();
+//                        grupy[grupy.length]=id;
+//			zleceniaGrid.zaladuj(grupy);
+//			return true;                        
+//                    }
+//		});
+//		grupyTree.attachEvent("onCheck",function(id){
+//			var grupy=grupyTree.getAllChecked(); 
+//			zleceniaGrid.zaladuj(grupy);
+//			return true;
+//		});                
+//		grupyTree.zaladuj = function(i=null){	
+//                    var treeStruct = ajaxGet("api/taskgroups/grupytree", '', function(data) {                    
+//                        if (data && data.success){      
+//                            grupyTree.clearAll();                            
+//                            grupyTree.loadStruct(data.data);                           
+//                        }                    
+//                    });
+//                };         
                 
-                var zleceniaGridToolBar = zleceniaLayout.cells("b").attachToolbar({
+                var zleceniaGridToolBar = zleceniaLayout.cells("a").attachToolbar({
 			iconset: "awesome",
 			items: [
                             {id: "Product",text: _("Wyprodukować"), type: "button", img: "fa fa-print"},                                                       
                             {id: "DontProduct",text: _("Nie produkować"), type: "button", img: "fa fa-times"},                                                       
-                            {id: "Block",text: _("Blokuj"), type: "button", img: "fa fa-lock"},                            
-                            {id: "UnBlock",text: _("Odblokuj"), type: "button", img: "fa fa-unlock"},                            
+                            
                             {id: "sep3",     type: "separator"},
                             {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
 			]
@@ -122,39 +121,13 @@ function zleceniaInit(cell) {
                                     }
                                 });
                             });                          
-                        };break;                         
-		        case 'UnBlock':{
-                            var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
-                            selectedZlecenia.split(',').forEach(function(elem){
-                                var data = zleceniaGrid.getRowData(elem);
-                                data.status = 0;
-                                data.date_status = new Date();
-                                ajaxGet("api/positions/" + elem + "/edit", data, function(data){
-                                    if (data.success && data.data) {                            
-                                        zleceniaGrid.zaladuj(0);
-                                    }
-                                });
-                            });                          
-                        };break;                         
-		        case 'Block':{
-                            var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
-                            selectedZlecenia.split(',').forEach(function(elem){
-                                var data = zleceniaGrid.getRowData(elem);
-                                data.status = 2;
-                                data.date_status = new Date();
-                                ajaxGet("api/positions/" + elem + "/edit", data, function(data){
-                                    if (data.success && data.data) {                            
-                                        zleceniaGrid.zaladuj(0);
-                                    }
-                                });
-                            });                          
-                        };break;                      
+                        };break;                                             
 		        case 'Redo':{
                                 zleceniaGrid.zaladuj(0);
                         };break;
                     }
                 });                
-                var zleceniaGrid = zleceniaLayout.cells("b").attachGrid({
+                var zleceniaGrid = zleceniaLayout.cells("a").attachGrid({
 		    image_path:'codebase/imgs/',
 		    columns: [  
                         {label: "",                    id:'checked',           width: 30,  type: "ch", align: "center"},                        
@@ -190,7 +163,7 @@ function zleceniaInit(cell) {
                 });                 
                 zleceniaGrid.attachEvent("onCheck", function(rId,cInd,state){
                     var rowData = zleceniaGrid.getRowData(rId);
-                    if (rowData.closed == true) {
+                    if (rowData.closed == true || rowData.status == 2) {
                         zleceniaGrid.cells(rId,0).setValue(false);
                     }
                     var ids = zleceniaGrid.getCheckedRows(0);
@@ -203,7 +176,7 @@ function zleceniaInit(cell) {
                     this.clearAll();
                     var ids = Array();
                     ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-                    var new_data = ajaxGet("api/positions", "", function(data){
+                    var new_data = ajaxGet("api/positions/forzlec", "", function(data){
                         if (data && data.success){                            
                                 zleceniaGrid.parse(data.data, "js");
                             }
@@ -211,51 +184,100 @@ function zleceniaInit(cell) {
 		}; 
                 zleceniaGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                     var data = zleceniaGrid.getRowData(rId);
-                    //if (data.declared == data.countWorks) { 
+                    //blocked task
                     if (data.status == 2) {
-                        zleceniaGrid.setRowColor(rId,"pink");
+                        zleceniaGrid.setRowColor(rId,"lightgray");
                     } 
+                    //for producting
                     if (data.status == 1) {
                         zleceniaGrid.setRowColor(rId,"lightyellow");
                     } 
+                    //done
                     if (data.closed == true) { 
                         zleceniaGrid.setRowColor(rId,"lightgreen");
                     } 
+                    //inprogress
                     if (data.countWorks > 0) {
                         zleceniaGrid.setRowColor(rId,"yellow");
                     }
                 }); 
+                zleceniaGrid.zaladuj(0); 
                 
-                var tasksGrid = zleceniaLayout.cells("c").attachGrid({
+		var tasksGridToolBar = zleceniaLayout.cells("b").attachToolbar({
+			iconset: "awesome",
+			items: [
+				{id: "Add",  type: "button", text: _("Zapisz zmiany"),   img: "fa fa-save "},                                                                
+                                {id: "sep3",     type: "separator"},
+                                {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
+			]
+		}); 
+		tasksGridToolBar.attachEvent("onClick", function(btn) {
+                    switch (btn){
+                            case 'Add':{
+                                var selectedTasks = tasksGrid.getCheckedRows(0);
+                                if (selectedTasks.length) {                              
+                                    tasksGrid.forEachRow(function(id){
+                                        var data = tasksGrid.getRowData(id);
+                                        data.order_position_id = zleceniaGrid.getSelectedRowId();
+                                        data.declared_amount = data.amount;                                        
+                                        ajaxGet("api/declaredworks/savework", data, function(data){
+                                            if (data.success) {
+                                                console.log(data.data);
+                                            } else {
+                                                console.log(data.message);
+                                            }
+                                        });
+                                    });
+                                    tasksGrid.fill(zleceniaGrid.getSelectedRowId());
+                                } else {
+                                    dhtmlx.message({
+                                        title:_("Wiadomość"),
+                                        type:"alert",
+                                        text:_("Zaznacz co najmniej jedno zadanie do wykonania")
+                                    }); 
+                                }
+                            };break;                            
+                            case 'Redo':{
+                                    tasksGrid.fill(zleceniaGrid.getSelectedRowId());
+                            };break;
+                    }
+		});                
+                var tasksGrid = zleceniaLayout.cells("b").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [ 
-                        {id: "checked", type: "ch", width: 30},
+                        {id: "status", type: "ch", width: 30},
                         {label: _("Zadanie Kod"),   id: "kod",      type: "ro", sort: "str", align: "left", width: 100},                                                                        
                         {label: _("Zadanie"),       id: "name",     type: "ro", sort: "str", align: "left", width: 150},                         
                         {label: _("Ilość"),         id: "amount",   type: "ro", sort: "str", align: "left", width: 50},                                    
                         {label: _("Ilość czasu"),   id: "duration", type: "ro", sort: "str", align: "left", width: 50},                          
                         {label: _("Ilość zrobiona"),id: "done", type: "ro", sort: "str", align: "left", width: 50},                                                
-                        {id: "countWorks"}
+                        {id: "countWorks"},
+                        {id: "task_id"}
                     ]
                 });  
                 tasksGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                     var data = tasksGrid.getRowData(rId);
-                    if (data.amount == data.done) { 
-                        tasksGrid.setRowColor(rId,"lightgreen");
-                    } else if (data.countWorks>0) {
+                    if (data.status == false) {
+                        tasksGrid.setRowColor(rId,"lightgrey");
+                    }                    
+                    if (data.countWorks > 0) {
                         tasksGrid.setRowColor(rId,"yellow");
                     }
+                    if (data.amount == data.done) { 
+                        tasksGrid.setRowColor(rId,"lightgreen");
+                    } 
                 });                 
                 tasksGrid.fill = function(positionsIds) { 
                     tasksGrid.clearAll();
                     ajaxGet("api/positions/tasks/" + positionsIds, "", function(data){
-                        if (data.success && data.data) {                            
+                        if (data.success && data.data) {     
+                            console.log(data.data);
                             tasksGrid.parse((data.data), "js");
                         }
                     });
                 };                 
                 
-                componentsGridToolBar = zleceniaLayout.cells("d").attachToolbar({
+                componentsGridToolBar = zleceniaLayout.cells("c").attachToolbar({
                         iconset: "awesome",
                         items: [                           
                                 {id: "Do",    type: "button", text: _("Wyprodukować"),  img: "fa fa-plus-square"},
@@ -310,7 +332,7 @@ function zleceniaInit(cell) {
                         };break;      
                     }
                 });
-                var componentsGrid = zleceniaLayout.cells("d").attachGrid({
+                var componentsGrid = zleceniaLayout.cells("c").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [ 
                         {id: "checked", type: "ch", width: 30},

@@ -106,23 +106,34 @@ class OrderPositionController extends BaseController
         $positions    = OrderPosition::find($positionsIds);
         
         foreach ($positions as $position) {
-            $product    = $position->product;
-            $tasks      = $product->tasks;
-            $operations = $position->operations;
-            if ($tasks) {
-                foreach ($tasks as $task) { 
-                    $task->amount      = $position->amount;
-                    $task->duration    = $position->amount * $task->pivot->duration;
-                    $task->key         = $task->id;
-                    $task->label       = $task->name;
-                    $task->done        = $operations->where("task_id", "=", $task->id)
-                            ->sum("done_amount");
-                    $task->countWorks  = $operations->where("task_id", "=", $task->id)
-                            ->count("id");  
-                    $result[] = $task;
-                }                
-            }
-        }
+            $product       = $position->product;
+            $operations    = $position->operations;
+            $tasks         = $product->tasks;
+                if ($tasks) {                
+                    foreach ($tasks as $task) { 
+                        $task->amount      = $position->amount;
+                        $task->duration    = $position->amount * $task->pivot->duration;
+                        $task->key         = $task->id;
+                        $task->task_id     = $task->id;
+                        $task->label       = $task->name;
+                        $task->done        = $operations->where("task_id", "=", $task->id)
+                                ->sum("done_amount");
+                        $task->countWorks  = $operations->where("task_id", "=", $task->id)
+                                ->count("id");  
+                        $task->status     = true;
+                        $wasChangedTask   = DeclaredWork::where("order_position_id", "=", $position->id)
+                            ->where("task_id", "=", $task->id)->get();
+                        if (count($wasChangedTask)) {
+                            //print_r($wasChangedTask);
+                            $task->status   = $wasChangedTask[0]->status;
+                            $task->amount   = $wasChangedTask[0]->declared_amount;
+                            $task->duration = $wasChangedTask[0]->declared_amount * $task->pivot->duration;
+                        }
+                        $result[] = $task;
+                    }                
+                } 
+            }  
+        
         
         
 //        $components = DB::table('')
@@ -189,11 +200,11 @@ class OrderPositionController extends BaseController
     
     
     /**
-     * Get list order positions without declared tasks(zlecen)
+     * Get list order positions marked as "for manufacturing"
      * 
      * @return response
      */    
-    public function freePositionsList()
+    public function forManufacturing()
     {        
         
 //        if ($positions) {            
@@ -203,8 +214,23 @@ class OrderPositionController extends BaseController
 //            }
 //        }
         
-        return $this->getResponseResult($this->repository->getFreePositions());        
+        return $this->getResponseResult($this->repository->getForManufacturingPositions());        
     }   
+    
+    /**
+     * Get list order positions which have tasks and can be manufactured
+     * 
+     * @return response
+     */    
+    public function forZlecenia()
+    {    
+        $productsWithTasks = Product::has("tasks")->pluck("id");
+        $positionsIds = OrderPosition::whereIn("product_id", $productsWithTasks)
+                ->pluck("id");
+        
+        return $this->getResponseResult($this->repository->
+                getPositionWithAdditionalFields($positionsIds));        
+    }      
     
     /**
      * create new order position

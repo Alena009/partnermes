@@ -1217,6 +1217,16 @@ dhtmlXGridObject.prototype.fill = function(url) {
     });     
 };
 
+dhtmlXGridObject.prototype.getUnCheckedRows = function(col_ind){
+		var d = new Array();
+		this.forEachRowA(function(id){
+				var cell = this.cells(id, col_ind);
+				if (cell.changeState && cell.getValue() == 0)
+					d.push(id);
+		},true);
+		return d.join(",");
+};
+
 //dhtmlXGridObject.prototype._in_header_stat_total_sum=function(tag,index,data){//'stat_rowcount'-counter name
 //    var calc=function(){                       // function used for calculations
 //        var total_sum = 0;

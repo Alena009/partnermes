@@ -42,9 +42,6 @@ class TaskController extends BaseController
         
         $task = new Task();
         $task->kod = $request['kod'];           
-        $task->for_order = $request['for_order']; 
-        $task->amount_start = $request['amount_start'];
-        $task->amount_stop = $request['amount_stop'];
         $task->task_group_id = $request['task_group_id'];
         
         if ($task->save()) {

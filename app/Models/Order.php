@@ -25,8 +25,7 @@ class Order extends BaseModel
     }
     
     public function history()
-    {
-        //return $this->belongsToMany("App\Models\Status", "orders_history", 'order_id', 'status_id');
+    {        
         return $this->hasMany('App\Models\OrderHistory');
     }
     
@@ -45,4 +44,9 @@ class Order extends BaseModel
         
         return $orderHistory->save(); 
     }
+        
+    public function positionsInWork()
+    {
+        return $this->hasMany('App\Models\OrderPosition')->where("status", ">", 0)->get();
+    }    
 }

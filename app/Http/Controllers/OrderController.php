@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-//use App\Order;
 use Illuminate\Http\Request;
-
 use App\Repositories\OrderRepository;
 use App\Models\Order;
-use App\Models\OrderHistory;
-use App\Models\DeclaredWork;
+use Illuminate\Support\MessageBag;
 
 class OrderController extends BaseController
 {    
@@ -25,37 +22,46 @@ class OrderController extends BaseController
      */
     public function index($locale = 'pl')
     {
-        $orders = [];
         app()->setLocale($locale);
 
-        $orders = Order::orderBy("id", "desc")->get();              
-        foreach ($orders as $order) {
-            $order['client_name'] = $order->client->name;
-            $order['text']        = $order->kod;
-            $order['value']       = $order->id;
-            $date = new \DateTime($order->date_end);
-            $order['num_week']    = $date->format("W");
-            $order['available']   = 1;
-            $tasks = $this->getTasks($order->id);
-            if (count($tasks)) {
-                $order['available'] = 0;
-            }
-        }
-        
-        return response()->json(['data' => $orders, 'success' => (boolean)count($orders)]);        
+        $orders = $this->repository->getModel()::orderBy("id", "desc")->get();    
+        if ($orders) {
+            foreach ($orders as $order) {
+                $order->client_name  = $order->client->name;               
+                $order->text         = $order->kod;
+                $order->value        = $order->id;
+                $date = new \DateTime($order->date_end);
+                $order->num_week     = $date->format("W");
+                $order->hasopenworks = count($order->positionsInWork());            
+            }            
+            return response()->json(['data' => $orders, 'success' => true]);        
+        } else {
+            return response()->json(['data' => [], 'success' => false, 
+                'message' => 'Orders were not found']);        
+        }        
     }
     
-
     /**
      * create new order
      */
     public function store(Request $request)
     {
         $locale = app()->getLocale();
+
+        $validator = $request->validate([
+            'kod'        => 'required|unique:orders|max:45',
+            'date_start' => 'required'
+        ]);
+        
+        if (!$validator) {
+            return response()->json(['success' => false,
+                'data' => [],
+                'message' => $validator->errors()]);
+        }   
         
         $currentWeekNum = date("W");
         $currentYear    = date("Y");
-        if ($request['num_week'] < $currentWeekNum) {
+        if ($request->num_week < $currentWeekNum) {
             $year = $currentYear + 1; 
         } else {
             $year = $currentYear;
@@ -86,6 +92,17 @@ class OrderController extends BaseController
     {
         $order = [];
         $locale = app()->getLocale();
+
+        $validator = $request->validate([
+            'kod'        => 'required|unique:orders|max:45',
+            'date_start' => 'required'
+        ]);
+        
+        if (!$validator) {
+            return response()->json(['success' => false,
+                'data' => [],
+                'message' => $validator->errors()]);
+        }          
         
         $currentWeekNum = date("W");
         $currentYear    = date("Y");
@@ -112,7 +129,7 @@ class OrderController extends BaseController
             $order->save(); 
         }         
         
-        return response()->json(['data' => $order, 'success' => (boolean)count($order)]);                
+        return response()->json(['data' => $order, 'success' => true]);                
     }
     
     public function history($orderId)
@@ -127,35 +144,5 @@ class OrderController extends BaseController
         }        
         
         return $this->getResponseResult($history);
-    }
-
-
-    /**
-     * Gets list begun tasks for order 
-     * 
-     * @param type $orderId
-     * @return type
-     */
-    public function beguntasks($orderId)
-    {        
-        $tasks = $this->getTasks($orderId);
-                        
-        return response()->json(['data' => $tasks, 'success' => (boolean)count($tasks)]);         
-    }
-    
-    public function getTasks($orderId) 
-    {
-        $result = [];
-        $order = []; 
-        $order = Order::find($orderId);
-        
-        if ($order) {
-            $positions    = $order->positions;
-            $positionsIds = $positions->pluck('id');
-            $result = DeclaredWork::whereIn("order_position_id", $positionsIds)->get();
-        }
-        
-        return $result;
-    }
-    
+    }    
 }

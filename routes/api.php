@@ -41,7 +41,7 @@ Route::group([
     Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
     Route::resource('/operations', 'OperationController'); 
 
-    Route::get('/orders/beguntasks/{orderId}', 'OrderController@beguntasks');
+    //Route::get('/orders/beguntasks/{orderId}', 'OrderController@beguntasks');
    // Route::get('/orders/positions/{orderId}', 'OrderController@positions');
     Route::get('/orders/history/{orderId}', 'OrderController@history');
     Route::resource('/orders', 'OrderController');    

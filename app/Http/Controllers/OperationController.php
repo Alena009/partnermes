@@ -57,9 +57,9 @@ class OperationController extends BaseController
         $openedTasks = $model::where("user_id", "=", $request['user_id'])
                 ->where("closed", "<", 1)->get(); 
         //if we found opened tasks, we search does requested task is in opened 
-        //tasks list. If it is - so we begin to edit this task, if it is not - 
-        //show message for user with text he has another opened tasks and he must 
-        //to close it 
+        //tasks list. If it is - so we will close this task, if it is not - 
+        //show message for user with text that he has another opened tasks and he must 
+        //to close it before adding one more task
         if (count($openedTasks)) { 
             foreach ($openedTasks as $ot) {
                 if ($ot->task_id == $request["task_id"]) {
@@ -67,7 +67,7 @@ class OperationController extends BaseController
                 }                
             }
             if ($openTask) {
-                //$openTask->start_date   = date('Y-m-d H:i:s');            
+                $openTask->start_date   = $openTask->start_date;            
                 $openTask->end_date     = date('Y-m-d H:i:s');            
                 $openTask->done_amount  = $request["done_amount"];
                 $openTask->closed = 1; 
@@ -87,14 +87,21 @@ class OperationController extends BaseController
         } else {
             //adding new task
             $position = [];
-            $position = OrderPosition::find($request['order_position_id']); 
-            if ($position) {              
-                $productTask = DB::table("product_tasks")
+            $position = OrderPosition::find($request->order_position_id); 
+            if ($position) {   
+                $declared_works = DB::table("declared_works")
+                        ->where("order_position_id", "=", $position->id)
+                        ->where("task_id", "=", $request->task_id)
+                        ->first();
+                if ($declared_works->status == 0) {
+                    $productTask = [];
+                } else {
+                    $productTask = DB::table("product_tasks")
                         ->where("product_id", "=", $position->product_id)
-                        ->where("task_id", "=", $request['task_id'])
-                        ->first();                
+                        ->where("task_id", "=", $request->task_id)
+                        ->first();                      
+                }                              
                 if ($productTask) { 
-                    //$dateStart = date('Y-m-d H:i:s');
                     $dateStart = date('Y-m-d H:i:s');
                     $dateEnd = date('Y-m-d H:i:s', strtotime($dateStart. ' + ' . 
                             $productTask->duration * $position->amount . ' minute'));                    
@@ -107,7 +114,7 @@ class OperationController extends BaseController
                     'message' => 'This task is not declared for this product']);                 
                 }
             } else {
-                //timeout or cleaning
+                //timeout or cleaning tasks which do not have order
                 $request["start_date"] = date('Y-m-d H:i:s');
                 $request["end_date"]   = date('Y-m-d H:i:s', 
                         strtotime(date('Y-m-d H:i:s') . ' + ' . 15 . ' minute'));

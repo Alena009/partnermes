@@ -35,7 +35,8 @@ function projectsInit(cell) {
                             var clientsCombo = newOrderForm.getCombo("client_id");
                             ajaxGet("api/clients", "", function(data){
                                 clientsCombo.addOption(data.data);
-                            });                                       
+                            });                           
+                            
                             newOrderForm.attachEvent("onButtonClick", function(name){
                                 switch (name){
                                     case 'save':{    
@@ -66,11 +67,13 @@ function projectsInit(cell) {
                             var rowData = projectsGrid.getRowData(projectsGrid.getSelectedRowId());
                             editOrderForm.bind(projectsGrid);
                             editOrderForm.unbind(projectsGrid);
+                               
                             var clientsCombo = editOrderForm.getCombo("client_id");
                             ajaxGet("api/clients", "", function(data){
                                 clientsCombo.addOption(data.data);
                                 clientsCombo.selectOption(clientsCombo.getIndexByValue(rowData.client_id));
-                            });                           
+                            });                        
+                            
                             editOrderForm.attachEvent("onButtonClick", function(name){
                                 switch (name){
                                     case 'save':{                                                           
@@ -99,7 +102,7 @@ function projectsInit(cell) {
                             var orderId = projectsGrid.getSelectedRowId();                            
                             if (orderId) {
                                 var rowData = projectsGrid.getRowData(orderId);                                
-                                if (rowData.available == 0) {
+                                if (rowData.hasopenworks != 0) {
                                     dhtmlx.alert({
                                         title:_("Wiadomość"),
                                         text:_("Nie mozna usunąć zamowienie. \n\
@@ -129,7 +132,7 @@ function projectsInit(cell) {
                         {label: _("Klient"),           id: "client_name", type: "ro",   sort: "str", align: "left", width: 150},                                                                                                
                         {label: _("Termin wykonania"), id: "num_week",    type: "ro",   sort: "str", align: "left", width: 50},                         
                         {id: "client_id"}, 
-                        {id: "available"}
+                        {id: "hasopenworks"}
                     ],
                     multiselect: true
                 });
@@ -166,7 +169,7 @@ function projectsInit(cell) {
                 });  
                 projectsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                     var data = projectsGrid.getRowData(rId);
-                    if (data.available == 0) {
+                    if (data.hasopenworks != 0) {
                         projectsGrid.setRowColor(rId,"yellow");
                     }
                 });                 
@@ -181,7 +184,6 @@ function projectsInit(cell) {
  * 
  */		                                
                 var projectsForm = projectsLayout.cells("b").attachForm(newProjectFormStruct);
-		projectsForm.bind(projectsGrid);
                 projectsForm.attachEvent("onButtonClick", function(name){
                     switch (name){
                         case 'save':{   
@@ -222,8 +224,13 @@ function projectsInit(cell) {
                             }
                         };break;
                     }
-                });                 
-                var clientsCombo = projectsForm.getCombo("client_id");                
+                });                
+                var clientsCombo = projectsForm.getCombo("client_id");  
+                ajaxGet("api/clients", '', function(data) {
+                    if (data.success && data.data) {
+                        clientsCombo.addOption(data.data);                         
+                    }
+                });                              
                 var dateEndCombo = projectsForm.getCombo("num_week");
                 if (dateEndCombo) {
                     var numCurrentWeek = new Date().getWeekNumber();
@@ -239,7 +246,8 @@ function projectsInit(cell) {
                             projectsForm.removeItem("on_next_year");
                         }
                     });  
-                }                
+                }  
+                projectsForm.bind(projectsGrid);
 /**
  * C
  */                                                            
@@ -551,19 +559,12 @@ function projectsInit(cell) {
                         ]}                    
                     ]; 
              
-            ajaxGet("api/clients", '', function(data) {
-                if (data.success && data.data) {
-                    data.data.forEach(function(rec){
-                        //typeProductCombo.put(rec.id, rec.name);
-                    });
-                    clientsCombo.addOption(data.data); 
-                }
-            });   
+              
 	}	
 }
 
 newProjectFormStruct = [                    
-        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},                        
+        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},   	        
         {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
         {type: "input", name: "kod",       required: true, label: _("Kod zamowienia")},
         {type: "input", name: "name",      required: true, label: _("Zamowienie"),                           

@@ -4,22 +4,39 @@ var zleceniaForm;
 
 function zleceniaInit(cell) {
 	if (zleceniaLayout == null) {
+                var userData = JSON.parse(localStorage.getItem("userData")); 
+                var write;
+                userData.permissions.forEach(function(elem){
+                    if (elem.name == 'zlecenia') {
+                        write = elem.pivot.value;
+                    }
+                });
 		// init layout
 		var zleceniaLayout = cell.attachLayout("3L");		
 		zleceniaLayout.cells("a").setText(_("Zlecenia"));
                 zleceniaLayout.cells("b").setText(_("Zadania"));
                 zleceniaLayout.cells("c").setText(_("Komponenty"));        
                 
-                var zleceniaGridToolBar = zleceniaLayout.cells("a").attachToolbar({
-			iconset: "awesome",
-			items: [
-                            {id: "Product",text: _("Wyprodukować"), type: "button", img: "fa fa-wrench"},                                                       
-                            {id: "DontProduct",text: _("Nie produkować"), type: "button", img: "fa fa-times"},                                                       
-                            {id: "Print",text: _("Wydrukować"), type: "button", img: "fa fa-print"},                                                       
-                            {id: "sep3",     type: "separator"},
-                            {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
-			]
-		}); 
+                if (write) {
+                    var zleceniaGridToolBar = zleceniaLayout.cells("a").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                {id: "Product",text: _("Wyprodukować"), type: "button", img: "fa fa-wrench"},                                                       
+                                {id: "DontProduct",text: _("Nie produkować"), type: "button", img: "fa fa-times"},                                                       
+                                {id: "Print",text: _("Wydrukować"), type: "button", img: "fa fa-print"},                                                       
+                                {id: "sep3",     type: "separator"},
+                                {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
+                            ]
+                    });                    
+                } else {
+                    var zleceniaGridToolBar = zleceniaLayout.cells("a").attachToolbar({
+                            iconset: "awesome",
+                            items: [                                
+                                {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
+                            ]
+                    });                    
+                }
+ 
                 zleceniaGridToolBar.attachEvent("onClick", function(btn) {	
 		    switch (btn){
 		        case 'Product':{
@@ -56,7 +73,7 @@ function zleceniaInit(cell) {
                                         type:"alert",
                                         text:_("Nie mogę wydrukować kilka zleceń. \n\
                                                Zlecenia mogą być wzdrukowane tylko pojedynczo. \n\
-                                               Wzbierz jedno zlecenie.")
+                                               Wybierz jedno zlecenie.")
                                     });                                     
                                 } else {
                                     var selectedZlecenieId = zleceniaGrid.getSelectedRowId();
@@ -65,17 +82,26 @@ function zleceniaInit(cell) {
                                     }                                    
                                     if (selectedZlecenieId) {
                                         var zlecenie =  zleceniaGrid.getRowData(selectedZlecenieId);
-                                        tasksGrid.printView('<div>' + _("Zamówienie") + ": " + zlecenie.order_kod + '</div>' + 
-                                                    '<div>' + _("Zlecenie") + ": " + zlecenie.kod + '</div>' +
-                                                    '<div>' + _("Produkt Kod") + ": " + zlecenie.product_kod + " - " + 
-                                                              _("Produkt") + ": " + zlecenie.product_name + '</div>' + 
-                                                    '<div>' + _("Iłość") + ": " + zlecenie.amount + '</div>',                                        
-                                                    '<strong>' + _("") + '</strong>');                                     
+                                        if (zlecenie.status) { 
+                                            tasksGrid.printView('<div>' + _("Zamówienie") + ": " + zlecenie.order_kod + '</div>' + 
+                                                        '<div>' + _("Zlecenie") + ": " + zlecenie.kod + '</div>' +
+                                                        '<div>' + _("Produkt Kod") + ": " + zlecenie.product_kod + " - " + 
+                                                                  _("Produkt") + ": " + zlecenie.product_name + '</div>' + 
+                                                        '<div>' + _("Iłość") + ": " + zlecenie.amount + '</div>',                                        
+                                                        '<strong>' + _("") + '</strong>');                                     
+                                        } else {
+                                            dhtmlx.message({
+                                                title:_("Wiadomość"),
+                                                type:"alert",
+                                                text:_("Nie można wzdrukować zlecenie \n\
+                                                        które nie wybrane do wyprodukowania!")
+                                            });
+                                        }
                                     } else {
                                         dhtmlx.message({
                                             title:_("Wiadomość"),
                                             type:"alert",
-                                            text:_("Wzbierz zlecenie!")
+                                            text:_("Wybierz zlecenie!")
                                         });
                                     }
                                 };
@@ -89,12 +115,12 @@ function zleceniaInit(cell) {
 		    image_path:'codebase/imgs/',
 		    columns: [  
                         {label: "",                    id:'checked',           width: 30,  type: "ch", align: "center"},                        
-                        {label: "Zmówienie Kod",       id:'order_kod',         width: 50, type: "ro", sort: "str",  align: "center"},                        
+                        {label: "Zmówienie Kod",       id:'order_kod',         width: 50,  type: "ro", sort: "str",  align: "center"},                        
                         {label: "Zlecenie Kod",        id:'kod',               width: 100, type: "ro", sort: "str",  align: "center"},                                              
                         {label: "Produkt Kod",         id:'product_kod',       width: 100, type: "ro", sort: "str",  align: "left"},
                         {label: "Imie produktu",       id:'product_name',      width: 200, type: "ro", sort: "str",  align: "left"},                        
                         {label: "Ilość produktu",      id:'amount',            width: 60,  type: "ro",sort: "str",  align: "right"},                        
-                        {label: "Zrobiona ilość",      id:'done_amount',       width: 60,  type: "edn",sort: "str",  align: "right"},
+                        {label: "Zrobiona ilość",      id:'done_amount',       width: 60,  type: "ro",sort: "str",  align: "right"},
                         {label: "Zamknięte",           id:'closed',            width: 30,  type: "ch", align: "center"},
                         {label: "Data dodania",        id:'created_at',        width: 120, type: "ro", sort: "date", align: "center"},
                         {label: "Data zamkniecia",     id:'date_closing',      width: 120, type: "ro", sort: "date", align: "center"},
@@ -161,14 +187,24 @@ function zleceniaInit(cell) {
                 }); 
                 zleceniaGrid.zaladuj(0); 
                 
-		var tasksGridToolBar = zleceniaLayout.cells("b").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{id: "Add",  type: "button", text: _("Zapisz zmiany"),   img: "fa fa-save "},                                                                
-                                {id: "sep3",     type: "separator"},
-                                {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
-			]
-		}); 
+                if (write) {
+                    var tasksGridToolBar = zleceniaLayout.cells("b").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Add",  type: "button", text: _("Zapisz zmiany"),   img: "fa fa-save "},                                                                
+                                    {id: "sep3",     type: "separator"},
+                                    {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
+                            ]
+                    });                     
+                } else {
+                    var tasksGridToolBar = zleceniaLayout.cells("b").attachToolbar({
+                            iconset: "awesome",
+                            items: [                                    
+                                    {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
+                            ]
+                    });                     
+                }
+		
 		tasksGridToolBar.attachEvent("onClick", function(btn) {
                     switch (btn){
                             case 'Add':{
@@ -237,13 +273,22 @@ function zleceniaInit(cell) {
                     });
                 };                 
                 
-                componentsGridToolBar = zleceniaLayout.cells("c").attachToolbar({
-                        iconset: "awesome",
-                        items: [                           
-                                {id: "Do",    type: "button", text: _("Wyprodukować"),  img: "fa fa-wrench"},
-                                {id: "Order", type: "button", text: _("Zamówić"), img: "fa fa-plus-square"}
-                        ]                    
-                }); 
+                if (write) {
+                    componentsGridToolBar = zleceniaLayout.cells("c").attachToolbar({
+                            iconset: "awesome",
+                            items: [                           
+                                    {id: "Do",    type: "button", text: _("Wyprodukować"),  img: "fa fa-wrench"},
+                                    {id: "Order", type: "button", text: _("Zamówić"), img: "fa fa-plus-square"}
+                            ]                    
+                    }); 
+                } else {
+                    componentsGridToolBar = zleceniaLayout.cells("c").attachToolbar({
+                            iconset: "awesome",
+                            items: [                           
+                                    
+                            ]                    
+                    }); 
+                }
                 componentsGridToolBar.attachEvent("onClick", function(btn) {	
 		    switch (btn){
 		        case 'Do':{
@@ -300,7 +345,7 @@ function zleceniaInit(cell) {
                         {label: _("Komponent"),           id: "name",     type: "ro", sort: "str", align: "left", width: 150},                                  
                         {label: _("Wymagana ilość"),      id: "amount1",   type: "ro", sort: "str", align: "left", width: 50},                                    
                         {label: _("Ilość na magazynie"),  id: "available",type: "ro", sort: "str", align: "left", width: 50},
-                        {label: _("Ilość do produkowania"),id: "amount",   type: "ed", sort: "str", align: "left", width: 50},
+                        {label: _("Ilość do produkowania"),id: "amount",   type: "ro", sort: "str", align: "left", width: 50},
                         //{label: _("Zlecenie"),            id: "zlecenie", type: "ro", sort: "str", align: "left", width: 100},												
                         {id: "component_id"},												
                         {id: "available"},

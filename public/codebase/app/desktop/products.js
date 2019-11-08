@@ -4,7 +4,14 @@ var productsForm;
 var products;
 
 function productsInit(cell) {
-    if (productsLayout == null) {           
+    if (productsLayout == null) {   
+        var userData = JSON.parse(localStorage.getItem("userData")); 
+        var write;
+        userData.permissions.forEach(function(elem){
+            if (elem.name == 'products') {
+                write = elem.pivot.value;
+            }
+        });
         
         var productsLayout = cell.attachLayout("4A");
         productsLayout.cells("a").setText(_("Grupy produktów")); 
@@ -16,14 +23,21 @@ function productsInit(cell) {
 /**
  * A
  */       
-        var productsGroupsToolBar = productsLayout.cells("a").attachToolbar({
-                iconset: "awesome",
-                items: [
-                        {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                        {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                ]
-        });
+        if (write) {
+            var productsGroupsToolBar = productsLayout.cells("a").attachToolbar({
+                    iconset: "awesome",
+                    items: [
+                            {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                            {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                            {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                    ]
+            });
+        } else {
+            var productsGroupsToolBar = productsLayout.cells("a").attachToolbar({
+                    iconset: "awesome",
+                    items: []
+            });
+        }
         productsGroupsToolBar.attachEvent("onClick", function(btn) {
             switch (btn){
                     case 'Add':{			                                        
@@ -82,16 +96,25 @@ function productsInit(cell) {
 /**
  * B
  */        
-        var typesProductsGridToolBar = productsLayout.cells("b").attachToolbar({
-                iconset: "awesome",
-                items: [
-                        {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                        {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                        {type: "separator", id: "sep3"},
-                        {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
-                ]
-        });
+        if (write) {
+            var typesProductsGridToolBar = productsLayout.cells("b").attachToolbar({
+                    iconset: "awesome",
+                    items: [
+                            {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                            {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                            {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                            {type: "separator", id: "sep3"},
+                            {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+                    ]
+            });
+        } else {
+            var typesProductsGridToolBar = productsLayout.cells("b").attachToolbar({
+                    iconset: "awesome",
+                    items: [
+                            {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+                    ]
+            });
+        }
         typesProductsGridToolBar.attachEvent("onClick", function(btn) {
             switch (btn){
                     case 'Add':{
@@ -251,21 +274,30 @@ function productsInit(cell) {
 /**
  * C
  */       
-        productsGridToolBar = productsLayout.cells("c").attachToolbar({
-                iconset: "awesome",
-                items: [                           
-                        {id: "Add",  type: "button", text: _("Dodaj"),  img: "fa fa-plus-square "},
-                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                        {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
-                        {type: "separator",   id: "sep3"}, 
-                        {id: "Copy", type: "button", text: _("Kopiuj"), img: "fa fa-clone"},
-                        {type: "separator",   id: "sep4"}, 
-                        {id: "Tasks",     text: _("Zadania"),    type: "button", img: "fa fa-file-text-o "},
-                        {id: "Components",text: _("Komponenty"), type: "button", img: "fa fa-puzzle-piece "},
-                        {type: "separator",   id: "sep2"},                           
-                        {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
-                ]                    
-        });  
+        if (write) {
+            productsGridToolBar = productsLayout.cells("c").attachToolbar({
+                    iconset: "awesome",
+                    items: [                           
+                            {id: "Add",  type: "button", text: _("Dodaj"),  img: "fa fa-plus-square "},
+                            {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                            {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
+                            {type: "separator",   id: "sep3"}, 
+                            {id: "Copy", type: "button", text: _("Kopiuj"), img: "fa fa-clone"},
+                            {type: "separator",   id: "sep4"}, 
+                            {id: "Tasks",     text: _("Zadania"),    type: "button", img: "fa fa-file-text-o "},
+                            {id: "Components",text: _("Komponenty"), type: "button", img: "fa fa-puzzle-piece "},
+                            {type: "separator",   id: "sep2"},                           
+                            {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
+                    ]                    
+            }); 
+        } else {
+            productsGridToolBar = productsLayout.cells("c").attachToolbar({
+                    iconset: "awesome",
+                    items: [                         
+                            {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
+                    ]                    
+            }); 
+        }
         productsGridToolBar.attachEvent("onClick", function(name) {           
             switch (name){
                 case 'Copy': {
@@ -725,23 +757,40 @@ function productsInit(cell) {
  * D
  */        
 
-        var productFormStruct = [
-            {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                 
-            {type: "combo", name: "product_group_id",  required:true,  label: _("Grupa produktu"), options: []},		
-            {type: "combo", name: "product_type_id", required:true,   label: _("Typ produktu"),   options: []},		
-            {type: "input", name: "kod",     required:true,            label: _("Kod produktu")},
-            {type: "input", name: "name",     required:true,          label: _("Nazwa produktu")},                                      
-            {type: "input", name: "height",             label: _("Wysokość, mm")},
-            {type: "input", name: "width",     required:true,          label: _("Szerokość, mm")},
-            {type: "input", name: "length",             label: _("Długość, mm")},
-            {type: "input", name: "weight",    required: true,         label: _("Masa, kg"), numberFormat:"0,000.00"},
-            {type: "input", name: "area",      required:true,          label: _("Powierzchnia, m2"), numberFormat:"0,000.00"},
-            {type: "input", name: "pack",        required:true,        label: _("Opakowanie")},
-            {type: "input", name: "description",  required:true,       label: _("Opis"), rows: 3},
-            {type: "block", name: "block",         blockOffset: 0, position: "label-left", list: [
-                {type: "button", name: "save",   value: _("Zapisz"), offsetTop:18},                              
-            ]}
-        ];         
+        if (write) {
+            var productFormStruct = [
+                {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                 
+                {type: "combo", name: "product_group_id",  required:true,  label: _("Grupa produktu"), options: []},		
+                {type: "combo", name: "product_type_id", required:true,   label: _("Typ produktu"),   options: []},		
+                {type: "input", name: "kod",     required:true,            label: _("Kod produktu")},
+                {type: "input", name: "name",     required:true,          label: _("Nazwa produktu")},                                      
+                {type: "input", name: "height",             label: _("Wysokość, mm")},
+                {type: "input", name: "width",     required:true,          label: _("Szerokość, mm")},
+                {type: "input", name: "length",             label: _("Długość, mm")},
+                {type: "input", name: "weight",    required: true,         label: _("Masa, kg"), numberFormat:"0,000.00"},
+                {type: "input", name: "area",      required:true,          label: _("Powierzchnia, m2"), numberFormat:"0,000.00"},
+                {type: "input", name: "pack",        required:true,        label: _("Opakowanie")},
+                {type: "input", name: "description",  required:true,       label: _("Opis"), rows: 3},
+                {type: "block", name: "block",         blockOffset: 0, position: "label-left", list: [
+                    {type: "button", name: "save",   value: _("Zapisz"), offsetTop:18},                              
+                ]}
+            ];  
+        } else {
+            var productFormStruct = [
+                {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                 
+                {type: "combo", name: "product_group_id",  required:true,  label: _("Grupa produktu"), options: []},		
+                {type: "combo", name: "product_type_id", required:true,   label: _("Typ produktu"),   options: []},		
+                {type: "input", name: "kod",     required:true,            label: _("Kod produktu")},
+                {type: "input", name: "name",     required:true,          label: _("Nazwa produktu")},                                      
+                {type: "input", name: "height",             label: _("Wysokość, mm")},
+                {type: "input", name: "width",     required:true,          label: _("Szerokość, mm")},
+                {type: "input", name: "length",             label: _("Długość, mm")},
+                {type: "input", name: "weight",    required: true,         label: _("Masa, kg"), numberFormat:"0,000.00"},
+                {type: "input", name: "area",      required:true,          label: _("Powierzchnia, m2"), numberFormat:"0,000.00"},
+                {type: "input", name: "pack",        required:true,        label: _("Opakowanie")},
+                {type: "input", name: "description",  required:true,       label: _("Opis"), rows: 3}                
+            ];  
+        }
         var productForm = productsLayout.cells("d").attachForm(productFormStruct);
         var productTypeCombo = productForm.getCombo("product_type_id");
         var productGroupCombo = productForm.getCombo("product_group_id"); 

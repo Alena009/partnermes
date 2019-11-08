@@ -4,20 +4,36 @@ var warehouseMap;
 
 function warehouseInit(cell) {
     if (warehouseLayout == null) {
+        var userData = JSON.parse(localStorage.getItem("userData")); 
+        var write;
+        userData.permissions.forEach(function(elem){
+            if (elem.name == 'warehouse') {
+                write = elem.pivot.value;
+            }
+        });
+                
         // init layout
         var warehouseLayout = cell.attachLayout("2U");                  
         warehouseLayout.cells("a").setText(_("Grupy produktow"));
         warehouseLayout.cells("b").setText( _("Produkty"));                
         warehouseLayout.cells("a").setWidth(280);		                
         warehouseLayout.setAutoSize("a", "a;b");
-        var productsTreeToolBar = warehouseLayout.cells("a").attachToolbar({
-                iconset: "awesome",
-                items: [                                                       
-                        {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
-                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                        {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"}
-                ]
-        }); 
+        
+        if (write) {
+            var productsTreeToolBar = warehouseLayout.cells("a").attachToolbar({
+                    iconset: "awesome",
+                    items: [                                                       
+                            {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                            {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                            {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"}
+                    ]
+            }); 
+        } else {
+            var productsTreeToolBar = warehouseLayout.cells("a").attachToolbar({
+                    iconset: "awesome",
+                    items: []
+            }); 
+        }
         var grupyFormAddData = [
                 {type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
                         {type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),     options: [{text: "None", value: "0"}], inputWidth: 150},                                
@@ -175,19 +191,21 @@ function warehouseInit(cell) {
         };
         productsTree.build(); 
         
-        productsGridToolBar = warehouseLayout.cells("b").attachToolbar({
-            iconset: "awesome",
-            items: [
-//                {type: "text", id: "find", text: _("Find:")},				
-//                {type: "buttonInput", id: "szukaj", text: "", width: 100},
-//                {type: "separator", id: "sep2"},                                
-                {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
-//                {id: "Edit", type: "button", img: "fa fa-edit"},
-//                {id: "Del", type: "button", img: "fa fa-minus-square"}
-                {type: "separator", id: "sep1"},
-                {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
-            ]
-        });
+        if (write) {
+            productsGridToolBar = warehouseLayout.cells("b").attachToolbar({
+                iconset: "awesome",
+                items: [                              
+                    {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                    {type: "separator", id: "sep1"},
+                    {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+                ]
+            });
+        } else {
+            productsGridToolBar = warehouseLayout.cells("b").attachToolbar({
+                iconset: "awesome",
+                items: []
+            });
+        }
         productsGridToolBar.attachEvent("onClick", function(name){
             switch (name){
                 case 'Add':{

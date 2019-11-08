@@ -5,6 +5,13 @@ var pracownicyForm;
 function pracownicyInit(cell) {
 
 	if (pracownicyLayout == null) {
+                var userData = JSON.parse(localStorage.getItem("userData")); 
+                var write;
+                userData.permissions.forEach(function(elem){
+                    if (elem.name == 'pracownicy') {
+                        write = elem.pivot.value;
+                    }
+                });
 		// init layout
 		var pracownicyLayout = cell.attachLayout("3W");		    
                     pracownicyLayout.cells("a").setText(_("Grupy pracownikow"));                    
@@ -71,14 +78,21 @@ function pracownicyInit(cell) {
 			pracownicyGrid.zaladuj(grupy);
 			return true;
 		});
-                var grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar({
-			iconset: "awesome",
-			items: [
-				{id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},                            
-			]
-		});                 
+                if (write) {
+                    var grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                    {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},                            
+                            ]
+                    });  
+                } else {
+                    var grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar({
+                            iconset: "awesome",
+                            items: []
+                    });
+                }
                 grupyTreeToolBar.attachEvent("onClick", function(id) {                        		
 			switch (id){
                             case 'Add':{			                                        
@@ -97,22 +111,32 @@ function pracownicyInit(cell) {
                                 }
                             };break;    
 			}
-		});               
-                var pracownicyGridToolBar = pracownicyLayout.cells("b").attachToolbar({
-			iconset: "awesome",
-         		items: [
-//				{type: "text", id: "find", text: _("Find:")},				
-//				{type: "buttonInput", id: "szukaj", text: "", width: 100},
-//				{type: "separator", id: "sep2"},
-				{id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
-                                {type: "separator", id: "sep2"},  
-                                {id: "Cog", type: "button",  text: _("Dodaj do departamentu"), img: "fa fa-spin fa-cog "},                              
-                                {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-			]
-		}); 
+		});   
+                
+                if (write) {
+                    var pracownicyGridToolBar = pracownicyLayout.cells("b").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+    //				{type: "text", id: "find", text: _("Find:")},				
+    //				{type: "buttonInput", id: "szukaj", text: "", width: 100},
+    //				{type: "separator", id: "sep2"},
+                                    {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                    {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
+                                    {type: "separator", id: "sep2"},  
+                                    {id: "Cog", type: "button",  text: _("Dodaj do departamentu"), img: "fa fa-spin fa-cog "},                              
+                                    {type: "separator", id: "sep3"},
+                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
+                            ]
+                    }); 
+                } else {
+                    var pracownicyGridToolBar = pracownicyLayout.cells("b").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
+                            ]
+                    });                     
+                }
                 pracownicyGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{                            
@@ -353,32 +377,52 @@ function pracownicyInit(cell) {
 //                dpGrupyTree.init(grupyTree);
 //                dpGrupyTree.setTransactionMode("REST");
                 
-                        
-                pracownikFormStruct = [         
-                        {type: "file",     name: "upload_photo", hidden: true},
-                        {type: "container",name: "photo",      label: "",             inputWidth: 160,    inputHeight: 160, offsetTop: 20, offsetLeft: 65},                        //
-                        {type: "input",    name: "kod",        label: _("Kod"),       labelAlign: "left", required: true},
-		 	{type: "input",    name: "firstname",  label: _("First name"),labelAlign: "left", required: true},
-                        {type: "input",    name: "lastname",   label: _("Last name"), labelAlign: "left", required: true},
-                        {type: "input",    name: "name",       label: _("User name"), labelAlign: "left"},
-                        {type: "input",    name: "login",      label: _("Login"),     labelAlign: "left", required: true},
-                        {type: "password", name: "password",   label: _("Password"),  labelAlign: "left", required: true},
-                        {type: "combo",    name: "country",    label: _("Kraj"),  options:[]},
-                        {type: "combo",    name: "language",   label: _("Język"), options:[]},
-		 	{type: "input",    name: "email",      label: _("E-mail"),    labelAlign: "left"},
-		 	{type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},
-                        
-                        {type: "label",                        label: _("Is worker")},
-                        {type: "radio",    name: "is_worker",  label: _("Tak"), value: 1,  checked: true},
-                        {type: "radio",    name: "is_worker",  label: _("Nie"),  value: 0},                        
-                        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
-                        {type: "block",    name: "buttonblock",inputWidth: 200,    className: "myBlock", list:[
-                            {type: "button",   name: "save",   value:_("Zapisz"), offsetTop:18},
-                            {type: "newcolumn"},
-			    {type: "button",   name: "cancel", value:_("Anuluj"), offsetTop:18}
-                        ]}                  
-		];               
-                
+                if (write) {        
+                    pracownikFormStruct = [         
+                            {type: "file",     name: "upload_photo", hidden: true},
+                            {type: "container",name: "photo",      label: "",             inputWidth: 160,    inputHeight: 160, offsetTop: 20, offsetLeft: 65},                        //
+                            {type: "input",    name: "kod",        label: _("Kod"),       labelAlign: "left", required: true},
+                            {type: "input",    name: "firstname",  label: _("First name"),labelAlign: "left", required: true},
+                            {type: "input",    name: "lastname",   label: _("Last name"), labelAlign: "left", required: true},
+                            {type: "input",    name: "name",       label: _("User name"), labelAlign: "left"},
+                            {type: "input",    name: "login",      label: _("Login"),     labelAlign: "left", required: true},
+                            {type: "password", name: "password",   label: _("Password"),  labelAlign: "left", required: true},
+                            {type: "combo",    name: "country",    label: _("Kraj"),  options:[]},
+                            {type: "combo",    name: "language",   label: _("Język"), options:[]},
+                            {type: "input",    name: "email",      label: _("E-mail"),    labelAlign: "left"},
+                            {type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},
+
+                            {type: "label",                        label: _("Is worker")},
+                            {type: "radio",    name: "is_worker",  label: _("Tak"), value: 1,  checked: true},
+                            {type: "radio",    name: "is_worker",  label: _("Nie"),  value: 0},                        
+                            {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
+                            {type: "block",    name: "buttonblock",inputWidth: 200,    className: "myBlock", list:[
+                                {type: "button",   name: "save",   value:_("Zapisz"), offsetTop:18},
+                                {type: "newcolumn"},
+                                {type: "button",   name: "cancel", value:_("Anuluj"), offsetTop:18}
+                            ]}                  
+                    ];               
+                } else {
+                    pracownikFormStruct = [         
+                            {type: "file",     name: "upload_photo", hidden: true},
+                            {type: "container",name: "photo",      label: "",             inputWidth: 160,    inputHeight: 160, offsetTop: 20, offsetLeft: 65},                        //
+                            {type: "input",    name: "kod",        label: _("Kod"),       labelAlign: "left", required: true},
+                            {type: "input",    name: "firstname",  label: _("First name"),labelAlign: "left", required: true},
+                            {type: "input",    name: "lastname",   label: _("Last name"), labelAlign: "left", required: true},
+                            {type: "input",    name: "name",       label: _("User name"), labelAlign: "left"},
+                            {type: "input",    name: "login",      label: _("Login"),     labelAlign: "left", required: true},
+                            {type: "password", name: "password",   label: _("Password"),  labelAlign: "left", required: true},
+                            {type: "combo",    name: "country",    label: _("Kraj"),  options:[]},
+                            {type: "combo",    name: "language",   label: _("Język"), options:[]},
+                            {type: "input",    name: "email",      label: _("E-mail"),    labelAlign: "left"},
+                            {type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},
+
+                            {type: "label",                        label: _("Is worker")},
+                            {type: "radio",    name: "is_worker",  label: _("Tak"), value: 1,  checked: true},
+                            {type: "radio",    name: "is_worker",  label: _("Nie"),  value: 0},                        
+                            {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160}                                              
+                    ]; 
+                }
                 var pracownicyForm = pracownicyLayout.cells("c").attachForm(pracownikFormStruct);               
                 pracownicyForm.bind(pracownicyGrid); 
                 pracownicyForm.attachEvent("onButtonClick", function(name){

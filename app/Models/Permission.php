@@ -16,7 +16,7 @@ class Permission extends BaseModel
     ];
     
     /* fields for translating */    
-    public $translatedAttributes = ['name', 'description'];
+    public $translatedAttributes = ['description'];
     
     public function values()
     {

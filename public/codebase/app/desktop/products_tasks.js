@@ -2,6 +2,13 @@ var productsTasksLayout;
 
 function productsTasksInit(cell) {
     if (productsTasksLayout == null) {
+        var userData = JSON.parse(localStorage.getItem("userData")); 
+        var write;
+        userData.permissions.forEach(function(elem){
+            if (elem.name == 'products_tasks') {
+                write = elem.pivot.value;
+            }
+        });
         var productsTasksLayout = cell.attachLayout("1C");
         var mainTabbar = productsTasksLayout.cells("a").attachTabbar();
         mainTabbar.addTab("a1", _("Grupy zadań, zadania"), null, null, true);               
@@ -22,14 +29,21 @@ function productsTasksInit(cell) {
  * Grupy zadan
  * 
  */
-                var tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar({
-                        iconset: "awesome",
-                        items: [                             
-                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                        ]
-                });
+                if (write) {
+                    var tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar({
+                            iconset: "awesome",
+                            items: [                             
+                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                            ]
+                    });
+                } else {
+                    var tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar({
+                            iconset: "awesome",
+                            items: []
+                    });
+                }
                 tasksGroupsToolBar.attachEvent("onClick", function(btn) {
                     switch (btn){
                             case 'Add':{			                                        
@@ -90,17 +104,27 @@ function productsTasksInit(cell) {
                         tasksGrid.clearAll();
                         tasksGrid.fill(grupy);                        
                         return true;
-                });                 
-                var tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                                {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"),  img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"),    img: "fa fa-minus-square"},
-                                {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"},
-                        ]
-                });                               
+                });    
+                
+                if (write) {
+                    var tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                                    {id: "Edit", type: "button", text: _("Edytuj"),  img: "fa fa-edit"},
+                                    {id: "Del",  type: "button", text: _("Usuń"),    img: "fa fa-minus-square"},
+                                    {type: "separator", id: "sep3"},
+                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"},
+                            ]
+                    }); 
+                } else {
+                    var tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"},
+                            ]
+                    });
+                }
                 tasksGridToolBar.attachEvent("onClick", function(id) {
                     switch (id){
                         case 'Add': {
@@ -275,18 +299,27 @@ function productsTasksInit(cell) {
                     zadaniaGrid.fill(id);     
                 });    
 
-                var zadaniaToolBar = productsTasksLayout.cells("b").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                                {type: "separator", id: "sep2"},
-                                {id: "Cog", type: "button", text: _("Zmień kolejność"), img: "fa fa-spin fa-cog "},
-                                {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
-                        ]                    
-                });   
+                if (write) {
+                    var zadaniaToolBar = productsTasksLayout.cells("b").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                                    {type: "separator", id: "sep2"},
+                                    {id: "Cog", type: "button", text: _("Zmień kolejność"), img: "fa fa-spin fa-cog "},
+                                    {type: "separator", id: "sep3"},
+                                    {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+                            ]                    
+                    });   
+                } else {
+                    var zadaniaToolBar = productsTasksLayout.cells("b").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+                            ]                    
+                    });                      
+                }
                 zadaniaToolBar.attachEvent("onClick", function(name) {
                     var formStruct = [
                                     {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},

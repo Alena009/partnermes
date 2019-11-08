@@ -21,14 +21,11 @@ Route::group([
     Route::resource('/components', 'ComponentController');  
     Route::resource('/country',    'CountryController');
     Route::resource('/language',   'LanguageController');
-    
-//    Route::get('/declaredworks/fortimeline', 'DeclaredWorkController@listWorksForTimeline');   
-//    Route::get('/declaredworks/list/{groups}', 'DeclaredWorkController@listWorksByGroups');   
-//    Route::get('/declaredworks/mainlist/{groups}', 'DeclaredWorkController@mainListWorksByGroups');   
-//    Route::get('/declaredworks/makegeneral/{works}', 'DeclaredWorkController@makeGeneral');   
-//    Route::get('/declaredworks/listforzlecenie/{workId}', 'DeclaredWorkController@listWorksForZlecenie');   
-//    Route::get('/declaredworks/delzlec/{selectedWorks}', 'DeclaredWorkController@deleteZlecenie');   
-//    Route::get('/declaredworks/group', 'DeclaredWorkController@groupedworks');   
+    Route::resource('/permissions','PermissionController');
+    Route::resource('/statuses', 'StatusController');   
+    Route::resource('/prodtypes', 'ProductTypeController');       
+    Route::resource('/history', 'OrderHistoryController');    
+      
     Route::get('/declaredworks/savework', 'DeclaredWorkController@savework'); 
     Route::resource('/declaredworks', 'DeclaredWorkController'); 
     
@@ -41,13 +38,10 @@ Route::group([
     Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
     Route::resource('/operations', 'OperationController'); 
 
-    //Route::get('/orders/beguntasks/{orderId}', 'OrderController@beguntasks');
-   // Route::get('/orders/positions/{orderId}', 'OrderController@positions');
     Route::get('/orders/history/{orderId}', 'OrderController@history');
     Route::resource('/orders', 'OrderController');    
     
-    Route::resource('/permissions', 'PermissionController');
-    Route::resource('/history', 'OrderHistoryController');
+
     
     Route::get('/positions/byorder/{order}', 'OrderPositionController@getPositionsByOrder');    
     Route::get('/positions/forprod', 'OrderPositionController@forManufacturing');    
@@ -60,7 +54,7 @@ Route::group([
     Route::get('/positions/tasks/{position}', 'OrderPositionController@positionTasks');
     Route::resource('/positions', 'OrderPositionController');      
     
-    Route::resource('/prodtypes', 'ProductTypeController'); 
+     
     
     Route::get('/prodgroups/grupytree', 'ProductGroupController@buildTree');       
     Route::resource('/prodgroups', 'ProductGroupController');
@@ -82,13 +76,12 @@ Route::group([
     Route::resource('/roles', 'RoleController');
     Route::get('/roles', 'RoleController@roles');
     Route::get('/roles/{roleId}/permissions', 'RoleController@listPermissions');
+    Route::get('/roles/{roleId}/freepermissions', 'RoleController@listFreePermissions');
     Route::get('/roles/{roleId}/users', 'RoleController@listUsers');
-    Route::get('/rolespermissions/edit', 'RolePermissionController@editByRoleAndPermissionId');    
-    Route::post('/rolespermissions/fillRole/{roleId}', 'RolePermissionController@addPermissionsForNewRole');
-    Route::post('/rolespermissions/addToRoles/{permissionId}', 'RolePermissionController@addNewPermissionToRoles');
-    Route::resource('/rolespermissions', 'RolePermissionController');    
     
-    Route::resource('/statuses', 'StatusController');
+    Route::get('/rolespermissions/delete', 'RolePermissionController@deleteByRoleAndPermissionId');        
+    Route::get('/rolespermissions/edit', 'RolePermissionController@editByRoleAndPermissionId');        
+    Route::resource('/rolespermissions', 'RolePermissionController');          
     
     Route::get('/tasks/listbygroups/{groups?}', 'TaskController@listByGroups');    
     Route::resource('/tasks', 'TaskController');    
@@ -98,6 +91,7 @@ Route::group([
     
     Route::get('/usersroles/del', 'UserRoleController@deleteByRoleAndUserId');
     Route::resource('/usersroles', 'UserRoleController');
+    
     Route::get('/users/avatar/{userId}', 'API\UserController@avatar');
     Route::post('/users/avatar/load/{userId}', 'API\UserController@loadAvatar');
     Route::resource('/users', 'API\UserController');

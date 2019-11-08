@@ -92,19 +92,42 @@ class RoleController extends BaseController
     public function listPermissions($roleId)
     {
         $data = [];
-        $data = \App\Models\Permission::all();
-        
-        if ($roleId) {       
-            $role = $this->repository->getModel()::find($roleId);
-            foreach ($data as $permission) {
-                $permission['value'] = \App\Models\RolePermission::where('role_id', $roleId)
-                        ->where('permission_id', $permission->id)
-                        ->pluck('value')[0];
-            }
-        }              
+        $role = $this->repository->getModel()::find($roleId);
+         
+        if ($role) {
+            $data = $role->permissions;
+            foreach ($data as $d) {
+                $d->value = $d->pivot->value;
+            }           
+        }
         
         return ['success'=>$data?true:false,'data'=>$data];
     }
+    
+    /**
+     * List of permissions free for this role
+     * 
+     * @param integer $roleId
+     * @return response
+     */
+    public function listFreePermissions($roleId)
+    {
+        $busyPermissionsIds = [];                  
+        $busyPermissionsIds = \App\Models\RolePermission::where("role_id", "=", $roleId)
+                ->pluck("permission_id");
+        
+        if ($busyPermissionsIds) {
+            $permissions = \App\Models\Permission::whereNotIn("id", $busyPermissionsIds)->get();
+        } else {
+            $permissions = \App\Models\Permission::all();
+        }
+        foreach ($permissions as $permission) {
+            $permission->text  = $permission->description;
+            $permission->value = $permission->id;
+        }
+                             
+        return ['success'=>$permissions?true:false,'data'=>$permissions];
+    }    
     
     /**
      * List users by roles

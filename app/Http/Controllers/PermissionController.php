@@ -19,13 +19,17 @@ class PermissionController extends BaseController
     /**
      * Get permissions list with translations
      */
-    public function permissions($locale = 'pl')
+    public function index($locale = 'pl')
     {
         app()->setLocale($locale);
-
-        $permissions = \App\Models\Permission::all();
         
-        return response()->json($permissions);        
+        $allPermissions = $this->repository->getModel()::all();
+        foreach ($allPermissions as $permission) {
+            $permission->text  = $permission->description;
+            $permission->value = $permission->id;
+        }
+        
+        return response()->json(['data' => $allPermissions, 'success' => true]);  
     }
 
     /**
@@ -34,12 +38,9 @@ class PermissionController extends BaseController
     public function create(Request $request)
     {
         $permission = new \App\Models\permission();       
-        $permission->name = $request['name'];        
-        $permission->description = $request['description'];
         $permission->save();
 
-        foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-            $permission->translateOrNew($locale)->name = "Title {$locale}";            
+        foreach (['en', 'nl', 'fr', 'de'] as $locale) {            
             $permission->translateOrNew($locale)->description = "Title {$locale}";            
         }
 

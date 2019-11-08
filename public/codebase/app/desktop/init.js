@@ -4,24 +4,30 @@ var w1;
 
 window.dhx_globalImgPath = 'codebase/imgs/dhxtree_web/';
 
-function appInit() {  
+function appInit() {            
+        var userData = JSON.parse(localStorage.getItem("userData"));        
+        userData.permissions.forEach(function(elem){
+            elem.id = elem.name;
+            elem.text = elem.description;
+        });        
 	mainSidebar = new dhtmlXSideBar({
 		parent: document.body,
 		icons_path: "imgs/sidebar/",
 		width: 140,
 		template: "tiles",
-		items: [
-                        //{id: "gantt",          text: "Gant",              icon: "timeline.png"},
-			{id: "timeline",       text: "Timeline",          icon: "timeline.png"},
-			{id: "zlecenia",       text: "Zlecenia",          icon: "list.png"},
-			{id: "pracownicy",     text: "Pracownicy",        icon: "contacts.png"},
-                        {id: "clients",        text: "Klienci",           icon: "contacts.png"},
-			{id: "projects",       text: "Zamowienia",        icon: "projects.png"},
-			{id: "warehouse",      text: "Magazyn",           icon: "events.png"  },
-                        {id: "products",       text: "Produkty",          icon: "box.png"},
-                        {id: "products_tasks", text: "Zadania",           icon: "shuffle.png"},
-			{id: "settings",       text: "Settings",          icon: "settings.png"}
-		]
+//		items: [
+//                        //{id: "gantt",          text: "Gant",              icon: "timeline.png"},
+//			{id: "timeline",       text: "Timeline",          icon: "timeline.png"},
+//			{id: "zlecenia",       text: "Zlecenia",          icon: "list.png"},
+//			{id: "pracownicy",     text: "Pracownicy",        icon: "contacts.png"},
+//                        {id: "clients",        text: "Klienci",           icon: "contacts.png"},
+//			{id: "projects",       text: "Zamowienia",        icon: "projects.png"},
+//			{id: "warehouse",      text: "Magazyn",           icon: "events.png"  },
+//                        {id: "products",       text: "Produkty",          icon: "box.png"},
+//                        {id: "products_tasks", text: "Zadania",           icon: "shuffle.png"},
+//			{id: "settings",       text: "Settings",          icon: "settings.png"}
+//		]
+                items: userData.permissions
 	});
 
 /*
@@ -44,8 +50,8 @@ function appInit() {
 
 	mainSidebar.attachEvent("onSelect", function(id){
 		mainToolbar.setItemText("title", window.dhx4.template("<span style='font-weight: bold; font-size: 14px;'>#text#</span>", {text:mainSidebar.cells(id).getText().text}));
-                mainToolbar.setItemText("user", localStorage.user);
-                mainToolbar.setItemText("language", localStorage.language);
+                mainToolbar.setItemText("user", JSON.parse(localStorage.getItem("userData")).name);
+                mainToolbar.setItemText("language", JSON.parse(localStorage.getItem("userData")).language);
 		window.dhx4.callEvent("onSidebarSelect", [id, this.cells(id)]);
 	});
 	mainToolbar.attachEvent("onClick", function(id) {
@@ -112,9 +118,10 @@ function loginFormShow(callback2={}){
 			ajaxPost("api/login","login="+data.login+"&password="+data.password,function(data){
                             console.log(data);
 				if (data.success===true){
+                                    localStorage.setItem('userData', JSON.stringify(data.user));                                    
                                     localStorage.setItem('token',data.token);   
-                                    localStorage.setItem("user", data.user.name);
-                                    localStorage.setItem("language",  data.user.language?  data.user.language:'pl');
+//                                    localStorage.setItem("user", data.user.name);
+//                                    localStorage.setItem("language",  data.user.language?  data.user.language:'pl');
 					w1.hide();
 					if (loginForm.callback.success && isFunction(loginForm.callback.success)){
 						loginForm.callback['success']();

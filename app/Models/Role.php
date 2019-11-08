@@ -31,16 +31,9 @@ class Role extends BaseModel
      */    
     public function permissions() 
     {
-        return $this->belongsToMany("App\Models\Permission", 'roles_permissions', 'role_id', 'permission_id');
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function permissionsValues()
-    {
-        return $this->hasMany("App\Models\RolePermission", 'role_id', 'id') ;
+        return $this->belongsToMany("App\Models\Permission", 'roles_permissions', 'role_id', 'permission_id')
+                ->withPivot('value')
+                ->withTimestamps(); 
     }
     
     public function getName()

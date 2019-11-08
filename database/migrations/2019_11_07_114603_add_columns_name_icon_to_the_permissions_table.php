@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddTypeOrderColumnToTheOrdersTable extends Migration
+class AddColumnsNameIconToThePermissionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class AddTypeOrderColumnToTheOrdersTable extends Migration
      */
     public function up()
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->integer('type_order')->default(0);
+        Schema::table('permissions', function (Blueprint $table) {
+            $table->string('name', 45);
+            $table->string('icon', 45)->nullable();
         });
     }
 
@@ -25,7 +26,7 @@ class AddTypeOrderColumnToTheOrdersTable extends Migration
      */
     public function down()
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('permissions', function (Blueprint $table) {
             //
         });
     }

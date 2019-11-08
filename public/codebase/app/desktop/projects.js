@@ -6,7 +6,15 @@ var projectsChartId;
 var projectsForm;
 
 function projectsInit(cell) {	
-	if (projectsLayout == null) {		
+	if (projectsLayout == null) {	
+                var userData = JSON.parse(localStorage.getItem("userData")); 
+                var write;
+                userData.permissions.forEach(function(elem){
+                    if (elem.name == 'projects') {
+                        write = elem.pivot.value;
+                    }
+                });   
+                
 		var projectsLayout = cell.attachLayout("3J");
 		projectsLayout.cells("a").setText(_("Zamowienia"));
                 projectsLayout.cells("b").setText(_("Informacja o zamowieniu"));
@@ -17,16 +25,25 @@ function projectsInit(cell) {
 /**
  * A
  */
-		var projectsGridToolBar = projectsLayout.cells("a").attachToolbar({
-                    iconset: "awesome",
-                    items: [                        
-                        {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
-                        {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                        {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
-                        {type: "separator", id: "sep3"},
-                        {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                    ]
-		});        
+		if (write) {
+                    var projectsGridToolBar = projectsLayout.cells("a").attachToolbar({
+                        iconset: "awesome",
+                        items: [                        
+                            {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                            {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                            {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
+                            {type: "separator", id: "sep3"},
+                            {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
+                        ]
+                    });  
+                } else {
+                    var projectsGridToolBar = projectsLayout.cells("a").attachToolbar({
+                        iconset: "awesome",
+                        items: [
+                            {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
+                        ]
+                    }); 
+                }
                 projectsGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{   
@@ -122,8 +139,7 @@ function projectsInit(cell) {
                             projectsGrid.fill("api/orders"); 
                         };break;
                     }
-                });                 
-                
+                });                                 
 		var projectsGrid = projectsLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
 	            columns: [
@@ -184,47 +200,49 @@ function projectsInit(cell) {
  * 
  */		                                
                 var projectsForm = projectsLayout.cells("b").attachForm(newProjectFormStruct);
-                projectsForm.attachEvent("onButtonClick", function(name){
-                    switch (name){
-                        case 'save':{   
-                            if (projectsGrid.getSelectedRowId()) {    
-                                var data = projectsForm.getFormData();   
-                                data.date_start = projectsForm.getCalendar("date_start").getDate(true);                                                                              
-                                ajaxGet("api/orders/" + data.id + "/edit", data, function(data){                                            
-                                    if (data && data.success) {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Zapisane")
-                                        });
-                                        projectsGrid.fill();                                                                                              
-                                    } else {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Błąd! Zmiany nie zostały zapisane")
-                                        });
-                                    }
-                                });
-                            } else {
-                                var data = projectsForm.getFormData();
-                                data.date_start = projectsForm.getCalendar("date_start").getDate(true);                                         
-                                ajaxPost("api/orders", data, function(data){
-                                    if (data && data.success) {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Zapisane")
-                                        });
-                                        projectsGrid.fill();                                                                                                
-                                    } else {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Błąd! Zmiany nie zostały zapisane")
-                                        });
-                                    }
-                                }); 
-                            }
-                        };break;
-                    }
-                });                
+                if (write) {
+                    projectsForm.attachEvent("onButtonClick", function(name){
+                        switch (name){
+                            case 'save':{   
+                                if (projectsGrid.getSelectedRowId()) {    
+                                    var data = projectsForm.getFormData();   
+                                    data.date_start = projectsForm.getCalendar("date_start").getDate(true);                                                                              
+                                    ajaxGet("api/orders/" + data.id + "/edit", data, function(data){                                            
+                                        if (data && data.success) {
+                                            dhtmlx.alert({
+                                                title:_("Wiadomość"),
+                                                text:_("Zapisane")
+                                            });
+                                            projectsGrid.fill();                                                                                              
+                                        } else {
+                                            dhtmlx.alert({
+                                                title:_("Wiadomość"),
+                                                text:_("Błąd! Zmiany nie zostały zapisane")
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    var data = projectsForm.getFormData();
+                                    data.date_start = projectsForm.getCalendar("date_start").getDate(true);                                         
+                                    ajaxPost("api/orders", data, function(data){
+                                        if (data && data.success) {
+                                            dhtmlx.alert({
+                                                title:_("Wiadomość"),
+                                                text:_("Zapisane")
+                                            });
+                                            projectsGrid.fill();                                                                                                
+                                        } else {
+                                            dhtmlx.alert({
+                                                title:_("Wiadomość"),
+                                                text:_("Błąd! Zmiany nie zostały zapisane")
+                                            });
+                                        }
+                                    }); 
+                                }
+                            };break;
+                        }
+                    });
+                }
                 var clientsCombo = projectsForm.getCombo("client_id");  
                 ajaxGet("api/clients", '', function(data) {
                     if (data.success && data.data) {
@@ -258,20 +276,29 @@ function projectsInit(cell) {
                                 //{id: "tasks", text: _("Zlecenia")},
                                 {id: "history", text: _("Historia")}                                
 			]
-		});  
-                    positionsGridToolbar = projectsTabbar.tabs("positions").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                {id:"Add", type:"button",  text: _("Dodaj"),  img: "fa fa-plus-square"},
-                                {id:"Edit", type:"button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id:"Del",  type:"button",text: _("Usun"),   img: "fa fa-minus-square"},
-                                {type: "separator", id: "sep3"},
-                                {id: "Block",text: _("Blokuj"), type: "button", img: "fa fa-lock"},                            
-                                {id: "UnBlock",text: _("Odblokuj"), type: "button", img: "fa fa-unlock"},                            
-                                {type: "separator", id: "sep2"},
-                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                            ]
-                    });                 
+		}); 
+                    if (write) {
+                        positionsGridToolbar = projectsTabbar.tabs("positions").attachToolbar({
+                                iconset: "awesome",
+                                items: [
+                                    {id:"Add", type:"button",  text: _("Dodaj"),  img: "fa fa-plus-square"},
+                                    {id:"Edit", type:"button", text: _("Edytuj"), img: "fa fa-edit"},
+                                    {id:"Del",  type:"button",text: _("Usun"),   img: "fa fa-minus-square"},
+                                    {type: "separator", id: "sep3"},
+                                    {id: "Block",text: _("Blokuj"), type: "button", img: "fa fa-lock"},                            
+                                    {id: "UnBlock",text: _("Odblokuj"), type: "button", img: "fa fa-unlock"},                            
+                                    {type: "separator", id: "sep2"},
+                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
+                                ]
+                        });   
+                    } else {
+                        positionsGridToolbar = projectsTabbar.tabs("positions").attachToolbar({
+                                iconset: "awesome",
+                                items: [
+                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
+                                ]
+                        });
+                    }
                     positionsGridToolbar.attachEvent("onClick", function(id) { 
                         switch (id) {
                             case 'Add': {
@@ -501,23 +528,6 @@ function projectsInit(cell) {
                             }
                         });			
                     };
-                    
-//                    var tasksGrid = projectsTabbar.tabs("tasks").attachGrid({
-//                        image_path:'codebase/imgs/',
-//                        columns: [
-//                            {label: _("Kod zlecenia"),id: "kod",          type: "ro", sort: "str", align: "left", width: 150},
-//                            {label: _("Data zlecenia"),id: "created_at",  type: "ro", sort: "str", align: "left", width: 150}
-//                        ],
-//                        multiselect: true                    
-//                    }); 
-//                    tasksGrid.fill = function(id){
-//                        tasksGrid.clearAll();
-//                        ajaxGet("api/orders/beguntasks/" + id, '', function(data){
-//                            if (data.data && data.success){			                                    
-//                                tasksGrid.parse(data.data, "js");
-//                            }
-//                        });			
-//                    };
   
                     var historyGrid = projectsTabbar.tabs("history").attachGrid({
                         image_path:'codebase/imgs/',

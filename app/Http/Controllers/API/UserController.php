@@ -24,6 +24,7 @@ class UserController extends \App\Http\Controllers\BaseController
     {
         if (Auth::attempt(['login' => request('login'), 'password' => request('password')])) {
             $user = Auth::user();
+            $user->permissions = $user->role[0]->permissions;
             $token = $user->createToken('MyApp')->accessToken;
             return response()->json(['success' => true, 'token' => $token, 'user' => $user], $this->successStatus);
         } else {

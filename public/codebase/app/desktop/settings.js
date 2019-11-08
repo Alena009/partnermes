@@ -137,6 +137,196 @@ function settingsInit(cell) {
                             ]}
                     ]}
                 ]; 
+                var rolesTree = rolesLayout.cells("a").attachTreeView({
+                    skin: "dhx_skyblue",    // string, optional, treeview's skin
+                        iconset: "font_awesome", // string, optional, sets the font-awesome icons
+                        multiselect: false,           // boolean, optional, enables multiselect                                 
+                        dnd: true,           // boolean, optional, enables drag-and-drop
+                        context_menu: true,  
+                }); 
+                rolesTree.load = function(){ 
+                    ajaxGet("api/roles", '', function(data) {                    
+                        if (data && data.success){                            
+                            rolesTree.loadStruct(data.data);                           
+                        }                    
+                    });
+                }; 
+                rolesTree.attachEvent("onSelect",function(id, mode){  
+                    if (mode) {
+                        usersGrid.clearAll();
+                        permissionsGrid.clearAll();			
+                        usersGrid.fill(id);
+                        permissionsGrid.fill(id);			
+                        return true;                        
+                    }
+                });
+                rolesTree.load();                                 
+                var permissionsToolBar = rolesLayout.cells("b").attachToolbar({
+                        iconset: "awesome",
+                        items: [
+                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                                {type: "separator", id: "sep3"},
+                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
+                        ]
+                });
+                var permissionForm = [
+                    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			                            
+                            {type:"combo",  name:"permission_id", label:_("Sekcja"), options:[], offsetTop:13, inputWidth: 150},                                                                				                            
+                            {type: "block",    name: "buttonblock",inputWidth: 200,    className: "myBlock", list:[
+                            {type: "button",   name: "save",   value:_("Zapisz"), offsetTop:18},
+                            {type: "newcolumn"},
+			    {type: "button",   name: "cancel", value:_("Anuluj"), offsetTop:18}
+                        ]} 
+                    ]}
+                ];                
+                permissionsToolBar.attachEvent("onClick", function(id) { 
+                    switch (id){
+                        case 'Add':{
+                            var roleId = rolesTree.getSelectedId();
+                            if (roleId) {
+                                var windowForm = createWindow(_("Permission"), 300, 300);
+                                var form = createForm(permissionForm, windowForm);
+                                var permissionCombo = form.getCombo("permission_id");
+                                ajaxGet("api/roles/" + roleId + "/freepermissions", "", function(data){
+                                    permissionCombo.clearAll();
+                                    permissionCombo.addOption(data.data);
+                                });
+                                form.attachEvent("onButtonClick", function(name){
+                                    switch (name){
+                                        case 'save':{    
+                                            var data = form.getFormData();
+                                            data.role_id = roleId;
+                                            ajaxPost("api/rolespermissions", data, function(data) {
+                                            if (data.success) {
+                                                    permissionsGrid.fill(roleId);                                                
+                                                } 
+                                            });                                                                                        
+                                        };break;
+                                        case 'cancel':{
+                                            form.clear();    
+                                        };break;
+                                    }
+                                });
+                            } else {
+                                dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        type:"alert",
+                                        text:_("Wybierz role, do której chcesz dodać uprawnienia!")
+                                    });
+                            }
+                        };break;
+//                        case 'Edit':{                                
+//                                var permissionId = permissionsGrid.getSelectedRowId();                                
+//                                if (permissionId) {  
+//                                    var windowForm = createWindow(_("Permission"), 300, 300);
+//                                    var form = createForm(permissionForm, windowForm);
+//                                    var data = {
+//                                        id: permissionId,
+//                                        name: permissionsGrid.cells(permissionId, 0).getValue(),
+//                                        description: permissionsGrid.cells(permissionId, 2).getValue()
+//                                    };
+//                                    form.setFormData(data); 
+//                                    form.attachEvent("onButtonClick", function(name){
+//                                        switch (name){
+//                                            case 'save':{                                                           
+//                                                ajaxGet("api/permissions/" + permissionId + "/edit", form.getFormData(), function(data){ 
+//                                                    if (data.success) {                                                           
+//                                                        permissionsGrid.fill(0);
+//                                                    } 
+//                                                });
+//                                            };break;
+//                                            case 'cancel':{
+//                                                form.setFormData(data); 
+//                                            };break;
+//                                        }
+//                                    });                                
+//                                } else {
+//                                    dhtmlx.alert({
+//                                        title:_("Wiadomość"),
+//                                        type:"alert",
+//                                        text:_("Wybierz uprawnienie, które chcesz edytować!")
+//                                    });
+//                                }                               
+//                        };break;
+                        case 'Del':{
+                                var permissionId = permissionsGrid.getSelectedRowId();                                
+                                if (permissionId) {
+                                    var roleId = rolesTree.getSelectedId();
+                                    dhtmlx.confirm({
+                                        title:_("Ostrożność"),                                    
+                                        text:_("Czy na pewno chcesz usunąć uprawnienie?"),
+                                        callback: function(result){
+                                            if (result) {
+                                                var data = {
+                                                    role_id: roleId,
+                                                    permission_id: permissionId                                                    
+                                                };                                                
+                                                ajaxGet("api/rolespermissions/delete", data, function(data) {
+                                                    if (data.success) {
+                                                        permissionsGrid.deleteSelectedRows();    
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        type:"alert",
+                                        text:_("Wybierz uprawnienie, które chcesz usunąć!")
+                                    });
+                                }
+                        };break;
+                        case 'Redo':{
+                                var roleId = rolesTree.getSelectedId();
+                                rolesTree.unselectItem(roleId);
+                                usersGrid.fill(0);
+                                permissionsGrid.fill(0);
+                        };break;
+                    }
+                });                
+                var permissionsGrid = rolesLayout.cells("b").attachGrid({
+                    image_path:'codebase/imgs/',
+                    columns: [                                                
+                        {
+                            label: _("Sekcja"),
+                            id: "description",
+                            width: 200, 
+                            type: "ed"       
+                        },
+                        {
+                            label: _("Może zmienić informacje"),
+                            id: "value",
+                            width: 50, 
+                            type: "ch"       
+                        }                        
+                    ]
+                }); 
+                permissionsGrid.fill = function(id) {
+                    ajaxGet("api/roles/" + id + "/permissions", '', function(data){                                     
+                        if (data && data.success){
+                            permissionsGrid.clearAll();
+                            permissionsGrid.parse((data.data), "js");
+                        }
+                    });
+                };
+                permissionsGrid.attachEvent("onCheck", function(rId,cInd,state){
+                    var roleId = rolesTree.getSelectedId();
+                    if (roleId) {
+                        var data = {
+                                role_id: roleId,
+                                permission_id: rId, 
+                                value: +state
+                            };
+                        ajaxGet("api/rolespermissions/edit", data, function(data) {
+                            if (data && data.success) {
+                                permissionsGrid.fill(roleId);                          
+                            }
+                        });                       
+                    }                                 
+                });                
                 var usersToolBar = rolesLayout.cells("c").attachToolbar({
                         iconset: "awesome",
                         items: [                                
@@ -242,193 +432,6 @@ function settingsInit(cell) {
                         };break; 
                     }
                 });
-                var permissionsToolBar = rolesLayout.cells("b").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                                {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                        ]
-                });
-                permissionsToolBar.attachEvent("onClick", function(id) { 
-                    switch (id){
-                        case 'Add':{
-                                var windowForm = createWindow(_("Permission"), 300, 300);
-                                var form = createForm(permissionForm, windowForm);
-                                form.attachEvent("onButtonClick", function(name){
-                                    switch (name){
-                                        case 'save':{                                                           
-                                            ajaxPost("api/permissions", form.getFormData(), function(data){                                                                                                        
-                                                ajaxPost("api/rolespermissions/addToRoles/" + data.data.id, '', function(data) {
-                                                    if (data.success) {
-                                                        permissionsGrid.fill(0);
-                                                        windowForm.close();
-                                                    } 
-                                                });                                            
-                                            });
-                                        };break;
-                                        case 'cancel':{
-                                            form.clear();    
-                                        };break;
-                                    }
-                                });
-                            };break;
-                        case 'Edit':{                                
-                                var permissionId = permissionsGrid.getSelectedRowId();                                
-                                if (permissionId) {  
-                                    var windowForm = createWindow(_("Permission"), 300, 300);
-                                    var form = createForm(permissionForm, windowForm);
-                                    var data = {
-                                        id: permissionId,
-                                        name: permissionsGrid.cells(permissionId, 0).getValue(),
-                                        description: permissionsGrid.cells(permissionId, 2).getValue()
-                                    };
-                                    form.setFormData(data); 
-                                    form.attachEvent("onButtonClick", function(name){
-                                        switch (name){
-                                            case 'save':{                                                           
-                                                ajaxGet("api/permissions/" + permissionId + "/edit", form.getFormData(), function(data){ 
-                                                    if (data.success) {                                                           
-                                                        permissionsGrid.fill(0);
-                                                    } 
-                                                });
-                                            };break;
-                                            case 'cancel':{
-                                                form.setFormData(data); 
-                                            };break;
-                                        }
-                                    });                                
-                                } else {
-                                    dhtmlx.alert({
-                                        title:_("Wiadomość"),
-                                        type:"alert",
-                                        text:_("Wybierz uprawnienie, które chcesz edytować!")
-                                    });
-                                }                               
-                        };break;
-                        case 'Del':{
-                                var permissionId = permissionsGrid.getSelectedRowId();                                
-                                if (permissionId) {
-                                    dhtmlx.confirm({
-                                        title:_("Ostrożność"),                                    
-                                        text:_("Czy na pewno chcesz usunąć uprawnienie?"),
-                                        callback: function(result){
-                                            if (result) {
-                                                ajaxDelete("api/permissions/" + permissionId, '', function(data) {
-                                                    if (data.success) {
-                                                        permissionsGrid.deleteSelectedRows();    
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    });
-                                } else {
-                                    dhtmlx.alert({
-                                        title:_("Wiadomość"),
-                                        type:"alert",
-                                        text:_("Wybierz uprawnienie, które chcesz usunąć!")
-                                    });
-                                }
-                        };break;
-                        case 'Redo':{
-                                var roleId = rolesTree.getSelectedId();
-                                rolesTree.unselectItem(roleId);
-                                usersGrid.fill(0);
-                                permissionsGrid.fill(0);
-                        };break;
-                    }
-                });
-                var permissionForm = [
-                    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
-                            {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:100},                                                                				                            
-//                            {type:"combo",  name:"name",        label:_("Nazwa rozdzialu"), options:[
-//                                    {text: "Gant", value: "gantt"},
-//                                    {text: "Gant", value: "timeline"},
-//                                    {text: "Gant", value: "zlecenia"},
-//                                    {text: "Gant", value: "pracownicy"},
-//                                    {text: "Gant", value: "clients"},
-//                                    {text: "Gant", value: "clients"},
-//                                    {text: "Gant", value: "clients"},
-//                                ], offsetTop:13, labelWidth:100},               
-                            {type:"input",  name:"description", label:_("Opis"), offsetTop:13, labelWidth:100},                                                                				                            
-                            {type:"button", name:"save",        value:_("Zapisz"),     offsetTop:18},
-                            {type:"button", name:"cancel",      value:_("Anuluj"),     offsetTop:18}
-                    ]}
-                ];
-                var rolesTree = rolesLayout.cells("a").attachTreeView({
-                    skin: "dhx_skyblue",    // string, optional, treeview's skin
-                        iconset: "font_awesome", // string, optional, sets the font-awesome icons
-                        multiselect: false,           // boolean, optional, enables multiselect
-                        checkboxes: true,           // boolean, optional, enables checkboxes
-                        dnd: true,           // boolean, optional, enables drag-and-drop
-                        context_menu: true,  
-                }); 
-                rolesTree.load = function(){ 
-                    ajaxGet("api/roles", '', function(data) {                    
-                        if (data && data.success){                            
-                            rolesTree.loadStruct(data.data);                           
-                        }                    
-                    });
-                }; 
-                rolesTree.attachEvent("onSelect",function(id, mode){  
-                    if (mode) {
-                        usersGrid.clearAll();
-                        permissionsGrid.clearAll();			
-                        usersGrid.fill(id);
-                        permissionsGrid.fill(id);			
-                        return true;                        
-                    }
-                });
-                var permissionsGrid = rolesLayout.cells("b").attachGrid({
-                    image_path:'codebase/imgs/',
-                    columns: [
-                        {
-                            label: _("Uprawnienie"),
-                            width: 100,
-                            id: "name",
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Value"),
-                            id: "value",
-                            width: 50, 
-                            type: "ch"       
-                        },
-                        {
-                            label: _("Opis"),
-                            id: "description",
-                            width: 200, 
-                            type: "ed"       
-                        }                        
-                    ],
-                        multiselect: true
-                }); 
-                permissionsGrid.fill = function(id) {
-                    ajaxGet("api/roles/" + id + "/permissions", '', function(data){                                     
-                        if (data && data.success){
-                            permissionsGrid.clearAll();
-                            permissionsGrid.parse((data.data), "js");
-                        }
-                    });
-                };
-                permissionsGrid.attachEvent("onCheck", function(rId,cInd,state){
-                    var roleId = rolesTree.getSelectedId();
-                    if (roleId) {
-                        var data = {
-                                role_id: roleId,
-                                permission_id: rId, 
-                                value: +state
-                            };
-                        ajaxGet("api/rolespermissions/edit", data, '');
-
-                        permissionsGrid.fill(roleId);                          
-                    }                                 
-                });
-                rolesTree.load();                                                  
                 var usersGrid = rolesLayout.cells("c").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [                        
@@ -467,8 +470,7 @@ function settingsInit(cell) {
                         }
                     });
                 };                
-                usersGrid.fill(0);                 
-                permissionsGrid.fill(0);                                         
+                usersGrid.fill(0);                                                                                                        
 /**
  * Statuses
  */                

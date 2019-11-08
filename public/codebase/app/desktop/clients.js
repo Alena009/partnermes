@@ -4,20 +4,37 @@ var clientsForm;
 
 function clientsInit(cell) {
     if (clientsLayout == null) {
+                var userData = JSON.parse(localStorage.getItem("userData")); 
+                var write;
+                userData.permissions.forEach(function(elem){
+                    if (elem.name == 'clients') {
+                        write = elem.pivot.value;
+                    }
+                });
                 var clientsLayout = cell.attachLayout("2U");
                     clientsLayout.cells("a").setText(_("Klienci"));
                     clientsLayout.cells("b").setText(_("Informacja"));
                     clientsLayout.cells("b").setWidth(280);
-                clientsGridToolBar = clientsLayout.cells("a").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                                {type: "separator",   id: "sep4"}, 
-                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                        ]                    
-                });
+                    
+                if (write) {
+                    clientsGridToolBar = clientsLayout.cells("a").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                                    {type: "separator",   id: "sep4"}, 
+                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
+                            ]                    
+                    });
+                } else {
+                    clientsGridToolBar = clientsLayout.cells("a").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
+                            ]                    
+                    });
+                }
                 clientsGridToolBar.attachEvent("onClick", function(id) {
                     switch (id){
                         case 'Add': {
@@ -190,23 +207,39 @@ function clientsInit(cell) {
                     });	                    
                 };                
                 clientsGrid.fill();
-                     
-                var clientFormStruct = [                    
-                        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
-                        //{type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
-                        {type: "input", name: "kod",       required: true, label: _("Kod")},
-                        {type: "input", name: "name",      required: true, label: _("Klient"),                           
-                           note: {text: _("Dodaj imie klienta. Jest obowiazkowe.")}},
-                        {type: "input", name: "address",required: true, label: _("Opis"), rows: 3,
-                           note: {text: _("Dodaj adrese klienta. Obowiazkowe.")}},
-                        {type: "input", name: "country", required: true, label: _("Kraj"), 
-                           note: {text: _("Kraj klienta. Jest obowiazkowe.")}},                        
-                        {type: "input", name: "contacts",required: true, label: _("Kontakty"), rows: 3,
-                           note: {text: _("Dodaj numer telefonu, e-mail klienta. Obowiazkowe.")}},                      
-                        {type: "block", blockOffset: 0, position: "label-left", list: [
-                            {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            
-                        ]}	
-		];                
+                  
+                if (write) {
+                    var clientFormStruct = [                    
+                            {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
+                            //{type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
+                            {type: "input", name: "kod",       required: true, label: _("Kod")},
+                            {type: "input", name: "name",      required: true, label: _("Klient"),                           
+                               note: {text: _("Dodaj imie klienta. Jest obowiazkowe.")}},
+                            {type: "input", name: "address",required: true, label: _("Opis"), rows: 3,
+                               note: {text: _("Dodaj adrese klienta. Obowiazkowe.")}},
+                            {type: "input", name: "country", required: true, label: _("Kraj"), 
+                               note: {text: _("Kraj klienta. Jest obowiazkowe.")}},                        
+                            {type: "input", name: "contacts",required: true, label: _("Kontakty"), rows: 3,
+                               note: {text: _("Dodaj numer telefonu, e-mail klienta. Obowiazkowe.")}},                      
+                            {type: "block", blockOffset: 0, position: "label-left", list: [
+                                {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            
+                            ]}	
+                    ];    
+                } else {
+                    var clientFormStruct = [                    
+                            {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
+                            //{type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
+                            {type: "input", name: "kod",       required: true, label: _("Kod")},
+                            {type: "input", name: "name",      required: true, label: _("Klient"),                           
+                               note: {text: _("Dodaj imie klienta. Jest obowiazkowe.")}},
+                            {type: "input", name: "address",required: true, label: _("Opis"), rows: 3,
+                               note: {text: _("Dodaj adrese klienta. Obowiazkowe.")}},
+                            {type: "input", name: "country", required: true, label: _("Kraj"), 
+                               note: {text: _("Kraj klienta. Jest obowiazkowe.")}},                        
+                            {type: "input", name: "contacts",required: true, label: _("Kontakty"), rows: 3,
+                               note: {text: _("Dodaj numer telefonu, e-mail klienta. Obowiazkowe.")}}                                                 
+                    ];   
+                }
                 var clientForm = clientsLayout.cells("b").attachForm(clientFormStruct);
                 clientForm.bind(clientsGrid);
                 clientForm.attachEvent("onButtonClick", function(name){

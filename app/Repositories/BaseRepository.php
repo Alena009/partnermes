@@ -36,13 +36,13 @@ class BaseRepository
         }
 
         return $this->model = $model;
-    }
+    }    
 
     public function getModel()
     {
         return $this->model;
     }
-
+    
     public function options()
     {
         if (!empty($this->model->getText()) && !empty($this->model->getPrimaryKey())) {

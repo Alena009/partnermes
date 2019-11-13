@@ -85,7 +85,7 @@ function productsInit(cell) {
             }
         });    
         productsGroupsTree.fill = function(i=null){	
-            ajaxGet("api/prodgroups/grupytree", '', function(data) {                    
+            ajaxGet("api/prodgroups/grupytree/" + localStorage.language, '', function(data) {                    
                 if (data && data.success){      
                     productsGroupsTree.clearAll();                            
                     productsGroupsTree.loadStruct(data.data);                           

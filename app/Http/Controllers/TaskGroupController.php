@@ -58,5 +58,5 @@ class TaskGroupController extends BaseController
         $taskGroup->save();
 
         return $this->getResponseResult($taskGroup);
-    }    
+    }     
 }

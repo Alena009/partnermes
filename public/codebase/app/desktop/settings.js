@@ -12,6 +12,7 @@ function settingsInit(cell) {
                 mainTabbar.addTab("a1", _("Role"), null, null, true);               
                 mainTabbar.addTab("a2", _("Statusy zamówień"));
                 mainTabbar.addTab("a3", _("Kraj, język"));
+                mainTabbar.addTab("a4", _("Tłumaczenia"));
                 var rolesLayout = mainTabbar.tabs("a1").attachLayout("3U");
                     rolesLayout.cells("a").setText(_("Role"));                    
                     rolesLayout.cells("b").setText(_("Uprawnienia"));                    
@@ -21,7 +22,9 @@ function settingsInit(cell) {
                     statusesLayout.cells("a").hideHeader();       
                 var countriesLayout = mainTabbar.tabs("a3").attachLayout("2U");
                     countriesLayout.cells("a").setText(_("Kraj"));                    
-                    countriesLayout.cells("b").setText(_("Język"));                             
+                    countriesLayout.cells("b").setText(_("Język"));
+                var translationsLayout = mainTabbar.tabs("a4").attachLayout("1C");
+                    translationsLayout.cells("a").hideHeader();                      
 /**
  * 
  * Roles tab
@@ -861,7 +864,188 @@ function settingsInit(cell) {
                         
                     });
                 });                  
-
+/**
+ * Tlumaczenia
+ * 
+ */
+                var translationsSidebar = translationsLayout.cells("a").attachSidebar({
+                        items: [
+                        {id: "taskgroups",      text: _("Grupy zadań"),       icon: "a1.png", selected: true},
+                        {id: "tasks",           text: _("Zadania"),           icon: "a1.png"},           
+                        {id: "prodgroups",      text: _("Grupy produktów"),   icon: "a1.png"},
+                        {id: "prodtypes",       text: _("Typy produktów"),    icon: "a1.png"},                         
+                        {id: "products",        text: _("Produkty"),          icon: "a1.png"},     
+                        {id: "departaments",    text: _("Grupy pracowników"), icon: "a1.png"},                         
+                    ]
+                });
+                translationsSidebar.attachEvent("onSelect", function(id, lastId){
+                    var translationsLayout = translationsSidebar.cells(id).attachLayout("2U");
+                    translationsLayout.cells("a").setText(_("Wpisy"));
+                    translationsLayout.cells("b").setText(_("Tłumaczenia"));
+                    recordsGridToolBar = translationsLayout.cells("a").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+//                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+//                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+//                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+//                                    {type: "separator", id: "sep3"},
+                                    {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+                            ]
+                    });                    
+                    var recordsGrid = translationsLayout.cells("a").attachGrid({
+                        image_path:'codebase/imgs/',
+                        columns: [
+                            {
+                                label: _("Imie"),
+                                id: "name",
+                                width: 150,
+                                type: "ro", 
+                                sort: "str", 
+                                align: "left"     
+                            }                         
+                        ] 
+                    });
+                    recordsGrid.fill("api/" + id);
+                    recordsGrid.attachEvent("onRowSelect", function(rId) {
+                        translationsGrid.fill("api/" + id + "/" + rId + "/translations"); 
+                    }); 
+                    translationsGridToolBar = translationsLayout.cells("b").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                                    {type: "separator", id: "sep3"},
+                                    {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+                            ]
+                    });
+                    translationsGridToolBar.attachEvent("onClick", function(btn) {
+                        switch (btn){
+                            case 'Add':{
+                                var selectedRecordId = recordsGrid.getSelectedRowId();
+                                if (selectedRecordId) {
+                                    var addingWindow = createWindow(_("Dodaj tłumaczenie"), 300, 300);
+                                    var addingForm = createForm([
+                                        {type:"fieldset",  offsetTop:0, label:_("Tłumaczenie"), width:250, list:[
+                                                {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
+                                                {type:"combo",  name:"locale",      label:_("Język"), required: true, options: []},                                              
+                                                {type:"input",  name:"name",        label:_("Imie"), required: true, offsetTop:13},                                                                				
+                                                {type:"input",  name:"description", label:_("Opis"), offsetTop:13, rows: 3},                                                                				
+                                                {type:"input",  name:"pack",        label:_("Opakowanie"), offsetTop:13, rows: 3},                                                                				                                                
+                                                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                                    {type:"button", name:"save",    	value:_("Zapisz")},
+                                                    {type: "newcolumn"},
+                                                    {type:"button", name:"cancel",     	value:_("Anuluj")}
+                                                ]}
+                                        ]}                                    
+                                    ], addingWindow);
+                                    var localeCombo = addingForm.getCombo("locale");
+                                    ajaxGet("api/language", "", function(data){
+                                        if (data && data.success) {
+                                            localeCombo.addOption(data.data);
+                                        }
+                                    });
+                                    addingForm.attachEvent("onButtonClick", function(name){
+                                        switch (name){
+                                            case 'save': {                                    
+                                                var data = addingForm.getFormData(); 
+                                                data.locale = localeCombo.getComboText();
+                                                ajaxGet("api/" + id + "/" + selectedRecordId + "/translations/add", data, function(data){
+                                                    if (data && data.success) {
+                                                        dhtmlx.alert({
+                                                            title:_("Wiadomość"),
+                                                            text:_("Zapisane!")
+                                                        });  
+                                                    }
+                                                });                                                                
+                                            };break;
+                                        }
+                                    });
+                                } else {
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        text:_("Wybierz wpis, do którego chcesz dodać tłumaczenie!")
+                                    }); 
+                                }
+                            };break;
+                            case 'Edit': {};break;
+                            case 'Del': {
+                                var selectedRecordId = recordsGrid.getSelectedRowId();
+                                if (selectedRecordId) {
+                                    var translationId = translationsGrid.getSelectedRowId();
+                                    if (translationId) {
+                                        ajaxGet("api/" + id + "/" + selectedRecordId + "/" + translationId + "/translations/del", "", function(data){
+                                            if (data && data.success) {
+                                                dhtmlx.alert({
+                                                    title:_("Wiadomość"),
+                                                    text:_("Usunięte!")
+                                                });  
+                                            }
+                                        });                                     
+                                    } else {
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Wybierz tłumaczenie które chcesz usunąć!")                                        
+                                        });
+                                    }                                    
+                                } else {
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        text:_("Wybierz wpis, do którego chcesz usunąć tłumaczenia!")                                        
+                                    }); 
+                                }                                     
+                            };break;
+                            case 'Redo': {
+                                var selectedRecordId = recordsGrid.getSelectedRowId();
+                                if (selectedRecordId) {
+                                    translationsGrid.fill("api/" + id + "/" + selectedRecordId + "/translations");                                     
+                                } else {
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        text:_("Wybierz wpis, do którego chcesz zobaczyć tłumaczenia!")                                        
+                                    }); 
+                                }                                                                
+                            };break;
+                        }
+                    });
+                    var translationsGrid = translationsLayout.cells("b").attachGrid({
+                        image_path:'codebase/imgs/',
+                        columns: [
+                            {
+                                label: _("Imie"),
+                                id: "name",
+                                width: 100,
+                                type: "ed", 
+                                sort: "str", 
+                                align: "left"     
+                            },       
+                            {
+                                label: _("Opis"),
+                                id: "description",
+                                width: 100,
+                                type: "ed", 
+                                sort: "str", 
+                                align: "left"     
+                            }, 
+                            {
+                                label: _("Opakowanie"),
+                                id: "pack",
+                                width: 100,
+                                type: "ed", 
+                                sort: "str", 
+                                align: "left"     
+                            },
+                            {
+                                label: _("Język"),
+                                id: "locale",
+                                width: 50,
+                                type: "ro", 
+                                sort: "str", 
+                                align: "left"     
+                            }                          
+                        ] 
+                    });                   
+                });
 	}
 	
 }

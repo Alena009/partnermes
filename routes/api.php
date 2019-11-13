@@ -22,8 +22,7 @@ Route::group([
     Route::resource('/country',    'CountryController');
     Route::resource('/language',   'LanguageController');
     Route::resource('/permissions','PermissionController');
-    Route::resource('/statuses', 'StatusController');   
-    Route::resource('/prodtypes', 'ProductTypeController');       
+    Route::resource('/statuses', 'StatusController');       
     Route::resource('/history', 'OrderHistoryController');    
       
     Route::get('/declaredworks/savework', 'DeclaredWorkController@savework'); 
@@ -31,6 +30,7 @@ Route::group([
     
     Route::get('/departaments/scheduler', 'DepartamentController@buildScheduler');
     Route::get('/departaments/grupytree', 'DepartamentController@buildTree');
+    Route::get('/departaments/{departament}/translations', 'DepartamentController@getTranslations');
     Route::resource('/departaments', 'DepartamentController'); 
     
     Route::get('/operations/save', 'OperationController@save');      
@@ -54,11 +54,14 @@ Route::group([
     Route::get('/positions/tasks/{position}', 'OrderPositionController@positionTasks');
     Route::resource('/positions', 'OrderPositionController');      
     
-     
+    Route::get('/prodtypes/{prodtype}/translations', 'ProductTypeController@getTranslations');
+    Route::resource('/prodtypes', 'ProductTypeController');            
     
-    Route::get('/prodgroups/grupytree', 'ProductGroupController@buildTree');       
+    Route::get('/prodgroups/{prodgroup}/translations', 'ProductGroupController@getTranslations');
+    Route::get('/prodgroups/grupytree/{locale?}', 'ProductGroupController@buildTree');       
     Route::resource('/prodgroups', 'ProductGroupController');
     
+    Route::get('/products/{product}/translations', 'ProductController@getTranslations');
     Route::post('/products/addtask', 'ProductController@addTaskForProduct');        
     Route::get('/products/availabletasks/{productId}', 'ProductController@listAvailableTasks');    
    // Route::get('/products/tasks/{product?}', 'ProductController@listTasksForProduct');       
@@ -83,9 +86,14 @@ Route::group([
     Route::get('/rolespermissions/edit', 'RolePermissionController@editByRoleAndPermissionId');        
     Route::resource('/rolespermissions', 'RolePermissionController');          
     
+    Route::get('/tasks/{task}/translations', 'TaskController@getTranslations');
     Route::get('/tasks/listbygroups/{groups?}', 'TaskController@listByGroups');    
     Route::resource('/tasks', 'TaskController');    
     
+    Route::get('/taskgroups/{taskgroup}/{translation}/translations/del', 
+            'TaskGroupController@delTranslation');
+    Route::get('/taskgroups/{taskgroup}/translations/add', 'TaskGroupController@addTranslation');
+    Route::get('/taskgroups/{taskgroup}/translations', 'TaskGroupController@getTranslations');
     Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
     Route::resource('/taskgroups', 'TaskGroupController');    
     

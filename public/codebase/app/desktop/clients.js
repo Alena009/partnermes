@@ -15,7 +15,14 @@ function clientsInit(cell) {
                     clientsLayout.cells("a").setText(_("Klienci"));
                     clientsLayout.cells("b").setText(_("Informacja"));
                     clientsLayout.cells("b").setWidth(280);
-                    
+                
+//                var clientsDS = new dhtmlXDataStore();
+//                ajaxGet("api/clients", "", function(data){
+//                    clientsDS.parse(data.data);    
+//                });            
+                  
+        
+        
                 if (write) {
                     clientsGridToolBar = clientsLayout.cells("a").attachToolbar({
                             iconset: "awesome",
@@ -45,7 +52,7 @@ function clientsInit(cell) {
                                     case 'save':{                                         
                                         ajaxPost("api/clients", form.getFormData(), function(data){                                                                                                        
                                             if (data && data.success) {
-                                                clientsGrid.fill();
+                                                clientsGrid.fill("api/clients");
                                                 windowForm.close();
                                                 dhtmlx.alert({
                                                     title:_("Wiadomość"),
@@ -77,7 +84,7 @@ function clientsInit(cell) {
                                         case 'save':{                                         
                                             ajaxGet("api/clients/" + selectedId + "/edit", form.getFormData(), function(data){                                                                                                        
                                                 if (data && data.success) {
-                                                    clientsGrid.fill();
+                                                    clientsGrid.fill("api/clients");
                                                     windowForm.close();
                                                     dhtmlx.alert({
                                                         title:_("Wiadomość"),
@@ -105,7 +112,7 @@ function clientsInit(cell) {
                         };break;
                         case 'Del': {                               
                             var selectedId = clientsGrid.getSelectedRowId();
-                            if (selectedId) {
+                            if (selectedId) {                                
                                 dhtmlx.confirm({
                                     title: _("Ostrożność"),                                    
                                     text: _("Czy na pewno chcesz usunąć?"),
@@ -120,7 +127,7 @@ function clientsInit(cell) {
                                                         text:_("Nie udało się usunąć!")
                                                     });
                                                 }
-                                            });                           
+                                            });    
                                         }
                                     }
                                 });                                     
@@ -132,7 +139,7 @@ function clientsInit(cell) {
                             }                                
                         };break;
                         case 'Redo': {
-                            clientsGrid.fill();                                
+                            clientsGrid.fill("api/clients");                                
                         };break;                        
                     }
                 });                 
@@ -183,7 +190,8 @@ function clientsInit(cell) {
                     multiselect: true                    
                 });
                 clientsGrid.attachHeader("#text_filter,#text_filter,,#select_filter");
-                var dpClientsGrid = new dataProcessor("api/clients", "js");                
+                clientsGrid.sync(clientsDS);
+                var dpClientsGrid = new dataProcessor("api/clients","js");                
                 dpClientsGrid.init(clientsGrid);
                 dpClientsGrid.enableDataNames(true);
                 dpClientsGrid.setTransactionMode("REST");
@@ -198,15 +206,7 @@ function clientsInit(cell) {
                         }
                     });
                 });                
-                clientsGrid.fill = function() {     
-                    this.clearAll();
-                    ajaxGet("api/clients", "", function(data){
-                        if (data && data.success){                    
-                            clientsGrid.parse(data.data, "js");
-                        }
-                    });	                    
-                };                
-                clientsGrid.fill();
+                clientsGrid.fill("api/clients");               
                   
                 if (write) {
                     var clientFormStruct = [                    
@@ -264,7 +264,7 @@ function clientsInit(cell) {
                             } else {                                       
                                 ajaxPost("api/clients", data, function(data){                                                                                                        
                                     if (data && data.success) {
-                                        clientsGrid.fill();
+                                        //clientsGrid.fill();
                                         dhtmlx.alert({
                                             title:_("Wiadomość"),
                                             text:_("Zapisane!")

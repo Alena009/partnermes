@@ -250,5 +250,50 @@ public function t($item)
         return response()->json(['success'=>$data?true:false,'data'=>$data]);       
     }  
     
+    public function getTranslations($id) 
+    {
+        $result = [];
+        $record = [];
+        $record = $this->repository->getModel()::find($id);
+        
+        if ($record) {
+            $translations = $record->translations;
+            foreach ($translations as $translation) {
+                $result[] = $translation;
+            }            
+        }
+        
+        if ($result) {
+            return response()->json(['data' => $result, 'success' => true]);        
+        } else {
+            return response()->json(['data' => [], 'success' => false, 
+                "message" => "There are no variants of translation for this record"]);       
+        }      
+    } 
     
+    public function addTranslation($id, Request $request)
+    {
+        $record = [];
+        $record = $this->repository->getModel()::find($id);
+        
+        $record->translateOrNew($request->locale)->name = $request->name;  
+        if ($request->description) {
+            $record->translateOrNew($request->locale)->description = $request->description;  
+        }
+        if ($request->pack) {
+            $record->translateOrNew($request->locale)->pack = $request->pack;  
+        }
+        
+        if ($record->save()) {
+            return response()->json(['data' => $record, 'success' => true]);        
+        } else {
+            return response()->json(['data' => [], 'success' => false, 
+                "message" => "Translation was not added"]);        
+        }
+    }
+    
+    public function delTranslation($id, $translationId)
+    {
+        
+    }    
 }

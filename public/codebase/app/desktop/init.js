@@ -120,8 +120,8 @@ function loginFormShow(callback2={}){
 				if (data.success===true){
                                     localStorage.setItem('userData', JSON.stringify(data.user));                                    
                                     localStorage.setItem('token',data.token);   
-//                                    localStorage.setItem("user", data.user.name);
-//                                    localStorage.setItem("language",  data.user.language?  data.user.language:'pl');
+                                    localStorage.setItem("user", JSON.parse(localStorage.getItem("userData")).name);
+                                    localStorage.setItem("language",  JSON.parse(localStorage.getItem("userData")).language?  JSON.parse(localStorage.getItem("userData")).language:'pl');
 					w1.hide();
 					if (loginForm.callback.success && isFunction(loginForm.callback.success)){
 						loginForm.callback['success']();

@@ -23,7 +23,7 @@ class LanguageController extends BaseController
         
         foreach ($result as $res) {
             $res['value'] = $res->id;
-            $res['text']  = $res->name;
+            $res['text']  = $res->short;
         }         
         
         return $this->getResponseResult($result);

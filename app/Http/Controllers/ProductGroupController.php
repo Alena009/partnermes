@@ -43,8 +43,8 @@ class ProductGroupController extends BaseController
         $locale = app()->getLocale();
         
         $productGroup = new ProductGroup();
-        if ($request['parent_id']) {
-            $productGroup->parent_id = $request['parent_id'];        
+        if ($request->parent_id) {
+            $productGroup->parent_id = $request->parent_id;        
         } 
         $productGroup->save();
         
@@ -55,5 +55,13 @@ class ProductGroupController extends BaseController
         $productGroup->save();
 
         return $this->getResponseResult($productGroup);
+    }
+    
+    public function getProductsByGroups($groups, $locale='pl')
+    {        
+        $groups = explode(",", $groups);
+        $groups = $this->getAllChilds($groups);
+        
+        return $this->getResponseResult($this->repository->productsByGroups($groups, $locale));
     }
 }

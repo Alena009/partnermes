@@ -1290,8 +1290,8 @@ Date.prototype.getWeekNumber = function(){
 };   
 
 dhtmlXGridObject.prototype.deleteMyRecordById = function(url){
-    var thisGrid = this;
-    var id = thisGrid.getSelectedRowId();                                       
+    const thisGrid = this;
+    let id = thisGrid.getSelectedRowId();                                       
     if (id) {
         dhtmlx.confirm({
             title: _("Ostrożność"),                                    
@@ -1410,7 +1410,14 @@ var treeStruct = {
 //}; 
                                                     
 
-
+function getPermission(paragraph) {
+    var userData = JSON.parse(localStorage.getItem("userData")); 
+    userData.permissions.forEach(function(elem){
+        if (elem.name === paragraph) {
+            return elem.pivot.value;
+        }
+    });
+}
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 	if (id == "settings") {

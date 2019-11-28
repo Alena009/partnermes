@@ -24,23 +24,9 @@ function clientsInit(cell) {
         
         
                 if (write) {
-                    clientsGridToolBar = clientsLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                                    {type: "separator",   id: "sep4"}, 
-                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                            ]                    
-                    });
+                    clientsGridToolBar = clientsLayout.cells("a").attachToolbar(standartToolbar);
                 } else {
-                    clientsGridToolBar = clientsLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                            ]                    
-                    });
+                    clientsGridToolBar = clientsLayout.cells("a").attachToolbar(emptyToolbar);
                 }
                 clientsGridToolBar.attachEvent("onClick", function(id) {
                     switch (id){
@@ -190,7 +176,7 @@ function clientsInit(cell) {
                     multiselect: true                    
                 });
                 clientsGrid.attachHeader("#text_filter,#text_filter,,#select_filter");
-                clientsGrid.sync(clientsDS);
+                
                 var dpClientsGrid = new dataProcessor("api/clients","js");                
                 dpClientsGrid.init(clientsGrid);
                 dpClientsGrid.enableDataNames(true);

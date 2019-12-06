@@ -47,7 +47,7 @@ function projectsInit(cell) {
                 projectsGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{   
-                            var newOrderWindow = createWindow(_("Nowe zamowienie"), 500, 380);
+                            var newOrderWindow = createWindow(_("Nowe zamowienie"), 500, 450);
                             var newOrderForm = createForm(newProjectFormStruct, newOrderWindow);                                                                
                             var clientsCombo = newOrderForm.getCombo("client_id");
                             ajaxGet("api/clients", "", function(data){
@@ -572,8 +572,10 @@ function projectsInit(cell) {
               
 	}	
 }
-
-newProjectFormStruct = [                    
+var nowDate = getNowDate();
+console.log(nowDate);
+newProjectFormStruct = [      
+    
         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},   	        
         {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
         {type: "input", name: "kod",       required: true, label: _("Kod zamowienia")},
@@ -583,6 +585,7 @@ newProjectFormStruct = [
            note: {text: _("Dodaj opis zamowienia. Obowiazkowe.")}},
         {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 
             required: true, dateFormat: "%Y-%m-%d", enableTodayButton: true,
+            value: nowDate,
             note: {text: _("Data poczatku wykonania zamowienia. Jest obowiazkowe.")}},                       
         {type: "combo", name: "num_week", required: true, label: _("Termin wykonania"), 
             options:[],

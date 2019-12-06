@@ -269,15 +269,7 @@ function productsTasksInit(cell) {
                     ],
                         multiselect: true
                 });                
-                productsGrid.fill = function(){
-                    productsGrid.clearAll();
-                    ajaxGet("api/products", '', function(data){                                     
-                        if (data && data.success){                                    
-                            productsGrid.parse(data.data, "js");
-                        }
-                    });                        
-                };                
-                productsGrid.fill();
+                productsGrid.sync(productsData);
                 productsGrid.attachHeader("#text_filter,#text_filter,#select_filter,#select_filter");	
                 productsGrid.setRegFilter(productsGrid, 0);
                 productsGrid.setRegFilter(productsGrid, 1);

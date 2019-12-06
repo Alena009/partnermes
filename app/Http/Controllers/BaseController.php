@@ -16,7 +16,7 @@ class BaseController extends Controller
     protected $repository;
     protected $requestName;
     protected $viewName = 'home';
-
+            
     public function __construct()
     {
     }
@@ -137,7 +137,7 @@ class BaseController extends Controller
     
     public function buildTree($locale = 'pl')
     {
-        $data = $this->tree(0, $locale);        
+        $data = $this->tree(0, $locale);           
         return $this->getResponseResult($data);
     }
 
@@ -206,37 +206,37 @@ class BaseController extends Controller
         return $kids;
     }
     
-    public function getAllChildsIds($parentId)
-    {
+    public function getAllChilds($groups)
+    {             
+        $model = $this->repository->getModel(); 
+        $items = $model::find($groups);
         $result = [];
-        $model = $this->repository->getModel();
-        $item = $model::find($parentId);    
         
-       
-            $kids = [];
+        foreach ($items as $item) {
+            $result[] = $item->id;
             if ($item->kids) {
-                $kids = $this->t($item);                
-            }
-            $result[] = $kids;
-        
-        
-        return $result;
-    }
-
-public function t($item) 
-{
-        $kids = [];  
-        $kid = [];
-       
-        foreach ($item->kids as $arr) {                            
-            if (count($arr->kids)) {                   
-                $kid[] = $this->t($arr);
-            }
-            $kids[] = $kid;
+                foreach ($item->kids as $kid) {
+                    $result[] = $kid->id;
+                }
+            }           
         }
-        
-        return $kids;    
-}    
+        return $result;    
+    }  
+
+//    public function t($item) 
+//    {
+//        $kids = [];  
+//        $kid = [];
+//
+//        foreach ($item->kids as $arr) {                            
+//            if (count($arr->kids)) {                   
+//                $kid[] = $this->t($arr);
+//            }
+//            $kids[] = $kid;
+//        }
+//
+//        return $kids;    
+//    }    
 
 
     /**

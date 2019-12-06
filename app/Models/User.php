@@ -45,4 +45,12 @@ class User extends Authenticatable
     {
         return $this->belongsToMany('App\Models\Role', 'users_roles', 'user_id', 'role_id');
     }
+    
+    /*
+     * get all operations which related to this user
+     */
+    public function operations() 
+    {
+        return $this->hasMany('App\Models\Operation', 'user_id', 'id');
+    } 
 }

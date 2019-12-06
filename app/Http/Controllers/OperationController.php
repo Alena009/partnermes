@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderPosition;
 use App\Models\Task;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class OperationController extends BaseController
 {
@@ -51,102 +52,62 @@ class OperationController extends BaseController
     
     public function save(Request $request) 
     {  
-        $openTask = [];
-        $model = $this->repository->getModel();
-        //search all opened tasks for this user
-        $openedTasks = $model::where("user_id", "=", $request['user_id'])
-                ->where("closed", "<", 1)->get(); 
-        //if we found opened tasks, we search does requested task is in opened 
-        //tasks list. If it is - so we will close this task, if it is not - 
-        //show message for user with text that he has another opened tasks and he must 
-        //to close it before adding one more task
-        if (count($openedTasks)) { 
-            foreach ($openedTasks as $ot) {
-                if ($ot->task_id == $request["task_id"]) {
-                    $openTask = $ot;
-                }                
-            }
-            if ($openTask) {
-                $openTask->start_date   = $openTask->start_date;            
-                $openTask->end_date     = date('Y-m-d H:i:s');            
-                $openTask->done_amount  = $request["done_amount"];
-                $openTask->closed = 1; 
+        //search opened task for this user
+        $openedOperation = Operation::where("user_id", "=", $request->user_id)
+                ->where("closed", "<", 1)
+                ->get();
+        
+        //if user hasopened task and this opened task is equal to the task from 
+        //request we close this task
+        if (count($openedOperation)) {
+            $openedOperation = $openedOperation[0];
+            if ($openedOperation->task_id == $request->task_id) {
+                $openedOperation->start_date  = $openedOperation->start_date;            
+                $openedOperation->end_date    = date('Y-m-d H:i:s');            
+                $openedOperation->done_amount = $request->done_amount;
+                $openedOperation->closed      = 1;
                 try {
-                    return response()->json(['success' => $openTask->save(), 'data' => [], 
-                    'message' => "Operation closed"]); 
+                    return response()->json(['success' => $openedOperation->save(), 
+                        'data' => [], 'message' => "Operation closed"]); 
                 } 
                 catch(Exception $e) {                    
                     return response()->json(["data" => [], "success" => false, 
                         "message" => $e->getMessage()]); 
-                }                
-            } else {
+                } 
+            }  else {
                 return response()->json(['success' => false, 'data' => [], 
                 'message' => 'This user has opened tasks and can`t '
-                . 'add new tasks while opened tasks aren`t closed']); 
+                . 'add new task while opened tasks aren`t closed']); 
             }
-        } else {
-            //adding new task
-            $position = [];
+        } else { 
+            //if user has not opened tasks - we save task from request 
             $position = OrderPosition::find($request->order_position_id); 
-            if ($position) {   
-                $declared_works = DB::table("declared_works")
-                        ->where("order_position_id", "=", $position->id)
-                        ->where("task_id", "=", $request->task_id)
-                        ->first();
-                if ($declared_works->status == 0) {
-                    $productTask = [];
-                } else {
-                    $productTask = DB::table("product_tasks")
-                        ->where("product_id", "=", $position->product_id)
-                        ->where("task_id", "=", $request->task_id)
-                        ->first();                      
-                }                              
-                if ($productTask) { 
+            //operation has order
+            if ($position) {
+                $task = Task::find($request['task_id']);
+                if ($task) {
                     $dateStart = date('Y-m-d H:i:s');
                     $dateEnd = date('Y-m-d H:i:s', strtotime($dateStart. ' + ' . 
-                            $productTask->duration * $position->amount . ' minute'));                    
+                            $task->duration * $position->amount . ' minute'));                    
                     $request["start_date"] = $dateStart;
                     $request["end_date"]   = $dateEnd;
 
-                    return parent::store($request); 
+                    return parent::store($request);
                 } else {
                     return response()->json(['success' => false, 'data' => [], 
-                    'message' => 'This task is not declared for this product']);                 
+                    'message' => 'This task is not declared']);                     
                 }
             } else {
-                //timeout or cleaning tasks which do not have order
+                //operation without order (for example cleaning)
                 $request["start_date"] = date('Y-m-d H:i:s');
                 $request["end_date"]   = date('Y-m-d H:i:s', 
                         strtotime(date('Y-m-d H:i:s') . ' + ' . 15 . ' minute'));
                 $request["start_amount"] = 1;
                 $request["done_amount"] = 1;
                 
-                return parent::store($request); 
+                return parent::store($request);                         
             }
-        }
-        
-//        //search all opened tasks for this user
-//        $openedTasks = Operation::where("user_id", "=", $request['user_id'])
-//                ->where("closed", "<", 1)->get();
-//        if (count($openedTasks)) { 
-//            return response()->json(['success' => false, 'data' => [], 
-//                'message' => 'This user has opened tasks and can`t '
-//                . 'add new tasks while opened tasks aren`t closed']);
-//        } else { 
-//            $position = OrderPosition::find($request['order_position_id']);              
-//            $duration = DB::table("product_tasks")
-//                    ->where("product_id", "=", $position->product_id)
-//                    ->where("task_id", "=", $request['task_id'])
-//                    ->pluck("duration");
-//            $dateStart = date('Y-m-d H:i:s');
-//            $dateEnd = date('Y-m-d H:i:s', strtotime($dateStart. ' + ' . $duration[0] * $position->amount . ' minute'));
-//
-//            $request["done_amount"] = 0;
-//            $request["start_date"] = $dateStart;
-//            $request["end_date"]   = $dateEnd;
-//
-//            return parent::store($request);            
-//        }
+        }        
     }
     
 

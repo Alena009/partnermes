@@ -8,4 +8,10 @@ class OperationRepository extends BaseRepository
     {
         return "App\Models\Operation";
     }
+    
+    public function get($id) 
+    {
+        return $this->model::find($id);
+    } 
+  
 }

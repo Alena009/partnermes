@@ -229,14 +229,12 @@ function warehouseInit(cell) {
                             ]}
                         ], addingWindow);                    
                     var productGroupsCombo = addingForm.getCombo("product_group_id");                                                                            
-                    ajaxGet("api/prodgroups", '', function(data) {                    
-                            productGroupsCombo.addOption(data.data);
-                    });
+                    productGroupsCombo.sync(productGroupsData);
                     //occurs when some value has selected in the products groups combobox
                     productGroupsCombo.attachEvent("onChange", function(value, text){
                         var selectedGroupId = productGroupsCombo.getSelectedValue();
                         var productsCombo = addingForm.getCombo("product_id"); 
-                        ajaxGet("api/products/group/" + selectedGroupId + "/" + localStorage.language, '', function(data) {                    
+                        ajaxGet("api/prodgroups/products/" + selectedGroupId + "/" + localStorage.language, '', function(data) {                    
                             productsCombo.clearAll();
                             productsCombo.addOption(data.data);
                         }); 
@@ -334,6 +332,7 @@ function warehouseInit(cell) {
             [_("Ilosc: "),"#cspan","#cspan","#stat_total"],
             ["text-align:right;","text-align:center"]
         );  
+        productsGrid.setRegFilter(productsGrid, 1); 
         productsGrid.fill = function(i = 0) {
             productsGrid.clearAll();
             var ids = Array();
@@ -344,8 +343,7 @@ function warehouseInit(cell) {
                 }
             });	                    
         };
-        productsGrid.fill(0);         
-        productsGrid.setRegFilter(1);    
+        productsGrid.fill(0);            
         
        
 //        var searchElem = productsGridToolBar.getInput('szukaj');

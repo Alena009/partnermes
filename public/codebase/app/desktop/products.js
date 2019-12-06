@@ -4,49 +4,41 @@ var productsForm;
 var products;
 
 function productsInit(cell) {
-    if (productsLayout == null) {   
+    if (productsLayout == null) {  
+        var userCanWrite;
         var userData = JSON.parse(localStorage.getItem("userData")); 
-        var write;
         userData.permissions.forEach(function(elem){
-            if (elem.name == 'products') {
-                write = elem.pivot.value;
+            if (elem.name === "products") {
+                userCanWrite = elem.pivot.value;
             }
-        });
-        
+        });            
         var productsLayout = cell.attachLayout("4A");
         productsLayout.cells("a").setText(_("Grupy produktów")); 
         productsLayout.cells("b").setText(_("Typy produktów"));
         productsLayout.cells("b").setWidth(280);        
         productsLayout.cells("c").setText(_("Produkty"));        
         productsLayout.cells("d").setText(_("Informacja o produktu"));         
-        productsLayout.cells("d").setWidth(300);  
+        productsLayout.cells("d").setWidth(300);    
+        
+        
 /**
  * A
- */       
-        if (write) {
-            var productsGroupsToolBar = productsLayout.cells("a").attachToolbar({
-                    iconset: "awesome",
-                    items: [
-                            {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                            {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                            {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                    ]
-            });
-        } else {
-            var productsGroupsToolBar = productsLayout.cells("a").attachToolbar({
-                    iconset: "awesome",
-                    items: []
-            });
-        }
+ */             
+        var productsGroupsToolBar;
+        userCanWrite ? productsGroupsToolBar = productsLayout.cells("a").attachToolbar(standartToolbar):
+                productsGroupsToolBar = productsLayout.cells("a").attachToolbar(emptyToolbar);
+        
         productsGroupsToolBar.attachEvent("onClick", function(btn) {
             switch (btn){
                     case 'Add':{			                                        
-                            createAddEditGroupWindow("api/prodgroups", "api/prodgroups", productsGroupsTree, 0);
+                            createAddEditGroupWindow("api/prodgroups", 
+                                "api/prodgroups", productsGroupsTree, 0);                            
                     };break;
                     case 'Edit':{
                         var id = productsGroupsTree.getSelectedId();
                         if (id) {                                        
-                            createAddEditGroupWindow("api/prodgroups", "api/prodgroups/" + id + "/edit", productsGroupsTree, id);
+                            createAddEditGroupWindow("api/prodgroups", 
+                                "api/prodgroups/" + id + "/edit", productsGroupsTree, id);                         
                         }
                     };break;
                     case 'Del':{
@@ -55,33 +47,27 @@ function productsInit(cell) {
                             deleteNodeFromTree(productsGroupsTree, "api/prodgroups/" + id);
                         }
                     };break;
+                    case 'Redo':{
+                        productsGroupsTree.fill();
+                    };break;                    
             }
         });
-        var productsGroupsTree = productsLayout.cells("a").attachTreeView({
-                skin: "dhx_web",    // string, optional, treeview's skin
-                iconset: "font_awesome", // string, optional, sets the font-awesome icons
-                multiselect: false,           // boolean, optional, enables multiselect
-                //checkboxes: true,           // boolean, optional, enables checkboxes
-                dnd: true,           // boolean, optional, enables drag-and-drop
-                context_menu: true           // boolean, optional, enables context menu			
-        });                 
+        var productsGroupsTree = productsLayout.cells("a").attachTreeView(treeStruct);                 
         productsGroupsTree.attachEvent("onDrop",function(id){			
                 var parent_id = arguments[1];
-                parent_id = (parent_id) ? parent_id+'' : '';
+                parent_id = (parent_id) ? parent_id + '' : '';
                 var data = {
                     id: id,
                     parent_id: parent_id
                 };                        
                 ajaxGet("api/prodgroups/" + id + "/edit?", data, ''); 
-                return true;
         });  
         productsGroupsTree.attachEvent("onSelect",function(id, mode){  
             if (mode) {
+                productsGrid.zaladuj(id);
                 if (typesProductsGrid.getSelectedRowId()) {
-                    productsGrid.filterBy(2, typesProductsGrid.getSelectedRowId());
-                }         
-                productsGrid.fill(id);
-                return true;                        
+                    productsGrid.filterBy(9, typesProductsGrid.getSelectedRowId());
+                }                               
             }
         });    
         productsGroupsTree.fill = function(i=null){	
@@ -96,25 +82,9 @@ function productsInit(cell) {
 /**
  * B
  */        
-        if (write) {
-            var typesProductsGridToolBar = productsLayout.cells("b").attachToolbar({
-                    iconset: "awesome",
-                    items: [
-                            {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                            {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                            {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                            {type: "separator", id: "sep3"},
-                            {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
-                    ]
-            });
-        } else {
-            var typesProductsGridToolBar = productsLayout.cells("b").attachToolbar({
-                    iconset: "awesome",
-                    items: [
-                            {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
-                    ]
-            });
-        }
+        var typesProductsGridToolBar;
+        userCanWrite ? typesProductsGridToolBar = productsLayout.cells("b").attachToolbar(standartToolbar):
+                typesProductsGridToolBar = productsLayout.cells("b").attachToolbar(emptyToolbar);        
         typesProductsGridToolBar.attachEvent("onClick", function(btn) {
             switch (btn){
                     case 'Add':{
@@ -165,9 +135,8 @@ function productsInit(cell) {
                             addingForm.attachEvent("onButtonClick", function(name){
                                 if (name == 'save') {
                                     ajaxGet("api/prodtypes/" + typesProductsGrid.getSelectedRowId() + "/edit", addingForm.getFormData(), function(data){
-                                        if (data && data.success) {
-                                            //typesProductsGrid.addRow(data.data.id, [data.data.name, data.data.description]);   
-                                            typesProductsGrid.fill();
+                                        if (data && data.success) {     
+                                            
                                             addingWindow.close();
                                         } else {
                                             dhtmlx.alert({
@@ -223,47 +192,22 @@ function productsInit(cell) {
         var typesProductsGrid = productsLayout.cells("b").attachGrid({
             image_path:'codebase/imgs/',
             columns: [
-                {
-                    label: _("Imie"),
-                    id: "name",
-                    width: 100,
-                    type: "ed", 
-                    sort: "str", 
-                    align: "left"     
-                },                                                
-                {
-                    label: _("Opis"),
-                    id: "description",
-                    width: 300,
-                    type: "txt", 
-                    sort: "str", 
-                    align: "left"     
-                }                          
-            ],
-            multiselect: true                    
+                {label: _("Imie"), id: "name", width: 100, type: "ed", sort: "str", align: "left"},                                                
+                {label: _("Opis"), id: "description", width: 300, type: "txt", sort: "str", align: "left"}                          
+            ]                  
         });
         typesProductsGrid.attachEvent("onRowSelect", function() {
             var id = typesProductsGrid.getSelectedRowId();
             if (productsGroupsTree.getSelectedId()) {
-                productsGrid.filterBy(3, productsGroupsTree.getSelectedId());
+                productsGrid.filterBy(10, productsGroupsTree.getSelectedId());
             }
-            productsGrid.filterBy(2, id);
+            productsGrid.filterBy(9, id);
         });        
-        typesProductsGrid.fill = function() {    
-            this.clearAll();
-            ajaxGet("api/prodtypes", "", function(data){
-                if (data && data.success){                    
-                    typesProductsGrid.parse(data.data, "js");
-                }
-            });	                    
-        };                  
-        typesProductsGrid.fill();
-        var dptypesProductsGrid = new dataProcessor("api/products", "js");                
+        typesProductsGrid.sync(productTypesData);
+        var dptypesProductsGrid = new dataProcessor("api/prodtypes", "js");                
         dptypesProductsGrid.init(typesProductsGrid);
         dptypesProductsGrid.enableDataNames(true);
         dptypesProductsGrid.setTransactionMode("REST");
-        dptypesProductsGrid.enablePartialDataSend(true);
-        dptypesProductsGrid.enableDebug(true);
         dptypesProductsGrid.setUpdateMode("row", true);
         dptypesProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
             data.id = id;
@@ -274,7 +218,8 @@ function productsInit(cell) {
 /**
  * C
  */       
-        if (write) {
+        var productsGridToolBar;
+        if (userCanWrite) {
             productsGridToolBar = productsLayout.cells("c").attachToolbar({
                     iconset: "awesome",
                     items: [                           
@@ -291,55 +236,30 @@ function productsInit(cell) {
                     ]                    
             }); 
         } else {
-            productsGridToolBar = productsLayout.cells("c").attachToolbar({
-                    iconset: "awesome",
-                    items: [                         
-                            {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
-                    ]                    
-            }); 
+            productsGridToolBar = productsLayout.cells("c").attachToolbar(emptyToolbar); 
         }
-        productsGridToolBar.attachEvent("onClick", function(name) {           
+        productsGridToolBar.attachEvent("onClick", function(name) {             
+            if (name === 'Copy' || name === 'Add' || name === 'Edit') {
+                var productWindow = createWindow(_("Produkt"), 550, 400);
+                var productForm = createForm(productFormStruct, productWindow);
+                var productTypeCombo = productForm.getCombo("product_type_id");
+                productTypeCombo.sync(productTypesData);
+                var productGroupCombo = productForm.getCombo("product_group_id");
+                productGroupCombo.sync(productGroupsData);                  
+            }
+                        
             switch (name){
                 case 'Copy': {
                     var selectedId = productsGrid.getSelectedRowId();
-                    if (selectedId) {                        
-                        var productWindow = createWindow(_("Produkt"), 550, 400);
-                        var productForm = createForm(productFormStruct, productWindow); 
-                        var rowData = productsGrid.getRowData(selectedId);
-                        var productTypeCombo = productForm.getCombo("product_type_id");
-                        ajaxGet("api/prodtypes", "", function(data){
-                            if (data && data.success) {                        
-                                productTypeCombo.addOption(data.data); 
-                                productTypeCombo.selectOption(productTypeCombo.getIndexByValue(rowData.product_type_id));
-                            }
-                        });
-                        var productGroupCombo = productForm.getCombo("product_group_id");
-                        ajaxGet("api/prodgroups", "", function(data){
-                            if (data && data.success) {
-                                productGroupCombo.addOption(data.data);
-                                productGroupCombo.selectOption(productGroupCombo.getIndexByValue(rowData.product_group_id));
-                            }
-                        });                         
+                    if (selectedId) {                       
+                        var rowData = productsGrid.getRowData(selectedId);                                                                                         
                         productForm.setFormData(rowData);
                         productForm.setItemValue("kod", "");
                         productForm.attachEvent("onButtonClick", function(name){
                             switch (name){
-                                case 'save': {                                    
-                                    ajaxPost("api/products", productForm.getFormData(), function(data) {
-                                    if (data && data.success) {
-                                        productsGrid.fill();
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Zapisane!")
-                                        });                                          
-                                    } else {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Zmiany nie zostały zapisane. \n\
-                                                    Wprowadź ponownie!")
-                                        });                                         
-                                    }
-                                });                                                                 
+                                case 'save': {                                          
+                                    addProduct(productForm.getFormData());   
+                                    productsGrid.zaladuj(productGroupCombo.getSelectedValue());
                                 };break;
                             }
                         });
@@ -353,17 +273,13 @@ function productsInit(cell) {
                 case 'Tasks': {
                     var productId = productsGrid.getSelectedRowId();
                     if (productId) {
-                        var tasksWindow = createWindow(_("Zadania"), 500, 500);  
+                        var data = productsGrid.getRowData(productId);                    
+                        var tasksWindow = createWindow(_("Zadania") + ": " + 
+                                data.kod + "-" + data.name, 
+                                500, 500);  
                         var tasksLayout = tasksWindow.attachLayout("1C");
                         tasksLayout.cells("a").hideHeader();
-                        var tasksGridToolbar = tasksLayout.cells("a").attachToolbar({
-                                iconset: "awesome",
-                                items: [                                 
-                                    {id:"Add", type:"button", text: _("Dodaj"),  img: "fa fa-plus-square"},
-                                    {id:"Edit",type:"button", text: _("Edytuj"), img: "fa fa-edit"},
-                                    {id:"Del", type:"button", text: _("Usun"),   img: "fa fa-minus-square"}
-                                ]                    
-                        });
+                        var tasksGridToolbar = tasksLayout.cells("a").attachToolbar(standartToolbar);
                         tasksGridToolbar.attachEvent("onClick", function(name) {
                             switch(name) {
                                 case "Add": {
@@ -378,6 +294,10 @@ function productsInit(cell) {
                                 case "Del": {
                                     var productId = tasksGrid.getSelectedRowId();
                                     deleteTaskForProduct(productId, tasksGrid);                           
+                                };break;
+                                case "Redo": {
+                                    var selectedProductId = productsGrid.getSelectedRowId();
+                                    tasksGrid.fill(selectedProductId);                           
                                 };break;
                             }
                         });     
@@ -449,22 +369,21 @@ function productsInit(cell) {
                 };break;
                 case 'Components': {
                     var productId = productsGrid.getSelectedRowId();
-                    if (productId) { 
-                        var componentsWindow = createWindow(_("Komponenty"), 500, 500);  
+                    if (productId) {
+                        var data = productsGrid.getRowData(productId);
+                        var componentsWindow = createWindow(_("Komponenty") + ": " + 
+                                data.kod + "-" + data.name, 
+                                500, 500);  
                         var componentsLayout = componentsWindow.attachLayout("1C");
                         componentsLayout.cells("a").hideHeader();
-                        componentsGridToolbar = componentsLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                {id:"Add", type:"button", text: _("Dodaj"),  img: "fa fa-plus-square"},
-                                //{id:"Edit",type:"button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id:"Del", type:"button", text: _("Usun"),   img: "fa fa-minus-square"}
-                            ]                    
-                        });    
+                        componentsGridToolbar = componentsLayout.cells("a").attachToolbar(standartToolbar);    
                         componentsGridToolbar.attachEvent("onClick", function(id) {
                             var formStruct = [
                                             {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
-                                            {type: "combo", name: "component_id", required: true, label: _("Produkt"), options: []},		
+                                            {type: "combo", name: "component_id", required: true, label: _("Produkt"), options: [
+                                                    {header: _("Kod"),  width:  80,  option: "#kod#"},
+                                                    {header: _("Imie"), width: 110,  option: "#name#"}                                                    
+                                            ]},		
                                             {type: "input", name: "amount",     required: true, label: _("Ilosc")},
                                             {type: "input", name: "height",     required: true, label: _("Wymiar 1")},
                                             {type: "input", name: "width",      required: true, label: _("Wymiar 2")},
@@ -481,9 +400,7 @@ function productsInit(cell) {
                                         var addingWindow = createWindow(_("Componenty"), 300, 300);
                                         var addingForm = createForm(formStruct, addingWindow);
                                         var productCombo = addingForm.getCombo("component_id");                        
-                                        ajaxGet("api/products", '', function(data){
-                                            productCombo.addOption(data.data);
-                                        });
+                                        productCombo.sync(productsData);
                                         addingForm.attachEvent("onButtonClick", function(name){
                                             var data = this.getFormData();
                                             data.product_id = selectedProductId;
@@ -536,6 +453,9 @@ function productsInit(cell) {
                                         });                          
                                     }                           
                                 };break;
+                                case "Redo": {
+                                    componentsGrid.fill(productsGrid.getSelectedRowId());
+                                };break;
                             }
                         });                          
                         var componentsGrid = componentsLayout.cells("a").attachGrid({
@@ -557,9 +477,7 @@ function productsInit(cell) {
                         var dpComponentsGrid = new dataProcessor("api/components", "js");                
                         dpComponentsGrid.init(componentsGrid);
                         dpComponentsGrid.enableDataNames(true);
-                        dpComponentsGrid.setTransactionMode("REST");
-                        //dpComponentsGrid.enablePartialDataSend(true);
-                        dpComponentsGrid.enableDebug(true);
+                        dpComponentsGrid.setTransactionMode("REST");                                              
                         dpComponentsGrid.setUpdateMode("row", true);
                         dpComponentsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
                             data.id = id;
@@ -598,39 +516,12 @@ function productsInit(cell) {
                         });                        
                     }                        
                 };break;
-                case 'Add': {  
-                    var productWindow = createWindow(_("Produkt"), 550, 400);
-                    var productForm = createForm(productFormStruct, productWindow);                          
-                    var productTypeCombo = productForm.getCombo("product_type_id");
-                    ajaxGet("api/prodtypes", "", function(data){
-                        if (data && data.success) {                        
-                            productTypeCombo.addOption(data.data);                        
-                        }
-                    });
-                    var productGroupCombo = productForm.getCombo("product_group_id");
-                    ajaxGet("api/prodgroups", "", function(data){
-                        if (data && data.success) {
-                            productGroupCombo.addOption(data.data);
-                        }
-                    });                         
+                case 'Add': {                                                
                     productForm.attachEvent("onButtonClick", function(name){
                         switch (name){
-                            case 'save':{ 
-                                ajaxPost("api/products", productForm.getFormData(), function(data) {
-                                    if (data && data.success) {
-                                        productsGrid.fill();
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Zapisane!")
-                                        });                                          
-                                    } else {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Zmiany nie zostały zapisane. \n\
-                                                    Wprowadź ponownie!")
-                                        });                                         
-                                    }
-                                }); 
+                            case 'save':{                        
+                                addProduct(productForm.getFormData());                                              
+                                productsGrid.zaladuj(productGroupCombo.getSelectedValue());                    
                             };break;
                         }
                     });                    
@@ -638,37 +529,13 @@ function productsInit(cell) {
                 case 'Edit': {
                     var selectedId = productsGrid.getSelectedRowId();
                     if (selectedId) {                        
-                        var productWindow = createWindow(_("Produkt"), 550, 400);
-                        var productForm = createForm(productFormStruct, productWindow); 
-                        var rowData = productsGrid.getRowData(selectedId);
-                        var productTypeCombo = productForm.getCombo("product_type_id");
-                        ajaxGet("api/prodtypes", "", function(data){
-                            if (data && data.success) {                        
-                                productTypeCombo.addOption(data.data); 
-                                productTypeCombo.selectOption(productTypeCombo.getIndexByValue(rowData.product_type_id));
-                            }
-                        });
-                        var productGroupCombo = productForm.getCombo("product_group_id");
-                        ajaxGet("api/prodgroups", "", function(data){
-                            if (data && data.success) {
-                                productGroupCombo.addOption(data.data);
-                                productGroupCombo.selectOption(productGroupCombo.getIndexByValue(rowData.product_group_id));
-                            }
-                        });                         
-                        productForm.bind(productsGrid);
-                        productForm.unbind(productsGrid);
+                        var rowData = productsGrid.getRowData(selectedId);                       
+                        productForm.setFormData(rowData);
                         productForm.attachEvent("onButtonClick", function(name){
                             switch (name){
-                                case 'save': {                                    
-                                    var data = productForm.getFormData(); 
-                                    ajaxGet("api/products/" + selectedId + "/edit", data, function(data){
-                                        if (data && data.success) {
-                                            dhtmlx.alert({
-                                                title:_("Wiadomość"),
-                                                text:_("Zapisane!")
-                                            });  
-                                        }
-                                    });                                                                
+                                case 'save': {                                                                        
+                                    editProduct(productForm.getFormData(), selectedId);
+                                    productsGrid.zaladuj(productGroupCombo.getSelectedValue());                                    
                                 };break;
                             }
                         });
@@ -680,12 +547,10 @@ function productsInit(cell) {
                     }
                 };break;
                 case 'Del': {
-                        productsGrid.deleteMyRecordById("api/products/");
+                    productsGrid.deleteMyRecordById("api/products");
                 };break;   
                 case 'Redo': {                    
-                    productsGrid.fill(0);                    
-                    productsGroupsTree.unselectItem(productsGroupsTree.getSelectedId());
-                    typesProductsGrid.fill();                    
+                    setDefaultView();                   
                 };break;
             }
         });        
@@ -694,23 +559,24 @@ function productsInit(cell) {
             columns: [  
                 //{id: "checked", type:"ch", width: 25},
                 {label: _("Kod"), width: 100,id: "kod",type: "ed",sort: "str",  align: "left"},
-                {label: _("Imie produktu"),width: 100,id: "name",type: "ed", sort: "str", align: "left"},
-                {label: _("Typ produktu"), width: 100,id: "product_type_id", type: "coro", sort: "str", align: "left"},
-                {label: _("Grupa produktu"),width: 100,id: "product_group_id", type: "coro",sort: "str", align: "left"},
+                {label: _("Imie produktu"),width: 100,id: "name",type: "ed", sort: "str", align: "left"},                
                 {label: _("Opakowanie"), width: 100, id: "pack", type: "ed", sort: "str", align: "left"}, 
                 {label: _("Opis"), width: 100, id: "description", type: "ed", sort: "str", align: "left"},
                 {label: _("Masa, kg"), width: 50, id: "weight", type: "edn", sort: "str", align: "left"},
                 {label: _("Wysokość, mm"), width: 50, id: "height", type: "edn", sort: "str", align: "left"},
                 {label: _("Szerokość, mm"), width: 50, id: "width", type: "edn", sort: "str", align: "left"},
                 {label: _("Długość, mm"), width: 50, id: "length", type: "edn", sort: "str", align: "left"},
-                {label: _("Powierzchnia, m2"), width: 50, id: "area", type: "edn", sort: "str", align: "left"}
-            ],
-            multiselect: true
-        });       
+                {label: _("Powierzchnia, m2"), width: 50, id: "area", type: "edn", sort: "str", align: "left"},
+                {label: _("Typ produktu"), width: 100,id: "product_type_id", type: "ro", sort: "str", align: "left"},
+                {label: _("Grupa produktu"),width: 100,id: "product_group_id", type: "ro",sort: "str", align: "left"}
+            ]
+        });   
+        productsGrid.setColumnHidden(9,true);
+        productsGrid.setColumnHidden(10,true);
         productsGrid.setColValidators(["NotEmpty","NotEmpty"]);    
-        productsGrid.attachHeader("#text_filter,#text_filter,#select_filter,#select_filter");        
+        productsGrid.attachHeader("#text_filter,#text_filter");        
         productsGrid.setRegFilter(productsGrid, 0);    
-        productsGrid.setRegFilter(productsGrid, 1);                   
+        productsGrid.setRegFilter(productsGrid, 1);              
         var dpProductsGrid = new dataProcessor("api/products", "js");                
         dpProductsGrid.init(productsGrid);
         dpProductsGrid.enableDataNames(true);
@@ -741,23 +607,19 @@ function productsInit(cell) {
                 }
             }                    
         });                
-        productsGrid.fill = function(i = 0){	
-            productsGridToolBar.setItemImage("Redo", "fa fa-spin fa-spinner");
-            this.clearAll();
-            //productsGrid.parse(products, "js");
-            ajaxGet("api/products/group/" + i + "/" + localStorage.language, '', function(data){                                     
-                if (data && data.success){                                    
-                    productsGrid.parse(data.data, "js");
-                    productsGridToolBar.setItemImage("Redo", "fa fa-refresh");
-                }
-            });                        
+        productsGrid.zaladuj = (i = 0) => {	              
+//            productsGrid.fill("api/prodgroups/products/" + i + "/" + localStorage.language, 
+//                                    productsGridToolBar);
+            var productsData = fillProductsData(i);
+            productsGrid.sync(productsData);
         }; 
-        productsGrid.fill(0);
+        productsGrid.zaladuj(0);
+        //productsGrid.sync(productsData);
 /**
  * D
  */        
 
-        if (write) {
+        if (userCanWrite) {
             var productFormStruct = [
                 {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                 
                 {type: "combo", name: "product_group_id",  required:true,  label: _("Grupa produktu"), options: []},		
@@ -792,81 +654,71 @@ function productsInit(cell) {
             ];  
         }
         var productForm = productsLayout.cells("d").attachForm(productFormStruct);
-        var productTypeCombo = productForm.getCombo("product_type_id");
-        var productGroupCombo = productForm.getCombo("product_group_id"); 
+        var productTypeCombo = productForm.getCombo("product_type_id");  
+        productTypeCombo.sync(productTypesData);
+        var productGroupCombo = productForm.getCombo("product_group_id");        
+        productGroupCombo.sync(productGroupsData);
         productForm.attachEvent("onButtonClick", function(name){
             switch(name) {
                 case "save": {
-                    if (productsGrid.getSelectedRowId()){
-                        try {                  
-                            productForm.save(); 
-                            dpProductsGrid.sendData();
-                            dpProductsGrid.setUpdated(productsGrid.getSelectedRowId(), false, "updated");
-                            dhtmlx.alert({
-                                title:_("Wiadomość"),
-                                text:_("Zapisane!")
-                            });                        
-                        } catch (e){
-                            console.log(e);
-                            dhtmlx.alert({
-                                title:_("Wiadomość"),
-                                text:_("Zmiany nie zostały zapisane. \n\
-                                        Wybierz produkt, który chcesz zmienic ta wprowadź zmiany ponownie!")
-                            });
-                        }
-                    } else {
-                        ajaxPost("api/products", productForm.getFormData(), function(data) {
-                            if (data && data.success) {
-                                productsGrid.fill();
-                                dhtmlx.alert({
-                                    title:_("Wiadomość"),
-                                    text:_("Zapisane!")
-                                });                                          
-                            } else {
-                                dhtmlx.alert({
-                                    title:_("Wiadomość"),
-                                    text:_("Zmiany nie zostały zapisane. \n\
-                                            Wprowadź ponownie!")
-                                });                                         
-                            }
-                        });                      
+                    if (productsGrid.getSelectedRowId()){                        
+                        editProduct(productForm.getFormData(), 
+                                        productsGrid.getSelectedRowId());
+                    } else {                        
+                        addProduct(productForm.getFormData());                                              
+                        productsGrid.zaladuj(productGroupCombo.getSelectedValue());
                     }
                 };break;              
             }
         });        
-        productForm.bind(productsGrid); 
-       
-        var typeProductCombo = productsGrid.getCombo(2); 
-        var groupProductCombo = productsGrid.getCombo(3);        
-        ajaxGet("api/prodtypes", '', function(data) {
-            if (data.success && data.data) {
-                data.data.forEach(function(rec){
-                    typeProductCombo.put(rec.id, rec.name);
-                });
-                productTypeCombo.addOption(data.data); 
-            }
-        });                
-        ajaxGet("api/prodgroups", '', function(data) {
-            if (data.success && data.data) {
-                data.data.forEach(function(rec){
-                    groupProductCombo.put(rec.id, rec.name);
-                });
-                productGroupCombo.addOption(data.data);
-            }
-        });        
+        productForm.bind(productsGrid);  
         
-        
-
+        setDefaultView = function() {
+            productsGroupsTree.unselectItem(productsGroupsTree.getSelectedId());
+            //typesProductsGrid.unselectRowById(typesProductsGrid.getSelectedRowId());
+            typesProductsGrid.sync(productTypesData);
+            productsGrid.zaladuj(0);
+            productForm.clear();  
+            productForm.bind(productsGrid);
+        };
+        setDefaultView();
     }
 }
 
-function addProduct() {
-    
+function addProduct(data) {
+    ajaxPost("api/products", data, function(data) {
+        if (data && data.success) {
+            dhtmlx.alert({
+                title:_("Wiadomość"),
+                text:_("Zapisane!")
+            });                                          
+        } else {
+            dhtmlx.alert({
+                title:_("Wiadomość"),
+                text:_("Zmiany nie zostały zapisane. \n\
+                        Wprowadź ponownie!")
+            });                                         
+        }
+    });     
 }
 
-function addComponentForProduct() {
-    
+function editProduct(data, id) {
+    ajaxGet("api/products/" + id + "/edit", data, function(data){
+        if (data && data.success) {
+            dhtmlx.alert({
+                title:_("Wiadomość"),
+                text:_("Zapisane!")
+            });  
+        } else {
+            dhtmlx.alert({
+                title:_("Wiadomość"),
+                text:_("Zmiany nie zostały zapisane. \n\
+                        Wprowadź ponownie!")
+            }); 
+        }
+    });     
 }
+
 
 function addTaskForProduct(productId, tasksGrid) {    
     if (productId) {
@@ -883,19 +735,9 @@ function addTaskForProduct(productId, tasksGrid) {
         var addingWindow = createWindow(_("Zadania"), 300, 300);
         var addingForm = createForm(formStruct, addingWindow);
         var tasksCombo = addingForm.getCombo("task_id");
-        ajaxGet("api/tasks", '', function(data){
-            if (data && data.success) {
-                tasksCombo.addOption(data.data);
-            } else {
-                dhtmlx.alert({
-                    title:_("Wiadomość"),
-                    text:_("Listę zadań nie było otrzymano. Wypełnij listę zadań \n\
-                            w rozdziale 'Zadania' albo odswież stronę.")
-                });                 
-            }
-        });
+        tasksCombo.sync(tasksData);
         addingForm.attachEvent("onButtonClick", function(name){
-            var data = this.getFormData();
+            var data = addingForm.getFormData();
             data.product_id = productId;
             if (name == "save") {
                 ajaxPost("api/products/addtask", data, function(data){
@@ -910,7 +752,7 @@ function addTaskForProduct(productId, tasksGrid) {
                     }
                 });
             }
-        });
+        });        
     } else {
         dhtmlx.alert({
             title:_("Wiadomość"),
@@ -988,6 +830,10 @@ function editTaskForProduct(id, productId, tasksGrid) {
         });           
     }     
 }
+
+
+
+
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {
     if (id == "products") {

@@ -1078,7 +1078,7 @@ var taskFormStruct = [
 function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, id = 0) {
     var grupyWindow = createWindow(_("Dodaj lub zmien grupe"), 300, 350);
     var grupyForm = createForm(groupFormStruct, grupyWindow);
-    //if we editing some group, we removing parent_grop combo, because 
+    //if we editing some group, we removing parentgrop combo, because 
     //we can drag groups and change parent group by that way
     if (id) {
         grupyForm.removeItem("parent_id");
@@ -1088,51 +1088,46 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
         ajaxGet(urlForParentCombo, '', function(data) {                    
                 dhxCombo.addOption(data.data);
         });  
-    } 
+    }   
+    grupyForm.addRecord = () => {
+        ajaxPost(urlForSaveButton, grupyForm.getFormData(), function(data){
+            if (data.success) {                                               
+                treeObj.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
+                if (data.data.parent_id) { treeObj.openItem(data.data.parent_id); }
+                treeObj.selectItem(data.data.id);  
+                grupyForm.setItemValue('name', '');
+            } else {
+                dhtmlx.alert({
+                    title:_("Wiadomość"),
+                    text:_("Błąd! Informacja nie została zapisana")
+                });  
+            }
+        });        
+    };
+    grupyForm.editRecord = () => {
+        ajaxGet(urlForSaveButton, grupyForm.getFormData(), function(data){  
+            if (data && data.success) {             
+                grupyWindow.close();
+                treeObj.setItemText(id, data.data.name);
+                if (data.data.parent_id) { treeObj.openItem(data.data.parent_id); }
+                treeObj.selectItem(data.data.id);                                                
+            } else {
+                dhtmlx.alert({
+                    title:_("Wiadomość"),
+                    text:_("Błąd! Zmiany nie zostały zapisane")
+                });  
+            }
+        });        
+    };
+    grupyForm.saveEvent = (id = 0) => {
+        id ? grupyForm.editRecord() : grupyForm.addRecord();
+    };
+    
     grupyForm.attachEvent("onKeyUp",function(inp, ev, name, value){
         if (name == 'name') {
             if (grupyForm.getItemValue('name') !== '') {                
                 if (ev.code == 'Enter') {
-                    if (id) {                    
-                        ajaxGet(urlForSaveButton, grupyForm.getFormData(), function(data){  
-                            if (data && data.success) {             
-                                grupyWindow.close();
-                                treeObj.setItemText(id, data.data.name);
-                                if (data.data.parent_id) {
-                                    treeObj.openItem(data.data.parent_id);
-                                }
-                                treeObj.selectItem(data.data.id);
-                                dhtmlx.alert({
-                                    title:_("Wiadomość"),
-                                    text:_("Zapisane")
-                                });                                
-                            } else {
-                                dhtmlx.alert({
-                                    title:_("Wiadomość"),
-                                    text:_("Błąd! Zmiany nie zostały zapisane")
-                                });  
-                            }
-                        });
-                    } else {                   
-                        ajaxPost(urlForSaveButton, grupyForm.getFormData(), function(data){
-                            if (data.success) {                                               
-                                treeObj.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
-                                if (data.data.parent_id) {
-                                    treeObj.openItem(data.data.parent_id);
-                                }
-                                treeObj.selectItem(data.data.id);
-                                dhtmlx.alert({
-                                    title:_("Wiadomość"),
-                                    text:_("Zapisane")
-                                });
-                            } else {
-                                dhtmlx.alert({
-                                    title:_("Wiadomość"),
-                                    text:_("Błąd! Informacja nie została zapisana")
-                                });  
-                            }
-                        });                
-                    }
+                    grupyForm.saveEvent(id);
                 }                
             }
         }
@@ -1140,46 +1135,7 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
     grupyForm.attachEvent("onButtonClick", function(name){
         switch (name){
             case 'save':{
-                if (id) {                    
-                    ajaxGet(urlForSaveButton, grupyForm.getFormData(), function(data){  
-                        if (data && data.success) {             
-                            grupyWindow.close();
-                            treeObj.setItemText(id, data.data.name);
-                            if (data.data.parent_id) {
-                                treeObj.openItem(data.data.parent_id);
-                            }
-                            treeObj.selectItem(data.data.id);   
-                            dhtmlx.alert({
-                                title:_("Wiadomość"),
-                                text:_("Zapisane")
-                            });                             
-                        } else {
-                            dhtmlx.alert({
-                                title:_("Wiadomość"),
-                                text:_("Błąd! Zmiany nie zostały zapisane")
-                            });  
-                        }
-                    });
-                } else {                   
-                    ajaxPost(urlForSaveButton, grupyForm.getFormData(), function(data){
-                        if (data.success) {                                         
-                            treeObj.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
-                            if (data.data.parent_id) {
-                                treeObj.openItem(data.data.parent_id);
-                            }
-                            treeObj.selectItem(data.data.id);
-                            dhtmlx.alert({
-                                title:_("Wiadomość"),
-                                text:_("Zapisane")
-                            });                            
-                        } else {
-                            dhtmlx.alert({
-                                title:_("Wiadomość"),
-                                text:_("Błąd! Informacja nie została zapisana")
-                            });  
-                        }
-                    });                
-                }
+                grupyForm.saveEvent(id);
             };break;         
             case 'cancel':{
                 grupyForm.reset();
@@ -1242,7 +1198,9 @@ function createWindow (caption, height, width) {
 
 function createForm(formStruct, windowObj){
     var myForm = windowObj.attachForm(formStruct, true);
+    myForm.setFocusOnFirstActive();
     myForm.enableLiveValidation(true);
+    myForm.adjustParentSize();
 //    myForm.attachEvent("onValidateError", function (name, value, result){
 //        dhtmlx.message({
 //            title: "Close",
@@ -1256,12 +1214,22 @@ function createForm(formStruct, windowObj){
                     var input = myForm.getInput(id); 
                     input.autocomplete = "off";                     
                 };break;
-            case 'calendar': {myForm.getInput(id).autocomplete = "off"; };break;
+            case 'calendar': {
+                    var dhxCalendar = myForm.getCalendar("date_start");    
+                    //dhxCalendar.setDateFormat("%d.%m.%Y");
+//                    var d = new Date();                    
+//                    var date = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+//                    dhxCalendar.setDateFormat("%Y-%m-%d");
+                    dhxCalendar.setDate("04.12.2019");
+                    console.log(dhxCalendar);
+                };break;
             case 'combo':    {
                 var myCombo = myForm.getCombo(id);
-                myCombo.enableAutocomplete();
+                myCombo.enableAutocomplete();                               
                 myCombo.attachEvent("onKeyPressed", function(keyCode){
-                    if (keyCode != 40 && keyCode != 38) {    
+                    //if pressed button is not "up" or "down" arrow button 
+                    //or is not enter button 
+                    if (keyCode != 40 && keyCode != 38 && keyCode != 13) {    
                         var input = myCombo.getComboText().trim().toLowerCase().split(' ');
                         var mask = "";
                         for (var i = 0; i < input.length; i++) {
@@ -1270,8 +1238,11 @@ function createForm(formStruct, windowObj){
                         myCombo.filter(function(opt){
                             return opt.text.match(new RegExp(mask,"ig"))!=null;
                         }, true);                       
-                    }
+                    }                    
                 });
+                myCombo.attachEvent("onFocus", function(){
+                    myCombo.setFocus();
+                });                
             }
         };           
     });
@@ -1315,17 +1286,37 @@ function createForm(formStruct, windowObj){
         switch (name){  
             case 'save':{
                 myForm.validate();
+                myForm.setItemFocus(myForm.getFirstActive());
             };break;            
             case 'cancel':{
-                myForm.clear();
-                
+                myForm.clear();                
             };break;
         }
     });
-    myForm.adjustParentSize();
+//    myForm.attachEvent("onKeyUp",function(inp, ev, name, value){               
+//        if (ev.code == 'Enter') {
+//            //myForm.save();
+//            //var dhxCalendar = myForm.getCalendar("date_start");
+//        }    
+//        console.log(ev.inp);
+//    });     
+    
     
     return myForm;         
 }
+
+function getNowDate() {
+    var d = new Date();    
+    var year = d.getFullYear();
+    var month = d.getMonth() + 1;
+    var day = d.getDate();
+    if (day < 10) {
+        day = '0' + day;
+    }
+    var date = year + '-' + month + '-' + day;
+    return date;   
+}
+
 
 Date.prototype.getWeekNumber = function(){
     var d = new Date(+this);
@@ -1335,15 +1326,15 @@ Date.prototype.getWeekNumber = function(){
 };   
 
 dhtmlXGridObject.prototype.deleteMyRecordById = function(url){
-    var thisGrid = this;
-    var id = thisGrid.getSelectedRowId();                                       
+    const thisGrid = this;
+    let id = thisGrid.getSelectedRowId();                                       
     if (id) {
         dhtmlx.confirm({
             title: _("Ostrożność"),                                    
             text: _("Czy na pewno chcesz usunąć te informacje?"),
             callback: function(result){
                 if (result) {                                     
-                    ajaxDelete(url + id,'', function(data){
+                    ajaxDelete(url + '/' + id,'', function(data){
                         if (data && data.success) {
                             thisGrid.deleteRow(id);
                         } else {
@@ -1387,20 +1378,21 @@ dhtmlXGridObject.prototype.setRegFilter = function(gridObj, colIdx) {
     };
 }
         
-dhtmlXGridObject.prototype.fill = function(url) {
+dhtmlXGridObject.prototype.fill = function(url, toolbar = null) {
+    if (toolbar) { toolbar.setItemImage("Redo", "fa fa-spin fa-spinner"); }
     var thisGrid = this;
     thisGrid.clearAll();
     ajaxGet(url, '', function(data){                                     
-        if (data && data.success){                                    
-            thisGrid.parse(data.data, "js");
-        } else {
-            dhtmlx.alert({
-                title:_("Wiadomość"),
-                text:_("Komponenty nie zostały załadowane. \n\
-                        Odśwież stronę!")
-            });                    
-        }
-    });     
+            if (data && data.success){                                    
+                thisGrid.parse(data.data, "js");
+                if (toolbar) { toolbar.setItemImage("Redo", "fa fa-refresh"); }
+            } else {
+                dhtmlx.alert({
+                    title:_("Wiadomość"),
+                    text:_(data.message)
+                });                    
+            }
+        });     
 };
 
 dhtmlXGridObject.prototype.getUnCheckedRows = function(col_ind){
@@ -1413,21 +1405,81 @@ dhtmlXGridObject.prototype.getUnCheckedRows = function(col_ind){
 		return d.join(",");
 };
 
-//dhtmlXGridObject.prototype._in_header_stat_total_sum=function(tag,index,data){//'stat_rowcount'-counter name
-//    var calc=function(){                       // function used for calculations
-//        var total_sum = 0;
-//        var data;
-//        this.forEachRow(function(id){
-//            data = this.getRowData(id);
-//            total_sum += (data.price * data.amount); 
-//        });
-//        return total_sum;
-//    };
-//    this._stat_in_header(tag,calc,index,data); // default statistics handler processor
-//}; 
-                                                    
+
+var productGroupsData = new dhtmlXDataStore();
+var productTypesData  = new dhtmlXDataStore();
+var productsData      = new dhtmlXDataStore();
+var tasksData         = new dhtmlXDataStore();
+
+        
+ajaxGet("api/prodtypes", '', function(data) {
+    if (data.success && data.data) {
+        productTypesData.parse(data.data);
+    }
+});                    
+ajaxGet("api/prodgroups", '', function(data) {
+    if (data.success && data.data) {
+        productGroupsData.parse(data.data);
+    }
+});        
+ajaxGet("api/prodgroups/products/0/" + localStorage.language, '', function(data) {
+    if (data.success && data.data) {
+        productsData.parse(data.data);
+    }
+});
+ajaxGet("api/tasks", '', function(data){
+    if (data && data.success) {
+        tasksData.parse(data.data);                
+    }
+});
+
+function fillProductsData(groupProduct) {
+    var productsData = new dhtmlXDataStore();
+    ajaxGet("api/prodgroups/products/" + groupProduct + "/" + localStorage.language, '', function(data){
+        if (data && data.success) {
+            productsData.parse(data.data);                
+        }
+    });
+    return productsData;
+} 
 
 
+var standartToolbar = {
+        iconset: "awesome",
+        items: [
+                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                {type: "separator", id: "sep3"},
+                {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+        ]
+};
+
+var emptyToolbar = {
+        iconset: "awesome",
+        items: [
+                {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+        ]
+};
+
+var treeStruct = {
+                skin: "dhx_web",    // string, optional, treeview's skin
+                iconset: "font_awesome", // string, optional, sets the font-awesome icons
+                multiselect: false,           // boolean, optional, enables multiselect
+                //checkboxes: true,           // boolean, optional, enables checkboxes
+                dnd: true,           // boolean, optional, enables drag-and-drop
+                context_menu: true           // boolean, optional, enables context menu			
+};
+                                                
+
+function getPermission(paragraph) {
+    var userData = JSON.parse(localStorage.getItem("userData")); 
+    userData.permissions.forEach(function(elem){
+        if (elem.name === paragraph) {
+            return elem.pivot.value;
+        }
+    });
+}
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 	if (id == "settings") {

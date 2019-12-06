@@ -57,6 +57,7 @@ Route::group([
     Route::get('/prodtypes/{prodtype}/translations', 'ProductTypeController@getTranslations');
     Route::resource('/prodtypes', 'ProductTypeController');            
     
+    Route::get('/prodgroups/products/{groups}/{locale?}', 'ProductGroupController@getProductsByGroups');      
     Route::get('/prodgroups/{prodgroup}/translations', 'ProductGroupController@getTranslations');
     Route::get('/prodgroups/grupytree/{locale?}', 'ProductGroupController@buildTree');       
     Route::resource('/prodgroups', 'ProductGroupController');
@@ -72,7 +73,7 @@ Route::group([
     Route::get('/products/tasks/{product}/{task}/edit', 'ProductController@editTask');  
     Route::get('/products/components/{product}', 'ProductController@getListComponents');  
     Route::get('/products/tasks/{product}', 'ProductController@getListTasks');      
-    Route::get('/products/group/{groups}/{locale?}', 'ProductController@productsByGroups');      
+    
     Route::resource('/products', 'ProductController');  
  
     

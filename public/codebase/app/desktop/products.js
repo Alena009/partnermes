@@ -18,9 +18,7 @@ function productsInit(cell) {
         productsLayout.cells("b").setWidth(280);        
         productsLayout.cells("c").setText(_("Produkty"));        
         productsLayout.cells("d").setText(_("Informacja o produktu"));         
-        productsLayout.cells("d").setWidth(300);    
-        
-        
+        productsLayout.cells("d").setWidth(320);            
 /**
  * A
  */             
@@ -84,7 +82,7 @@ function productsInit(cell) {
  */        
         var typesProductsGridToolBar;
         userCanWrite ? typesProductsGridToolBar = productsLayout.cells("b").attachToolbar(standartToolbar):
-                typesProductsGridToolBar = productsLayout.cells("b").attachToolbar(emptyToolbar);        
+            typesProductsGridToolBar = productsLayout.cells("b").attachToolbar(emptyToolbar);        
         typesProductsGridToolBar.attachEvent("onClick", function(btn) {
             switch (btn){
                     case 'Add':{
@@ -251,8 +249,7 @@ function productsInit(cell) {
             switch (name){
                 case 'Copy': {
                     var selectedId = productsGrid.getSelectedRowId();
-                    if (selectedId) {                       
-                        var rowData = productsGrid.getRowData(selectedId);                                                                                         
+                    if (selectedId) {
                         productForm.setFormData(rowData);
                         productForm.setItemValue("kod", "");
                         productForm.attachEvent("onButtonClick", function(name){
@@ -608,13 +605,10 @@ function productsInit(cell) {
             }                    
         });                
         productsGrid.zaladuj = (i = 0) => {	              
-//            productsGrid.fill("api/prodgroups/products/" + i + "/" + localStorage.language, 
-//                                    productsGridToolBar);
             var productsData = fillProductsData(i);
             productsGrid.sync(productsData);
         }; 
         productsGrid.zaladuj(0);
-        //productsGrid.sync(productsData);
 /**
  * D
  */        
@@ -671,6 +665,7 @@ function productsInit(cell) {
                 };break;              
             }
         });        
+
         productForm.bind(productsGrid);  
         
         setDefaultView = function() {
@@ -718,7 +713,6 @@ function editProduct(data, id) {
         }
     });     
 }
-
 
 function addTaskForProduct(productId, tasksGrid) {    
     if (productId) {

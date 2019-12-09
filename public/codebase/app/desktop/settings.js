@@ -1405,7 +1405,6 @@ dhtmlXGridObject.prototype.getUnCheckedRows = function(col_ind){
 		return d.join(",");
 };
 
-
 var productGroupsData = new dhtmlXDataStore();
 var productTypesData  = new dhtmlXDataStore();
 var productsData      = new dhtmlXDataStore();
@@ -1469,8 +1468,7 @@ var treeStruct = {
                 //checkboxes: true,           // boolean, optional, enables checkboxes
                 dnd: true,           // boolean, optional, enables drag-and-drop
                 context_menu: true           // boolean, optional, enables context menu			
-};
-                                                
+};                                            
 
 function getPermission(paragraph) {
     var userData = JSON.parse(localStorage.getItem("userData")); 

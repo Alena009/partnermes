@@ -882,16 +882,7 @@ function settingsInit(cell) {
                     var translationsLayout = translationsSidebar.cells(id).attachLayout("2U");
                     translationsLayout.cells("a").setText(_("Wpisy"));
                     translationsLayout.cells("b").setText(_("Tłumaczenia"));
-                    recordsGridToolBar = translationsLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-//                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-//                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-//                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-//                                    {type: "separator", id: "sep3"},
-                                    {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
-                            ]
-                    });                    
+                    recordsGridToolBar = translationsLayout.cells("a").attachToolbar(emptyToolbar);                    
                     var recordsGrid = translationsLayout.cells("a").attachGrid({
                         image_path:'codebase/imgs/',
                         columns: [
@@ -1063,7 +1054,7 @@ var groupFormStruct = [
 ];
 
 var taskFormStruct = [
-        {type:"fieldset",  offsetTop:0, label:_("Nowe zlecenie"), width:253, list:[  
+        {type:"fieldset",  offsetTop:0, label:_("Nowe zadanie"), width:253, list:[  
                 {type:"combo",  name: "task_group_id", label:_("Grupa"), options: [], inputWidth: 150},                                                                
                 {type:"input",  name:"kod",          label:_("Kod"),         offsetTop:13, labelWidth:80},                                                                				
                 {type:"input",  name:"name",         label:_("Imie"),        offsetTop:13, labelWidth:80},                 
@@ -1201,13 +1192,6 @@ function createForm(formStruct, windowObj){
     myForm.setFocusOnFirstActive();
     myForm.enableLiveValidation(true);
     myForm.adjustParentSize();
-//    myForm.attachEvent("onValidateError", function (name, value, result){
-//        dhtmlx.message({
-//            title: "Close",
-//            type: "alert-warning",
-//            text: "Required field " + name + " is empty!"            
-//        });
-//    });
     myForm.forEachItem(function(id){ 
         switch(myForm.getItemType(id)){
             case 'input':    {
@@ -1246,25 +1230,7 @@ function createForm(formStruct, windowObj){
             }
         };           
     });
-                    
-//    myForm.attachEvent("onChange", function (name, value, state){
-//        if ((name.indexOf("price") !== -1) ||                
-//                (name.indexOf("weight") !== -1) ||
-//                (name.indexOf("area") !== -1)) {
-//            //var re = /^\d[0-9,]+\d$/;
-//            //var re = /^\d{1,8}([,\.])?\d{1,2}$/;
-//            var re = /^\d{1,8}([\.])?\d{1,2}$/;
-//            if (!re.test(value)) {
-//                myForm.setItemValue(name, "");
-//            }            
-//        } else if (name.indexOf("amount") !== -1) {
-//            var re = /^\d+$/;            
-//            if (!re.test(value)) {
-//                myForm.setItemValue(name, "");
-//            }            
-//        }        
-//    });  
-//    
+
     var dateEndCombo   = myForm.getCombo("num_week");
     if (dateEndCombo) {
         var numCurrentWeek = new Date().getWeekNumber();
@@ -1292,16 +1258,7 @@ function createForm(formStruct, windowObj){
                 myForm.clear();                
             };break;
         }
-    });
-//    myForm.attachEvent("onKeyUp",function(inp, ev, name, value){               
-//        if (ev.code == 'Enter') {
-//            //myForm.save();
-//            //var dhxCalendar = myForm.getCalendar("date_start");
-//        }    
-//        console.log(ev.inp);
-//    });     
-    
-    
+    });   
     return myForm;         
 }
 
@@ -1316,7 +1273,6 @@ function getNowDate() {
     var date = year + '-' + month + '-' + day;
     return date;   
 }
-
 
 Date.prototype.getWeekNumber = function(){
     var d = new Date(+this);
@@ -1404,33 +1360,6 @@ dhtmlXGridObject.prototype.getUnCheckedRows = function(col_ind){
 		},true);
 		return d.join(",");
 };
-
-var productGroupsData = new dhtmlXDataStore();
-var productTypesData  = new dhtmlXDataStore();
-var productsData      = new dhtmlXDataStore();
-var tasksData         = new dhtmlXDataStore();
-
-        
-ajaxGet("api/prodtypes", '', function(data) {
-    if (data.success && data.data) {
-        productTypesData.parse(data.data);
-    }
-});                    
-ajaxGet("api/prodgroups", '', function(data) {
-    if (data.success && data.data) {
-        productGroupsData.parse(data.data);
-    }
-});        
-ajaxGet("api/prodgroups/products/0/" + localStorage.language, '', function(data) {
-    if (data.success && data.data) {
-        productsData.parse(data.data);
-    }
-});
-ajaxGet("api/tasks", '', function(data){
-    if (data && data.success) {
-        tasksData.parse(data.data);                
-    }
-});
 
 function fillProductsData(groupProduct) {
     var productsData = new dhtmlXDataStore();

@@ -13,7 +13,7 @@ class TaskRepository extends BaseRepository
     {        
         $task = $this->model::find($id);
         
-        $task->task_group_name = $task->group->name;
+        $task->task_group_name = $task->group->name;        
         $task->text            = $task->name;  
         $task->value           = (string)$task->id;
         $task->key             = $task->id;

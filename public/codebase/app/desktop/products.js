@@ -551,23 +551,7 @@ function productsInit(cell) {
                 };break;
             }
         });        
-        var productsGrid = productsLayout.cells("c").attachGrid({
-            image_path:'codebase/imgs/',
-            columns: [  
-                //{id: "checked", type:"ch", width: 25},
-                {label: _("Kod"), width: 100,id: "kod",type: "ed",sort: "str",  align: "left"},
-                {label: _("Imie produktu"),width: 100,id: "name",type: "ed", sort: "str", align: "left"},                
-                {label: _("Opakowanie"), width: 100, id: "pack", type: "ed", sort: "str", align: "left"}, 
-                {label: _("Opis"), width: 100, id: "description", type: "ed", sort: "str", align: "left"},
-                {label: _("Masa, kg"), width: 50, id: "weight", type: "edn", sort: "str", align: "left"},
-                {label: _("Wysokość, mm"), width: 50, id: "height", type: "edn", sort: "str", align: "left"},
-                {label: _("Szerokość, mm"), width: 50, id: "width", type: "edn", sort: "str", align: "left"},
-                {label: _("Długość, mm"), width: 50, id: "length", type: "edn", sort: "str", align: "left"},
-                {label: _("Powierzchnia, m2"), width: 50, id: "area", type: "edn", sort: "str", align: "left"},
-                {label: _("Typ produktu"), width: 100,id: "product_type_id", type: "ro", sort: "str", align: "left"},
-                {label: _("Grupa produktu"),width: 100,id: "product_group_id", type: "ro",sort: "str", align: "left"}
-            ]
-        });   
+        var productsGrid = productsLayout.cells("c").attachGrid(productsGridStructure);   
         productsGrid.setColumnHidden(9,true);
         productsGrid.setColumnHidden(10,true);
         productsGrid.setColValidators(["NotEmpty","NotEmpty"]);    
@@ -612,42 +596,8 @@ function productsInit(cell) {
 /**
  * D
  */        
-
-        if (userCanWrite) {
-            var productFormStruct = [
-                {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                 
-                {type: "combo", name: "product_group_id",  required:true,  label: _("Grupa produktu"), options: []},		
-                {type: "combo", name: "product_type_id", required:true,   label: _("Typ produktu"),   options: []},		
-                {type: "input", name: "kod",     required:true,            label: _("Kod produktu")},
-                {type: "input", name: "name",     required:true,          label: _("Nazwa produktu")},                                      
-                {type: "input", name: "height",             label: _("Wysokość, mm")},
-                {type: "input", name: "width",     required:true,          label: _("Szerokość, mm")},
-                {type: "input", name: "length",             label: _("Długość, mm")},
-                {type: "input", name: "weight",    required: true,         label: _("Masa, kg"), numberFormat:"0,000.00"},
-                {type: "input", name: "area",      required:true,          label: _("Powierzchnia, m2"), numberFormat:"0,000.00"},
-                {type: "input", name: "pack",        required:true,        label: _("Opakowanie")},
-                {type: "input", name: "description",  required:true,       label: _("Opis"), rows: 3},
-                {type: "block", name: "block",         blockOffset: 0, position: "label-left", list: [
-                    {type: "button", name: "save",   value: _("Zapisz"), offsetTop:18},                              
-                ]}
-            ];  
-        } else {
-            var productFormStruct = [
-                {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                 
-                {type: "combo", name: "product_group_id",  required:true,  label: _("Grupa produktu"), options: []},		
-                {type: "combo", name: "product_type_id", required:true,   label: _("Typ produktu"),   options: []},		
-                {type: "input", name: "kod",     required:true,            label: _("Kod produktu")},
-                {type: "input", name: "name",     required:true,          label: _("Nazwa produktu")},                                      
-                {type: "input", name: "height",             label: _("Wysokość, mm")},
-                {type: "input", name: "width",     required:true,          label: _("Szerokość, mm")},
-                {type: "input", name: "length",             label: _("Długość, mm")},
-                {type: "input", name: "weight",    required: true,         label: _("Masa, kg"), numberFormat:"0,000.00"},
-                {type: "input", name: "area",      required:true,          label: _("Powierzchnia, m2"), numberFormat:"0,000.00"},
-                {type: "input", name: "pack",        required:true,        label: _("Opakowanie")},
-                {type: "input", name: "description",  required:true,       label: _("Opis"), rows: 3}                
-            ];  
-        }
         var productForm = productsLayout.cells("d").attachForm(productFormStruct);
+        if (!userCanWrite) productForm.hideItem("buttonsBlock");     
         var productTypeCombo = productForm.getCombo("product_type_id");  
         productTypeCombo.sync(productTypesData);
         var productGroupCombo = productForm.getCombo("product_group_id");        
@@ -665,12 +615,10 @@ function productsInit(cell) {
                 };break;              
             }
         });        
-
         productForm.bind(productsGrid);  
         
         setDefaultView = function() {
             productsGroupsTree.unselectItem(productsGroupsTree.getSelectedId());
-            //typesProductsGrid.unselectRowById(typesProductsGrid.getSelectedRowId());
             typesProductsGrid.sync(productTypesData);
             productsGrid.zaladuj(0);
             productForm.clear();  
@@ -825,9 +773,60 @@ function editTaskForProduct(id, productId, tasksGrid) {
     }     
 }
 
+var productGroupsData = new dhtmlXDataStore();
+var productTypesData  = new dhtmlXDataStore();
+var productsData      = new dhtmlXDataStore();
 
+ajaxGet("api/prodtypes", '', function(data) {
+    if (data.success && data.data) {
+        productTypesData.parse(data.data);
+    }
+});                    
+ajaxGet("api/prodgroups", '', function(data) {
+    if (data.success && data.data) {
+        productGroupsData.parse(data.data);
+    }
+});        
+ajaxGet("api/prodgroups/products/0/" + localStorage.language, '', function(data) {
+    if (data.success && data.data) {
+        productsData.parse(data.data);
+    }
+});
 
+var productsGridStructure = {
+    image_path:'codebase/imgs/',
+    columns: [  
+        {label: _("Kod"), width: 100,id: "kod",type: "ed",sort: "str",  align: "left"},
+        {label: _("Imie produktu"),width: 100,id: "name",type: "ed", sort: "str", align: "left"},                
+        {label: _("Opakowanie"), width: 100, id: "pack", type: "ed", sort: "str", align: "left"}, 
+        {label: _("Opis"), width: 100, id: "description", type: "ed", sort: "str", align: "left"},
+        {label: _("Masa, kg"), width: 50, id: "weight", type: "edn", sort: "str", align: "left"},
+        {label: _("Wysokość, mm"), width: 50, id: "height", type: "edn", sort: "str", align: "left"},
+        {label: _("Szerokość, mm"), width: 50, id: "width", type: "edn", sort: "str", align: "left"},
+        {label: _("Długość, mm"), width: 50, id: "length", type: "edn", sort: "str", align: "left"},
+        {label: _("Powierzchnia, m2"), width: 50, id: "area", type: "edn", sort: "str", align: "left"},
+        {label: _("Typ produktu"), width: 100,id: "product_type_id", type: "ro", sort: "str", align: "left"},
+        {label: _("Grupa produktu"),width: 100,id: "product_group_id", type: "ro",sort: "str", align: "left"}
+    ]
+};
 
+var productFormStruct = [
+    {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                 
+    {type: "combo", name: "product_group_id",  required:true,  label: _("Grupa produktu"), options: []},		
+    {type: "combo", name: "product_type_id", required:true,   label: _("Typ produktu"),   options: []},		
+    {type: "input", name: "kod",     required:true,            label: _("Kod produktu")},
+    {type: "input", name: "name",     required:true,          label: _("Nazwa produktu")},                                      
+    {type: "input", name: "height",             label: _("Wysokość, mm")},
+    {type: "input", name: "width",     required:true,          label: _("Szerokość, mm")},
+    {type: "input", name: "length",             label: _("Długość, mm")},
+    {type: "input", name: "weight",    required: true,         label: _("Masa, kg"), numberFormat:"0,000.00"},
+    {type: "input", name: "area",      required:true,          label: _("Powierzchnia, m2"), numberFormat:"0,000.00"},
+    {type: "input", name: "pack",        required:true,        label: _("Opakowanie")},
+    {type: "input", name: "description",  required:true,       label: _("Opis"), rows: 3},
+    {type: "block", name: "block", id:"buttonsBlock", blockOffset: 0, position: "label-left", list: [
+        {type: "button", name: "save",   value: _("Zapisz"), offsetTop:18}
+    ]}
+]; 
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {
     if (id == "products") {

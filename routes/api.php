@@ -41,8 +41,6 @@ Route::group([
     Route::get('/orders/history/{orderId}', 'OrderController@history');
     Route::resource('/orders', 'OrderController');    
     
-
-    
     Route::get('/positions/byorder/{order}', 'OrderPositionController@getPositionsByOrder');    
     Route::get('/positions/forprod', 'OrderPositionController@forManufacturing');    
     Route::get('/positions/forzlec', 'OrderPositionController@forZlecenia');    
@@ -65,15 +63,14 @@ Route::group([
     Route::get('/products/{product}/translations', 'ProductController@getTranslations');
     Route::post('/products/addtask', 'ProductController@addTaskForProduct');        
     Route::get('/products/availabletasks/{productId}', 'ProductController@listAvailableTasks');    
-   // Route::get('/products/tasks/{product?}', 'ProductController@listTasksForProduct');       
+    //Route::get('/products/tasks/{product?}', 'ProductController@listTasksForProduct');       
     Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup');     
     Route::get('/products/deleteseveral/{products}', 'ProductController@deleteSeveralProducts');     
     Route::get('/products/deletetask/{product}/{task}', 'ProductController@deleteTask');  
     Route::get('/products/tasks/changepriority/{product}/{stask}/{task}', 'ProductController@changePriorityTask');  
     Route::get('/products/tasks/{product}/{task}/edit', 'ProductController@editTask');  
     Route::get('/products/components/{product}', 'ProductController@getListComponents');  
-    Route::get('/products/tasks/{product}', 'ProductController@getListTasks');      
-    
+    Route::get('/products/tasks/{product}', 'ProductController@getListTasks');          
     Route::resource('/products', 'ProductController');  
  
     

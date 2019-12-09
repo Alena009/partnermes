@@ -3,10 +3,10 @@ var productsTasksLayout;
 function productsTasksInit(cell) {
     if (productsTasksLayout == null) {
         var userData = JSON.parse(localStorage.getItem("userData")); 
-        var write;
+        var userCanWrite;
         userData.permissions.forEach(function(elem){
             if (elem.name == 'products_tasks') {
-                write = elem.pivot.value;
+                userCanWrite = elem.pivot.value;
             }
         });
         var productsTasksLayout = cell.attachLayout("1C");
@@ -29,21 +29,9 @@ function productsTasksInit(cell) {
  * Grupy zadan
  * 
  */
-                if (write) {
-                    var tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: [                             
-                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                            ]
-                    });
-                } else {
-                    var tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: []
-                    });
-                }
+                var tasksGroupsToolBar;
+                userCanWrite ? tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar(standartToolbar):
+                        tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar(emptyToolbar);
                 tasksGroupsToolBar.attachEvent("onClick", function(btn) {
                     switch (btn){
                             case 'Add':{			                                        
@@ -81,7 +69,7 @@ function productsTasksInit(cell) {
                         ajaxGet("api/taskgroups/" + id + "/edit?", data, ''); 
                         return true;
                 });  
-                tasksGroupsTree.fill = function(i=null){	
+                tasksGroupsTree.fill = function(){	
                     ajaxGet("api/taskgroups/grupytree", '', function(data) {                    
                         if (data && data.success){      
                             tasksGroupsTree.clearAll();                            
@@ -106,53 +94,44 @@ function productsTasksInit(cell) {
                         return true;
                 });    
                 
-                if (write) {
-                    var tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                    {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
-                                    {id: "Edit", type: "button", text: _("Edytuj"),  img: "fa fa-edit"},
-                                    {id: "Del",  type: "button", text: _("Usuń"),    img: "fa fa-minus-square"},
-                                    {type: "separator", id: "sep3"},
-                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"},
-                            ]
-                    }); 
-                } else {
-                    var tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"},
-                            ]
-                    });
-                }
-                tasksGridToolBar.attachEvent("onClick", function(id) {
-                    switch (id){
-                        case 'Add': {
-                            var windowForm = createWindow(_("Nowe zadanie"), 300, 300);
-                            var form = createForm(taskFormStruct, windowForm);
-                            var groupsCombo = form.getCombo("task_group_id");
-                            ajaxGet("api/taskgroups", "", function(data){                                                                                                        
-                                if (data && data.success) {
-                                    groupsCombo.addOption(data.data);
-                                }                                           
-                            });                            
+                var tasksGridToolBar;
+                userCanWrite ? tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar(standartToolbar):                 
+                        tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar(emptyToolbar);                
+                tasksGridToolBar.attachEvent("onClick", function(name) {
+                    if (name === 'Add' || name === 'Edit') {
+                        var windowForm = createWindow(_("Nowe zadanie"), 300, 300);
+                        var form = createForm(taskFormStruct, windowForm);
+                        var groupsCombo = form.getCombo("task_group_id");
+                        groupsCombo.sync(tasksGroupsData);                 
+                    }                    
+                    switch (name){
+                        case 'Add': {                           
                             form.attachEvent("onButtonClick", function(name){
                                 switch (name){
-                                    case 'save':{ 
-                                        //var idSelectedGroup = tasksGroupsTree.getSelectedId();
+                                    case 'save':{                                         
                                         ajaxPost("api/tasks", form.getFormData(), function(data){                                                                                                        
                                             if (data && data.success) {
                                                 tasksGrid.fill(data.data.task_group_id);
                                             }                                           
                                         });
                                     };break;
-                                    case 'cancel':{
-                                        form.clear();    
-                                    };break;
                                 }
                             });                                
                         };break;
-                        case 'Edit': {  };break;
+                        case 'Edit': {                           
+                            var taskId   = tasksGrid.getSelectedRowId();
+                            var taskData = tasksGrid.getRowData(taskId);                                                          
+                            form.setFormData(taskData);
+                            form.attachEvent("onButtonClick", function(name){
+                                if (name === 'save') {                                         
+                                    ajaxGet("api/tasks/" + taskId + "/edit", taskData, function(data){                                                                                                        
+                                        if (data && data.success) {
+                                            tasksGrid.fill(data.data.task_group_id);
+                                        }                                           
+                                    });                                    
+                                }
+                            });                                 
+                        };break;
                         case 'Del': {
                             var id = tasksGrid.getSelectedRowId();
                             if (id) {
@@ -194,10 +173,13 @@ function productsTasksInit(cell) {
                             width: 150,
                             type: "coro",                            
                             align: "left"     
-                        }                      
-                    ],
-                        multiselect: true
-                });                
+                        },
+                        {                            
+                            id: "task_group_id"    
+                        }                        
+                    ]
+                });   
+                tasksGrid.setColumnHidden(3,true);
                 tasksGrid.fill = function(i = 0) {
                     this.clearAll();
                     var ids = Array();
@@ -209,7 +191,7 @@ function productsTasksInit(cell) {
                     });	                    
                 };
                 tasksGrid.fill(0);
-                var grupyCombo = tasksGrid.getCombo(3);
+                var grupyCombo = tasksGrid.getCombo(2);
                 ajaxGet("api/taskgroups", "", function(data){                                                            
                     if (data.success && data.data) {
                         data.data.forEach(function(group){
@@ -222,7 +204,6 @@ function productsTasksInit(cell) {
                 dpTasksGrid.enableDataNames(true);
                 dpTasksGrid.setTransactionMode("REST");
                 dpTasksGrid.enablePartialDataSend(true);
-                dpTasksGrid.enableDebug(true);
                 dpTasksGrid.setUpdateMode("row", true);
                 dpTasksGrid.attachEvent("onBeforeDataSending", function(id, state, data){
                     data.id = id;
@@ -291,7 +272,7 @@ function productsTasksInit(cell) {
                     zadaniaGrid.fill(id);     
                 });    
 
-                if (write) {
+                if (userCanWrite) {
                     var zadaniaToolBar = productsTasksLayout.cells("b").attachToolbar({
                             iconset: "awesome",
                             items: [
@@ -446,6 +427,20 @@ function productsTasksInit(cell) {
                 );
     }
 }
+
+var tasksData       = new dhtmlXDataStore();     
+var tasksGroupsData = new dhtmlXDataStore(); 
+        
+ajaxGet("api/tasks", '', function(data){
+    if (data && data.success) {
+        tasksData.parse(data.data);                
+    }
+});
+ajaxGet("api/taskgroups", "", function(data){                                                            
+    if (data.success && data.data) {
+        tasksGroupsData.parse(data.data);
+    }
+});
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {
     if (id == "products_tasks") {

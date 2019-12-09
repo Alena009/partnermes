@@ -148,9 +148,7 @@ function loginFormShow(callback2={}){
 function logged(){    	
         ajaxPost("api/logged",'',function(data){
 		//var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
-		if (data.success===true){
-			console.log(data);      
-                        
+		if (data.success===true){                        
 			appInit();                        
 			//window.dhx4.attachEvent("onload", loginFormShow);
 			this.isLogged = !0;
@@ -298,60 +296,6 @@ function axiosQuery(method, url, params, callback, inputHeaders = {}) {
     });   
 }
 
-
-
-
-//function ajaxQuery(method, url, params, callback) {
-//    
-//    var csrf_token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-//
-//    var headers = {        
-//        'Authorization': localStorage.getItem('token'),
-//        'X-CSRF-TOKEN': csrf_token,
-//        'Content-Type': 'application/json'
-//    };    
-//    
-//    var afterCall = function(loader, data, xhr){
-//			var evs;
-//			if (loader.xmlDoc.status == 200) {
-//				var str = loader.xmlDoc.responseText;
-//				var data = (window.JSON && JSON.parse("["+str+"]")) ? JSON.parse("["+str+"]") : false;
-//				var success = (data && data[0] && data[0].success) ? (data[0].success) : false;
-//
-//				if (data && success){
-//					if (callback && callback.success){
-//						callback['success'](data);
-//					}else if (callback){
-//						callback(data);
-//					}else{
-//						return data;
-//					}
-//				}else if (data && !success && data.code==402){
-//					loginFormShow();
-//				}else{
-//					if (callback && callback.failure){
-//						callback['failure'](data);
-//					}else if (callback){
-//						callback(data);
-//					}else{
-//						return false;
-//					}
-//				}
-//			} else {
-//				alert("ERROR!!! \n \n System Error code: " + loader.xmlDoc.status);
-//			}
-//		};    
-//    
-//    return dhx.ajax.query({
-//        method: method,
-//        url: url,
-//        data: params,
-//        async:true,
-//        callback: afterCall,
-//        headers: headers
-//    });    
-//}
-
 function _(txt=''){
     return txt;
 }
@@ -367,7 +311,7 @@ function historyApi() {
 }
 
 /*
- * function listen changes of hash forr hash navigation
+ * function listen changes of hash for hash navigation
  */
 window.onhashchange = function() { 
     var hash = location.hash;

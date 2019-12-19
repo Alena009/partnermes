@@ -192,61 +192,6 @@ function ajaxDelete(url, params, callback) {
     return axiosQuery('delete', url, params, callback);
 }
 
-//async function axiosQuery(method, url, params, callback, inputHeaders = {}) {  
-//
-//    var headers = inputHeaders;
-//    headers.Authorization = 'Bearer ' + localStorage.token;
-//   
-//    var requestBody = {
-//        method: method,
-//        url: url,               
-//        headers: headers   
-//    };
-//    
-//    if (method == 'get') {
-//        requestBody.params = params;        
-//    } else {
-//        requestBody.data = params;
-//    };
-//    
-//    const data = await axios.request(requestBody).then(function(response){			
-//        var data = response.data;                
-//        if (response.status == 200) {
-//            //console.log(data);
-//            var success = data.success;
-//            if (success) {
-//                if (callback) { callback(data); } else { return data; };                
-//            }
-////            var success = (data.success) ? (data.success) : false;
-////            if (success){
-////                if (callback && callback.success){                                            
-////                    callback['success'](data);
-////                }else if (callback){                                            
-////                    callback(data);
-////                }else{
-////                    return data;
-////                }
-////            }else if (data && !success && data.code==402){
-////                    loginFormShow();
-////            }else{
-////                if (callback && callback.failure){
-////                        callback['failure'](data);
-////                }else if (callback){
-////                        callback(data);
-////                }else{
-////                        return false;
-////                }
-////            }
-//        } else {
-//            alert("ERROR!!! \n \n System Error code: " + loader.xmlDoc.status);
-//        }
-//    }).catch(function (error) {
-//        console.log(error.message);
-//    });   
-//    
-//    return data;
-//}
-
 function axiosQuery(method, url, params, callback, inputHeaders = {}) { 
     var headers = inputHeaders;
     headers.Authorization = 'Bearer ' + localStorage.token;

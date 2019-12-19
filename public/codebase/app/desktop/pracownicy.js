@@ -3,7 +3,6 @@ var pracownicyLayout;
 var pracownicyForm;
 
 function pracownicyInit(cell) {
-
 	if (pracownicyLayout == null) {
                 var userData = JSON.parse(localStorage.getItem("userData")); 
                 var write;
@@ -19,7 +18,10 @@ function pracownicyInit(cell) {
                     pracownicyLayout.cells("c").setText(_("Informacja o pracowniku"));
 		    pracownicyLayout.cells("a").setWidth(280);		
 		    pracownicyLayout.setAutoSize("a");   
-                
+/**
+ * A 
+ *
+ */                
 		var grupyTree = pracownicyLayout.cells("a").attachTreeView({
 			skin: "dhx_web",    // string, optional, treeview's skin
 			iconset: "font_awesome", // string, optional, sets the font-awesome icons
@@ -37,18 +39,6 @@ function pracownicyInit(cell) {
                     });                       
                 };                
                 grupyTree.build();                
-//		grupyTree.attachEvent("onBeforeDrag",function(id){
-//			console.log("grupyTree.onBeforeDrag", arguments);
-//			return true;
-//		});
-//		grupyTree.attachEvent("onDragOver",function(id){
-//			console.log("grupyTree.onDragOver", arguments);
-//			return true;
-//		});
-//		grupyTree.attachEvent("onBeforeDrop",function(id){
-//			console.log("grupyTree.onBeforeDrop", arguments);
-//			return true;
-//		});
 		grupyTree.attachEvent("onDrop",function(id){
                     //console.log("grupyTree.onDrop", arguments);
                     var parent_id = arguments[1];
@@ -112,7 +102,10 @@ function pracownicyInit(cell) {
                             };break;    
 			}
 		});   
-                
+/**
+ * B
+ * 
+ */                
                 if (write) {
                     var pracownicyGridToolBar = pracownicyLayout.cells("b").attachToolbar({
                             iconset: "awesome",
@@ -318,8 +311,7 @@ function pracownicyInit(cell) {
                                     pracownicyGrid.parse((data.data), "js");
                                 }
 			});                        
-                };
-                
+                };                
 		var dpPracownicyGrid = new dataProcessor("api/users", "js");                
                 dpPracownicyGrid.init(pracownicyGrid);
                 dpPracownicyGrid.enableDataNames(true);
@@ -328,35 +320,11 @@ function pracownicyInit(cell) {
                 dpPracownicyGrid.enableDebug(true);
                 dpPracownicyGrid.setUpdateMode("row", true);
                 dpPracownicyGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-                    console.log(data);
                     data.id = id;                    
                     ajaxGet("api/users/" + id + "/edit", data, function(data){                                                            
                         console.log(data);
                     });
-                });                
-
-//                pracownicyGrid.attachEvent("onRowSelect", function() { 
-//                        pracownicyForm.attachEvent("onButtonClick", function(name){
-//                                    switch (name){
-//                                        case 'save':{                                                           
-//                                            var userId = pracownicyGrid.getSelectedRowId();
-//                                            updateUser(userId, pracownicyForm.getFormData());
-//                                        };break;
-//                                        case 'cancel':{
-//                                            //pracownicyForm.updateValues();                   
-//                                        };break;
-//                                    }
-//                                });                                 
-//                        var selectedId = pracownicyGrid.getSelectedRowId(); 
-//                        pracownicyForm.fillAvatar(selectedId);  
-//                });
-                
-//                var searchElem = pracownicyGridToolBar.getInput('szukaj');
-//                pracownicyGrid.makeFilter(searchElem, 0, true);
-//                pracownicyGrid.makeFilter(searchElem, 1, true);                                 
-//                pracownicyGrid.makeFilter(searchElem, 2, true);                                 
-//                pracownicyGrid.filterByAll();                
-                
+                });                                         
 		var grupyFormAddData = [
 			{type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
 				{type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),     options: [{text: "None", value: "0"}], inputWidth: 150},                                
@@ -372,11 +340,10 @@ function pracownicyInit(cell) {
 				{type:"button", name:"cancel",     	value:"Anuluj",   		offsetTop:18}
 			]}
 		];                
-//                
-//                var dpGrupyTree = new dataProcessor("api/departaments", "js");
-//                dpGrupyTree.init(grupyTree);
-//                dpGrupyTree.setTransactionMode("REST");
-                
+/**
+ * C 
+ * 
+ */                
                 if (write) {        
                     pracownikFormStruct = [         
                             {type: "file",     name: "upload_photo", hidden: true},
@@ -545,8 +512,7 @@ function pracownicyInit(cell) {
                         //console.log(base64Encode(JSON.stringify(grupy)));
                         console.log(args);
                  });
-	}
-        pracownicyGrid.zaladuj(0);        
+	}                
 }
 
 function pracownicyFillForm(id) {

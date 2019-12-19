@@ -24,16 +24,8 @@ class OrderController extends BaseController
     {
         app()->setLocale($locale);
 
-        $orders = $this->repository->getModel()::orderBy("id", "desc")->get();    
-        if ($orders) {
-            foreach ($orders as $order) {
-                $order->client_name  = $order->client->name;               
-                $order->text         = $order->kod;
-                $order->value        = $order->id;
-                $date = new \DateTime($order->date_end);
-                $order->num_week     = $date->format("W");
-                $order->hasopenworks = count($order->positionsInWork());            
-            }            
+        $orders = $this->repository->getAllWithAdditionals();                
+        if ($orders) {          
             return response()->json(['data' => $orders, 'success' => true]);        
         } else {
             return response()->json(['data' => [], 'success' => false, 
@@ -72,20 +64,21 @@ class OrderController extends BaseController
         
         $order = new Order();
         $order->kod = $request['kod'];   
-        $order->client_id = $request['client_id']; 
+        $order->client_id  = $request['client_id']; 
         $order->date_start = $request['date_start'];
-        $order->date_end = $date_end;
+        $order->date_end   = $date_end;
         
         if ($order->save()) {
-            //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-                $order->translateOrNew($locale)->name        = $request['name'];            
-                $order->translateOrNew($locale)->description = $request['description'];            
-            //}
-            $order->save();             
-            $order->changeStatus();
-        }     
-
-        return response()->json(['data' => $order, 'success' => true]);        
+            $order->translateOrNew($locale)->name        = $request['name'];            
+            $order->translateOrNew($locale)->description = $request['description'];            
+            $order->save(); 
+            $order = $this->repository->getWithAdditionals($order->id);
+            
+            return response()->json(['data' => $order, 'success' => true]);                    
+        } else {
+            return response()->json(['data' => [], 'success' => false, 
+                'message' => 'Saving new order false']);        
+        }        
     } 
     
     public function edit(Request $request, $id)
@@ -94,7 +87,7 @@ class OrderController extends BaseController
         $locale = app()->getLocale();
 
         $validator = $request->validate([
-            'kod'        => 'required|unique:orders|max:45',
+            'kod'        => 'required|unique:orders,kod,'.$id.'|max:45',
             'date_start' => 'required'
         ]);
         
@@ -122,14 +115,16 @@ class OrderController extends BaseController
         $order->date_end   = $date_end;
         
         if ($order->save()) {
-            //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-                $order->translateOrNew($locale)->name        = $request['name'];            
-                $order->translateOrNew($locale)->description = $request['description'];            
-            //}
+            $order->translateOrNew($locale)->name        = $request['name'];            
+            $order->translateOrNew($locale)->description = $request['description'];            
             $order->save(); 
-        }         
-        
-        return response()->json(['data' => $order, 'success' => true]);                
+            $order = $this->repository->getWithAdditionals($order->id);
+            
+            return response()->json(['data' => $order, 'success' => true]);                    
+        } else {
+            return response()->json(['data' => [], 'success' => false, 
+                'message' => 'Saving new order false']);        
+        }              
     }
     
     public function history($orderId)

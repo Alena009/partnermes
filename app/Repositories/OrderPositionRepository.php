@@ -10,40 +10,46 @@ class OrderPositionRepository extends BaseRepository
         return "App\Models\OrderPosition";
     }
 
-    public function getPositionWithAdditionalFields($ids)
+    public function getWithAdditionals($id)
     {
-        $positions = $this->find($ids);
+        $position = []; 
+        $position = $this->model::find($id);
         
-        if ($positions) {
-            foreach ($positions as $position) {
-                $product                      = $position->product;
-                $position->text               = $product->name;
-                $position->value              = $position->id;        
-                $position->product_id         = $product->id;
-                $position->product_name       = $product->name;
-                $position->product_kod        = $position->product->kod;
-                $position->order_kod          = $position->order->kod;            
-                $position->order_name         = $position->order->name;       
-                $position->order_position_id  = $position->id;      
-                $position->order_position_kod = $position->kod;                
-                $position->key                = $position->id;
-                $position->label              = $position->kod;
-                $date = new \DateTime($position->date_delivery);
-                $position->num_week           = $date->format("W");
-                $position->summa              = $position->price * $position->amount;        
-                $position->countWorks         = $position->operations->count("id");
-                $position->declared           = $position->product->tasks->count() * $position->amount;
-                $position->closed             = false; 
-                if ($position->declared == $position->countWorks) {
-                    $position->closed = true; 
-                }
-                               
-            }
+        if ($position) {
+            $product                      = $position->product;
+            $position->text               = $product->name;
+            $position->value              = $position->id;        
+            $position->product_id         = $product->id;
+            $position->product_name       = $product->name;
+            $position->product_kod        = $position->product->kod;
+            $position->order_kod          = $position->order->kod;            
+            $position->order_name         = $position->order->name;       
+            $position->order_position_id  = $position->id;      
+            $position->order_position_kod = $position->kod;                
+            $position->key                = $position->id;
+            $position->label              = $position->kod;
+            $date = new \DateTime($position->date_delivery);
+            $position->num_week           = $date->format("W");
+            $position->summa              = $position->price * $position->amount;        
+            $position->countWorks         = $position->operations->count("id");
+            $position->declared           = $position->product->tasks->count() * $position->amount;
+            $position->closed             = false; 
+            if ($position->declared == $position->countWorks) {
+                $position->closed = true; 
+            }                                           
         }
         
-        return $positions;        
+        return $position;        
     }  
   
+    public function getFewWithAdditionals($ids)
+    {
+        $data = [];
+        foreach ($ids as $id) {
+            $data[] = $this->getWithAdditionals($id);            
+        }
+        return $data;
+    }
     
     /**
      * Returns all positions with parameters 
@@ -51,9 +57,9 @@ class OrderPositionRepository extends BaseRepository
      * 
      * @return array
      */
-    public function getAllPositionsWithAdditionalFields()
+    public function getAllWithAdditionals()
     {        
-        return $this->getPositionWithAdditionalFields($this->model::all()->pluck("id"));
+        return $this->getFewWithAdditionals($this->model::all()->pluck("id"));
     }
      
     /**
@@ -63,31 +69,7 @@ class OrderPositionRepository extends BaseRepository
      */
     public function getForManufacturingPositions()
     {
-//        $positions = [];
-//        $model = $this->getModel();
-//        $freePositions = DB::select("SELECT * FROM orders_positions pos
-//                                            where pos.id not in 
-//                                            (select order_position_id from declared_works 
-//                                            where product_id = pos.product_id)");
-//        $positions = $model::find(array_column($freePositions, "id"))->pluck("id");
-//        if ($positions) {
-//            return $this->getPositionWithAdditionalFields($positions);
-//        } else {
-//            return $positions;
-//        }    
-//        $positions = [];
-//        $model = $this->getModel();
-//        $positions = $model::doesntHave('operations')->pluck("id");        
-//        if ($positions) {
-//            return $this->getPositionWithAdditionalFields($positions);
-//        } else {
-//            return $positions;
-//        } 
-        
-        $data = [];
-        $positionsIds = $this->model::where("status", "=", 1)->pluck("id");
-        $data = $this->getPositionWithAdditionalFields($positionsIds);
-        return $data;        
+        return $this->getFewWithAdditionals($this->model::where("status", "=", 1)->pluck("id"));        
     }     
     
     public function isPositionAvailableForCreatingZlecenie($position)
@@ -108,27 +90,4 @@ class OrderPositionRepository extends BaseRepository
         
         return 1;
     }     
-    
-    /**
-     * Returns result array
-     * 
-     * @param array of objects $declaredWorks
-     * @return array
-     */
-    public function getResultPositionsWithAdditionalFields($positions)
-    {
-        $result = [];
-        
-        if ($positions) {
-            foreach ($positions as $position) {
-                $result[] = $this->
-                        getPositionWithAdditionalFields($position->id);    
-            }        
-        }
-        
-        return $result;   
-    }
-
-
-
 }

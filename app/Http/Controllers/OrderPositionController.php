@@ -206,14 +206,6 @@ class OrderPositionController extends BaseController
      */    
     public function forManufacturing()
     {        
-        
-//        if ($positions) {            
-//            $data = $this->repository->getResultPositionsWithAdditionalFields($positions);
-//            foreach ($data as $position) {
-//                $position->available = $this->isPositionAvailableForCreatingZlecenie($position);
-//            }
-//        }
-        
         return $this->getResponseResult($this->repository->getForManufacturingPositions());        
     }   
     
@@ -228,8 +220,7 @@ class OrderPositionController extends BaseController
         $positionsIds = OrderPosition::whereIn("product_id", $productsWithTasks)
                 ->pluck("id");
         
-        return $this->getResponseResult($this->repository->
-                getPositionWithAdditionalFields($positionsIds));        
+        return $this->getResponseResult($this->repository->getFewWithAdditionals($positionsIds));        
     }      
     
     /**
@@ -257,9 +248,14 @@ class OrderPositionController extends BaseController
         $orderPosition->price         = $request['price'];
         $orderPosition->description   = $request['description'];
         $orderPosition->date_delivery = $date_end;
-        $orderPosition->save();
-
-        return $this->getResponseResult($orderPosition);        
+        
+        if ($orderPosition->save()) {
+            return response()->json(['data' => $this->repository->getWithAdditionals($orderPosition->id),
+                'success' => true]);
+        } else {
+            return response()->json(['data' => [], 'success' => false, 
+                'message' => 'Saving new position failed']);
+        }        
     }     
     
     /**
@@ -384,20 +380,26 @@ class OrderPositionController extends BaseController
         $orderPosition->date_delivery = $date_end;
         $orderPosition->status        = $request['status'];
         $orderPosition->date_status   = $request['date_status'];
+        
         if ($orderPosition->save()) {
-            return response()->json(['data' => OrderPosition::find($id), 'success' => true]);                
+            return response()->json(['data' => $this->repository->getWithAdditionals($orderPosition->id),
+                'success' => true]);
         } else {
-            return response()->json(['data' => [], 'success' => false]);                
-        }  
+            return response()->json(['data' => [], 'success' => false, 
+                'message' => 'Saving new position failed']);
+        }
     }
     
     public function getPositionsByOrder($orderId)
-    {
-        $positions = [];
-        $positionsIds = OrderPosition::where("order_id", "=", $orderId)->pluck("id");
+    {    
+        $positions = $this->repository->getFewWithAdditionals(OrderPosition::where("order_id", "=", $orderId)->pluck("id"));
         
-        return $this->getResponseResult($this->repository->
-                getPositionWithAdditionalFields($positionsIds));        
+        if ($positions) {
+            return response()->json(['data' => $positions, 'success' => true]);  
+        } else {
+            return response()->json(['data' => $positions, 'success' => false, 
+                'message' => 'Failed']);             
+        }      
     }
 
 }

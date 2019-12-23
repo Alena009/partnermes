@@ -210,9 +210,8 @@ function projectsInit(cell) {
                             var orderId = projectsGrid.getSelectedRowId();                                                          
                             if (orderId) {
                                 var order = projectsGrid.getRowData(orderId); 
-                                var positionsWindow = createWindow(_("Nowa pozycja"), 350, 350);
-                                var positionsForm = createForm(orderPositionFormStruct, 
-                                    positionsWindow);
+                                var positionsWindow = createWindow(_("Nowa pozycja"), 350, 550);
+                                var positionsForm = createForm(orderPositionFormStruct, positionsWindow);
                                 positionsForm.setItemFocus("kod");
                                 var productsCombo = positionsForm.getCombo("product_id");
                                 var numWeekCombo = positionsForm.getCombo("num_week");
@@ -229,7 +228,8 @@ function projectsInit(cell) {
                                         ajaxPost("api/positions", data, function(data){                                                   
                                             if (data.success && data.data) {
                                                 positionsGrid.addRow(data.data.id, '');
-                                                positionsGrid.setRowData(data.data.id, data.data);                                                 
+                                                positionsGrid.setRowData(data.data.id, data.data);
+                                                positionsGrid.callEvent("onGridReconstructed", []);
                                             } else {
                                                 dhtmlx.alert({
                                                     title:_("Wiadomość"),
@@ -253,7 +253,7 @@ function projectsInit(cell) {
                             var positionId = positionsGrid.getSelectedRowId();
                             if (positionId) {
                                 var position = positionsGrid.getRowData(positionId);
-                                var positionsWindow = createWindow(_("Edutyj pozycje"), 350, 350);
+                                var positionsWindow = createWindow(_("Edutyj pozycje"), 350, 550);
                                 var positionsForm = createForm(orderPositionFormStruct, positionsWindow);                                    
                                 positionsForm.setFormData(position);  
                                 var productsCombo = positionsForm.getCombo("product_id");
@@ -332,7 +332,9 @@ function projectsInit(cell) {
                             data.date_status = new Date();
                             ajaxGet("api/positions/" + data.id + "/edit", data, function(data){
                                 if (data.success && data.data) {                            
-                                    positionsGrid.fill(projectsGrid.getSelectedRowId());
+                                    //positionsGrid.fill(projectsGrid.getSelectedRowId());
+                                    positionsGrid.setRowData(data.data.id, data.data);
+                                    positionsGrid.callEvent("onRowCreated", [data.id]);
                                 }
                             });                                                        
                         };break;                         
@@ -342,7 +344,8 @@ function projectsInit(cell) {
                             data.date_status = new Date();
                             ajaxGet("api/positions/" + data.id + "/edit", data, function(data){
                                 if (data.success && data.data) {                            
-                                    positionsGrid.fill(projectsGrid.getSelectedRowId());
+                                    positionsGrid.setRowData(data.data.id, data.data);
+                                    positionsGrid.callEvent("onRowCreated", [data.id]);
                                 }
                             });                         
                         };break;                              
@@ -416,7 +419,7 @@ function projectsInit(cell) {
                             positionsGrid.parse(data.data, "js");
                         }
                     });			
-                };
+                };                
 
                 var historyGrid = projectsTabbar.tabs("history").attachGrid({
                     image_path:'codebase/imgs/',
@@ -537,18 +540,6 @@ function editOrder(id, data, grid) {
 //	projectsChart.load(A.server+"chart/"+id+".json?r="+new Date().getTime(),"json");
 //	// remember loaded project
 //	projectsChartId = id;
-//}
-//
-//function projectsFillForm(id) {
-//	// update form
-//	var data = projectsForm.getFormData();
-//	for (var a in data) {
-//		var index = projectsGrid.getColIndexById(a);
-//		if (index != null && index >=0) data[a] = String(projectsGrid.cells(id, index).getValue()).replace(/\&amp;?/gi,"&");
-//	}
-//	projectsForm.setFormData(data);
-//	// update chart
-//	updateChart(id);
 //}
 
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){

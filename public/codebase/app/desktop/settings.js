@@ -1343,10 +1343,10 @@ dhtmlXGridObject.prototype.fill = function(url, toolbar = null) {
                 thisGrid.parse(data.data, "js");
                 if (toolbar) { toolbar.setItemImage("Redo", "fa fa-refresh"); }
             } else {
-                dhtmlx.alert({
-                    title:_("Wiadomość"),
-                    text:_(data.message)
-                });                    
+//                dhtmlx.alert({
+//                    title:_("Wiadomość"),
+//                    text:_(data.message)
+//                });                    
             }
         });     
 };

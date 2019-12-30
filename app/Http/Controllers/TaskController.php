@@ -47,14 +47,34 @@ class TaskController extends BaseController
         if ($task->save()) {
             $task->translateOrNew('pl')->name = $request['name'];                        
             $success = $task->save();
-        }              
-
-        //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-            
-        //}       
+        }        
+        $task->task_group_name = $task->group->name;
 
         return response()->json(['success' => $success, 'data' => $task]);        
     } 
+    
+    /**
+     * Create new task with translations
+     * 
+     * @param array $request
+     * @return response
+     */
+    public function edit(Request $request, $id)
+    {
+        $task = [];
+        $success = false;
+        $locale = app()->getLocale();
+        
+        $task = parent::edit($request, $id);
+        
+        if ($task['success']) { 
+            $task = $task['data'];
+            $task->translateOrNew($locale)->name = $request['name']; 
+            $success = $task->save();    
+        }         
+
+        return response()->json(['success' => $success, 'data' => $task]);        
+    }     
     
     /**
      * Gets list tasks by tasks groups ids

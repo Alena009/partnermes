@@ -1042,7 +1042,7 @@ function settingsInit(cell) {
 }
 
 var groupFormStruct = [
-        {type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
+        {type:"fieldset",  offsetTop:0, label:_("Grupa"), width:253, list:[                                
                 {type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),        options: [{text: "None", value: "0"}], inputWidth: 150},                                
                 {type:"input",  name:"name",    	label:_("Imie grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
                 {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
@@ -1054,7 +1054,7 @@ var groupFormStruct = [
 ];
 
 var taskFormStruct = [
-        {type:"fieldset",  offsetTop:0, label:_("Nowe zadanie"), width:253, list:[  
+        {type:"fieldset",  offsetTop:0, label:_("Zadanie"), width:253, list:[  
                 {type:"combo",  name: "task_group_id", label:_("Grupa"), options: [], inputWidth: 150},                                                                
                 {type:"input",  name:"kod",          label:_("Kod"),         offsetTop:13, labelWidth:80},                                                                				
                 {type:"input",  name:"name",         label:_("Imie"),        offsetTop:13, labelWidth:80},                 

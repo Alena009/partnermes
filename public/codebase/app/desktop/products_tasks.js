@@ -29,6 +29,10 @@ function productsTasksInit(cell) {
  * Grupy zadan
  * 
  */
+/**
+ * A
+ * 
+ */
                 var tasksGroupsToolBar;
                 userCanWrite ? tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar(standartToolbar):
                         tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar(emptyToolbar);
@@ -69,15 +73,6 @@ function productsTasksInit(cell) {
                         ajaxGet("api/taskgroups/" + id + "/edit?", data, ''); 
                         return true;
                 });  
-                tasksGroupsTree.fill = function(){	
-                    ajaxGet("api/taskgroups/grupytree", '', function(data) {                    
-                        if (data && data.success){      
-                            tasksGroupsTree.clearAll();                            
-                            tasksGroupsTree.loadStruct(data.data);                           
-                        }                    
-                    });
-                };
-                tasksGroupsTree.fill();
                 tasksGroupsTree.attachEvent("onSelect",function(id, mode){  
                     if (mode) {
                         var grupy=tasksGroupsTree.getAllChecked();
@@ -92,55 +87,98 @@ function productsTasksInit(cell) {
                         tasksGrid.clearAll();
                         tasksGrid.fill(grupy);                        
                         return true;
-                });    
-                
+                });   
+                tasksGroupsTree.fill = function(){	
+                    ajaxGet("api/taskgroups/grupytree", '', function(data) {                    
+                        if (data && data.success){      
+                            tasksGroupsTree.clearAll();                            
+                            tasksGroupsTree.loadStruct(data.data);                           
+                        }                    
+                    });
+                };
+                tasksGroupsTree.fill();                
+/**
+ * B
+ * 
+ */                
                 var tasksGridToolBar;
                 userCanWrite ? tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar(standartToolbar):                 
                         tasksGridToolBar = tasksGroupsLayout.cells("b").attachToolbar(emptyToolbar);                
-                tasksGridToolBar.attachEvent("onClick", function(name) {
-                    if (name === 'Add' || name === 'Edit') {
-                        var windowForm = createWindow(_("Nowe zadanie"), 300, 300);
-                        var form = createForm(taskFormStruct, windowForm);
-                        var groupsCombo = form.getCombo("task_group_id");
-                        groupsCombo.sync(tasksGroupsData);                 
-                    }                    
+                tasksGridToolBar.attachEvent("onClick", function(name) {                 
                     switch (name){
-                        case 'Add': {                           
+                        case 'Add': { 
+                            var windowForm = createWindow(_("Zadanie"), 300, 300);
+                            var form = createForm(taskFormStruct, windowForm);
+                            var groupsCombo = form.getCombo("task_group_id");
+                            groupsCombo.sync(tasksGroupsData);                                  
                             form.attachEvent("onButtonClick", function(name){
-                                switch (name){
-                                    case 'save':{                                         
-                                        ajaxPost("api/tasks", form.getFormData(), function(data){                                                                                                        
-                                            if (data && data.success) {
-                                                tasksGrid.fill(data.data.task_group_id);
-                                            }                                           
-                                        });
-                                    };break;
-                                }
-                            });                                
-                        };break;
-                        case 'Edit': {                           
-                            var taskId   = tasksGrid.getSelectedRowId();
-                            var taskData = tasksGrid.getRowData(taskId);                                                          
-                            form.setFormData(taskData);
-                            form.attachEvent("onButtonClick", function(name){
-                                if (name === 'save') {                                         
-                                    ajaxGet("api/tasks/" + taskId + "/edit", taskData, function(data){                                                                                                        
-                                        if (data && data.success) {
-                                            tasksGrid.fill(data.data.task_group_id);
+                                if (name === 'save'){                                    
+                                    ajaxPost("api/tasks", form.getFormData(), function(data){                                                                                                        
+                                        if (data && data.success) {                                            
+                                            tasksGrid.addRow(data.data.id, '');
+                                            tasksGrid.setRowData(data.data.id, data.data);
                                         }                                           
                                     });                                    
                                 }
-                            });                                 
+                            });                                
+                        };break;
+                        case 'Edit': {                                  
+                            var taskId   = tasksGrid.getSelectedRowId();
+                            if (taskId) {
+                                var windowForm = createWindow(_("Zadanie"), 300, 300);
+                                var form = createForm(taskFormStruct, windowForm);
+                                var groupsCombo = form.getCombo("task_group_id");
+                                groupsCombo.sync(tasksGroupsData);                                 
+                                var taskData = tasksGrid.getRowData(taskId);                                                          
+                                form.setFormData(taskData);                                
+                                form.attachEvent("onButtonClick", function(name){
+                                    if (name === 'save') {                                         
+                                        ajaxGet("api/tasks/" + taskId + "/edit", form.getFormData(), function(data){                                                                                                        
+                                            if (data && data.success) {
+                                                tasksGrid.setRowData(data.data.id, data.data);  
+                                                dhtmlx.alert({
+                                                    title:_("Wiadomość"),
+                                                    text:_("Zapisane!")
+                                                });  
+                                                windowForm.close();
+                                            }                                           
+                                        });                                    
+                                    }
+                                }); 
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Wybierz zadanie!")
+                                });
+                            }
                         };break;
                         case 'Del': {
                             var id = tasksGrid.getSelectedRowId();
                             if (id) {
-                                ajaxDelete("api/tasks/" + id, "", function(data){
-                                    if (data && data.success){
-                                        tasksGrid.deleteRow(id);
+                            dhtmlx.confirm({
+                            title:_("Ostrożność"),                                    
+                            text:_("Czy na pewno chcesz usunąć?"),
+                            callback: function(result){
+                                        if (result) {
+                                            ajaxDelete("api/tasks/" + id, "", function(data){
+                                                if (data && data.success){
+                                                    tasksGrid.deleteRow(id);
+                                                } else {
+                                                    dhtmlx.alert({
+                                                        title:_("Wiadomość"),
+                                                        text:_("Błąd! Nie udało się usunąć!")
+                                                    });                                            
+                                                }
+                                            });                                            
+                                        }
                                     }
-                                });    
-                            }                                
+                                });                                    
+                            } else {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Wybierz zadanie!")
+                                });                                
+                            }                               
                         };break;
                         case 'Redo': {
                             tasksGroupsTree.fill();
@@ -151,35 +189,14 @@ function productsTasksInit(cell) {
                 var tasksGrid = tasksGroupsLayout.cells("b").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [
-                        {
-                            label: _("Kod"),
-                            width: 100,
-                            id: "kod",
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Name"),
-                            id: "name",
-                            width: 200,
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"     
-                        },
-                        {
-                            label: _("Grupa"),
-                            id: "task_group_name",
-                            width: 150,
-                            type: "coro",                            
-                            align: "left"     
-                        },
-                        {                            
-                            id: "task_group_id"    
-                        }                        
+                        {label: _("Kod"),   id: "kod",             width: 100, type: "ro", sort: "str", align: "left"},
+                        {label: _("Name"),  id: "name",            width: 200, type: "ed", sort: "str", align: "left"},
+                        {label: _("Grupa"), id: "task_group_name", width: 150, type: "coro",            align: "left"},
+                        {id: "task_group_id"}                        
                     ]
                 });   
                 tasksGrid.setColumnHidden(3,true);
+                tasksGrid.attachHeader(",,#select_filter");        
                 tasksGrid.fill = function(i = 0) {
                     this.clearAll();
                     var ids = Array();
@@ -191,87 +208,37 @@ function productsTasksInit(cell) {
                     });	                    
                 };
                 tasksGrid.fill(0);
-                var grupyCombo = tasksGrid.getCombo(2);
-                ajaxGet("api/taskgroups", "", function(data){                                                            
-                    if (data.success && data.data) {
-                        data.data.forEach(function(group){
-                            grupyCombo.put(group.id, group.name);
-                        });
-                    }
-                });
-                var dpTasksGrid = new dataProcessor("api/tasks", "js");                
-                dpTasksGrid.init(tasksGrid);
-                dpTasksGrid.enableDataNames(true);
-                dpTasksGrid.setTransactionMode("REST");
-                dpTasksGrid.enablePartialDataSend(true);
-                dpTasksGrid.setUpdateMode("row", true);
-                dpTasksGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-                    data.id = id;
-                    data.task_group_id = data.task_group_name;
-                    ajaxGet("api/tasks/" + id + "/edit", data, function(data){                                                            
-                        console.log(data.data);
-                    });
-                });
 /**
  * Products-tasks
  * 
- */                
+ */      
+/**
+ * A
+ * 
+ */
                 var productsGrid = productsTasksLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [                        
-                        {
-                            label: _("Kod"),                    
-                            id: "kod",
-                            type: "ro", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Imie produktu"),                    
-                            id: "name",
-                            type: "ro", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Typ produktu"),                    
-                            id: "product_type_name",
-                            type: "ro", 
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Grupa produktu"),                    
-                            id: "product_group_name",
-                            type: "ro", 
-                            sort: "str", 
-                            align: "left"
-                        }                          
-                    ],
-                        multiselect: true
+                        {label: _("Kod"),           id: "kod",                type: "ro", sort: "str", align: "left"},
+                        {label: _("Imie produktu"), id: "name",               type: "ro", sort: "str", align: "left"},
+                        {label: _("Typ produktu"),  id: "product_type_name",  type: "ro", sort: "str", align: "left"},
+                        {label: _("Grupa produktu"),id: "product_group_name", type: "ro", sort: "str", align: "left"}                          
+                    ]                        
                 });                
-                productsGrid.sync(productsData);
                 productsGrid.attachHeader("#text_filter,#text_filter,#select_filter,#select_filter");	
                 productsGrid.setRegFilter(productsGrid, 0);
-                productsGrid.setRegFilter(productsGrid, 1);
-                productsGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty","NotEmpty"]);        
-                var dpProductsGrid = new dataProcessor("api/products", "js");                
-                dpProductsGrid.init(productsGrid);
-                dpProductsGrid.enableDataNames(true);
-                dpProductsGrid.setTransactionMode("REST");
-                dpProductsGrid.enablePartialDataSend(true);
-                dpProductsGrid.enableDebug(true);
-                dpProductsGrid.setUpdateMode("row", true);
-                dpProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-                    data.id = id;
-                    ajaxGet("api/products/" + id + "/edit", data, function(data){                                                            
-                        console.log(data);
-                    });
-                });
+                productsGrid.setRegFilter(productsGrid, 1);                              
                 productsGrid.attachEvent("onRowSelect", function(id, ind) {            
                     zadaniaGrid.fill(id);     
-                });    
-
+                });  
+                productsGrid.zaladuj = (i = 0) => {	              
+                    productsGrid.fill("api/prodgroups/products/" + i + "/" + localStorage.language, null);
+                };                   
+                productsGrid.zaladuj(0);
+/**
+ * B
+ * 
+ */
                 if (userCanWrite) {
                     var zadaniaToolBar = productsTasksLayout.cells("b").attachToolbar({
                             iconset: "awesome",
@@ -286,12 +253,7 @@ function productsTasksInit(cell) {
                             ]                    
                     });   
                 } else {
-                    var zadaniaToolBar = productsTasksLayout.cells("b").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                    {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
-                            ]                    
-                    });                      
+                    var zadaniaToolBar = productsTasksLayout.cells("b").attachToolbar(emptyToolbar);                      
                 }
                 zadaniaToolBar.attachEvent("onClick", function(name) {
                     var formStruct = [
@@ -336,38 +298,10 @@ function productsTasksInit(cell) {
                 var zadaniaGrid = productsTasksLayout.cells("b").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [                        
-                        {
-                            label: _("Kod"),                  
-                            id: "kod",
-                            type: "ro",
-                            width: 50,
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Zadanie"),                    
-                            id: "name",
-                            type: "ro", 
-                            width: 150,
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {
-                            label: _("Czas, min"),                 
-                            id: "duration",
-                            type: "ed", 
-                            width: 50,
-                            sort: "str", 
-                            align: "left"
-                        },
-                        {                                     
-                            label: _("Kolejnosc"),                 
-                            id: "priority",
-                            type: "ro",
-                            width: 50,
-                            sort: "str", 
-                            align: "left"                    
-                        },
+                        {label: _("Kod"),       id: "kod",      type: "ro", width: 50,  sort: "str", align: "left"},
+                        {label: _("Zadanie"),   id: "name",     type: "ro", width: 150, sort: "str", align: "left"},
+                        {label: _("Czas, min"), id: "duration", type: "ro", width: 50,  sort: "str", align: "left"},
+                        {label: _("Kolejnosc"), id: "priority", type: "ro", width: 50,  sort: "str", align: "left"},
                         {id: "product_id"},
                         {id: "task_id"}
                     ]
@@ -376,28 +310,27 @@ function productsTasksInit(cell) {
                 zadaniaGrid.setColumnHidden(3,true);
                 zadaniaGrid.setColumnHidden(4,true);
                 zadaniaGrid.setColumnHidden(5,true);
-                zadaniaGrid.attachHeader("#select_filter,#select_filter");		
-                zadaniaGrid.setColValidators(["NotEmpty","NotEmpty","NotEmpty"]); 
+                zadaniaGrid.attachHeader("#select_filter,#select_filter");		                
                 zadaniaGrid.enableDragAndDrop(true);
-                zadaniaGrid.attachEvent("onKeyPress", function(code,cFlag,sFlag){
-                    if (code == 13) {
-                        var id = zadaniaGrid.getSelectedRowId();
-                        if (id) {
-                            var data = zadaniaGrid.getRowData(id);
-                            ajaxGet("api/products/tasks/" + data.product_id + "/" + id + "/edit", data, function(data){ 
-                                if (data && data.success) {
-                                    console.log(data);
-                                } else {
-                                    dhtmlx.alert({
-                                        title:_("Wiadomość"),
-                                        text:_("Zmiany nie zostały zapisane. \n\
-                                                Wprowadź zmiany ponownie!")
-                                    });
-                                }
-                            });
-                        }
-                    }                    
-                });          
+//                zadaniaGrid.attachEvent("onKeyPress", function(code,cFlag,sFlag){
+//                    if (code == 13) {
+//                        var id = zadaniaGrid.getSelectedRowId();
+//                        if (id) {
+//                            var data = zadaniaGrid.getRowData(id);
+//                            ajaxGet("api/products/tasks/" + data.product_id + "/" + id + "/edit", data, function(data){ 
+//                                if (data && data.success) {
+//                                    console.log(data);
+//                                } else {
+//                                    dhtmlx.alert({
+//                                        title:_("Wiadomość"),
+//                                        text:_("Zmiany nie zostały zapisane. \n\
+//                                                Wprowadź zmiany ponownie!")
+//                                    });
+//                                }
+//                            });
+//                        }
+//                    }                    
+//                });          
                 zadaniaGrid.fill = function(id = 0){	
                     zadaniaGrid.clearAll();					
                     ajaxGet("api/products/tasks/" + id, '', function(data){                                     
@@ -407,7 +340,7 @@ function productsTasksInit(cell) {
                     });                        
                 };  
                 zadaniaGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
-                    var productId = productsGrid.getSelectedRowId();           
+                    var productId = productsGrid.getSelectedRowId();                                    
                     ajaxGet("api/products/tasks/changepriority/" + productId + "/" + sId + "/" + tId, "", function(data){ 
                         if (data && data.success) {
                             console.log(data);

@@ -196,18 +196,18 @@ class ProductController extends BaseController
         return response()->json(['success' => true, 'data' => $result, 
             'message' => 'Task was successfull added']);     
     }
-//    
-//    public function editTask(Request $request, $productId, $taskId)
-//    {
-//        $result = DB::table('product_tasks')
-//            ->where("product_id", "=", $productId)
-//            ->where("task_id", "=", $taskId)
-//            ->update(['priority' => $request['priority'], 
-//                'duration' => $request['duration']]);        
-//        
-//        return response()->json(['success' => (boolean)$result, 'data' => $result]);     
-//    }    
-//    
+    
+    public function editTask(Request $request, $productId, $taskId)
+    {
+        $result = DB::table('product_tasks')
+            ->where("product_id", "=", $productId)
+            ->where("task_id", "=", $taskId)
+            ->update(['priority' => $request['priority'], 
+                'duration' => $request['duration']]);        
+        
+        return response()->json(['success' => (boolean)$result, 'data' => $result]);     
+    }    
+    
     public function changePriorityTask($productId, $sTaskId, $tTaskId)
     {        
         $product = $this->repository->get($productId);
@@ -222,11 +222,11 @@ class ProductController extends BaseController
                 }
             }
 
-            $result = DB::table('product_tasks')
+            DB::table('product_tasks')
                 ->where("product_id", "=", $productId)
                 ->where("task_id", "=", $sTaskId)
                 ->update(['priority' => $tTaskPriority]); 
-            $result = DB::table('product_tasks')
+            DB::table('product_tasks')
                 ->where("product_id", "=", $productId)
                 ->where("task_id", "=", $tTaskId)
                 ->update(['priority' => $sTaskPriority]);              

@@ -40,12 +40,13 @@ class TaskController extends BaseController
     {
         $success = false;
         
-        $task = new Task();
-        $task->kod = $request['kod'];           
-        $task->task_group_id = $request['task_group_id'];
+        $task                = new Task();
+        $task->kod           = $request->kod;           
+        $task->task_group_id = $request->task_group_id;
+        $task->for_order     = $request->for_order;
         
         if ($task->save()) {
-            $task->translateOrNew('pl')->name = $request['name'];                        
+            $task->translateOrNew('pl')->name = $request->name;                        
             $success = $task->save();
         }        
         $task->task_group_name = $task->group->name;
@@ -91,4 +92,21 @@ class TaskController extends BaseController
             return $this->getResponseResult($this->repository->allWithAdditionals());                              
         }            
     }
+    
+    /**
+     * Gets list tasks not for order
+     * 
+     * @param str $groups
+     * @return response 
+     */
+    public function notForOrder()
+    {   
+        $tasks = Task::where("for_order", "=", 0)->pluck("id");
+        if ($tasks) {  
+            return response()->json(['success' => true, 
+                'data' => $this->repository->getFewWithAdditionals($tasks)]);            
+        } else {
+            return response()->json(['success' => false, 'data' => []]); 
+        }            
+    }    
 }

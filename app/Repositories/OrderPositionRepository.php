@@ -17,7 +17,8 @@ class OrderPositionRepository extends BaseRepository
         
         if ($position) {
             $product                      = $position->product;
-            $position->text               = $product->name;
+            //$position->text               = $product->name;
+            $position->text               = $position->kod;
             $position->value              = $position->id;        
             $position->product_id         = $product->id;
             $position->product_name       = $product->name;
@@ -41,26 +42,6 @@ class OrderPositionRepository extends BaseRepository
         
         return $position;        
     }  
-  
-    public function getFewWithAdditionals($ids)
-    {
-        $data = [];
-        foreach ($ids as $id) {
-            $data[] = $this->getWithAdditionals($id);            
-        }
-        return $data;
-    }
-    
-    /**
-     * Returns all positions with parameters 
-     * which was added in the getPosition()
-     * 
-     * @return array
-     */
-    public function getAllWithAdditionals()
-    {        
-        return $this->getFewWithAdditionals($this->model::all()->pluck("id"));
-    }
      
     /**
      * Returns list of orders positions which does not have zlecenia 

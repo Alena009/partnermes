@@ -11,7 +11,7 @@ class Task extends BaseModel
     protected $table = "tasks";
     
     protected $fillable = [
-        'kod', 'name', 'task_group_id'
+        'kod', 'name', 'task_group_id', 'for_order'
     ];
     
     /* fields for translating */    
@@ -27,5 +27,5 @@ class Task extends BaseModel
         return $this->belongsToMany('App\Models\Product', 'product_tasks', 'task_id', 'product_id')
                 ->withPivot('duration', 'priority')
                 ->withTimestamps();        
-    }      
+    }    
 }

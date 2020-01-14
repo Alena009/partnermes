@@ -53,4 +53,12 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Models\Operation', 'user_id', 'id');
     } 
+    
+    /*
+     * get all operations which related to this user
+     */
+    public function openedOperations() 
+    {
+        return $this->hasMany('App\Models\Operation', 'user_id', 'id')->where("closed", "<", 1);
+    }     
 }

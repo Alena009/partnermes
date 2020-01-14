@@ -25,20 +25,6 @@ class OrderRepository extends BaseRepository
         
         return $order;
     }
-    
-    public function getFewWithAdditionals($ids)
-    {
-        $data = [];
-        foreach ($ids as $id) {
-            $data[] = $this->getWithAdditionals($id);            
-        }
-        return $data;
-    }
-    
-    public function getAllWithAdditionals()
-    {
-        return $this->getFewWithAdditionals($this->model::orderBy("id", "desc")->pluck('id'));        
-    }
 
     public function getStatus($step)
     {

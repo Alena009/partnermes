@@ -1058,6 +1058,7 @@ var taskFormStruct = [
                 {type:"combo",  name: "task_group_id", label:_("Grupa"), options: [], inputWidth: 150},                                                                
                 {type:"input",  name:"kod",          label:_("Kod"),         offsetTop:13, labelWidth:80},                                                                				
                 {type:"input",  name:"name",         label:_("Imie"),        offsetTop:13, labelWidth:80},                 
+                {type:"checkbox", name:"for_order",    label:_("Potrzebuje zamówienia"), offsetTop:13, labelWidth:80},                 
                 {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                     {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
                     {type: "newcolumn"},
@@ -1198,15 +1199,6 @@ function createForm(formStruct, windowObj){
                     var input = myForm.getInput(id); 
                     input.autocomplete = "off";                     
                 };break;
-            case 'calendar': {
-                    var dhxCalendar = myForm.getCalendar("date_start");    
-                    //dhxCalendar.setDateFormat("%d.%m.%Y");
-//                    var d = new Date();                    
-//                    var date = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
-//                    dhxCalendar.setDateFormat("%Y-%m-%d");
-                    dhxCalendar.setDate("04.12.2019");
-                    console.log(dhxCalendar);
-                };break;
             case 'combo':    {
                 var myCombo = myForm.getCombo(id);
                 myCombo.enableAutocomplete();                               
@@ -1266,6 +1258,9 @@ function getNowDate() {
     var d = new Date();    
     var year = d.getFullYear();
     var month = d.getMonth() + 1;
+    if (month < 10) {
+        month = '0' + month;
+    }    
     var day = d.getDate();
     if (day < 10) {
         day = '0' + day;

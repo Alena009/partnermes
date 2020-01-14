@@ -297,7 +297,7 @@ function projectsInit(cell) {
                             if (positionId) {                                   
                                 //ajaxGet("api/positions/list/beguntasks/" + positionId, "", function (data){
                                     var rowData = positionsGrid.getRowData(positionsGrid.getSelectedRowId());
-                                    if (rowData.available == 0) {
+                                    if (rowData.status) {
                                         dhtmlx.alert({
                                             title:_("Wiadomość"),
                                             text:_("Nie mozna usunąć pozycje. \n\
@@ -442,6 +442,7 @@ function projectsInit(cell) {
 	}	
 }
 var nowDate = getNowDate();
+console.log(nowDate);
 newProjectFormStruct = [          
         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},   	        
         {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		

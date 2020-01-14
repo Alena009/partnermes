@@ -29,35 +29,14 @@ class OrderPositionController extends BaseController
      */
     public function index()
     {
-        return $this->getResponseResult($this->repository->getAllPositionsWithAdditionalFields());      
-    }
-    
-    
-    /**
-     * Returns all components for positions by their ids
-     * 
-     * @return type
-     */
-    public function getAllComponentsForFreePositions()
-    {
-//        $data = [];
-//        $positions = $this->repository->getFreePositions();
-//        if ($positions) {
-//            foreach ($positions as $position) {
-//                $components = $this->getComponentsForPosition($position->id);
-//                if ($components) {
-//                    foreach ($components as $component) {
-//                        $data[] = $component;
-//                    }
-//                }
-//            }
-//        }
+        $all = $this->repository->getAllWithAdditionals();
         
-
-        
-        return $this->getResponseResult($data);
-    }
-    
+        if ($all) {
+            return response()->json(['data' => $all, 'success' => true]); 
+        } else {
+            return response()->json(['data' => [], 'success' => false]);
+        }  
+    }  
     
     public function positionComponents($positionsIds, $locale="pl")
     {
@@ -134,70 +113,8 @@ class OrderPositionController extends BaseController
                 } 
             }  
         
-        
-        
-//        $components = DB::table('')
-//        ->join('orders_positions', 'orders_positions.product_id', '=', 'components.product_id')              
-//        ->join('products', 'products.id', '=', 'components.component_id')         
-//        ->join('product_translations', 'product_translations.product_id', '=', 'products.id')
-//                 ->where('product_translations.locale', '=', $locale) 
-//        ->whereIn("orders_positions.id", $positionsIds)
-//        ->select('components.*',
-//                'products.kod', 
-//                'product_translations.name',               
-//                DB::raw('sum(components.amount * orders_positions.amount) as amount1'))
-//        ->groupBy('components.component_id')
-//        ->get();  
-//
-//        if ($components) {
-//            foreach ($components as $component) {                
-//                $component->available = Warehouse::where('product_id', '=', $component->component_id)
-//                                    ->sum('amount');
-//                $component->checked   = true;
-//                $result[] = $component;
-//            }                
-//        }
-        
         return $this->getResponseResult($result);        
-    }    
-    
-//    public function getComponentsForPosition($positionId)
-//    {
-//        $position   = $this->repository->getPositionWithAdditionalFields($positionId);
-//        if ($position) {
-//            $product    = $position->product;
-//            $components = $product->components;
-//            if ($components) {
-//                foreach ($components as $component) {                    
-//                    $componentProduct                      = $component->product;
-//                    $neededAvailableOfComponent            = $component->amount * $position->amount;
-//                    $availableAmountOfComponentInWarehouse = Warehouse::where('product_id', '=', $componentProduct->id)
-//                                        ->sum('amount');                 
-//                    $component['order_position_id']= $position->id;
-//                    $component['component_id']     = $componentProduct->id;
-//                    $component['component_kod']    = $componentProduct->kod;
-//                    $component['component_name']   = $componentProduct->name;
-//                    $component['amount_need']      = $neededAvailableOfComponent;
-//                    $component['amount_available'] = $availableAmountOfComponentInWarehouse;
-//                    $component['available']        = 1;
-//                    $component['zlecenie']         = "";
-//                    if ($neededAvailableOfComponent > $availableAmountOfComponentInWarehouse) {
-//                        $component['available'] = 0;
-//                        $inProgress = DeclaredWork::where("product_id", "=", $componentProduct->id)
-//                                ->where("order_position_id", "=", $position->id)
-//                                ->distinct("kod")
-//                                ->pluck("kod");
-//                        if (count($inProgress)) {
-//                            $component['available'] = 2;
-//                            $component['zlecenie']  = $inProgress[0];
-//                        }
-//                    }                  
-//                }                
-//            }
-//        }
-//        return $components; 
-//    }
-    
+    }       
     
     /**
      * Get list order positions marked as "for manufacturing"
@@ -308,28 +225,31 @@ class OrderPositionController extends BaseController
     
     public function listTasksForPosition($orderPosition)
     {
-        $result = [];
-        
         $position = OrderPosition::find($orderPosition);
-        $order    = $position->order;
+        //$order    = $position->order;
         $product  = $position->product;
-        $result   = ProductController::getTasksForProduct($product->id);
+        $tasks    = $product->tasks;
         
-        if ($result) {
-            foreach ($result as $res) {
-                $res['task_id']           = $res->id;
-                $res['order_kod']         = $order->kod;
-                $res['order_position_id'] = $position->id;
-                $res['position_kod']      = $position->kod;
-                $res['product_id']        = $product->id;
-                $res['product_kod']       = $product->kod;
-                $res['product_name']      = $product->name;
-                $res['declared_amount']   = $position->amount;
-                $res['checked']           = true;
+        if ($tasks) {
+            foreach ($tasks as $task) {
+                $task->text  = $task->name;
+                $task->value = $task->id;
+//                $res->task_id           = $res->id;
+//                $res->order_kod         = $order->kod;
+//                $res->order_position_id = $position->id;
+//                $res->position_kod      = $position->kod;
+//                $res->product_id        = $product->id;
+//                $res->product_kod       = $product->kod;
+//                $res->product_name      = $product->name;
+//                $res->declared_amount   = $position->amount;
+//                $res->checked           = true;
+                $task->duration = $task->pivot->duration;
+                $task->priority = $task->pivot->priority;
             }
-        }  
-        
-        return response()->json(["success" => (boolean)count($result), "data" => $result]);                
+            return response()->json(["success" => true, "data" => $tasks]);                
+        } else {
+            return response()->json(["success" => false, "data" => []]);                
+        }         
     } 
     
     public function listTasksForPositionComponent(Request $request)

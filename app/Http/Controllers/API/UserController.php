@@ -197,6 +197,8 @@ class UserController extends \App\Http\Controllers\BaseController
         foreach ($users as $user) {
             $user['key']   = $user['id'];
             $user['label'] = $user['name']; 
+            $user['value'] = $user['id'];
+            $user['text']  = $user['name'];             
         }
         
         return response()->json(['success' => true, 'data' => $users]);

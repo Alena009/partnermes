@@ -84,6 +84,7 @@ Route::group([
     Route::get('/rolespermissions/edit', 'RolePermissionController@editByRoleAndPermissionId');        
     Route::resource('/rolespermissions', 'RolePermissionController');          
     
+    Route::get('/tasks/notfororder', 'TaskController@notForOrder');
     Route::get('/tasks/{task}/translations', 'TaskController@getTranslations');
     Route::get('/tasks/listbygroups/{groups?}', 'TaskController@listByGroups');    
     Route::resource('/tasks', 'TaskController');    

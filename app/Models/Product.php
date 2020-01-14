@@ -34,7 +34,7 @@ class Product extends BaseModel
                 ->withPivot('duration', 'priority')
                 ->withTimestamps()
                 ->orderBy("priority", "asc");        
-    }     
+    }          
     
     public function components()
     {

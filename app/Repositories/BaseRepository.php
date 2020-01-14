@@ -263,23 +263,18 @@ class BaseRepository
         return $this->model::find($id);
     }
     
-    public function allWithAdditionals()
+    public function getFewWithAdditionals($ids)
     {
-        $data = $this->model::all();
-        return $this->withAdditionals($data);
-    }
-
-    public function withAdditionals($data)
-    {
-        $result = [];
-        
-        if ($data) {
-            foreach ($data as $d) {
-                $result[] = $this->
-                        getWithAdditionals($d->id);    
-            }        
+        $data = [];
+        foreach ($ids as $id) {
+            $data[] = $this->getWithAdditionals($id);            
         }
-        
-        return $result;           
+        return $data;
+    }
+    
+    public function getAllWithAdditionals()
+    {
+        return $this->getFewWithAdditionals($this->model::orderBy("id", "desc")
+                ->pluck('id'));        
     }
 }

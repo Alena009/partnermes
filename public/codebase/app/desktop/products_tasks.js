@@ -110,7 +110,11 @@ function productsTasksInit(cell) {
                             var windowForm = createWindow(_("Zadanie"), 300, 300);
                             var form = createForm(taskFormStruct, windowForm);
                             var groupsCombo = form.getCombo("task_group_id");
-                            groupsCombo.sync(tasksGroupsData);                                  
+                            ajaxGet("api/taskgroups", "", function(data){                                                            
+                                if (data.success && data.data) {
+                                    groupsCombo.addOption(data.data);
+                                }
+                            });                                  
                             form.attachEvent("onButtonClick", function(name){
                                 if (name === 'save'){                                    
                                     ajaxPost("api/tasks", form.getFormData(), function(data){                                                                                                        
@@ -128,7 +132,11 @@ function productsTasksInit(cell) {
                                 var windowForm = createWindow(_("Zadanie"), 300, 300);
                                 var form = createForm(taskFormStruct, windowForm);
                                 var groupsCombo = form.getCombo("task_group_id");
-                                groupsCombo.sync(tasksGroupsData);                                 
+                                ajaxGet("api/taskgroups", "", function(data){                                                            
+                                    if (data.success && data.data) {
+                                        groupsCombo.addOption(data.data);
+                                    }
+                                });                               
                                 var taskData = tasksGrid.getRowData(taskId);                                                          
                                 form.setFormData(taskData);                                
                                 form.attachEvent("onButtonClick", function(name){
@@ -189,14 +197,30 @@ function productsTasksInit(cell) {
                 var tasksGrid = tasksGroupsLayout.cells("b").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [
-                        {label: _("Kod"),   id: "kod",             width: 100, type: "ro", sort: "str", align: "left"},
+                        {label: _("Kod"),   id: "kod",             width: 100, type: "ed", sort: "str", align: "left"},
                         {label: _("Name"),  id: "name",            width: 200, type: "ed", sort: "str", align: "left"},
-                        {label: _("Grupa"), id: "task_group_name", width: 150, type: "coro",            align: "left"},
+                        {label: _("Grupa"), id: "task_group_name", width: 150, type: "ro",            align: "left"},
+                        {label: _("Potrzebuje zamówienia"), id: "for_order",       width: 50,  type: "ch",align: "left"},
                         {id: "task_group_id"}                        
                     ]
                 });   
-                tasksGrid.setColumnHidden(3,true);
-                tasksGrid.attachHeader(",,#select_filter");        
+                tasksGrid.setColumnHidden(4,true);
+                tasksGrid.attachHeader(",,#select_filter");  
+		var dpTasksGrid = new dataProcessor("api/tasks", "js");                
+                dpTasksGrid.init(tasksGrid);
+                dpTasksGrid.enableDataNames(true);
+                dpTasksGrid.setTransactionMode("REST");                
+                dpTasksGrid.enableDebug(true);
+                dpTasksGrid.setUpdateMode("row", true);
+                dpTasksGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+                    data.id = id;                      
+                    ajaxGet("api/tasks/" + id + "/edit", data, function(data){ 
+                        if (data.success) {
+                            dpTasksGrid.setUpdated(id);
+                        }
+                        //console.log(data);
+                    });
+                }); 
                 tasksGrid.fill = function(i = 0) {
                     this.clearAll();
                     var ids = Array();
@@ -361,19 +385,19 @@ function productsTasksInit(cell) {
     }
 }
 
-var tasksData       = new dhtmlXDataStore();     
-var tasksGroupsData = new dhtmlXDataStore(); 
-        
-ajaxGet("api/tasks", '', function(data){
-    if (data && data.success) {
-        tasksData.parse(data.data);                
-    }
-});
-ajaxGet("api/taskgroups", "", function(data){                                                            
-    if (data.success && data.data) {
-        tasksGroupsData.parse(data.data);
-    }
-});
+//var tasksData       = new dhtmlXDataStore();     
+//var tasksGroupsData = new dhtmlXDataStore(); 
+//        
+//ajaxGet("api/tasks", '', function(data){
+//    if (data && data.success) {
+//        tasksData.parse(data.data);                
+//    }
+//});
+//ajaxGet("api/taskgroups", "", function(data){                                                            
+//    if (data.success && data.data) {
+//        tasksGroupsData.parse(data.data);
+//    }
+//});
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {
     if (id == "products_tasks") {

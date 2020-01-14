@@ -9,8 +9,9 @@ class Operation extends BaseModel
     protected $table = "operations";
     
     protected $fillable = [
-        'user_id', 'order_position_id', 'task_id', 'start_amount', 
-        'done_amount', 'start_date', 'end_date', 'closed'
+        'user_id', 'order_position_id', 'task_id', 
+        'start_amount', 'done_amount', 
+        'start_date', 'end_date', 'closed'
     ];
     
     public function task()

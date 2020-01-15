@@ -309,51 +309,33 @@ function zleceniaInit(cell) {
                                 newOrderForm.disableItem("kod");
                                 newOrderForm.attachEvent("onButtonClick", function(name){
                                     switch (name){
-                                        case 'save':{  
-                                                var data = newOrderForm.getFormData();
-                                                data.date_start = newOrderForm.getCalendar("date_start").getDate(true);  
-                                                ajaxPost("api/orders", data, function(data){
-                                                    if (data.success) {
-                                                        var data3 = [];
-                                                        selectedComponents.split(',').forEach(function(elem){
-                                                            var data2 = componentsGrid.getRowData(elem);
-                                                            data2.order_id = data.data.id;
-                                                            data2.price = 0;
-                                                            data2.date_delivery = data.data.date_end;
-                                                            data2.product_id = data2.component_id;
-                                                            data2.kod = data.data.id + data2.kod;
-                                                            data3.push(data2);
-                                                        });
-                                                        console.log(data3);
-                                                    }
-                                                });
-                                                
-//                                            var data = newOrderForm.getFormData();
-//                                            data.date_start = newOrderForm.getCalendar("date_start").getDate(true);                                         
-//                                            ajaxPost("api/orders", data, function(data){
-//                                                if (data && data.success) {
-//                                                    selectedComponents.split(',').forEach(function(elem){
-//                                                        var data2 = componentsGrid.getRowData(elem);
-//                                                        data2.order_id = data.data.id;
-//                                                        data2.price = 0;
-//                                                        data2.date_delivery = data.data.date_end;
-//                                                        data2.product_id = data2.component_id;
-//                                                        data2.kod = data.data.id + data2.kod;
-//                                                        ajaxPost("api/positions", data2, "");
-//                                                    });
-//                                                    newOrderWindow.hide(); 
-//                                                    dhtmlx.alert({
-//                                                        title:_("Wiadomość"),
-//                                                        text:_("Zapisane")
-//                                                    });
-//                                                    zleceniaGrid.zaladuj(0);
-//                                                } else {
-//                                                    dhtmlx.alert({
-//                                                        title:_("Wiadomość"),
-//                                                        text:_("Błąd! Zmiany nie zostały zapisane")
-//                                                    });
-//                                                }
-//                                            });                
+                                        case 'save':{                                                  
+                                            var data = newOrderForm.getFormData();
+                                            data.date_start = newOrderForm.getCalendar("date_start").getDate(true);                                         
+                                            ajaxPost("api/orders", data, function(data){
+                                                if (data && data.success) {
+                                                    selectedComponents.split(',').forEach(function(elem){
+                                                        var data2 = componentsGrid.getRowData(elem);
+                                                        data2.order_id = data.data.id;
+                                                        data2.price = 0;
+                                                        data2.date_delivery = data.data.date_end;
+                                                        data2.product_id = data2.component_id;
+                                                        data2.kod = data.data.id + data2.kod;
+                                                        ajaxPost("api/positions", data2, "");
+                                                    });
+                                                    newOrderWindow.hide(); 
+                                                    dhtmlx.alert({
+                                                        title:_("Wiadomość"),
+                                                        text:_("Zapisane")
+                                                    });
+                                                    zleceniaGrid.zaladuj(0);
+                                                } else {
+                                                    dhtmlx.alert({
+                                                        title:_("Wiadomość"),
+                                                        text:_("Błąd! Zmiany nie zostały zapisane")
+                                                    });
+                                                }
+                                            });                
                                         };break;                                        
                                     }
                                 });
@@ -366,18 +348,17 @@ function zleceniaInit(cell) {
                     columns: [ 
                         {id: "checked", type: "ch", width: 30},
                         {label: _("Komponent Kod"),       id: "kod",      type: "ro", sort: "str", align: "left", width: 100},                                                                        
-                        {label: _("Komponent"),           id: "name",     type: "ro", sort: "str", align: "left", width: 150},                                  
+                        //{label: _("Komponent"),           id: "name",     type: "ro", sort: "str", align: "left", width: 150},                                  
                         {label: _("Wymagana ilość"),      id: "amount1",   type: "ro", sort: "str", align: "left", width: 50},                                    
                         {label: _("Ilość na magazynie"),  id: "available",type: "ro", sort: "str", align: "left", width: 50},
                         {label: _("Ilość do produkowania"),id: "amount",   type: "ro", sort: "str", align: "left", width: 50},                        
-                        {id: "component_id"},												
-                        {id: "available"},
+                        {id: "component_id"},												                        
                         {id: "order_position_id"}
                     ]
                 });
-                componentsGrid.setColumnHidden(6, true);
-                componentsGrid.setColumnHidden(7, true);                
-                componentsGrid.setColumnHidden(8, true);                
+//                componentsGrid.setColumnHidden(6, true);
+//                componentsGrid.setColumnHidden(7, true);                
+//                componentsGrid.setColumnHidden(8, true);                
                 componentsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                     var data = componentsGrid.getRowData(rId);
                     if ((data.amount1 - data.available) > 0) {                        

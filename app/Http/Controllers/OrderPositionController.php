@@ -40,47 +40,17 @@ class OrderPositionController extends BaseController
     
     public function positionComponents($positionsIds, $locale="pl")
     {   
-//        $result = [];
-//        $positionsIds = explode(',', $positionsIds);
-//        $result = DB::table('orders_positions')
-//                ->select('IF(components.component_id, components.component_id, orders_positions.product_id) as component_id,'
-//                        . 'products.kod')
-//                ->leftJoin('components', 'components.product_id', '=', 'orders_positions.product_id')
-//                ->leftJoin('products', 'products.id', '=', 'IF(components.component_id, components.component_id, orders_positions.product_id)')
-//                ->whereIn('orders_positions.id', $positionsIds)
-//               // ->sum("IF(components.amount * orders_positions.amount, components.amount * orders_positions.amount, orders_positions.amount)")
-//                ->groupBy('IF(components.component_id, components.component_id, orders_positions.product_id)')
-//                ->get();
-       
         $result = [];
-        $positionsIds = explode(',', $positionsIds);
-        $positions = OrderPosition::find($positionsIds);
-        
-        foreach ($positions as $position) {
-            $amount     = $position->amount;
-            $product    = $position->product;
-            $components = $product->components;
-            if (count($components)) {
-                foreach ($components as $component) {
-                    $componentProduct = $component->product;
-                    $data = (object) [
-                        'product_id' => $component->component_id,
-                        'amount1'    => $component->amount * $amount,
-                        'kod'        => $componentProduct->kod,
-                        'name'       => $componentProduct->name,                        
-                    ];
-                    $result[] = $data;
-                }                
-            } else {
-                $data = (object) [
-                    'product_id' => $product->id,
-                    'amount1'    => $amount,
-                    'kod'        => $product->kod,
-                    'name'       => $product->name,                        
-                ];
-                $result[] = $data;
-            }
-        }
+        $result = DB::select(DB::raw("select if(c.component_id, c.component_id, op.product_id) as component_id, 
+            sum(if(c.amount * op.amount, c.amount * op.amount, op.amount)) as amount1, 
+            p.kod, op.id as order_position_id,
+            if(sum(w.amount),sum(w.amount),0) as available 
+            from orders_positions op
+            left join components c on op.product_id = c.product_id
+            left join products p on p.id = if(c.component_id, c.component_id, op.product_id)
+            left join warehouse w on w.product_id = if(c.component_id, c.component_id, op.product_id)
+            where op.id in (" . $positionsIds .")
+            group by if(c.component_id, c.component_id, op.product_id)"));
        
         return $this->getResponseResult($result);        
     }

@@ -14,8 +14,8 @@ function zleceniaInit(cell) {
 		// init layout
 		var zleceniaLayout = cell.attachLayout("3L");		
 		zleceniaLayout.cells("a").setText(_("Zlecenia"));
-                zleceniaLayout.cells("b").setText(_("Zadania"));
-                zleceniaLayout.cells("c").setText(_("Komponenty"));        
+                zleceniaLayout.cells("b").setText(_("Zadania do wybranych zleceń"));
+                zleceniaLayout.cells("c").setText(_("Niezbędne materialy"));        
                 
                 if (write) {
                     var zleceniaGridToolBar = zleceniaLayout.cells("a").attachToolbar({
@@ -232,7 +232,10 @@ function zleceniaInit(cell) {
                                 }
                             };break;                            
                             case 'Redo':{
-                                    tasksGrid.fill(zleceniaGrid.getSelectedRowId());
+                                    var ids = zleceniaGrid.getCheckedRows(0);
+                                    if (ids.length) {
+                                        tasksGrid.fill(ids);
+                                    }
                             };break;
                     }
 		});                
@@ -275,16 +278,16 @@ function zleceniaInit(cell) {
                 
                 if (write) {
                     componentsGridToolBar = zleceniaLayout.cells("c").attachToolbar({
-                            iconset: "awesome",
-                            items: [                           
-                                    {id: "Do",    type: "button", text: _("Wyprodukować"),  img: "fa fa-wrench"},
-                                    {id: "Order", type: "button", text: _("Zamówić"), img: "fa fa-plus-square"}
-                            ]                    
+                        iconset: "awesome",
+                        items: [                           
+                            {id: "Do",    type: "button", text: _("Wyprodukować"),  img: "fa fa-wrench"},
+                            {id: "Order", type: "button", text: _("Zamówić"), img: "fa fa-plus-square"},
+                            {type: "separator", id: "sep3"},         
+                            {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
+                        ]                    
                     }); 
                 } else {
-                    componentsGridToolBar = zleceniaLayout.cells("c").attachToolbar({
-                            items: []                    
-                    }); 
+                    componentsGridToolBar = zleceniaLayout.cells("c").attachToolbar(emptyToolbar); 
                 }
                 componentsGridToolBar.attachEvent("onClick", function(btn) {	
 		    switch (btn){
@@ -340,15 +343,20 @@ function zleceniaInit(cell) {
                                     }
                                 });
                             }
-                        };break;      
+                        };break;  
+                        case 'Redo': {
+                            var ids = zleceniaGrid.getCheckedRows(0);
+                            if (ids.length) {
+                                componentsGrid.fill(ids);                                
+                            }                                
+                        };break;
                     }
                 });
                 var componentsGrid = zleceniaLayout.cells("c").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [ 
                         {id: "checked", type: "ch", width: 30},
-                        {label: _("Komponent Kod"),       id: "kod",      type: "ro", sort: "str", align: "left", width: 100},                                                                        
-                        //{label: _("Komponent"),           id: "name",     type: "ro", sort: "str", align: "left", width: 150},                                  
+                        {label: _("Komponent Kod"),       id: "kod",      type: "ro", sort: "str", align: "left", width: 100},                                                                                                
                         {label: _("Wymagana ilość"),      id: "amount1",   type: "ro", sort: "str", align: "left", width: 50},                                    
                         {label: _("Ilość na magazynie"),  id: "available",type: "ro", sort: "str", align: "left", width: 50},
                         {label: _("Ilość do produkowania"),id: "amount",   type: "ro", sort: "str", align: "left", width: 50},                        
@@ -356,9 +364,8 @@ function zleceniaInit(cell) {
                         {id: "order_position_id"}
                     ]
                 });
-//                componentsGrid.setColumnHidden(6, true);
-//                componentsGrid.setColumnHidden(7, true);                
-//                componentsGrid.setColumnHidden(8, true);                
+                componentsGrid.setColumnHidden(5, true);
+                componentsGrid.setColumnHidden(6, true);                               
                 componentsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                     var data = componentsGrid.getRowData(rId);
                     if ((data.amount1 - data.available) > 0) {                        

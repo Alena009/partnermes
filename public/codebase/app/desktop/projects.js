@@ -37,7 +37,23 @@ function projectsInit(cell) {
                         var clientsCombo = newOrderForm.getCombo("client_id");
                         ajaxGet("api/clients", "", function(data){
                             clientsCombo.addOption(data.data);
-                        });       
+                        }); 
+                        clientsCombo.attachEvent("onClose", function(){
+                            var value = clientsCombo.getSelectedValue();
+                            if (value == 0) {
+                                ajaxGet("api/orders/last", "", function(data){
+                                    if (data.success) {
+                                        var date = getNowDate();
+                                        date = date.replace(/[-]/g, "");
+                                        newOrderForm.setItemValue("kod", "W-" + date + "-" + data.data.id + 1);
+                                        newOrderForm.disableItem("kod");
+                                    }
+                                }); 
+                            } else {
+                                newOrderForm.enableItem("kod");
+                                newOrderForm.setItemValue("kod", "");
+                            }
+                        });
                         newOrderForm.attachEvent("onButtonClick", function(name){
                             if (name === 'save'){  
                                 var newOrderData = newOrderForm.getFormData();

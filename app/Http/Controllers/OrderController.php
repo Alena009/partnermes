@@ -40,16 +40,16 @@ class OrderController extends BaseController
     {
         $locale = app()->getLocale();
 
-        $validator = $request->validate([
-            'kod'        => 'required|unique:orders|max:45',
-            'date_start' => 'required'
-        ]);
-        
-        if (!$validator) {
-            return response()->json(['success' => false,
-                'data' => [],
-                'message' => $validator->errors()]);
-        }   
+//        $validator = $request->validate([
+//            'kod'        => 'required|unique:orders|max:45',
+//            'date_start' => 'required'
+//        ]);
+//        
+//        if (!$validator) {
+//            return response()->json(['success' => false,
+//                'data' => [],
+//                'message' => $validator->errors()]);
+//        }   
         
         $currentWeekNum = date("W");
         $currentYear    = date("Y");
@@ -60,16 +60,15 @@ class OrderController extends BaseController
         }
         
         $date = new \DateTime;
-        $date_end = $date->setISODate($year, $request['num_week'])->format('Y-m-d');        
+        $date_end = $date->setISODate($year, $request['num_week'])->format('Y-m-d');  
         
         $order = new Order();
-        $order->kod = $request['kod'];   
-        $order->client_id  = $request['client_id']; 
-        $order->date_start = $request['date_start'];
+        $order->kod        = $request->kod;   
+        $order->client_id  = $request->client_id; 
+        $order->date_start = $request->date_start;
         $order->date_end   = $date_end;
         
-        if ($order->save()) {
-            $order->translateOrNew($locale)->name        = $request['name'];            
+        if ($order->save()) {   
             $order->translateOrNew($locale)->description = $request['description'];            
             $order->save(); 
             $order = $this->repository->getWithAdditionals($order->id);
@@ -114,8 +113,7 @@ class OrderController extends BaseController
         $order->date_start = $request['date_start'];
         $order->date_end   = $date_end;
         
-        if ($order->save()) {
-            $order->translateOrNew($locale)->name        = $request['name'];            
+        if ($order->save()) {         
             $order->translateOrNew($locale)->description = $request['description'];            
             $order->save(); 
             $order = $this->repository->getWithAdditionals($order->id);
@@ -127,6 +125,11 @@ class OrderController extends BaseController
         }              
     }
     
+    public function getLastOrder()
+    {        
+        return $this->getResponseResult($this->repository->lastOrder());
+    }
+
     public function history($orderId)
     {
         $order = [];

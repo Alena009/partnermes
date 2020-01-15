@@ -13,11 +13,11 @@ class Order extends BaseModel
     protected $table = "orders";
     
     protected $fillable = [
-        'kod', 'client_id', 'start_date', 'end_date', 'name', 'description'
+        'kod', 'client_id', 'start_date', 'end_date'
     ];
     
     /* fields for translating */    
-    public $translatedAttributes = ['name', 'description'];
+    public $translatedAttributes = ['description'];
     
     public function client() 
     {

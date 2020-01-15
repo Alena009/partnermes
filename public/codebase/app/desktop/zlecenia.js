@@ -283,10 +283,7 @@ function zleceniaInit(cell) {
                     }); 
                 } else {
                     componentsGridToolBar = zleceniaLayout.cells("c").attachToolbar({
-                            iconset: "awesome",
-                            items: [                           
-                                    
-                            ]                    
+                            items: []                    
                     }); 
                 }
                 componentsGridToolBar.attachEvent("onClick", function(btn) {	
@@ -300,36 +297,63 @@ function zleceniaInit(cell) {
                                 ajaxGet("api/clients", "", function(data){
                                     clientsCombo.addOption(data.data);
                                     clientsCombo.selectOption(0);
-                                });                                       
+                                });       
+                                ajaxGet("api/orders/last", "", function(data){
+                                    if (data.success) {
+                                        var date = getNowDate();
+                                        date = date.replace(/[-]/g, "");
+                                        newOrderForm.setItemValue("kod", "W-" + date + "-" + data.data.id + 1);
+                                    }
+                                });                                  
+                                newOrderForm.disableItem("client_id");
+                                newOrderForm.disableItem("kod");
                                 newOrderForm.attachEvent("onButtonClick", function(name){
                                     switch (name){
-                                        case 'save':{    
-                                            var data = newOrderForm.getFormData();
-                                            data.date_start = newOrderForm.getCalendar("date_start").getDate(true);                                         
-                                            ajaxPost("api/orders", data, function(data){
-                                                if (data && data.success) {
-                                                    selectedComponents.split(',').forEach(function(elem){
-                                                        var data2 = componentsGrid.getRowData(elem);
-                                                        data2.order_id = data.data.id;
-                                                        data2.price = 0;
-                                                        data2.date_delivery = data.data.date_end;
-                                                        data2.product_id = data2.component_id;
-                                                        data2.kod = data.data.id + data2.kod;
-                                                        ajaxPost("api/positions", data2, "");
-                                                    });
-                                                    newOrderWindow.hide(); 
-                                                    dhtmlx.alert({
-                                                        title:_("Wiadomość"),
-                                                        text:_("Zapisane")
-                                                    });
-                                                    zleceniaGrid.zaladuj(0);
-                                                } else {
-                                                    dhtmlx.alert({
-                                                        title:_("Wiadomość"),
-                                                        text:_("Błąd! Zmiany nie zostały zapisane")
-                                                    });
-                                                }
-                                            });                
+                                        case 'save':{  
+                                                var data = newOrderForm.getFormData();
+                                                data.date_start = newOrderForm.getCalendar("date_start").getDate(true);  
+                                                ajaxPost("api/orders", data, function(data){
+                                                    if (data.success) {
+                                                        var data3 = [];
+                                                        selectedComponents.split(',').forEach(function(elem){
+                                                            var data2 = componentsGrid.getRowData(elem);
+                                                            data2.order_id = data.data.id;
+                                                            data2.price = 0;
+                                                            data2.date_delivery = data.data.date_end;
+                                                            data2.product_id = data2.component_id;
+                                                            data2.kod = data.data.id + data2.kod;
+                                                            data3.push(data2);
+                                                        });
+                                                        console.log(data3);
+                                                    }
+                                                });
+                                                
+//                                            var data = newOrderForm.getFormData();
+//                                            data.date_start = newOrderForm.getCalendar("date_start").getDate(true);                                         
+//                                            ajaxPost("api/orders", data, function(data){
+//                                                if (data && data.success) {
+//                                                    selectedComponents.split(',').forEach(function(elem){
+//                                                        var data2 = componentsGrid.getRowData(elem);
+//                                                        data2.order_id = data.data.id;
+//                                                        data2.price = 0;
+//                                                        data2.date_delivery = data.data.date_end;
+//                                                        data2.product_id = data2.component_id;
+//                                                        data2.kod = data.data.id + data2.kod;
+//                                                        ajaxPost("api/positions", data2, "");
+//                                                    });
+//                                                    newOrderWindow.hide(); 
+//                                                    dhtmlx.alert({
+//                                                        title:_("Wiadomość"),
+//                                                        text:_("Zapisane")
+//                                                    });
+//                                                    zleceniaGrid.zaladuj(0);
+//                                                } else {
+//                                                    dhtmlx.alert({
+//                                                        title:_("Wiadomość"),
+//                                                        text:_("Błąd! Zmiany nie zostały zapisane")
+//                                                    });
+//                                                }
+//                                            });                
                                         };break;                                        
                                     }
                                 });
@@ -345,8 +369,7 @@ function zleceniaInit(cell) {
                         {label: _("Komponent"),           id: "name",     type: "ro", sort: "str", align: "left", width: 150},                                  
                         {label: _("Wymagana ilość"),      id: "amount1",   type: "ro", sort: "str", align: "left", width: 50},                                    
                         {label: _("Ilość na magazynie"),  id: "available",type: "ro", sort: "str", align: "left", width: 50},
-                        {label: _("Ilość do produkowania"),id: "amount",   type: "ro", sort: "str", align: "left", width: 50},
-                        //{label: _("Zlecenie"),            id: "zlecenie", type: "ro", sort: "str", align: "left", width: 100},												
+                        {label: _("Ilość do produkowania"),id: "amount",   type: "ro", sort: "str", align: "left", width: 50},                        
                         {id: "component_id"},												
                         {id: "available"},
                         {id: "order_position_id"}

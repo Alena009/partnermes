@@ -188,17 +188,17 @@ class OperationController extends BaseController
         //if task has order
         if ($positionId) {
             $position  = OrderPosition::find($positionId);
-            $currentTaskPriority = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
-                            ->where("task_id", "=", $taskId)->pluck("priority");  
+            $currentTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
+                            ->where("task_id", "=", $taskId)->get();             
             $changedTasks = DB::table('declared_works')->where("order_position_id", "=", $positionId)
                     ->where("status", "=", 1)->pluck("task_id");
             if ($changedTasks) {
                 $previousTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
-                        ->whereIn("task_id", $changedTasks)->where("priority", "<", $currentTaskPriority[0])
+                        ->whereIn("task_id", $changedTasks)->where("priority", "<", $currentTask[0]->priority)
                         ->orderBy('priority', 'desc')->first();                
             } else {
                 $previousTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
-                        ->where("priority", "<", $currentTaskPriority[0])
+                        ->where("priority", "<", $currentTask[0]->priority)
                         ->orderBy('priority', 'desc')->first();                   
             }
             if ($previousTask) {  

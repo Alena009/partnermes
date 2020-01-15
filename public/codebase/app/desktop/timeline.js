@@ -42,7 +42,7 @@ function timelineInit(cell) {
                             }
                         }
                     });                    
-                    ajaxGet("api/users", "", function(data){
+                    ajaxGet("api/users/freeusers", "", function(data){
                         usersCombo.addOption(data.data);
                         usersCombo.selectOption(0);
                     });      
@@ -187,7 +187,7 @@ function addOperation(data, grid) {
         } else {
             dhtmlx.alert({
                 title:_("Wiadomość"),
-                text:_("Błąd! Zmiany nie zostały zapisane")
+                text:data.message
             });
         }                                          
     });      

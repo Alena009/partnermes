@@ -48,11 +48,13 @@ class OperationRepository extends BaseRepository
         $changedAmount = DB::table('declared_works')->where("order_position_id", "=", $positionId)
                                           ->where("task_id", "=", $taskId)
                                           ->where("status", "=", 1)
-                                          ->pluck("declared_amount");
-        if ($changedAmount) {
+                                          ->pluck("declared_amount");        
+        if (count($changedAmount)) {
             $amount = $changedAmount[0];
         } else {
-            $amount = DB::table('orders_positions')->where("id", "=", $positionId)->pluck("amount")[0];
+            $orderPosition = DB::table('orders_positions')->where("id", "=", $positionId)->get();
+            //echo $orderPosition;
+            $amount = $orderPosition[0]->amount;
         }
         
         return $amount;

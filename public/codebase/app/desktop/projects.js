@@ -47,23 +47,31 @@ function projectsInit(cell) {
                             }
                         }); 
                     };break;
-                    case 'Edit':{      
-                        var editOrderWindow = createWindow(_("Edytuj zamowienie"), 480, 380);                            
-                        var editOrderForm = createForm(newProjectFormStruct, editOrderWindow);                                
-                        var orderData = projectsGrid.getRowData(projectsGrid.getSelectedRowId());
-                        var clientsCombo = editOrderForm.getCombo("client_id");
-                        ajaxGet("api/clients", "", function(data){
-                            clientsCombo.addOption(data.data);                            
-                        }); 
-                        editOrderForm.setFormData(orderData);
-                        editOrderForm.attachEvent("onButtonClick", function(name){
-                            if (name === 'save'){                                 
-                                var orderData = editOrderForm.getFormData();   
-                                orderData.date_start = editOrderForm.getCalendar("date_start").getDate(true);                                                                              
-                                editOrder(projectsGrid.getSelectedRowId(), orderData, projectsGrid);
-                                editOrderWindow.close();
-                            }
-                        });                            
+                    case 'Edit':{ 
+                        var orderId = projectsGrid.getSelectedRowId();                            
+                        if (orderId) {
+                            var editOrderWindow = createWindow(_("Edytuj zamowienie"), 480, 380);                            
+                            var editOrderForm = createForm(newProjectFormStruct, editOrderWindow);                                
+                            var orderData = projectsGrid.getRowData(projectsGrid.getSelectedRowId());
+                            var clientsCombo = editOrderForm.getCombo("client_id");
+                            ajaxGet("api/clients", "", function(data){
+                                clientsCombo.addOption(data.data);                            
+                            }); 
+                            editOrderForm.setFormData(orderData);
+                            editOrderForm.attachEvent("onButtonClick", function(name){
+                                if (name === 'save'){                                 
+                                    var orderData = editOrderForm.getFormData();   
+                                    orderData.date_start = editOrderForm.getCalendar("date_start").getDate(true);                                                                              
+                                    editOrder(projectsGrid.getSelectedRowId(), orderData, projectsGrid);
+                                    editOrderWindow.close();
+                                }
+                            });   
+                        } else {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Wybierz zamowienie, które chcesz edytować!")
+                            });
+                        }
                     };break;   
                     case 'Del': {                                                                                                                                                                                                                                                   
                         var orderId = projectsGrid.getSelectedRowId();                            
@@ -110,8 +118,7 @@ function projectsInit(cell) {
             var projectsGrid = projectsLayout.cells("a").attachGrid({
                 image_path:'codebase/imgs/',
                 columns: [
-                    {label: _("Kod"),              id: "kod",         type: "ro",   sort: "str", align: "left", width: 50},
-                    {label: _("Imie"),             id: "name",        type: "ro",   sort: "str", align: "left", width: 150},
+                    {label: _("Kod"),              id: "kod",         type: "ro",   sort: "str", align: "left", width: 50},                    
                     {label: _("Klient"),           id: "client_name", type: "ro",   sort: "str", align: "left", width: 150},                                                                                                
                     {label: _("Termin wykonania"), id: "num_week",    type: "ro",   sort: "str", align: "left", width: 50},                         
                     {id: "client_id"}, 
@@ -121,13 +128,13 @@ function projectsInit(cell) {
                 ]
             });
             projectsGrid.attachHeader('#text_filter,#text_filter,#select_filter');      
+            projectsGrid.setColumnHidden(3,true);
             projectsGrid.setColumnHidden(4,true);
-            projectsGrid.setColumnHidden(5,true);
+            projectsGrid.setColumnHidden(5,true);            
             projectsGrid.setColumnHidden(6,true);            
-            projectsGrid.setColumnHidden(7,true);            
             projectsGrid.attachEvent("onRowSelect", function() {
                 var id = projectsGrid.getSelectedRowId();
-                historyGrid.fill(id);
+                //historyGrid.fill(id);
                 positionsGrid.fill(id);
             });              
             projectsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
@@ -140,8 +147,14 @@ function projectsInit(cell) {
 /**
  * B
  * 
- */		                                
-            var projectsForm = projectsLayout.cells("b").attachForm(newProjectFormStruct);
+ */		
+            var projectsForm = createForm(newProjectFormStruct, projectsLayout.cells("b"));
+            var clientsCombo = projectsForm.getCombo("client_id");  
+            ajaxGet("api/clients", '', function(data) {
+                if (data.success && data.data) {
+                    clientsCombo.addOption(data.data);                         
+                }
+            }); 
             if (!userCanWrite) { projectsForm.hideItem('save'); }
             projectsForm.attachEvent("onButtonClick", function(name){
                 if (name === 'save'){
@@ -153,29 +166,7 @@ function projectsInit(cell) {
                         addOrder(data, projectsGrid);
                     }                        
                 }
-            });            
-            var clientsCombo = projectsForm.getCombo("client_id");  
-            ajaxGet("api/clients", '', function(data) {
-                if (data.success && data.data) {
-                    clientsCombo.addOption(data.data);                         
-                }
-            });                              
-            var dateEndCombo = projectsForm.getCombo("num_week");
-            if (dateEndCombo) {
-                var numCurrentWeek = new Date().getWeekNumber();
-                for (var i = 1; i <= 53; i++) {
-                    dateEndCombo.addOption(i, "" + i);
-                }
-                dateEndCombo.attachEvent("onChange", function(value, text){
-                    if (value < numCurrentWeek) {
-                        if (!projectsForm.isItem("on_next_year")) {
-                            projectsForm.addItem(null, {type: "label", name: "on_next_year", label: _("Na nastepny rok")}, null, 1);
-                        }
-                    } else {
-                        projectsForm.removeItem("on_next_year");
-                    }
-                });  
-            }  
+            });                                                               
             projectsForm.bind(projectsGrid);
 /**
  * C
@@ -211,7 +202,7 @@ function projectsInit(cell) {
                             if (orderId) {
                                 var order = projectsGrid.getRowData(orderId); 
                                 var positionsWindow = createWindow(_("Nowa pozycja"), 350, 550);
-                                var positionsForm = createForm(orderPositionFormStruct, positionsWindow);
+                                var positionsForm = createForm(orderPositionFormStruct, positionsWindow);                                
                                 positionsForm.setItemFocus("kod");
                                 var productsCombo = positionsForm.getCombo("product_id");
                                 var numWeekCombo = positionsForm.getCombo("num_week");
@@ -226,11 +217,11 @@ function projectsInit(cell) {
                                         var data = positionsForm.getFormData();                                                                                                
                                         data.order_id = orderId;
                                         ajaxPost("api/positions", data, function(data){                                                   
-                                            if (data.success && data.data) {
+                                            if (data.success) {
                                                 positionsGrid.addRow(data.data.id, '');
                                                 positionsGrid.setRowData(data.data.id, data.data);
                                                 positionsGrid.callEvent("onGridReconstructed", []);
-                                            } else {
+                                            } else {                                                
                                                 dhtmlx.alert({
                                                     title:_("Wiadomość"),
                                                     text:_("Błąd! Zmiany nie zostały zapisane")
@@ -247,11 +238,11 @@ function projectsInit(cell) {
                                 }); 
                             }
                         };break;
-                        case 'Edit': {
-                            var orderId    = projectsGrid.getSelectedRowId(); 
-                            var order      = projectsGrid.getRowData(orderId);                                
+                        case 'Edit': {                               
                             var positionId = positionsGrid.getSelectedRowId();
                             if (positionId) {
+                                var orderId    = projectsGrid.getSelectedRowId(); 
+                                var order      = projectsGrid.getRowData(orderId);                                 
                                 var position = positionsGrid.getRowData(positionId);
                                 var positionsWindow = createWindow(_("Edutyj pozycje"), 350, 550);
                                 var positionsForm = createForm(orderPositionFormStruct, positionsWindow);                                    
@@ -272,7 +263,8 @@ function projectsInit(cell) {
                                                     text:_("Zapisane")
                                                 });
                                                 positionsGrid.setRowData(data.data.id, data.data);
-                                                positionsWindow.hide();                                                    
+                                                positionsGrid.callEvent("onGridReconstructed", []);
+                                                positionsWindow.close();                                                    
                                             } else {
                                                 dhtmlx.alert({
                                                     title:_("Wiadomość"),
@@ -447,8 +439,6 @@ newProjectFormStruct = [
         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},   	        
         {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
         {type: "input", name: "kod",       required: true, label: _("Kod zamowienia")},
-        {type: "input", name: "name",      required: true, label: _("Zamowienie"),                           
-           note: {text: _("Dodaj imie zamowienia. Jest obowiazkowe.")}},
         {type: "input", name: "description", label: _("Opis"), rows: 3,
            note: {text: _("Dodaj opis zamowienia. Obowiazkowe.")}},
         {type: "calendar", name: "date_start",  label: _("Data zamowienia"), 

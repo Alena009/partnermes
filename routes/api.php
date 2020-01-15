@@ -39,6 +39,7 @@ Route::group([
     Route::resource('/operations', 'OperationController'); 
 
     Route::get('/orders/history/{orderId}', 'OrderController@history');
+    Route::get('/orders/last', 'OrderController@getLastOrder');
     Route::resource('/orders', 'OrderController');    
     
     Route::get('/positions/byorder/{order}', 'OrderPositionController@getPositionsByOrder');    
@@ -99,6 +100,7 @@ Route::group([
     Route::get('/usersroles/del', 'UserRoleController@deleteByRoleAndUserId');
     Route::resource('/usersroles', 'UserRoleController');
     
+    Route::get('/users/freeusers', 'API\UserController@getAllFreeUsers');
     Route::get('/users/avatar/{userId}', 'API\UserController@avatar');
     Route::post('/users/avatar/load/{userId}', 'API\UserController@loadAvatar');
     Route::resource('/users', 'API\UserController');

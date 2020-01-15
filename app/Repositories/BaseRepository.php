@@ -274,7 +274,7 @@ class BaseRepository
     
     public function getAllWithAdditionals()
     {
-        return $this->getFewWithAdditionals($this->model::orderBy("id", "desc")
+        return $this->getFewWithAdditionals($this->model::orderBy("id", "asc")
                 ->pluck('id'));        
     }
 }

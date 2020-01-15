@@ -121,6 +121,7 @@ function productsTasksInit(cell) {
                                         if (data && data.success) {                                            
                                             tasksGrid.addRow(data.data.id, '');
                                             tasksGrid.setRowData(data.data.id, data.data);
+                                            dpTasksGrid.setUpdated(data.data.id);
                                         }                                           
                                     });                                    
                                 }

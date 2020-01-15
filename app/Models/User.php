@@ -55,7 +55,7 @@ class User extends Authenticatable
     } 
     
     /*
-     * get all operations which related to this user
+     * get all opened operations which related to this user
      */
     public function openedOperations() 
     {

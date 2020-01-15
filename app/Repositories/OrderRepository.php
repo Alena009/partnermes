@@ -34,4 +34,12 @@ class OrderRepository extends BaseRepository
         
         return $statusId;
     }
+    
+    public function lastOrder()
+    {
+        $order = [];
+        $order = $this->model::orderby('id', 'desc')->first();
+        
+        return $order;
+    }
 }

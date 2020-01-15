@@ -39,42 +39,49 @@ class OrderPositionController extends BaseController
     }  
     
     public function positionComponents($positionsIds, $locale="pl")
-    {
+    {   
+//        $result = [];
+//        $positionsIds = explode(',', $positionsIds);
+//        $result = DB::table('orders_positions')
+//                ->select('IF(components.component_id, components.component_id, orders_positions.product_id) as component_id,'
+//                        . 'products.kod')
+//                ->leftJoin('components', 'components.product_id', '=', 'orders_positions.product_id')
+//                ->leftJoin('products', 'products.id', '=', 'IF(components.component_id, components.component_id, orders_positions.product_id)')
+//                ->whereIn('orders_positions.id', $positionsIds)
+//               // ->sum("IF(components.amount * orders_positions.amount, components.amount * orders_positions.amount, orders_positions.amount)")
+//                ->groupBy('IF(components.component_id, components.component_id, orders_positions.product_id)')
+//                ->get();
+       
         $result = [];
         $positionsIds = explode(',', $positionsIds);
         $positions = OrderPosition::find($positionsIds);
-              
-        $components = DB::table('orders_positions')
-        ->join('components', 'orders_positions.product_id', '=', 'components.product_id')              
-        ->whereIn("orders_positions.id", $positionsIds)
-        ->select('components.component_id',    
-                'orders_positions.id as order_position_id',
-                DB::raw('sum(components.amount * orders_positions.amount) as amount1'))
-        ->groupBy('components.component_id')
-        ->get();  
         
-//        //check if position does not have a components, it is mean that 
-//        //position is component for itself, so we add it to the list of components
-//        //with amount equal to the amount in the position
-//        foreach ($positions as $position) {
-//            $positionComponents = $position->product->components;
-//            if (!count($positionComponents)) {
-//                $components->push((object)["component_id"=>$position->product_id, "amount1"=>$position->amount]);               
-//            }
-//        }
-                        
-        if ($components) {
-            foreach ($components as $component) { 
-                $componentProduct = Product::find($component->component_id);
-                $component->kod   = $componentProduct->kod;
-                $component->name  = $componentProduct->name;
-                $component->available = Warehouse::where('product_id', '=', $component->component_id)
-                                    ->sum('amount');
-                //$component->checked   = true;
-                $result[] = $component;
-            }                
+        foreach ($positions as $position) {
+            $amount     = $position->amount;
+            $product    = $position->product;
+            $components = $product->components;
+            if (count($components)) {
+                foreach ($components as $component) {
+                    $componentProduct = $component->product;
+                    $data = (object) [
+                        'product_id' => $component->component_id,
+                        'amount1'    => $component->amount * $amount,
+                        'kod'        => $componentProduct->kod,
+                        'name'       => $componentProduct->name,                        
+                    ];
+                    $result[] = $data;
+                }                
+            } else {
+                $data = (object) [
+                    'product_id' => $product->id,
+                    'amount1'    => $amount,
+                    'kod'        => $product->kod,
+                    'name'       => $product->name,                        
+                ];
+                $result[] = $data;
+            }
         }
-        
+       
         return $this->getResponseResult($result);        
     }
     
@@ -146,6 +153,7 @@ class OrderPositionController extends BaseController
     public function store(Request $request)
     {     
         $orderPosition = [];
+        $order = [];
         $currentWeekNum = date("W");
         $currentYear    = date("Y");
         if ($request['num_week'] < $currentWeekNum) {
@@ -157,22 +165,28 @@ class OrderPositionController extends BaseController
         $date = new \DateTime;
         $date_end = $date->setISODate($year, $request['num_week'])->format('Y-m-d');
 
-        $orderPosition                = new OrderPosition();
-        $orderPosition->kod           = $request['kod'];   
-        $orderPosition->order_id      = $request['order_id']; 
-        $orderPosition->product_id    = $request['product_id'];
-        $orderPosition->amount        = $request['amount'];
-        $orderPosition->price         = $request['price'];
-        $orderPosition->description   = $request['description'];
-        $orderPosition->date_delivery = $date_end;
-        
-        if ($orderPosition->save()) {
-            return response()->json(['data' => $this->repository->getWithAdditionals($orderPosition->id),
-                'success' => true]);
+        $order = \App\Models\Order::find($request->order_id);
+        if ($order) {
+            $orderPosition                = new OrderPosition();
+            $orderPosition->kod           = $order->kod . "." . $request->kod;   
+            $orderPosition->order_id      = $request['order_id']; 
+            $orderPosition->product_id    = $request['product_id'];
+            $orderPosition->amount        = $request['amount'];
+            $orderPosition->price         = $request['price'];
+            $orderPosition->description   = $request['description'];
+            $orderPosition->date_delivery = $date_end;
+
+            if ($orderPosition->save()) {
+                return response()->json(['data' => $this->repository->getWithAdditionals($orderPosition->id),
+                    'success' => true]);
+            } else {
+                return response()->json(['data' => [], 'success' => false, 
+                    'message' => 'Saving new position failed']);
+            }  
         } else {
-            return response()->json(['data' => [], 'success' => false, 
-                'message' => 'Saving new position failed']);
-        }        
+                return response()->json(['data' => [], 'success' => false, 
+                    'message' => 'Saving new position failed. Order was not found']);
+        }
     }     
     
     /**

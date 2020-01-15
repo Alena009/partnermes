@@ -33,10 +33,10 @@ class TaskRepository extends BaseRepository
      */
     public function getListTasksByGroups($groupsIds)
     {
-        $model = $this->model();
-        $tasks = $model::whereIn('task_group_id', $groupsIds)->get(); 
+        $tasksIds = [];
+        $tasksIds = $this->model::whereIn('task_group_id', $groupsIds)->pluck("id"); 
 
-        return $this->withAdditionals($tasks);       
+        return $this->getFewWithAdditionals($tasksIds);       
     }
        
 }

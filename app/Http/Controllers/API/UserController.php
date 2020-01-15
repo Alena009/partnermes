@@ -12,6 +12,13 @@ use Intervention\Image\Facades\Image as ImageInt;
 
 class UserController extends \App\Http\Controllers\BaseController
 {
+    protected $rep;
+    
+    public function __construct(UserRepository $rep)
+    {
+        parent:: __construct();
+        $this->setRepository($rep);
+    }   
 
     public $successStatus = 200;    
 
@@ -192,15 +199,33 @@ class UserController extends \App\Http\Controllers\BaseController
     public function index()
     {
         $users = [];
-        $users = User::all();
-        
-        foreach ($users as $user) {
-            $user['key']   = $user['id'];
-            $user['label'] = $user['name']; 
-            $user['value'] = $user['id'];
-            $user['text']  = $user['name'];             
-        }
+        $users = $this->repository->getAllWithAdditionals();
+//        $users = User::all();
+//        
+//        foreach ($users as $user) {
+//            $user['key']   = $user['id'];
+//            $user['label'] = $user['name']; 
+//            $user['value'] = $user['id'];
+//            $user['text']  = $user['name'];             
+//        }
         
         return response()->json(['success' => true, 'data' => $users]);
+    }
+    
+    /**
+     * Gets list of all users who do not have opened tasks (do not work now)
+     *  
+     * @return json
+     */
+    public function getAllFreeUsers()
+    {
+        $freeUsersIds = [];
+        $busyUsersIds = [];
+        
+        $busyUsersIds = \App\Models\Operation::where("closed", "<", 1)->pluck("user_id");
+        $freeUsersIds = User::whereNotIn("id", $busyUsersIds)->pluck("id");
+        $freeUsers = $this->repository->getFewWithAdditionals($freeUsersIds);
+                
+        return response()->json(['success' => true, 'data' => $freeUsers]);    
     }
 }

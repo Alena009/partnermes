@@ -108,6 +108,9 @@ function projectsInit(cell) {
                                             ajaxDelete("api/orders/" + orderId, "", function(data){
                                                 if (data && data.success){                                                    
                                                     projectsGrid.deleteRow(orderId);
+                                                    positionsGrid.fill(0);
+                                                    positionsGrid.callEvent("onGridReconstructed", []);
+                                                    projectsForm.clearAll();
                                                 } else {
                                                     dhtmlx.alert({
                                                         title:_("Wiadomość"),

@@ -158,19 +158,18 @@ function timelineInit(cell) {
                 {label: _("Pracownik"),                id: "user_name",          width: 150,type: "ro", sort: "str", align: "left"},
                 {label: _("Zamówienie"),               id: "order_kod",          width: 100, type: "ro", sort: "str", align: "left"},                        
                 {label: _("Zlecenie"),                 id: "zlecenie",           width: 100,type: "ro", sort: "str", align: "left"},
-                {label: _("Produkt Kod"),              id: "product_kod",        width: 150,type: "ro", sort: "str", align: "left"},
-                {label: _("Produkt"),                  id: "product_name",       width: 150,type: "ro", sort: "str", align: "left"},
-                {label: _("Zamknięte"),                id: "closed",             width: 50, type: "ch", align: "left"},
-                {label: _("Zadeklarowana iłość"),      id: "start_amount",       width: 50,type: "ro", sort: "str", align: "left"},
+                {label: _("Produkt Kod"),              id: "product_kod",        width: 150,type: "ro", sort: "str", align: "left"},                
+                {label: _("Zamknięte"),                id: "closed",             width: 50, type: "ch", align: "left"},                
                 {label: _("Zrbiona iłość"),            id: "done_amount",        width: 50,type: "ro", sort: "str", align: "left"},
                 {label: _("Data start"),               id: "start_date",         width: 150,type: "ro", sort: "str", align: "left"},
                 {label: _("Data end"),                 id: "end_date",           width: 150,type: "ro", sort: "str", align: "left"},
+                {id: "start_amount"},
                 {id: "order_position_id", width: 50},
                 {id: "task_id", width: 50}
             ]                   
         });  
         operationsGrid.attachHeader("#select_filter,#select_filter,#select_filter," + 
-                                     "#select_filter,#text_filter,#text_filter");             
+                                     "#select_filter,#text_filter,#select_filter");             
         operationsGrid.fill("api/operations");
     }
 }

@@ -44,11 +44,10 @@ class OrderPositionController extends BaseController
         $result = DB::select(DB::raw("select if(c.component_id, c.component_id, op.product_id) as component_id, 
             sum(if(c.amount * op.amount, c.amount * op.amount, op.amount)) as amount1, 
             p.kod, op.id as order_position_id,
-            if(sum(w.amount),sum(w.amount),0) as available 
+            (select sum(w.amount) from warehouse w where w.product_id = if(c.component_id, c.component_id, op.product_id)) as available
             from orders_positions op
             left join components c on op.product_id = c.product_id
             left join products p on p.id = if(c.component_id, c.component_id, op.product_id)
-            left join warehouse w on w.product_id = if(c.component_id, c.component_id, op.product_id)
             where op.id in (" . $positionsIds .")
             group by if(c.component_id, c.component_id, op.product_id)"));
        

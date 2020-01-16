@@ -19,21 +19,10 @@ function warehouseInit(cell) {
         warehouseLayout.cells("a").setWidth(280);		                
         warehouseLayout.setAutoSize("a", "a;b");
         
-        if (write) {
-            var productsTreeToolBar = warehouseLayout.cells("a").attachToolbar({
-                    iconset: "awesome",
-                    items: [                                                       
-                            {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
-                            {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                            {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"}
-                    ]
-            }); 
-        } else {
-            var productsTreeToolBar = warehouseLayout.cells("a").attachToolbar({
-                    iconset: "awesome",
-                    items: []
-            }); 
-        }
+        var productsTreeToolBar;
+        write ? productsTreeToolBar = warehouseLayout.cells("a").attachToolbar(standartToolbar):
+             productsTreeToolBar = warehouseLayout.cells("a").attachToolbar(emptyToolbar); 
+        
         var grupyFormAddData = [
                 {type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
                         {type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),     options: [{text: "None", value: "0"}], inputWidth: 150},                                
@@ -60,8 +49,7 @@ function warehouseInit(cell) {
                 case 'Add':{         
                     var addingWindow = createWindow(_("Grupy produktow"), 300, 250);
                     var addingForm = createForm(grupyFormAddData, addingWindow);            
-                    var parentGroupsCombo = addingForm.getCombo("parent_id");
-                    parentGroupsCombo.enableFilteringMode(true);  
+                    var parentGroupsCombo = addingForm.getCombo("parent_id");                    
                     ajaxGet("api/prodgroups", '', function(data) {                    
                             parentGroupsCombo.addOption(data.data);
                     });  
@@ -229,7 +217,9 @@ function warehouseInit(cell) {
                             ]}
                         ], addingWindow);                    
                     var productGroupsCombo = addingForm.getCombo("product_group_id");                                                                            
-                    productGroupsCombo.sync(productGroupsData);
+                    ajaxGet("api/prodgroups", '', function(data) {                    
+                        productGroupsCombo.addOption(data.data);
+                    });  
                     //occurs when some value has selected in the products groups combobox
                     productGroupsCombo.attachEvent("onChange", function(value, text){
                         var selectedGroupId = productGroupsCombo.getSelectedValue();

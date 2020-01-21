@@ -50,7 +50,8 @@ Route::group([
     Route::get('/positions/list/beguntasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/componenttasks', 'OrderPositionController@listTasksForPositionComponent');
     Route::get('/positions/components/{position}', 'OrderPositionController@positionComponents');
-    Route::get('/positions/tasks/{position}', 'OrderPositionController@positionTasks');
+    Route::get('/positions/tasks/{positions}', 'OrderPositionController@positionsTasks');
+    Route::get('/positions/print/{positions}', 'OrderPositionController@print');
     Route::resource('/positions', 'OrderPositionController');      
     
     Route::get('/prodtypes/{prodtype}/translations', 'ProductTypeController@getTranslations');

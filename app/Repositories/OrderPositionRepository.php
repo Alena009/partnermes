@@ -70,5 +70,32 @@ class OrderPositionRepository extends BaseRepository
         }
         
         return 1;
-    }     
+    }  
+    
+    public function get($ids) 
+    { 
+        $positions = [];
+
+        if (count($ids)) {        
+            $positions = $this->model::find($ids);
+        }
+        
+        return $positions;        
+    }
+    
+    public function getTasks($id) 
+    {
+        $result = [];
+        
+        $position = $this->model::find($id);
+        
+        if ($position) {
+            $declaredWorks = $position->declaredworks;
+            if ($declaredWorks) {
+                return $declaredWorks;
+            } else {
+                return $position->product->tasks;
+            }
+        }        
+    }
 }

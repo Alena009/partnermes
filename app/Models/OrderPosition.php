@@ -31,5 +31,5 @@ class OrderPosition extends BaseModel
     public function declaredworks()
     {        
         return $this->hasMany('App\Models\DeclaredWork', "order_position_id", "id");
-    }      
+    } 
 }

@@ -21,9 +21,9 @@ function zleceniaInit(cell) {
                     var zleceniaGridToolBar = zleceniaLayout.cells("a").attachToolbar({
                             iconset: "awesome",
                             items: [
-                                {id: "Product",text: _("Wyprodukować"), type: "button", img: "fa fa-wrench"},                                                       
-                                {id: "DontProduct",text: _("Nie produkować"), type: "button", img: "fa fa-times"},                                                       
                                 {id: "Print",text: _("Wydrukować"), type: "button", img: "fa fa-print"},                                                       
+                                //{id: "Product",text: _("Wyprodukować"), type: "button", img: "fa fa-wrench"},                                                       
+                                {id: "DontProduct",text: _("Nie produkować"), type: "button", img: "fa fa-times"},                                                                                       
                                 {id: "sep3",     type: "separator"},
                                 {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
                             ]
@@ -38,20 +38,7 @@ function zleceniaInit(cell) {
                 }
  
                 zleceniaGridToolBar.attachEvent("onClick", function(btn) {	
-		    switch (btn){
-		        case 'Product':{
-                            var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
-                            selectedZlecenia.split(',').forEach(function(elem){
-                                var data = zleceniaGrid.getRowData(elem);
-                                data.status = 1;
-                                data.date_status = new Date();
-                                ajaxGet("api/positions/" + elem + "/edit", data, function(data){
-                                    if (data.success && data.data) {                                         
-                                        zleceniaGrid.zaladuj(0);
-                                    }
-                                });
-                            });                          
-                        };break;   
+		    switch (btn){  
 		        case 'DontProduct':{
                             var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
                             selectedZlecenia.split(',').forEach(function(elem){
@@ -67,44 +54,64 @@ function zleceniaInit(cell) {
                         };break;
                         case 'Print': {
                                 var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
-                                if (selectedZlecenia.split(',').length > 1) {
-                                    dhtmlx.message({
-                                        title:_("Wiadomość"),
-                                        type:"alert",
-                                        text:_("Nie mogę wydrukować kilka zleceń. \n\
-                                               Zlecenia mogą być wzdrukowane tylko pojedynczo. \n\
-                                               Wybierz jedno zlecenie.")
-                                    });                                     
-                                } else {
-                                    var selectedZlecenieId = zleceniaGrid.getSelectedRowId();
-                                    if (!selectedZlecenieId) {
-                                        var selectedZlecenieId = zleceniaGrid.getCheckedRows(0).split(',')[0];
-                                    }                                    
-                                    if (selectedZlecenieId) {
-                                        var zlecenie =  zleceniaGrid.getRowData(selectedZlecenieId);
-                                        if (zlecenie.status) { 
-                                            tasksGrid.printView('<div>' + _("Zamówienie") + ": " + zlecenie.order_kod + '</div>' + 
-                                                        '<div>' + _("Zlecenie") + ": " + zlecenie.kod + '</div>' +
-                                                        '<div>' + _("Produkt Kod") + ": " + zlecenie.product_kod + " - " + 
-                                                                  _("Produkt") + ": " + zlecenie.product_name + '</div>' + 
-                                                        '<div>' + _("Iłość") + ": " + zlecenie.amount + '</div>',                                        
-                                                        '<strong>' + _("") + '</strong>');                                     
-                                        } else {
-                                            dhtmlx.message({
-                                                title:_("Wiadomość"),
-                                                type:"alert",
-                                                text:_("Nie można wzdrukować zlecenie \n\
-                                                        które nie wybrane do wyprodukowania!")
-                                            });
-                                        }
-                                    } else {
-                                        dhtmlx.message({
-                                            title:_("Wiadomość"),
-                                            type:"alert",
-                                            text:_("Wybierz zlecenie!")
-                                        });
-                                    }
-                                };
+                                ajaxGet("api/positions/print/" + selectedZlecenia, "", function(data){
+                                    var myWindow=window.open();
+  myWindow.document.write(data);
+
+  myWindow.focus();
+  //myWindow.print();
+
+                                });                                
+//                                selectedZlecenia.split(',').forEach(function(elem){
+//                                    var zlecenie = zleceniaGrid.getRowData(elem);
+//                                   zlecenie.status = 1;
+//                                    zlecenie.date_status = new Date();
+//                                    ajaxGet("api/positions/" + elem + "/edit", zlecenie, function(data){
+//                                        if (data.success && data.data) {                                         
+//                                            //zleceniaGrid.zaladuj(0);
+//                                            tasksGrid.printView('<div>' + _("Zamówienie") + ": " + zlecenie.order_kod + '</div>' + 
+//                                                '<div>' + _("Zlecenie") + ": " + zlecenie.kod + '</div>' +
+//                                                '<div>' + _("Produkt Kod") + ": " + zlecenie.product_kod + " - " + 
+//                                                          _("Produkt") + ": " + zlecenie.product_name + '</div>' + 
+//                                                '<div>' + _("Iłość") + ": " + zlecenie.amount + '</div>',                                        
+//                                                '<strong>' + _("") + '</strong>');                                            
+//                                        }
+//                                    });
+//                                });
+//                                
+//                                if (selectedZlecenia.split(',').length > 1) {
+//                                    dhtmlx.message({
+//                                        title:_("Wiadomość"),
+//                                        type:"alert",
+//                                        text:_("Nie mogę wydrukować kilka zleceń. \n\
+//                                               Zlecenia mogą być wydrukowane tylko pojedynczo. \n\
+//                                               Wybierz jedno zlecenie.")
+//                                    });                                     
+//                                } else {
+//                                    var selectedZlecenieId = zleceniaGrid.getSelectedRowId();
+//                                    if (!selectedZlecenieId) {
+//                                        var selectedZlecenieId = zleceniaGrid.getCheckedRows(0).split(',')[0];
+//                                    }                                    
+//                                    if (selectedZlecenieId) {
+//                                        var zlecenie =  zleceniaGrid.getRowData(selectedZlecenieId);
+//                                        if (zlecenie.status) { 
+//                                                                                 
+//                                        } else {
+//                                            dhtmlx.message({
+//                                                title:_("Wiadomość"),
+//                                                type:"alert",
+//                                                text:_("Nie można wzdrukować zlecenie \n\
+//                                                        które nie wybrane do wyprodukowania!")
+//                                            });
+//                                        }
+//                                    } else {
+//                                        dhtmlx.message({
+//                                            title:_("Wiadomość"),
+//                                            type:"alert",
+//                                            text:_("Wybierz zlecenie!")
+//                                        });
+//                                    }
+//                                };
                         };break;
 		        case 'Redo':{
                                 zleceniaGrid.zaladuj(0);
@@ -153,7 +160,7 @@ function zleceniaInit(cell) {
                     var ids = zleceniaGrid.getCheckedRows(0);
                     if (ids.length) {
                         componentsGrid.fill(ids);
-                        tasksGrid.fill(ids);
+                        //tasksGrid.fill(ids);
                     }
                 });                
 		zleceniaGrid.zaladuj = function(i = 0){
@@ -270,7 +277,6 @@ function zleceniaInit(cell) {
                     tasksGrid.clearAll();
                     ajaxGet("api/positions/tasks/" + positionsIds, "", function(data){
                         if (data.success && data.data) {     
-                            console.log(data.data);
                             tasksGrid.parse((data.data), "js");
                         }
                     });

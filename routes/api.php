@@ -23,7 +23,7 @@ Route::group([
     Route::resource('/language',   'LanguageController');
     Route::resource('/permissions','PermissionController');
     Route::resource('/statuses', 'StatusController');       
-    Route::resource('/history', 'OrderHistoryController');    
+    Route::resource('/history', 'OrderHistoryController');     
       
     Route::get('/declaredworks/savework', 'DeclaredWorkController@savework'); 
     Route::resource('/declaredworks', 'DeclaredWorkController'); 

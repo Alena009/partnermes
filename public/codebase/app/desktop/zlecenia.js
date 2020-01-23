@@ -55,6 +55,9 @@ function zleceniaInit(cell) {
                         case 'Print': {
                                 var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
                                 ajaxGet("api/positions/print/" + selectedZlecenia, "", function(data){
+
+//var print = window.open('data:application/pdf,'+data, "print", "width=800,height=600,resizable=yes,scrollbars=yes,status=yes");                                    
+//print.print();
                                     var myWindow=window.open();
   myWindow.document.write(data);
 

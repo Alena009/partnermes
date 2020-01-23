@@ -689,12 +689,16 @@ class OrderPositionController extends BaseController
         $today = date('Y-m-d');
         $allTasks = '';        
         if (count($positions)) {            
-            foreach ($positions as $position) {
-                //$tasks = $this->repository->getTasks($position->id);
-                $tasks = $position->product->tasks;
-                foreach ($tasks as $task) {
+            foreach ($positions as $position) {   
+                $copyAmount = 3;
+                $clientId = $position->order->client->id;
+                if ($clientId) {
+                    $copyAmount = 6;
+                }
+                //$tasks = $position->product->tasks;
+                for ($i = 1; $i <= $copyAmount; $i++) {
                     $current = $obiegowka;
-                    $barcode = $this->code39($position->id . "-" . $task->id);
+                    $barcode = $this->code39($position->id);
                     $current = str_replace('{dzisiaj}', $today, $current);
                     $current = str_replace('{zlecenie}', $position->product->name, $current);
                     $current = str_replace('{szt}', $position->amount, $current);
@@ -702,7 +706,7 @@ class OrderPositionController extends BaseController
                     $current = str_replace('{kod}', $position->kod, $current);
                     $current = str_replace('|kod|', $barcode, $current);
                     $current = str_replace('{uwagi}', $position->description, $current);                
-                    $current = str_replace('{obszar}', $task->name, $current);
+                    $current = str_replace('{obszar}', $i, $current);
                     $allTasks = $allTasks . $current;                    
                 }          
             }   

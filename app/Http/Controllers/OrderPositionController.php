@@ -698,7 +698,7 @@ class OrderPositionController extends BaseController
                 //$tasks = $position->product->tasks;
                 for ($i = 1; $i <= $copyAmount; $i++) {
                     $current = $obiegowka;
-                    $barcode = $this->code39($position->id);
+                    $barcode = $this->code39($position->kod);
                     $current = str_replace('{dzisiaj}', $today, $current);
                     $current = str_replace('{zlecenie}', $position->product->name, $current);
                     $current = str_replace('{szt}', $position->amount, $current);

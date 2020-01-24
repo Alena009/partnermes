@@ -58,11 +58,11 @@ function zleceniaInit(cell) {
 
 //var print = window.open('data:application/pdf,'+data, "print", "width=800,height=600,resizable=yes,scrollbars=yes,status=yes");                                    
 //print.print();
-                                    var myWindow=window.open();
+                                    var myWindow=window.open('data:application/pdf,'+data, "_blank", "width=800,height=600,resizable=yes,scrollbars=yes,status=yes");
   myWindow.document.write(data);
 
   myWindow.focus();
-  //myWindow.print();
+  myWindow.print();
 
                                 });                                
 //                                selectedZlecenia.split(',').forEach(function(elem){

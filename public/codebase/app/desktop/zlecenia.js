@@ -55,66 +55,11 @@ function zleceniaInit(cell) {
                         case 'Print': {
                                 var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
                                 ajaxGet("api/positions/print/" + selectedZlecenia, "", function(data){
-
-//var print = window.open('data:application/pdf,'+data, "print", "width=800,height=600,resizable=yes,scrollbars=yes,status=yes");                                    
-//print.print();
                                     var myWindow=window.open('data:application/pdf,'+data, "_blank", "width=800,height=600,resizable=yes,scrollbars=yes,status=yes");
-  myWindow.document.write(data);
-
-  myWindow.focus();
-  myWindow.print();
-
+                                    myWindow.document.write(data);
+                                    myWindow.focus();
+                                    myWindow.print();
                                 });                                
-//                                selectedZlecenia.split(',').forEach(function(elem){
-//                                    var zlecenie = zleceniaGrid.getRowData(elem);
-//                                   zlecenie.status = 1;
-//                                    zlecenie.date_status = new Date();
-//                                    ajaxGet("api/positions/" + elem + "/edit", zlecenie, function(data){
-//                                        if (data.success && data.data) {                                         
-//                                            //zleceniaGrid.zaladuj(0);
-//                                            tasksGrid.printView('<div>' + _("Zamówienie") + ": " + zlecenie.order_kod + '</div>' + 
-//                                                '<div>' + _("Zlecenie") + ": " + zlecenie.kod + '</div>' +
-//                                                '<div>' + _("Produkt Kod") + ": " + zlecenie.product_kod + " - " + 
-//                                                          _("Produkt") + ": " + zlecenie.product_name + '</div>' + 
-//                                                '<div>' + _("Iłość") + ": " + zlecenie.amount + '</div>',                                        
-//                                                '<strong>' + _("") + '</strong>');                                            
-//                                        }
-//                                    });
-//                                });
-//                                
-//                                if (selectedZlecenia.split(',').length > 1) {
-//                                    dhtmlx.message({
-//                                        title:_("Wiadomość"),
-//                                        type:"alert",
-//                                        text:_("Nie mogę wydrukować kilka zleceń. \n\
-//                                               Zlecenia mogą być wydrukowane tylko pojedynczo. \n\
-//                                               Wybierz jedno zlecenie.")
-//                                    });                                     
-//                                } else {
-//                                    var selectedZlecenieId = zleceniaGrid.getSelectedRowId();
-//                                    if (!selectedZlecenieId) {
-//                                        var selectedZlecenieId = zleceniaGrid.getCheckedRows(0).split(',')[0];
-//                                    }                                    
-//                                    if (selectedZlecenieId) {
-//                                        var zlecenie =  zleceniaGrid.getRowData(selectedZlecenieId);
-//                                        if (zlecenie.status) { 
-//                                                                                 
-//                                        } else {
-//                                            dhtmlx.message({
-//                                                title:_("Wiadomość"),
-//                                                type:"alert",
-//                                                text:_("Nie można wzdrukować zlecenie \n\
-//                                                        które nie wybrane do wyprodukowania!")
-//                                            });
-//                                        }
-//                                    } else {
-//                                        dhtmlx.message({
-//                                            title:_("Wiadomość"),
-//                                            type:"alert",
-//                                            text:_("Wybierz zlecenie!")
-//                                        });
-//                                    }
-//                                };
                         };break;
 		        case 'Redo':{
                                 zleceniaGrid.zaladuj(0);

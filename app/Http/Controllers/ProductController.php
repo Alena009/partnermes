@@ -28,40 +28,8 @@ class ProductController extends BaseController
     {   
         app()->setLocale($locale);  
         return $this->getResponseResult($this->repository->allProducts($locale));                        
-    }
-    
-//    public function bygroups($groups, $locale = "pl")
-//    {
-//        app()->setLocale($locale);          
-//        if ($groups) {
-//            $groups = explode(",", $groups);
-//            return $this->getResponseResult($this->repository->productsByGroups($groups, $locale));
-//        } else {
-//            return $this->getResponseResult($this->repository->allProducts($locale)); 
-//        }          
-//    }
-            
-    
-//    /**
-//     * Get products list with translations
-//     */
-//    public function productsByGroups($groups, $locale = 'pl')
-//    {   
-//        app()->setLocale($locale);          
-//        if ($groups) {
-//            $groups = explode(",", $groups);
-//            return $this->getResponseResult($this->repository->productsByGroups($groups, $locale));
-//        } else {
-//            return $this->getResponseResult($this->repository->allProducts($locale)); 
-//        }                    
-//    }    
-//    
-//    public function show(Request $request, $id, $locale = 'pl')
-//    {
-//        app()->setLocale($locale);
-//        return $this->getResponseResult($this->repository->getWithAdditionals($id));
-//    }
-//
+    }    
+
     /**
      * Create new product with translations
      */
@@ -102,18 +70,7 @@ class ProductController extends BaseController
 
         return $this->getResponseResult($product);        
     }
-//    
-//    /**
-//     * Delete several products by ids
-//     * 
-//     * @param array $ids
-//     */
-//    public function deleteSeveralProducts($ids)
-//    {
-//        $arrayIds = explode(',', $ids);      
-//        return $this->getResponseResult(Product::destroy($arrayIds));       
-//    }
-//    
+
     public function getListComponents($ids)
     {
         $result= [];
@@ -141,30 +98,6 @@ class ProductController extends BaseController
                 'message' => 'There is no tasks for this product']);  
         }                
     }
-//    
-// //--------------------------------------------------------------------------   
-//    
-//    
-//    
-//    /**
-//     * Get list products by tasks groups
-//     */
-//    public function listProductsByTaskGroup($groupsTasks = 0)
-//    {     
-//        $products = [];
-//        
-//        if ($groupsTasks) {  
-//            $groupsIds = explode(',', $groupsTasks);
-//            $allgroupsIdsWithChildNodes = ProductGroup::whereIn("id", $groupsIds)
-//                    ->orWhereIn("parent_id", $groupsIds)->pluck('id');
-//            $products = Product::whereIn("task_group_id", $allgroupsIdsWithChildNodes)->get();                     
-//        } else {
-//            $products = $this->index();        
-//        }
-//        
-//        return response()->json(['success' => (boolean)$products, 'data' => $products]);  
-//    }    
-//    
     
     /**
      * Adding task for product throw relationships
@@ -235,37 +168,7 @@ class ProductController extends BaseController
         return response()->json(['success' => (boolean)$tasks, 'data' => ["targetpriority"=>$tTaskPriority,
             "sourcepriority" => $sTaskPriority]]);     
     }       
-//    
-//    
-//    /**
-//     * Gets list available tasks for adding to the list of tasks for product
-//     * 
-//     * @param integer $productId
-//     * @return json response
-//     */
-//    public function listAvailableTasks($productId)
-//    {
-//        $product = [];
-//        $result = [];
-//        
-//        $product = Product::find($productId);
-//        if ($product) {
-//            $busyTasksIds = $product->tasks->pluck("id");
-//            $result = Task::whereNotIn("id", $busyTasksIds)->get();
-//            
-//            foreach ($result as $task) {
-//                $task->text  = $task->name;  
-//                $task->value = (string)$task->id;
-//                $task->key   = $task->id;
-//                $task->label = $task->name;
-//                $task->task_kod = $task->kod;
-//                $task->task_name = $task->name;
-//            }            
-//        }           
-//
-//        return response()->json(['success' => (boolean)$result, 'data' => $result]);     
-//    }
-//    
+
     public function deleteTask($productId, $taskId)
     {
         $product = $this->repository->get($productId);

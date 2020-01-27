@@ -57,9 +57,13 @@ Route::group([
     Route::get('/prodtypes/{prodtype}/translations', 'ProductTypeController@getTranslations');
     Route::resource('/prodtypes', 'ProductTypeController');            
     
+    Route::get('/prodgroups/tasks/{group}/{task}/edit', 'ProductGroupController@editTask');  
     Route::get('/prodgroups/products/{groups}/{locale?}', 'ProductGroupController@getProductsByGroups');      
     Route::get('/prodgroups/{prodgroup}/translations', 'ProductGroupController@getTranslations');
-    Route::get('/prodgroups/grupytree/{locale?}', 'ProductGroupController@buildTree');       
+    Route::get('/prodgroups/grupytree/{locale?}', 'ProductGroupController@buildTree');           
+    Route::get('/prodgroups/tasks/{groups}/{locale?}', 'ProductGroupController@getTasks');     
+    Route::post('/prodgroups/addtask', 'ProductGroupController@addTask'); 
+    Route::get('/prodgroups/deletetask/{group}/{task}', 'ProductGroupController@deleteTask');  
     Route::resource('/prodgroups', 'ProductGroupController');
     
     Route::get('/products/{product}/translations', 'ProductController@getTranslations');
@@ -72,7 +76,7 @@ Route::group([
     Route::get('/products/tasks/changepriority/{product}/{stask}/{task}', 'ProductController@changePriorityTask');  
     Route::get('/products/tasks/{product}/{task}/edit', 'ProductController@editTask');  
     Route::get('/products/components/{product}', 'ProductController@getListComponents');  
-    Route::get('/products/tasks/{product}', 'ProductController@getListTasks');          
+    Route::get('/products/tasks/{product}/{locale?}', 'ProductController@getListTasks');          
     Route::resource('/products', 'ProductController');  
  
     

@@ -75,9 +75,10 @@ class ProductRepository extends BaseRepository
         $products = $this->model::find($productsIds);
         if ($products) {
             foreach ($products as $product) {
-                $tasks = $product->tasks;
-                if ($tasks) {
-                    foreach ($tasks as $task) {                        
+                $groupTasks = $product->group->tasks;
+                $productTasks = $product->tasks;
+                if ($productTasks) {
+                    foreach ($productTasks as $task) {                        
                         $task->duration     = $task->pivot->duration;
                         $task->priority     = $task->pivot->priority;
                         $task->task_kod     = $task->kod;                
@@ -88,9 +89,26 @@ class ProductRepository extends BaseRepository
                         $task->task_id      = $task->id;
                         $task->text         = $task->name;  
                         $task->value        = (string)$task->id;
+                        $task->for_group    = 0;
                         $result[] = $task;
                     }        
                 }
+                if ($groupTasks) {
+                    foreach ($groupTasks as $task) {                        
+                        $task->duration     = $task->pivot->duration;
+                        $task->priority     = $task->pivot->priority;
+                        $task->task_kod     = $task->kod;                
+                        $task->task_name    = $task->name;
+                        $task->product_id   = $product->id;
+                        $task->product_name = $product->name;
+                        $task->product_kod  = $product->kod;
+                        $task->task_id      = $task->id;
+                        $task->text         = $task->name;  
+                        $task->value        = (string)$task->id;
+                        $task->for_group    = 1;
+                        $result[] = $task;
+                    }        
+                }                
             }
         }
         

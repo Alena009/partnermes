@@ -85,10 +85,8 @@ class OrderPositionRepository extends BaseRepository
     
     public function getTasks($id) 
     {
-        $result = [];
-        
-        $position = $this->model::find($id);
-        
+        $result = [];        
+        $position = $this->model::find($id);        
         if ($position) {
             $declaredWorks = $position->declaredworks;
             if ($declaredWorks) {
@@ -97,5 +95,20 @@ class OrderPositionRepository extends BaseRepository
                 return $position->product->tasks;
             }
         }        
+    }
+    
+    public function getDate($numWeek) 
+    {
+        $currentWeekNum = date("W");
+        $currentYear    = date("Y");
+        if ($numWeek < $currentWeekNum) {
+            $year = $currentYear + 1; 
+        } else {
+            $year = $currentYear;
+        }
+        
+        $date = new \DateTime;
+        
+        return $date->setISODate($year, $numWeek)->format('Y-m-d');        
     }
 }

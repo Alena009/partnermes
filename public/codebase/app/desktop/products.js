@@ -75,7 +75,8 @@ function productsInit(cell) {
                                         editTaskForGroup(groupTaskId, groupId, groupTasksGrid);                          
                                     };break;                                 
                                     case "Del": {                                        
-                                        deleteTaskForGroup(groupId, groupTasksGrid);                           
+                                        var groupTaskId = groupTasksGrid.getSelectedRowId();                                        
+                                        deleteTaskForGroup(groupTaskId, groupTasksGrid);                           
                                     };break;
                                     case "Redo": {                                        
                                         groupTasksGrid.fill(groupId);                           

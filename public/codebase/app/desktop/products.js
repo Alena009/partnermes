@@ -165,11 +165,7 @@ function productsInit(cell) {
         });  
         productsGroupsTree.attachEvent("onSelect",function(id, mode){  
             if (mode) {
-                //productsGrid.zaladuj(id);
-                productsGrid.filterBy(10, productsGroupsTree.getSelectedId());
-                if (typesProductsGrid.getSelectedRowId()) {
-                    productsGrid.filterBy(9, typesProductsGrid.getSelectedRowId());
-                }                               
+                productsGrid.zaladuj(id);                              
             }
         });    
         productsGroupsTree.fill = function(i=null){	

@@ -298,7 +298,8 @@ function productsTasksInit(cell) {
                     var zadaniaToolBar = productsTasksLayout.cells("c").attachToolbar({
                             iconset: "awesome",
                             items: [
-                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                                    {id: "AddToGroup",  type: "button", text: _("Dodaj do grupy"), img: "fa fa-plus-square "},
+                                    {id: "AddToProd",  type: "button", text: _("Dodaj do produktu"), img: "fa fa-plus-square "},
                                     {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
                                     {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
                                     {type: "separator", id: "sep2"},
@@ -325,18 +326,29 @@ function productsTasksInit(cell) {
                                 ];
 
                     switch(name) {                
-                        case "Add": { 
+                        case "AddToGroup": { 
+                            var groupId = productsGroupsTree.getSelectedId();
+                            addTaskForGroup(groupId, zadaniaGrid);
+                            zadaniaGrid.fill("api/prodgroups/tasks/" + groupId);							
+                        };break;                        
+                        case "AddToProd": { 
                             var productId = productsGrid.getSelectedRowId();
-                            addTaskForProduct(productId, zadaniaGrid, formStruct);                        
+                            addTaskForProduct(productId, zadaniaGrid);      
+                            zadaniaGrid.fill("api/products/tasks/" + productId);							
                         };break;
                         case "Edit": {
                             var selectedId = zadaniaGrid.getSelectedRowId();
                             var selectedProductId = productsGrid.getSelectedRowId();
                             editTaskForProduct(selectedId, selectedProductId, zadaniaGrid);                          
                         };break;                
-                        case "Del": {                    
-                            var id = zadaniaGrid.getSelectedRowId();
-                            deleteTaskForProduct(id, zadaniaGrid);
+                        case "Del": {      
+						    var groupId   = productsGroupsTree.getSelectedId();
+                            var productId = productsGrid.getSelectedRowId();
+							if (productId) {							    
+                                deleteTaskForProduct(productId, zadaniaGrid);								
+							} else if (groupId) {
+								deleteTaskForGroup(groupId, zadaniaGrid);								
+							}                             
                         };break;
                         case "Cog": {                    
                             dhtmlx.alert({
@@ -346,8 +358,13 @@ function productsTasksInit(cell) {
                             }); 
                         };break;  
                         case "Redo": {
+                            var groupId   = productsGroupsTree.getSelectedId();
                             var productId = productsGrid.getSelectedRowId();
-                            zadaniaGrid.fill(productId);
+							if (productId) {
+							    zadaniaGrid.fill("api/products/tasks/" + productId);	
+							} else if (groupId) {
+								zadaniaGrid.fill("api/prodgroups/tasks/" + groupId);
+							}  
                         };break;            
                     }
                 });  
@@ -376,6 +393,7 @@ function productsTasksInit(cell) {
 //                        }
 //                    });                        
 //                };  
+                
                 zadaniaGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
                     var productId = productsGrid.getSelectedRowId();                                    
                     ajaxGet("api/products/tasks/changepriority/" + productId + "/" + sId + "/" + tId, "", function(data){ 

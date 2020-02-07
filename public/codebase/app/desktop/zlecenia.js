@@ -24,6 +24,7 @@ function zleceniaInit(cell) {
                                 {id: "Print",text: _("Wydrukować"), type: "button", img: "fa fa-print"},                                                       
                                 //{id: "Product",text: _("Wyprodukować"), type: "button", img: "fa fa-wrench"},                                                       
                                 {id: "DontProduct",text: _("Nie produkować"), type: "button", img: "fa fa-times"},                                                                                       
+                                {id: "Close",  type: "button", text: _("Zamknij zlecenie"), img: "fa fa-minus-square"},
                                 {id: "sep3",     type: "separator"},
                                 {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
                             ]
@@ -64,6 +65,17 @@ function zleceniaInit(cell) {
 		        case 'Redo':{
                                 zleceniaGrid.zaladuj(0);
                         };break;
+                        case 'Close': {
+                                var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
+                                var data = {};
+                                data.zlecenia = selectedZlecenia;                                
+                                ajaxGet("api/positions/close", data, function(data){
+                                    
+                                    
+                                    
+                                    
+                                });                               
+                        };break;
                     }
                 });                
                 var zleceniaGrid = zleceniaLayout.cells("a").attachGrid({
@@ -76,6 +88,7 @@ function zleceniaInit(cell) {
                         {label: "Imie produktu",       id:'product_name',      width: 200, type: "ro", sort: "str",  align: "left"},                        
                         {label: "Ilość produktu",      id:'amount',            width: 60,  type: "ro",sort: "str",  align: "right"},                        
                         {label: "Zrobiona ilość",      id:'done_amount',       width: 60,  type: "ro",sort: "str",  align: "right"},
+                        {label: "Wydrukowane",         id:'status',            width: 30,  type: "ch", align: "center"},
                         {label: "Zamknięte",           id:'closed',            width: 30,  type: "ch", align: "center"},
                         {label: "Data dodania",        id:'created_at',        width: 120, type: "ro", sort: "date", align: "center"},
                         {label: "Data zamkniecia",     id:'date_closing',      width: 120, type: "ro", sort: "date", align: "center"},
@@ -92,7 +105,7 @@ function zleceniaInit(cell) {
                     multiline: true,
                     multiselect: true
                 });  
-                zleceniaGrid.attachHeader("#master_checkbox,#select_filter,#text_filter,#text_filter,#text_filter");
+                zleceniaGrid.attachHeader("#master_checkbox,#select_filter,#text_filter,#text_filter,#text_filter,,,#select_filter,#select_filter");
                 zleceniaGrid.setRegFilter(zleceniaGrid, 2);
                 zleceniaGrid.setRegFilter(zleceniaGrid, 3);
                 zleceniaGrid.setRegFilter(zleceniaGrid, 4);
@@ -102,7 +115,7 @@ function zleceniaInit(cell) {
                 });                 
                 zleceniaGrid.attachEvent("onCheck", function(rId,cInd,state){
                     var rowData = zleceniaGrid.getRowData(rId);
-                    if (rowData.closed == true || rowData.status == 2) {
+                    if (rowData.closed == true || rowData.status == 3) {
                         zleceniaGrid.cells(rId,0).setValue(false);
                     }
                     var ids = zleceniaGrid.getCheckedRows(0);
@@ -115,7 +128,7 @@ function zleceniaInit(cell) {
                     this.clearAll();
                     var ids = Array();
                     ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-                    var new_data = ajaxGet("api/positions/forzlec", "", function(data){
+                    var new_data = ajaxGet("api/positions/zlecenia", "", function(data){
                         if (data && data.success){                            
                                 zleceniaGrid.parse(data.data, "js");
                             }
@@ -123,16 +136,13 @@ function zleceniaInit(cell) {
 		}; 
                 zleceniaGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                     var data = zleceniaGrid.getRowData(rId);
-                    //blocked task
-                    if (data.status == 2) {
-                        zleceniaGrid.setRowColor(rId,"lightgray");
-                    } 
                     //for producting
-                    if (data.status == 1) {
+                    if (data.status == 2) {
                         zleceniaGrid.setRowColor(rId,"lightyellow");
                     } 
                     //done
-                    if (data.closed == true) { 
+                    if (data.status == 3) { 
+                        
                         zleceniaGrid.setRowColor(rId,"lightgreen");
                     } 
                     //inprogress
@@ -271,13 +281,15 @@ function zleceniaInit(cell) {
                                             data.date_start = newOrderForm.getCalendar("date_start").getDate(true);                                         
                                             ajaxPost("api/orders", data, function(data){
                                                 if (data && data.success) {
+                                                    var i = 0;
                                                     selectedComponents.split(',').forEach(function(elem){
+                                                        i++;
                                                         var data2 = componentsGrid.getRowData(elem);
                                                         data2.order_id = data.data.id;
                                                         data2.price = 0;
                                                         data2.date_delivery = data.data.date_end;
                                                         data2.product_id = data2.component_id;
-                                                        data2.kod = data.data.id + data2.kod;
+                                                        data2.kod = data.data.id + "." + i;
                                                         ajaxPost("api/positions", data2, "");
                                                     });
                                                     newOrderWindow.hide(); 

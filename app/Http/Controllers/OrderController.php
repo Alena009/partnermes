@@ -39,17 +39,6 @@ class OrderController extends BaseController
     public function store(Request $request)
     {
         $locale = app()->getLocale();
-
-//        $validator = $request->validate([
-//            'kod'        => 'required|unique:orders|max:45',
-//            'date_start' => 'required'
-//        ]);
-//        
-//        if (!$validator) {
-//            return response()->json(['success' => false,
-//                'data' => [],
-//                'message' => $validator->errors()]);
-//        }   
         
         $currentWeekNum = date("W");
         $currentYear    = date("Y");
@@ -72,7 +61,7 @@ class OrderController extends BaseController
             $order->translateOrNew($locale)->description = $request['description'];            
             $order->save(); 
             $order = $this->repository->getWithAdditionals($order->id);
-            
+            $order->status()->attach(1);
             return response()->json(['data' => $order, 'success' => true]);                    
         } else {
             return response()->json(['data' => [], 'success' => false, 
@@ -83,18 +72,7 @@ class OrderController extends BaseController
     public function edit(Request $request, $id)
     {
         $order = [];
-        $locale = app()->getLocale();
-
-        $validator = $request->validate([
-            'kod'        => 'required|unique:orders,kod,'.$id.'|max:45',
-            'date_start' => 'required'
-        ]);
-        
-        if (!$validator) {
-            return response()->json(['success' => false,
-                'data' => [],
-                'message' => $validator->errors()]);
-        }          
+        $locale = app()->getLocale();       
         
         $currentWeekNum = date("W");
         $currentYear    = date("Y");

@@ -11,6 +11,8 @@ use App\Models\Warehouse;
 use Illuminate\Support\Facades\DB;
 use App\Models\Product;
 use App\Models\Component;
+use App\Models\Order;
+use App\Models\OrderHistory;
 use Illuminate\Database\Eloquent\Collection;
 
 class OrderPositionController extends BaseController
@@ -86,20 +88,20 @@ class OrderPositionController extends BaseController
         $positions    = $this->repository->get(explode(',', $positionsIds));
         if ($positions) {
             foreach ($positions as $position) {
-//                $tasks = $this->repository->getTasks($position->id);
-                $product       = $position->product;
-                $operations    = $position->operations;
-                $productTasks  = $product->tasks;
-                $groupTasks    = $product->group->tasks;
-                $c = new Collection;
-                $tasks = $c->merge($productTasks)->merge($groupTasks);
+                $product    = $position->product;
+                $operations = $position->operations;
+                $tasks      = $product->allTasks();
                 if ($tasks) {                
                     foreach ($tasks as $task) { 
                         $task->amount      = $position->amount;
                         $task->duration    = $position->amount * $task->pivot->duration;
                         $task->key         = $task->id;
+                        $task->value       = $task->id;
+                        $task->text        = $task->name;
                         $task->task_id     = $task->id;
                         $task->label       = $task->name;
+                        $task->duration    = $task->pivot->duration;
+                        $task->priority    = $task->pivot->priority;
                         $task->done        = $operations->where("task_id", "=", $task->id)
                                 ->sum("done_amount");
                         $task->countWorks  = $operations->where("task_id", "=", $task->id)
@@ -107,8 +109,7 @@ class OrderPositionController extends BaseController
                         $task->status     = true;
                         $wasChangedTask   = DeclaredWork::where("order_position_id", "=", $position->id)
                             ->where("task_id", "=", $task->id)->get();
-                        if (count($wasChangedTask)) {
-                            //print_r($wasChangedTask);
+                        if (count($wasChangedTask)) {                            
                             $task->status   = $wasChangedTask[0]->status;
                             $task->amount   = $wasChangedTask[0]->declared_amount;
                             $task->duration = $wasChangedTask[0]->declared_amount * $task->pivot->duration;
@@ -130,9 +131,9 @@ class OrderPositionController extends BaseController
      * 
      * @return response
      */    
-    public function forManufacturing()
+    public function getPrinted()
     {        
-        return $this->getResponseResult($this->repository->getForManufacturingPositions());        
+        return $this->getResponseResult($this->repository->getPrintedPositions());        
     }   
     
     /**
@@ -140,11 +141,11 @@ class OrderPositionController extends BaseController
      * 
      * @return response
      */    
-    public function forZlecenia()
-    {    
-        $productsWithTasks = Product::has("tasks")->pluck("id");
-        $positionsIds = OrderPosition::whereIn("product_id", $productsWithTasks)
-                ->pluck("id");
+    public function zlecenia()
+    {            
+        $positionsIds = OrderPosition::leftJoin('orders_history', 'orders_positions.order_id', '=', 'orders_history.order_id')
+                ->where("orders_history.status_id", "<>", 3)
+                ->pluck("orders_positions.id"); 
         
         return $this->getResponseResult($this->repository->getFewWithAdditionals($positionsIds));        
     }      
@@ -181,24 +182,24 @@ class OrderPositionController extends BaseController
         }
     }     
         
-    public function listTasksForPosition($orderPosition)
-    {
-        $position = OrderPosition::find($orderPosition);
-        $product  = $position->product;
-        $tasks    = $product->tasks;
-        
-        if ($tasks) {
-            foreach ($tasks as $task) {
-                $task->text  = $task->name;
-                $task->value = $task->id;
-                $task->duration = $task->pivot->duration;
-                $task->priority = $task->pivot->priority;
-            }
-            return response()->json(["success" => true, "data" => $tasks]);                
-        } else {
-            return response()->json(["success" => false, "data" => []]);                
-        }         
-    }   
+//    public function listTasksForPosition($orderPosition)
+//    {
+//        $position = OrderPosition::find($orderPosition);
+//        $product  = $position->product;
+//        $tasks    = $product->tasks;
+//        
+//        if ($tasks) {
+//            foreach ($tasks as $task) {
+//                $task->text  = $task->name;
+//                $task->value = $task->id;
+//                $task->duration = $task->pivot->duration;
+//                $task->priority = $task->pivot->priority;
+//            }
+//            return response()->json(["success" => true, "data" => $tasks]);                
+//        } else {
+//            return response()->json(["success" => false, "data" => []]);                
+//        }         
+//    }   
     
     public function edit(Request $request, $id)
     {  
@@ -240,6 +241,17 @@ class OrderPositionController extends BaseController
             return response()->json(['data' => $positions, 'success' => false, 
                 'message' => 'Failed']);             
         }      
+    }
+    
+    public function close(Request $request)
+    {
+        $positionsIds = $request->zlecenia;
+        $positions = OrderPosition::find(explode(',', $positionsIds));
+        foreach ($positions as $position) {
+            $position->close();
+        }
+        
+        return response()->json(['data' => $positions, 'success' => true]);   
     }
     
     public function print($positionsIds)
@@ -592,12 +604,12 @@ class OrderPositionController extends BaseController
             ';
         $foot = '</div></div></body></html>';     
                 
-        $printedStatus = 1;
-        $positions = $this->changeStatus($positionsIds, $printedStatus);
+        $positions = OrderPosition::find(explode(',', $positionsIds));
         $today = date('Y-m-d');
         $allTasks = '';        
         if (count($positions)) {            
-            foreach ($positions as $position) {   
+            foreach ($positions as $position) {  
+                $position->setPrinted();                
                 $copyAmount = 3;
                 $clientId = $position->order->client->id;
                 if ($clientId) {

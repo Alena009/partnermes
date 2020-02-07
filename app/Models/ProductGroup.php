@@ -34,5 +34,41 @@ class ProductGroup extends BaseModel
                 ->withPivot('duration', 'priority')
                 ->withTimestamps()
                 ->orderBy("priority", "asc");        
+    }     
+    
+    
+    public function allParents($group, $arr = []) 
+    {        
+        $arr[] = $group;             
+        $parent = $group->parent;           
+        if ($parent) {                
+            return $this->allParents($parent, $arr);
+        } else {
+            return $arr;
+        }                
+    }
+    
+    public function allTasks()
+    {
+        $result     = [];        
+        $groupTasks = $this->tasks;                
+        $result     = $groupTasks;
+                
+        $parents = $this->allParents($this);
+        foreach ($parents as $parent) {            
+            $parentTasks = $parent->tasks; 
+            foreach ($parentTasks as $task) {
+                $result[] = $task; 
+            }
+        }  
+        
+        foreach ($result as $r) {
+            $r->duration         = $r->pivot->duration;
+            $r->priority         = $r->pivot->priority;
+            $r->task_id          = $r->id;
+            $r->product_group_id = $this->id;            
+        }
+        
+        return $result;       
     }      
 }

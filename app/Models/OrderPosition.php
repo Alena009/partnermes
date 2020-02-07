@@ -32,4 +32,25 @@ class OrderPosition extends BaseModel
     {        
         return $this->hasMany('App\Models\DeclaredWork', "order_position_id", "id");
     } 
+    
+    public function setPrinted()
+    {
+        $this->status = 2;
+        $this->date_status = date("Y-m-d H:i:s");
+        return $this->save();        
+    }    
+    
+    public function setClosed()
+    {
+        $this->status = 3;
+        $this->date_status = date("Y-m-d H:i:s");
+        return $this->save();        
+    }
+    
+    public function reOpen()
+    {
+        $this->status = 1;
+        $this->date_status = date("Y-m-d H:i:s");
+        return $this->save();        
+    }    
 }

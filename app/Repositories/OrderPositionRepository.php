@@ -34,8 +34,9 @@ class OrderPositionRepository extends BaseRepository
             $position->summa              = $position->price * $position->amount;        
             $position->countWorks         = $position->operations->count("id");
             $position->declared           = $position->product->tasks->count() * $position->amount;
+            
             $position->closed             = false; 
-            if ($position->declared == $position->countWorks) {
+            if ($position->status == 3) {
                 $position->closed = true; 
             }                                           
         }
@@ -48,9 +49,9 @@ class OrderPositionRepository extends BaseRepository
      * 
      * @return array
      */
-    public function getForManufacturingPositions()
+    public function getPrintedPositions()
     {
-        return $this->getFewWithAdditionals($this->model::where("status", "=", 1)->pluck("id"));        
+        return $this->getFewWithAdditionals($this->model::where("status", "=", 2)->pluck("id"));        
     }     
     
     public function isPositionAvailableForCreatingZlecenie($position)

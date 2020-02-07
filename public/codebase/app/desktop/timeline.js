@@ -46,12 +46,12 @@ function timelineInit(cell) {
                         usersCombo.addOption(data.data);
                         usersCombo.selectOption(0);
                     });      
-                    ajaxGet("api/positions/forprod", "", function(data){
+                    ajaxGet("api/positions/getPrinted", "", function(data){
                         positionsCombo.addOption(data.data);                        
                     });   
                     positionsCombo.attachEvent("onClose", function(){
                         var positionId = positionsCombo.getSelectedValue();
-                        ajaxGet("api/positions/list/tasks/" + positionId, "", function(data){
+                        ajaxGet("api/positions/tasks/" + positionId, "", function(data){
                             tasksCombo.clearAll();
                             tasksCombo.addOption(data.data);                            
                         });                           

@@ -38,20 +38,22 @@ Route::group([
     Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
     Route::resource('/operations', 'OperationController'); 
 
+    
     Route::get('/orders/history/{orderId}', 'OrderController@history');
     Route::get('/orders/last', 'OrderController@getLastOrder');
     Route::resource('/orders', 'OrderController');    
     
     Route::get('/positions/byorder/{order}', 'OrderPositionController@getPositionsByOrder');    
-    Route::get('/positions/forprod', 'OrderPositionController@forManufacturing');    
-    Route::get('/positions/forzlec', 'OrderPositionController@forZlecenia');    
+    Route::get('/positions/getPrinted', 'OrderPositionController@getPrinted');    
+    Route::get('/positions/zlecenia', 'OrderPositionController@zlecenia');    
     Route::get('/positions/list/components', 'OrderPositionController@getAllComponentsForFreePositions');
-    Route::get('/positions/list/tasks/{position}', 'OrderPositionController@listTasksForPosition');
+    //Route::get('/positions/list/tasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/beguntasks/{position}', 'OrderPositionController@listTasksForPosition');
     Route::get('/positions/list/componenttasks', 'OrderPositionController@listTasksForPositionComponent');
     Route::get('/positions/components/{position}', 'OrderPositionController@positionComponents');
     Route::get('/positions/tasks/{positions}', 'OrderPositionController@positionsTasks');
     Route::get('/positions/print/{positions}', 'OrderPositionController@print');
+    Route::get('/positions/close', 'OrderPositionController@close');
     Route::resource('/positions', 'OrderPositionController');      
     
     Route::get('/prodtypes/{prodtype}/translations', 'ProductTypeController@getTranslations');

@@ -45,4 +45,23 @@ class Product extends BaseModel
     {
         return $this->hasMany('App\Models\Warehouse', 'product_id', 'id');
     }
+    
+    public function allTasks()
+    {
+        $group        = $this->group;
+        $groupTasks   = $this->group->allTasks();
+        $productTasks = $this->tasks;
+        $result = $groupTasks->merge($productTasks);
+        foreach ($result as $r) {
+            if ($r->product_group_id) {
+                $r->for_group    = 1;
+            }
+            $r->duration         = $r->pivot->duration;
+            $r->priority         = $r->pivot->priority;
+            $r->task_id          = $r->id;
+            $r->product_id       = $this->id;
+            $r->product_group_id = $group->id;            
+        }        
+        return $result;        
+    }    
 }

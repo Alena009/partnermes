@@ -48,5 +48,11 @@ class Order extends BaseModel
     public function positionsInWork()
     {
         return $this->hasMany('App\Models\OrderPosition')->where("status", ">", 0)->get();
+    } 
+    
+    public function status()
+    {
+        return $this->belongsToMany('App\Models\Status', 'orders_history', 'order_id', 'status_id')
+                ->withTimestamps();
     }    
 }

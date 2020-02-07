@@ -54,5 +54,17 @@ class Order extends BaseModel
     {
         return $this->belongsToMany('App\Models\Status', 'orders_history', 'order_id', 'status_id')
                 ->withTimestamps();
-    }    
+    }  
+    
+    /**
+     * Checks does current order is inner order
+     */
+    public function isInner() 
+    {
+        if ($this->client->id == 0) {
+            return true;
+        }        
+        
+        return false;
+    }
 }

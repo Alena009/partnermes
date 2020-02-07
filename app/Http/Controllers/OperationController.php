@@ -10,6 +10,7 @@ use App\Models\OrderPosition;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\DeclaredWork;
+use App\Models\Warehouse;
 
 class OperationController extends BaseController
 {
@@ -90,10 +91,24 @@ class OperationController extends BaseController
 
         $operation->start_amount = $request->start_amount;        
         $operation->done_amount  = $request->done_amount;        
-        $operation->end_date     = new \DateTime(date('Y-m-d H:i:s'));
-        $operation->closed       = 1;
+        $operation->end_date     = new \DateTime(date('Y-m-d H:i:s'));        
         
         if ($operation->save()) {
+            $product = $operation->position->product;
+            $lastTask = $product->getLastTask();
+            $currentOrderIsInner = $operation->position->order->isInner();
+            if ($lastTask->id == $request->task_id && $currentOrderIsInner) {                
+                $warehouse = new Warehouse;
+                $warehouse->product_id = $product->id;
+                $warehouse->amount     = $operation->done_amount;
+                if ($warehouse->save()) {
+                    $operation->closed = 1;
+                    $operation->save();
+                }
+            } else {
+                $operation->closed = 1;
+                $operation->save();
+            }
             return response()->json(['success' => true, 'data' => Operation::find($id)]);
         } else {
             return response()->json(['success' => false, 'data' => []]);

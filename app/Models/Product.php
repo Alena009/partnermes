@@ -63,5 +63,11 @@ class Product extends BaseModel
             $r->product_group_id = $group->id;            
         }        
         return $result;        
-    }    
+    }  
+    
+    public function getLastTask()
+    {
+        $tasks = $this->allTasks();
+        return $tasks->last();  
+    }
 }

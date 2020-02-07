@@ -31,19 +31,29 @@ class OrderPositionRepository extends BaseRepository
             $position->label              = $position->kod;
             $date = new \DateTime($position->date_delivery);
             $position->num_week           = $date->format("W");
-            $position->summa              = $position->price * $position->amount;        
-            $position->countWorks         = $position->operations->count("id");
-            $position->declared           = $position->product->tasks->count() * $position->amount;
-            
+            $position->summa              = $position->price * $position->amount;                    
+            $position->declared           = $position->product->tasks->count() * $position->amount;         
             $position->closed             = false; 
+            $position->done_amount        = $this->getDoneAmount($position);
             if ($position->status == 3) {
                 $position->closed = true; 
+                $position->date_closed = $position->date_status; 
             }                                           
         }
         
         return $position;        
     }  
      
+    public function getDoneAmount($position) 
+    {
+       $product = $position->product;
+       $operations = $position->operations;       
+       $lastTask = $product->getLastTask();       
+       
+       return $operations->where("task_id", "=", $lastTask->id)
+               ->sum("done_amount");
+    }
+    
     /**
      * Returns list of orders positions which does not have zlecenia 
      * 

@@ -7,48 +7,26 @@ function zleceniaInit(cell) {
                 var userData = JSON.parse(localStorage.getItem("userData")); 
                 var write;
                 userData.permissions.forEach(function(elem){
-                    if (elem.name == 'zlecenia') {
-                        write = elem.pivot.value;
-                    }
+                    if (elem.name == 'zlecenia') { write = elem.pivot.value; }
                 });
-		// init layout
+                
 		var zleceniaLayout = cell.attachLayout("3L");		
 		zleceniaLayout.cells("a").setText(_("Zlecenia"));
                 zleceniaLayout.cells("b").setText(_("Zadania do wybranych zleceń"));
                 zleceniaLayout.cells("c").setText(_("Niezbędne materialy"));        
                 
-                if (write) {
-                    var zleceniaGridToolBar = zleceniaLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                {id: "Print",text: _("Wydrukować"), type: "button", img: "fa fa-print"},                                                       
-                                //{id: "Product",text: _("Wyprodukować"), type: "button", img: "fa fa-wrench"},                                                       
-                                {id: "DontProduct",text: _("Nie produkować"), type: "button", img: "fa fa-times"},                                                                                       
-                                {id: "Close",  type: "button", text: _("Zamknij zlecenie"), img: "fa fa-minus-square"},
-                                {id: "sep3",     type: "separator"},
-                                {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
-                            ]
-                    });                    
-                } else {
-                    var zleceniaGridToolBar = zleceniaLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: [                                
-                                {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
-                            ]
-                    });                    
-                }
- 
+                var zleceniaGridToolBar = getZleceniaGridToolBar(zleceniaLayout.cells("a"), write);                                    
                 zleceniaGridToolBar.attachEvent("onClick", function(btn) {	
 		    switch (btn){  
 		        case 'DontProduct':{
                             var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
                             selectedZlecenia.split(',').forEach(function(elem){
                                 var data = zleceniaGrid.getRowData(elem);
-                                data.status = 0;
+                                data.status = 1;
                                 data.date_status = new Date();
                                 ajaxGet("api/positions/" + elem + "/edit", data, function(data){
                                     if (data.success && data.data) {                            
-                                        zleceniaGrid.zaladuj(0);
+                                        zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar); 
                                     }
                                 });
                             });                          
@@ -63,101 +41,39 @@ function zleceniaInit(cell) {
                                 });                                
                         };break;
 		        case 'Redo':{
-                                zleceniaGrid.zaladuj(0);
+                            zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar); 
                         };break;
                         case 'Close': {
-                                var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
-                                var data = {};
-                                data.zlecenia = selectedZlecenia;                                
-                                ajaxGet("api/positions/close", data, function(data){
-                                    
-                                    
-                                    
-                                    
-                                });                               
+                            var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
+                            var data = {};
+                            data.zlecenia = selectedZlecenia;                                
+                            ajaxGet("api/positions/close", data, function(data){});                               
                         };break;
                     }
-                });                
-                var zleceniaGrid = zleceniaLayout.cells("a").attachGrid({
-		    image_path:'codebase/imgs/',
-		    columns: [  
-                        {label: "",                    id:'checked',           width: 30,  type: "ch", align: "center"},                        
-                        {label: "Zmówienie Kod",       id:'order_kod',         width: 50,  type: "ro", sort: "str",  align: "center"},                        
-                        {label: "Zlecenie Kod",        id:'kod',               width: 100, type: "ro", sort: "str",  align: "center"},                                              
-                        {label: "Produkt Kod",         id:'product_kod',       width: 100, type: "ro", sort: "str",  align: "left"},
-                        {label: "Imie produktu",       id:'product_name',      width: 200, type: "ro", sort: "str",  align: "left"},                        
-                        {label: "Ilość produktu",      id:'amount',            width: 60,  type: "ro",sort: "str",  align: "right"},                        
-                        {label: "Zrobiona ilość",      id:'done_amount',       width: 60,  type: "ro",sort: "str",  align: "right"},
-                        {label: "Wydrukowane",         id:'status',            width: 30,  type: "ch", align: "center"},
-                        {label: "Zamknięte",           id:'closed',            width: 30,  type: "ch", align: "center"},
-                        {label: "Data dodania",        id:'created_at',        width: 120, type: "ro", sort: "date", align: "center"},
-                        {label: "Data zamkniecia",     id:'date_closing',      width: 120, type: "ro", sort: "date", align: "center"},
-                        {label: "Data dostawy",        id:'num_week',          width: 120, type: "ro", align: "center"},
-                        {id: "date_delivery"},
-                        {id: "description"},
-                        {id: 'product_id'},
-                        {id: "declared"},
-                        {id: "countWorks"},
-                        {id: "status"},
-                        {id: "order_id"},
-                        {id: "price"}
-                    ],
-                    multiline: true,
-                    multiselect: true
-                });  
-                zleceniaGrid.attachHeader("#master_checkbox,#select_filter,#text_filter,#text_filter,#text_filter,,,#select_filter,#select_filter");
-                zleceniaGrid.setRegFilter(zleceniaGrid, 2);
-                zleceniaGrid.setRegFilter(zleceniaGrid, 3);
-                zleceniaGrid.setRegFilter(zleceniaGrid, 4);
+                });                 
+                var zleceniaGrid = getZleceniaGrid(zleceniaLayout.cells("a"));  
                 zleceniaGrid.attachEvent("onRowSelect", function(id,ind) {
                         componentsGrid.fill(id);
                         tasksGrid.fill(id);
                 });                 
                 zleceniaGrid.attachEvent("onCheck", function(rId,cInd,state){
                     var rowData = zleceniaGrid.getRowData(rId);
-                    if (rowData.closed == true || rowData.status == 3) {
+                    if (rowData.closed == true) {
                         zleceniaGrid.cells(rId,0).setValue(false);
                     }
                     var ids = zleceniaGrid.getCheckedRows(0);
                     if (ids.length) {
                         componentsGrid.fill(ids);
-                        //tasksGrid.fill(ids);
                     }
-                });                
-		zleceniaGrid.zaladuj = function(i = 0){
-                    this.clearAll();
-                    var ids = Array();
-                    ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-                    var new_data = ajaxGet("api/positions/zlecenia", "", function(data){
-                        if (data && data.success){                            
-                                zleceniaGrid.parse(data.data, "js");
-                            }
-                        });			
-		}; 
-                zleceniaGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
-                    var data = zleceniaGrid.getRowData(rId);
-                    //for producting
-                    if (data.status == 2) {
-                        zleceniaGrid.setRowColor(rId,"lightyellow");
-                    } 
-                    //done
-                    if (data.status == 3) { 
-                        
-                        zleceniaGrid.setRowColor(rId,"lightgreen");
-                    } 
-                    //inprogress
-                    if (data.countWorks > 0) {
-                        zleceniaGrid.setRowColor(rId,"yellow");
-                    }
-                }); 
-                zleceniaGrid.zaladuj(0); 
+                });                 
+                zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar); 
                 
                 if (write) {
                     var tasksGridToolBar = zleceniaLayout.cells("b").attachToolbar({
                             iconset: "awesome",
                             items: [
-                                    {id: "Add",  type: "button", text: _("Zapisz zmiany"),   img: "fa fa-save "},                                                                
-                                    {id: "sep3",     type: "separator"},
+//                                    {id: "Add",  type: "button", text: _("Zapisz zmiany"),   img: "fa fa-save "},                                                                
+//                                    {id: "sep3",     type: "separator"},
                                     {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
                             ]
                     });                     
@@ -245,7 +161,7 @@ function zleceniaInit(cell) {
                         iconset: "awesome",
                         items: [                           
                             {id: "Do",    type: "button", text: _("Wyprodukować"),  img: "fa fa-wrench"},
-                            {id: "Order", type: "button", text: _("Zamówić"), img: "fa fa-plus-square"},
+                            //{id: "Order", type: "button", text: _("Zamówić"), img: "fa fa-plus-square"},
                             {type: "separator", id: "sep3"},         
                             {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
                         ]                    

@@ -22,23 +22,7 @@ function productsInit(cell) {
 /**
  * A
  */             
-        var productsGroupsToolBar;
-        if (userCanWrite) { 
-            productsGroupsToolBar = productsLayout.cells("a").attachToolbar({
-                    iconset: "awesome",
-                    items: [                           
-                            {id: "Add",  type: "button", text: _("Dodaj"),  img: "fa fa-plus-square "},
-                            {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                            {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},                            
-                            {type: "separator",   id: "sep4"}, 
-                            {id: "Tasks",     text: _("Zadania"),    type: "button", img: "fa fa-file-text-o "},                            
-                            {type: "separator",   id: "sep2"},                           
-                            {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
-                    ]                    
-            });
-        } else {
-            productsGroupsToolBar = productsLayout.cells("a").attachToolbar(emptyToolbar);
-        }        
+        var productsGroupsToolBar = getProductsGroupsToolBar(productsLayout.cells("a"), userCanWrite);       
         productsGroupsToolBar.attachEvent("onClick", function(btn) {
             switch (btn){
                     case 'Add':{			                                        
@@ -61,87 +45,7 @@ function productsInit(cell) {
                     case 'Tasks':{
                         var groupId = productsGroupsTree.getSelectedId();
                         if (groupId) {
-                            var groupTasksWindow = createWindow(_("Zadania"), 500, 500);  
-                            var groupTasksLayout = groupTasksWindow.attachLayout("1C");
-                            groupTasksLayout.cells("a").hideHeader();
-                            var groupTasksGridToolbar = groupTasksLayout.cells("a").attachToolbar(standartToolbar);
-                            groupTasksGridToolbar.attachEvent("onClick", function(name) {
-                                switch(name) {
-                                    case "Add": {                                        
-                                        addTaskForGroup(groupId, groupTasksGrid);
-                                    };break;
-                                    case "Edit": {
-                                        var groupTaskId = groupTasksGrid.getSelectedRowId();                                        
-                                        editTaskForGroup(groupTaskId, groupId, groupTasksGrid);                          
-                                    };break;                                 
-                                    case "Del": {                                        
-                                        var groupTaskId = groupTasksGrid.getSelectedRowId();                                        
-                                        deleteTaskForGroup(groupTaskId, groupTasksGrid);                           
-                                    };break;
-                                    case "Redo": {                                        
-                                        groupTasksGrid.fill(groupId);                           
-                                    };break;
-                                }
-                            });     
-                            var groupTasksGrid = groupTasksLayout.cells("a").attachGrid({
-                                image_path:'codebase/imgs/',
-                                columns: [                        
-                                    {label: _("Kod"),width: 100,id: "task_kod", type: "ro", sort: "str", align: "left"},
-                                    {label: _("Zadania"),width: 100, id: "task_name", type: "ro", sort: "str", align: "left"},
-                                    {label: _("Czasy, min"), width: 100,  id: "duration", type: "ed", sort: "str", align: "left"},
-                                    {id: "product_group_id"},
-                                    {id: "task_id"},
-                                    {id: "priority"},
-                                    {label: _("Kolejnosc"), id: "priority", type: "ro", width: 50, sort: "str", align: "left"},
-                                    {id: "id"}
-                                ]                                
-                            }); 
-                            groupTasksGrid.setColumnHidden(3,true);
-                            groupTasksGrid.setColumnHidden(4,true);
-                            groupTasksGrid.setColumnHidden(5,true);
-                            groupTasksGrid.enableDragAndDrop(true);
-                            groupTasksGrid.attachEvent("onKeyPress", function(code,cFlag,sFlag){
-                                if (code == 13) {
-                                    var id = groupTasksGrid.getSelectedRowId();
-                                    if (id) {
-                                        var data = groupTasksGrid.getRowData(id);
-                                        ajaxGet("api/prodgroups/tasks/" + data.product_id + "/" + id + "/edit", data, function(data){ 
-                                            if (data && data.success) {
-                                                console.log(data);
-                                            } else {
-                                                dhtmlx.alert({
-                                                    title:_("Wiadomość"),
-                                                    text:_("Zmiany nie zostały zapisane. \n\
-                                                            Wprowadź zmiany ponownie!")
-                                                });
-                                            }
-                                        });
-                                    }
-                                }                    
-                            });    
-                            groupTasksGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
-                                var productId = productsGrid.getSelectedRowId();           
-                                ajaxGet("api/prodgroups/tasks/changepriority/" + productId + "/" + sId + "/" + tId, "", function(data){ 
-                                    if (data && data.success) {
-                                        console.log(data);
-                                    } else {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Zmiany nie zostały zapisane. \n\
-                                                    Wprowadź zmiany ponownie!")
-                                        });
-                                    }
-                                });            
-                            });                                      
-                            groupTasksGrid.fill = function(id){	
-                                groupTasksGrid.clearAll();
-                                ajaxGet("api/prodgroups/tasks/" + id + "/" + localStorage.language, '', function(data){                                     
-                                    if (data && data.success){
-                                        groupTasksGrid.parse((data.data), "js");
-                                    }
-                                });                        
-                            };    
-                            groupTasksGrid.fill(groupId);                        
+                            tasksModule(groupId);
                         } else {
                             dhtmlx.alert({
                                 title:_("Wiadomość"),
@@ -150,7 +54,7 @@ function productsInit(cell) {
                         }                              
                     };break;
                     case 'Redo':{
-                        productsGroupsTree.fill();
+                        
                     };break;                    
             }
         });
@@ -815,41 +719,6 @@ function editProduct(data, id, grid) {
     });     
 }
 
-function addTask(id) { 
-    var formStruct = [
-            {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
-            {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
-            {type: "input", name: "duration", required: true, label: _("Czas")},
-            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
-                {type: "newcolumn"},
-                {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
-            ]}              
-        ];     
-    if (id) {               
-        var addingWindow = createWindow(_("Zadania"), 300, 300);
-        var addingForm = createForm(formStruct, addingWindow);
-        var tasksCombo = addingForm.getCombo("task_id");
-        ajaxGet("api/tasks", '', function(data){
-            if (data && data.success) {
-                tasksCombo.addOption(data.data);
-            } else {
-                dhtmlx.alert({
-                    title:_("Wiadomość"),
-                    text:_("Listę zadań nie było otrzymano. Wypełnij listę zadań \n\
-                            w rozdziale 'Zadania' albo odswież stronę.")
-                });                 
-            }
-        });
-        return addingForm;
-    } else {
-        dhtmlx.alert({
-            title:_("Wiadomość"),
-            text:_("Wybierz produkt do którego chcesz dołączyć zadania!")
-        });       
-    }   
-}
-
 function addTaskForProduct(productId, tasksGrid) {    
     var addingForm = addTask(productId);
     addingForm.attachEvent("onButtonClick", function(name){
@@ -859,27 +728,6 @@ function addTaskForProduct(productId, tasksGrid) {
             ajaxPost("api/products/addtask", data, function(data){
                 if(data && data.success){
                     tasksGrid.fill(productId);                                                        
-                } else {
-                    dhtmlx.alert({
-                        title:_("Wiadomość"),
-                        text:_("Zmiany nie zostały zapisane. \n\
-                                Wprowadź zmiany ponownie!")
-                    });                                                         
-                }
-            });
-        }
-    });
-}
-
-function addTaskForGroup(groupId, groupTasksGrid) {    
-    var addingForm = addTask(groupId);
-    addingForm.attachEvent("onButtonClick", function(name){
-        var data = this.getFormData();
-        data.product_group_id = groupId;
-        if (name == "save") {
-            ajaxPost("api/prodgroups/addtask", data, function(data){
-                if(data && data.success){
-                    groupTasksGrid.fill(groupId);                                                        
                 } else {
                     dhtmlx.alert({
                         title:_("Wiadomość"),
@@ -920,117 +768,6 @@ function deleteTaskForProduct(id, tasksGrid) {
         }); 
     }    
 } 
-
-function deleteTaskForGroup(id, tasksGrid) {
-    if (id) {
-        dhtmlx.confirm({
-            title: _("Ostrożność"),                                    
-            text: _("Czy na pewno chcesz usunąć zadanie?"),
-            callback: function(result){
-                if (result) {                                        
-                    var rowData = tasksGrid.getRowData(id);
-                    ajaxGet("api/prodgroups/deletetask/" + rowData.product_group_id + "/" + rowData.task_id, "", function(data){
-                        if (data && data.success) {
-                            tasksGrid.deleteRow(id);
-                        } else {
-                            dhtmlx.alert({
-                                title:_("Wiadomość"),
-                                text:_("Nie udało się usunąć zadanie!")
-                            });
-                        }
-                    });                            
-                }
-            }
-        });                     
-    } else {
-        dhtmlx.alert({
-            title:_("Wiadomość"),
-            text:_("Wybierz zadanie, które chcesz usunąć!")
-        }); 
-    }    
-} 
-
-function editTaskForProduct(id, productId, tasksGrid) {
-    if (id) {
-        var formStruct = [
-            {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
-            {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
-            {type: "input", name: "duration", required: true, label: _("Czas")},
-            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
-                {type: "newcolumn"},
-                {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
-            ]}              
-        ];         
-        var editWindow = createWindow(_("Zadania do produktow"), 300, 300);
-        var editForm = createForm(formStruct, editWindow);
-        var rowData = tasksGrid.getRowData(id);
-        var tasksCombo = editForm.getCombo("task_id");
-        ajaxGet("api/tasks", '', function(data){
-            tasksCombo.addOption(data.data);
-            tasksCombo.selectOption(tasksCombo.getIndexByValue(rowData.task_id));
-        });
-        editForm.setFormData(rowData);
-        editForm.attachEvent("onButtonClick", function(name){
-            var data = this.getFormData();
-            data.product_id = productId;
-            if (name == "save") {
-                ajaxGet("api/products/tasks/" + productId +"/" + 
-                        rowData.task_id + "/edit", data, function(data){
-                    if (data && data.success){
-                        tasksGrid.fill(productId);                                        
-                    }
-                });
-            }
-        });
-    } else {
-        dhtmlx.alert({
-            title:_("Wiadomość"),
-            text:_("Wybierz zadanie, które chcesz edytować!")
-        });           
-    }     
-}
-
-function editTaskForGroup(id, groupId, tasksGrid) {
-    if (id) {
-        var formStruct = [
-            {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
-            {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
-            {type: "input", name: "duration", required: true, label: _("Czas")},
-            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
-                {type: "newcolumn"},
-                {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
-            ]}              
-        ];         
-        var editWindow = createWindow(_("Zadania"), 300, 300);
-        var editForm = createForm(formStruct, editWindow);
-        var rowData = tasksGrid.getRowData(id);
-        var tasksCombo = editForm.getCombo("task_id");
-        ajaxGet("api/tasks", '', function(data){
-            tasksCombo.addOption(data.data);
-            tasksCombo.selectOption(tasksCombo.getIndexByValue(rowData.task_id));
-        });
-        editForm.setFormData(rowData);
-        editForm.attachEvent("onButtonClick", function(name){
-            var data = this.getFormData();
-            data.product_group_id = groupId;
-            if (name == "save") {
-                ajaxGet("api/prodgroups/tasks/" + groupId +"/" + 
-                        rowData.task_id + "/edit", data, function(data){
-                    if (data && data.success){
-                        tasksGrid.fill(groupId);                                        
-                    }
-                });
-            }
-        });
-    } else {
-        dhtmlx.alert({
-            title:_("Wiadomość"),
-            text:_("Wybierz zadanie, które chcesz edytować!")
-        });           
-    }     
-}
 
 var productFormStruct = [
     {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                 

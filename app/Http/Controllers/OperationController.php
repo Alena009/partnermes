@@ -155,38 +155,6 @@ class OperationController extends BaseController
         return response()->json(['success' => $success, 'data' => $amount]);
     } 
     
-    
-
-
-    
-    
-    
-        
-//        //task already was begun
-//        $previousOperation = DB::table('operations')
-//                ->where("order_position_id", "=", $request->order_position_id)
-//                ->where("task_id", "=", $request->task_id) 
-//                ->where("closed", "=", 1)
-//                ->orderBy('id', 'desc')
-//                ->first();
-//        if ($previousOperation) {
-//            $amount = $previousOperation->start_amount - $previousOperation->done_amount;
-//            return response()->json(['success' => true, 'data' => $amount]);
-//        //if task was not begun, we must check it`s priority
-//        } else {            
-//            $position = OrderPosition::find($request->order_position_id);
-//            if ($position) {                 
-//                return response()->json(['success' => true, 'data' => $position->amount]);
-//            } else {
-//                return response()->json(['success' => false, 'data' => [], 
-//                    'message' => 'Operation was not found']);
-//            }
-//        }
-    
-
-            
-
-
     /**
      * Get list tasks by groups
      */
@@ -201,28 +169,8 @@ class OperationController extends BaseController
                     ->orderBy('operations.id', 'desc')
                     ->get(); 
         } else {
-//            $operations = Operation::with(['task.group' => function ($query) {
-//            $query->whereIn('task_group_id', $groupsIds);}, 'user'])->get(); 
             $operations = Operation::orderBy('operations.id', 'desc')->get();             
         }
-        
-//        foreach ($tasks as $task) {
-//            if ($task->for_order) {
-//                $orderPosition = $task->orderPosition;
-//                $order         = $orderPosition->order; 
-//                $product       = $orderPosition->product;
-//                $task['order_kod']         = $order['kod'];
-//                $task['order_description'] = $order['description'];
-//                $task['date_delivery']     = $orderPosition['date_delivery'];
-//                $task['product_name']      = $product['name'];                
-//                $task['product_kod']       = $product['kod'];                
-//            } else {
-//                $product              = $task->product;
-//                $task['product_name'] = $product["name"];                
-//                $task['product_kod']  = $product["kod"];                  
-//            }
-//        }
-        
         
         if ($operations) {
             foreach ($operations as $operation){

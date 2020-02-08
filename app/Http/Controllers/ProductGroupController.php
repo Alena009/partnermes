@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Repositories\ProductGroupRepository;
 use App\Models\ProductGroup;
 use Illuminate\Support\Facades\DB;
+use App\Models\Task;
 
 class ProductGroupController extends BaseController
 {
@@ -66,18 +67,18 @@ class ProductGroupController extends BaseController
         return $this->getResponseResult($this->repository->productsByGroups($groups, $locale));
     }
         
-    public function getTasks($ids)
+    public function tasks($id)
     {
         $result = [];
-        $ids    = explode(",", $ids);
-        $result = $this->repository->listTasks($ids);
-        
-        if ($result) {
-            return response()->json(['success' => true, 'data' => $result]);  
-        } else {
-            return response()->json(['success' => false, 'data' => $result, 
-                'message' => 'There is no tasks for this product']);  
-        }                
+        $group = $this->repository->get($id);
+        if ($group) {
+            $result = $group->allTasks();            
+            if ($result) {
+                return response()->json(['success' => true, 'data' => $result]);  
+            }           
+        }    
+        return response()->json(['success' => false, 'data' => $result, 
+            'message' => 'There is no tasks for this product']);                          
     }    
     
     /**
@@ -88,23 +89,21 @@ class ProductGroupController extends BaseController
      */
     public function addTask(Request $request)
     {
-        $group = [];
-        $result = [];
-              
-        $group = ProductGroup::find($request->product_group_id);        
+        $group = $this->repository->get($request->product_group_id);        
         if ($group) {
-            $latestTask = DB::table("product_groups_tasks")
-                    ->where("product_group_id", "=", $group->id)
-                    ->orderBy("id", "desc")->first();
-            
+            $latestTask = collect($group->allTasks())->last();            
             if ($latestTask) { $priority = $latestTask->priority + 1; } else { $priority = 1; }
             $group->tasks()->attach($request->task_id, 
                        ['duration' => $request->duration, 
-                        'priority' => $priority]);
-            $result = $group->tasks;
+                        'priority' => $priority]);    
+            $result = $group->tasks()->where("task_id", "=", $request->task_id)->get()[0];
+            $result->duration = $result->pivot->duration;
+            $result->priority = $result->pivot->priority;
+            $result->product_group_id = $group->id;
+            $result->task_id = $result->id;
         } else {
-            return response()->json(['success' => false, 
-                'data' => [], 'message' => 'Product group was not found']);     
+            return response()->json(['success' => false, 'data' => [], 
+                'message' => 'Product group was not found']);     
         } 
         
         return response()->json(['success' => true, 'data' => $result, 
@@ -113,11 +112,17 @@ class ProductGroupController extends BaseController
     
     public function editTask(Request $request, $groupId, $taskId)
     {
-        $result = DB::table('product_groups_tasks')
+        DB::table('product_groups_tasks')
             ->where("product_group_id", "=", $groupId)
             ->where("task_id", "=", $taskId)
             ->update(['priority' => $request['priority'], 
-                'duration' => $request['duration']]);        
+                'duration' => $request['duration']]); 
+        $group = $this->repository->get($groupId); 
+        $result = $group->tasks()->where("task_id", "=", $taskId)->get()[0];
+        $result->duration = $result->pivot->duration;
+        $result->priority = $result->pivot->priority;
+        $result->product_group_id = $group->id;
+        $result->task_id = $result->id;        
         
         return response()->json(['success' => (boolean)$result, 'data' => $result]);     
     }       

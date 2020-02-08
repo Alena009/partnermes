@@ -141,7 +141,7 @@ class OrderPositionController extends BaseController
      * 
      * @return response
      */    
-    public function zlecenia()
+    public function getZlecenia()
     {            
         $positionsIds = OrderPosition::leftJoin('orders_history', 'orders_positions.order_id', '=', 'orders_history.order_id')
                 ->where("orders_history.status_id", "<>", 3)

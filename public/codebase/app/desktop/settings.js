@@ -1403,6 +1403,72 @@ function getPermission(paragraph) {
     });
 }
 
+dhtmlXGridObject.prototype.add = function(url, data) {
+    var grid = this;
+    ajaxPost(url, data, function(data){                                                                                                        
+        if (data && data.success) {
+            grid.addRow(data.data.id, '');
+            grid.setRowData(data.data.id, data.data);
+//            dhtmlx.alert({
+//                title:_("Wiadomość"),
+//                text:_("Zapisane!")
+//            });                                        
+        } else {
+            dhtmlx.alert({
+                title:_("Wiadomość"),
+                text:_("Błąd! Zmiany nie zostały zapisane")
+            });
+        }                                          
+    });      
+};
+
+dhtmlXGridObject.prototype.edit = function(url, data) {
+    var grid = this;
+    ajaxGet(url, data, function(data){                                                                                                        
+        if (data && data.success) { 
+            grid.setRowData(data.data.id, data.data);
+//            dhtmlx.alert({
+//                title:_("Wiadomość"),
+//                text:_("Zapisane!")
+//            });
+        } else {
+            dhtmlx.alert({
+                title:_("Wiadomość"),
+                text:_("Błąd! Zmiany nie zostały zapisane")
+            });
+        }                                          
+    });         
+};
+
+dhtmlXGridObject.prototype.delete = function(url, id) {
+    var thisGrid = this;
+    if (id) {                                
+        dhtmlx.confirm({
+            title: _("Ostrożność"),                                    
+            text: _("Czy na pewno chcesz usunąć?"),
+            callback: function(result){
+                if (result) {                                                                                    
+                    ajaxDelete(url, "", function(data){
+                        if (data && data.success){
+                            thisGrid.deleteRow(id);
+                        } else {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Nie udało się usunąć!")
+                            });
+                        }
+                    });   
+                }
+            }
+        });                                     
+    } else {
+        dhtmlx.alert({
+            title:_("Wiadomość"),
+            text:_("Wybierz informację którą chcesz usunąć!")
+        });                            
+    }     
+};
+
 window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 	if (id == "settings") {
             window.history.pushState({'page_id': id}, null, '#settings');

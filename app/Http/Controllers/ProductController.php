@@ -112,11 +112,11 @@ class ProductController extends BaseController
               
         $product = Product::find($request->product_id);        
         if ($product) {
-            $latestTask = DB::table("product_tasks")
-                    ->where("product_id", "=", $product->id)
-                    ->orderBy("id", "desc")->first();
+            $latestTask = $product->allTasks();
             
-            if ($latestTask) { $priority = $latestTask->priority + 1; } else { $priority = 1; }
+            if ($latestTask) { 
+                $priority = $latestTask->priority + 1;                 
+            } else { $priority = 1; }
             $product->tasks()->attach($request->task_id, 
                        ['duration' => $request->duration, 
                         'priority' => $priority]);

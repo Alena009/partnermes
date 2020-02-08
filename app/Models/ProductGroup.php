@@ -22,10 +22,15 @@ class ProductGroup extends BaseModel
         return $this->hasMany($this, 'parent_id', 'id') ;
     }    
     
+    public function parent() 
+    {
+        return $this->hasOne($this, 'id', 'parent_id') ;
+    }      
+    
     public function products()
     {
         return $this->hasMany('App\Models\Product', 'product_group_id', 'id');
-    }
+    }  
     
     public function tasks()
     {
@@ -34,8 +39,7 @@ class ProductGroup extends BaseModel
                 ->withPivot('duration', 'priority')
                 ->withTimestamps()
                 ->orderBy("priority", "asc");        
-    }     
-    
+    }       
     
     public function allParents($group, $arr = []) 
     {        
@@ -50,23 +54,25 @@ class ProductGroup extends BaseModel
     
     public function allTasks()
     {
-        $result     = [];        
-        $groupTasks = $this->tasks;                
-        $result     = $groupTasks;
-                
+        $result     = [];       
         $parents = $this->allParents($this);
         foreach ($parents as $parent) {            
             $parentTasks = $parent->tasks; 
             foreach ($parentTasks as $task) {
+                $task->product_group_id = $parent->id;
                 $result[] = $task; 
             }
-        }  
+        }         
+        $groupTasks = $this->tasks;  
+        foreach ($groupTasks as $task) {
+            $task->product_group_id = $this->id;
+            $result[] = $task; 
+        }             
         
         foreach ($result as $r) {
             $r->duration         = $r->pivot->duration;
-            $r->priority         = $r->pivot->priority;
-            $r->task_id          = $r->id;
-            $r->product_group_id = $this->id;            
+            $r->priority         = $r->pivot->priority;            
+            $r->task_id          = $r->id;            
         }
         
         return $result;       

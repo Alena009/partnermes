@@ -65,35 +65,5 @@ class ProductGroupRepository extends BaseRepository
         
         return $result;        
     }
-    
-    /**
-     * Getting list tasks for one or several products by it`s ids.
-     * 
-     * @param array $groupsIds
-     */
-    public function listTasks($groupsIds) 
-    {
-        $groups = [];
-        $result = [];
-        
-        $groups = $this->model::find($groupsIds);
-        if ($groups) {
-            foreach ($groups as $group) {
-                $groupTasks = $group->tasks;
-                if ($groupTasks) {
-                    foreach ($groupTasks as $task) {                                                                       
-                        $task->task_kod  = $task->kod;
-                        $task->task_name = $task->name;
-                        $task->duration  = $task->pivot->duration;
-                        $task->product_group_id = $group->id;
-                        $task->task_id   = $task->id;
-                        $task->priority  = $task->pivot->priority;                        
-                        $result[] = $task;
-                    }        
-                }                
-            }
-        }
-        
-        return $result;               
-    }    
+   
 }

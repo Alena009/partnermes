@@ -22,10 +22,11 @@ function productsTasksInit(cell) {
             tasksGroupsLayout.cells("b").setText(_("Zadania"));
             tasksGroupsLayout.cells("a").setWidth(280);
             tasksGroupsLayout.setAutoSize("a", "a;b");
-            var productsTasksLayout = mainTabbar.tabs("a2").attachLayout("3W"); 
+            var productsTasksLayout = mainTabbar.tabs("a2").attachLayout("4W"); 
             productsTasksLayout.cells("a").setText(_("Grupy produktów"));
-            productsTasksLayout.cells("b").setText(_("Produkty"));
-            productsTasksLayout.cells("c").setText(_("Zadania"));            
+			productsTasksLayout.cells("b").setText(_("Zadania do grup produktów"));            
+            productsTasksLayout.cells("c").setText(_("Produkty"));
+            productsTasksLayout.cells("d").setText(_("Zadania do produktów"));            
 /**
  * Grupy zadan
  * 
@@ -247,7 +248,7 @@ function productsTasksInit(cell) {
                     if (mode) {                        
                         //productsGrid.filterBy(4, productsGroupsTree.getSelectedId());
                         productsGrid.zaladuj(productsGroupsTree.getSelectedId());
-                        zadaniaGrid.fill("api/prodgroups/tasks/" + productsGroupsTree.getSelectedId());
+                        zadaniaGroupGrid.fill(productsGroupsTree.getSelectedId());
 
                     }
                 });    
@@ -259,12 +260,161 @@ function productsTasksInit(cell) {
                         }                    
                     });
                 };
-                productsGroupsTree.fill(); 
+                productsGroupsTree.fill();
 /**
  * B
  * 
+ */				
+	        if (userCanWrite) {
+                    var zadaniaGroupToolBar = productsTasksLayout.cells("b").attachToolbar({
+                            iconset: "awesome",
+                            items: [
+                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},                                    
+                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},                                    
+                                    {type: "separator", id: "sep3"},
+                                    {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+                            ]                    
+                    });   
+                } else {
+                    var zadaniaGroupToolBar = productsTasksLayout.cells("b").attachToolbar(emptyToolbar);                      
+                }
+                zadaniaGroupToolBar.attachEvent("onClick", function(name) {
+                    var groupId = productsGroupsTree.getSelectedId();
+                    if (groupId) {
+                        switch(name) {                
+                            case "Add": { 
+                                var formStruct = [
+                                        {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
+                                        {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
+                                        {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},                                                                    
+                                        {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                            {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
+                                            {type: "newcolumn"},
+                                            {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
+                                        ]}              
+                                    ];                                                                
+                                var addTaskToGroupWindow = createWindow(_("Zadanie"), 300, 300);
+                                var addTaskToGroupForm = createForm(formStruct, addTaskToGroupWindow);
+                                var tasksCombo = addTaskToGroupForm.getCombo("task_id");
+                                ajaxGet("api/tasks", "", function(data){
+                                    if (data && data.success) {
+                                        tasksCombo.addOption(data.data);
+                                    }
+                                });
+                                addTaskToGroupForm.attachEvent("onButtonClick", function(name){
+                                    if (name == "save") {
+                                        var data = this.getFormData();
+                                        data.product_group_id = groupId;
+                                        zadaniaGroupGrid.add("api/prodgroups/addtask" , data); 
+                                        addTaskToGroupForm.clear();
+                                    }
+                                });                            							
+                            };break;                        
+                            case "Edit": {
+                                var taskId = zadaniaGroupGrid.getSelectedRowId();
+                                if (taskId) {
+                                    var formStruct = [
+                                        {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                                    
+                                        {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},                                                                    
+                                        {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                            {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
+                                            {type: "newcolumn"},
+                                            {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
+                                        ]}              
+                                    ];                                                                
+                                    var addTaskToGroupWindow = createWindow(_("Zadanie"), 300, 300);
+                                    var addTaskToGroupForm = createForm(formStruct, addTaskToGroupWindow);                                
+                                    var taskData = zadaniaGroupGrid.getRowData(taskId);
+                                    addTaskToGroupForm.setFormData(taskData);
+                                    addTaskToGroupForm.attachEvent("onButtonClick", function(name){
+                                        if (name == "save") {
+                                            var data = this.getFormData();
+                                            data.product_group_id = groupId;
+                                            zadaniaGroupGrid.edit("api/prodgroups/tasks/"+groupId+"/"+taskId+"/edit" , data); 
+                                            addTaskToGroupWindow.close();
+                                        }
+                                    });   
+                                } else {
+                                    dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Wybierz zadanie!")
+                                    });
+                                }
+                            };break;                
+                            case "Del": {                                      
+                                var taskId = zadaniaGroupGrid.getSelectedRowId();
+                                if (taskId) { 
+                                    zadaniaGroupGrid.delete("api/prodgroups/deletetask/"+groupId+"/"+taskId+"", taskId);				
+                                } else {
+                                    dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Wybierz zadanie!")
+                                    });
+                                }
+                            };break;
+                            case "Redo": {                                
+                                zadaniaGroupGrid.fill(groupId);
+                            };break;            
+                        }
+                    } else {
+                        dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Wybierz grupę!")
+                        });
+                    }
+                });  
+                var zadaniaGroupGrid = productsTasksLayout.cells("b").attachGrid({
+                    image_path:'codebase/imgs/',
+                    columns: [                        
+                        {label: _("Kod"),       id: "kod",      type: "ro", width: 50,  sort: "str", align: "left"},
+                        {label: _("Zadanie"),   id: "name",     type: "ro", width: 150, sort: "str", align: "left"},
+                        {label: _("Czas, min"), id: "duration", type: "ro", width: 50,  sort: "str", align: "left"},
+                        {label: _("Kolejnosc"), id: "priority", type: "ro", width: 50,  sort: "str", align: "left"},
+                        {id: "product_group_id"},
+                        {id: "task_id"}
+                    ]
+
+                });        
+//                zadaniaGroupGrid.setColumnHidden(4,true);
+//                zadaniaGroupGrid.setColumnHidden(5,true);
+                zadaniaGroupGrid.attachHeader("#select_filter,#select_filter");		                
+                zadaniaGroupGrid.enableDragAndDrop(true);     
+                zadaniaGroupGrid.fill = function(id = 0){	
+                    this.clearAll();					
+                    ajaxGet("api/prodgroups/tasks/" + id, '', function(data){                                     
+                        if (data && data.success){
+                            zadaniaGroupGrid.parse((data.data), "js");
+                        }
+                    });                        
+                };  
+                
+                zadaniaGroupGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
+                    var thisGrid = zadaniaGroupGrid;
+                    var source = thisGrid.getRowData(sId);
+                    var target = thisGrid.getRowData(tId);
+                    var sourcePriority = source.priority;
+                    var targetPriority = target.priority;
+
+                    if (source.product_group_id === target.product_group_id) {
+                        source.priority = targetPriority;
+                        target.priority = sourcePriority;
+                        thisGrid.edit("api/prodgroups/tasks/" + source.product_group_id +"/" + 
+                                                    source.task_id + "/edit", source);  
+                        thisGrid.edit("api/prodgroups/tasks/" + target.product_group_id +"/" + 
+                                                    target.task_id + "/edit", target); 
+                    } else {
+                        dhtmlx.alert({
+                            title:_("Wiadomość"),
+                            text:_("Nie można zmienić kolejność mędzy zadaniami róźnych grup")
+                        });
+                    }                                                
+                });  
+/**
+ * C
+ * 
  */
-                var productsGrid = productsTasksLayout.cells("b").attachGrid({
+                var productsGrid = productsTasksLayout.cells("c").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [                        
                         {label: _("Kod"),           id: "kod",                
@@ -283,92 +433,130 @@ function productsTasksInit(cell) {
                 productsGrid.setRegFilter(productsGrid, 1);   
                 productsGrid.setColumnHidden(4,true);
                 productsGrid.attachEvent("onRowSelect", function(id, ind) {            
-                    zadaniaGrid.fill("api/products/tasks/" + id);     
+                    zadaniaProductGrid.fill(id);     
                 });  
                 productsGrid.zaladuj = (i = 0) => {	              
                     productsGrid.fill("api/prodgroups/products/" + i + "/" + 
                             localStorage.language, null);
                 };                   
-                productsGrid.zaladuj(0);
 /**
- * C
+ * D
  * 
- */
-                if (userCanWrite) {
-                    var zadaniaToolBar = productsTasksLayout.cells("c").attachToolbar({
+ */				
+	        if (userCanWrite) {
+                    var zadaniaProductToolBar = productsTasksLayout.cells("d").attachToolbar({
                             iconset: "awesome",
                             items: [
-                                    {id: "AddToGroup",  type: "button", text: _("Dodaj do grupy"), img: "fa fa-plus-square "},
-                                    {id: "AddToProd",  type: "button", text: _("Dodaj do produktu"), img: "fa fa-plus-square "},
+                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},                                    
                                     {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                                    {type: "separator", id: "sep2"},
-                                    {id: "Cog", type: "button", text: _("Zmień kolejność"), img: "fa fa-spin fa-cog "},
+                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},                                    
                                     {type: "separator", id: "sep3"},
                                     {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
                             ]                    
                     });   
                 } else {
-                    var zadaniaToolBar = productsTasksLayout.cells("c").attachToolbar(emptyToolbar);                      
+                    var zadaniaProductToolBar = productsTasksLayout.cells("d").attachToolbar(emptyToolbar);                      
                 }
-                zadaniaToolBar.attachEvent("onClick", function(name) {
-                    var formStruct = [
-                                    {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
-                                    {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
-                                    {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},
-                                    {type: "radio", name: "grouporproduct", checked: true, label: _("Zadanie do grupy")},
-                                    {type: "radio", name: "grouporproduct", label: _("Zadanie do produktu")},
-                                    {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                                        {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
-                                        {type: "newcolumn"},
-                                        {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
-                                    ]}              
-                                ];
-
-                    switch(name) {                
-                        case "AddToGroup": { 
-                            var groupId = productsGroupsTree.getSelectedId();
-                            addTaskForGroup(groupId, zadaniaGrid);
-                            zadaniaGrid.fill("api/prodgroups/tasks/" + groupId);							
-                        };break;                        
-                        case "AddToProd": { 
-                            var productId = productsGrid.getSelectedRowId();
-                            addTaskForProduct(productId, zadaniaGrid);      
-                            zadaniaGrid.fill("api/products/tasks/" + productId);							
-                        };break;
-                        case "Edit": {
-                            var selectedId = zadaniaGrid.getSelectedRowId();
-                            var selectedProductId = productsGrid.getSelectedRowId();
-                            editTaskForProduct(selectedId, selectedProductId, zadaniaGrid);                          
-                        };break;                
-                        case "Del": {      
-						    var groupId   = productsGroupsTree.getSelectedId();
-                            var productId = productsGrid.getSelectedRowId();
-							if (productId) {							    
-                                deleteTaskForProduct(productId, zadaniaGrid);								
-							} else if (groupId) {
-								deleteTaskForGroup(groupId, zadaniaGrid);								
-							}                             
-                        };break;
-                        case "Cog": {                    
-                            dhtmlx.alert({
+                zadaniaProductToolBar.attachEvent("onClick", function(name) {
+                    var productId = productsGrid.getSelectedRowId();
+                    if (productId) {
+                        switch(name) {                
+                            case "Add": { 
+                                var formStruct = [
+                                        {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
+                                        {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
+                                        {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},                                                                    
+                                        {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                            {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
+                                            {type: "newcolumn"},
+                                            {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
+                                        ]}              
+                                    ];                                                                
+                                var addTaskToProductWindow = createWindow(_("Zadanie"), 300, 300);
+                                var addTaskToProductForm = createForm(formStruct, addTaskToProductWindow);
+                                var tasksCombo = addTaskToProductForm.getCombo("task_id");
+                                ajaxGet("api/tasks", "", function(data){
+                                    if (data && data.success) {
+                                        tasksCombo.addOption(data.data);
+                                    }
+                                });
+                                addTaskToProductForm.attachEvent("onButtonClick", function(name){
+                                    if (name == "save") {
+                                        var data = this.getFormData();
+                                        data.product_id = productId;
+                                        zadaniaProductGrid.add("api/products/addtask" , data); 
+                                        addTaskToProductForm.clear();
+                                    }
+                                });                            							
+                            };break;                        
+                            case "Edit": {
+                                var taskId = zadaniaProductGrid.getSelectedRowId();
+                                if (taskId) {
+                                    if (!zadaniaProductGrid.getRowData(taskId).for_group) {
+                                        var formStruct = [
+                                            {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                                    
+                                            {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},                                                                    
+                                            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                                {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
+                                                {type: "newcolumn"},
+                                                {type:"button",  name: "cancel", value: "Anuluj", offsetTop:18}
+                                            ]}              
+                                        ];                                                                
+                                        var addTaskToProductWindow = createWindow(_("Zadanie"), 300, 300);
+                                        var addTaskToProductForm = createForm(formStruct, addTaskToProductWindow);                                
+                                        var taskData = zadaniaProductGrid.getRowData(taskId);
+                                        addTaskToProductForm.setFormData(taskData);
+                                        addTaskToProductForm.attachEvent("onButtonClick", function(name){
+                                            if (name == "save") {
+                                                var data = this.getFormData();
+                                                data.product_id = productId;
+                                                zadaniaProductGrid.edit("api/products/tasks/"+productId+"/"+taskId+"/edit" , data); 
+                                                addTaskToProductWindow.close();
+                                            }
+                                        }); 
+                                    } else {
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Te zadanie, należy do grupy!")
+                                        });
+                                    }
+                                } else {
+                                    dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Wybierz zadanie!")
+                                    });
+                                }
+                            };break;                
+                            case "Del": {                                      
+                                var taskId = zadaniaProductGrid.getSelectedRowId();
+                                if (taskId) { 
+                                    if (!zadaniaProductGrid.getRowData(taskId).for_group) {
+                                        zadaniaProductGrid.delete("api/products/deletetask/"+productId+"/"+taskId+"", taskId);				
+                                    } else {
+                                        dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Te zadanie, należy do grupy!")
+                                        });
+                                    }
+                                } else {
+                                    dhtmlx.alert({
+                                            title:_("Wiadomość"),
+                                            text:_("Wybierz zadanie!")
+                                    });
+                                }
+                            };break;
+                            case "Redo": {                                
+                                zadaniaProductGrid.fill(productId);
+                            };break;            
+                        }
+                    } else {
+                        dhtmlx.alert({
                                 title:_("Wiadomość"),
-                                text:_("Dla zmiany kolejności wykonywania zadań \n\
-                                        przesuń zadanie w tabeli na potrzebne miejsce")
-                            }); 
-                        };break;  
-                        case "Redo": {
-                            var groupId   = productsGroupsTree.getSelectedId();
-                            var productId = productsGrid.getSelectedRowId();
-							if (productId) {
-							    zadaniaGrid.fill("api/products/tasks/" + productId);	
-							} else if (groupId) {
-								zadaniaGrid.fill("api/prodgroups/tasks/" + groupId);
-							}  
-                        };break;            
+                                text:_("Wybierz produkt!")
+                        });
                     }
                 });  
-                var zadaniaGrid = productsTasksLayout.cells("c").attachGrid({
+                var zadaniaProductGrid = productsTasksLayout.cells("d").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [                        
                         {label: _("Kod"),       id: "kod",      type: "ro", width: 50,  sort: "str", align: "left"},
@@ -376,43 +564,46 @@ function productsTasksInit(cell) {
                         {label: _("Czas, min"), id: "duration", type: "ro", width: 50,  sort: "str", align: "left"},
                         {label: _("Kolejnosc"), id: "priority", type: "ro", width: 50,  sort: "str", align: "left"},
                         {id: "product_id"},
-                        {id: "task_id"}
+                        {id: "task_id"}, 
+                        {id: "for_group"}
                     ]
 
                 });        
-                zadaniaGrid.setColumnHidden(3,true);
-                zadaniaGrid.setColumnHidden(4,true);
-                zadaniaGrid.setColumnHidden(5,true);
-                zadaniaGrid.attachHeader("#select_filter,#select_filter");		                
-                zadaniaGrid.enableDragAndDrop(true);     
-//                zadaniaGrid.fill = function(id = 0){	
-//                    zadaniaGrid.clearAll();					
-//                    ajaxGet("api/products/tasks/" + id, '', function(data){                                     
-//                        if (data && data.success){
-//                            zadaniaGrid.parse((data.data), "js");
-//                        }
-//                    });                        
-//                };  
-                
-                zadaniaGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
-                    var productId = productsGrid.getSelectedRowId();                                    
-                    ajaxGet("api/products/tasks/changepriority/" + productId + "/" + sId + "/" + tId, "", function(data){ 
-                        if (data && data.success) {
-                            console.log(data);
-                        } else {
-                            dhtmlx.alert({
-                                title:_("Wiadomość"),
-                                text:_("Zmiany nie zostały zapisane. \n\
-                                        Wprowadź zmiany ponownie!")
-                            });
+                zadaniaProductGrid.setColumnHidden(4,true);
+                zadaniaProductGrid.setColumnHidden(5,true);
+                zadaniaProductGrid.setColumnHidden(6,true);
+                zadaniaProductGrid.attachHeader("#select_filter,#select_filter");		                
+                zadaniaProductGrid.enableDragAndDrop(true);     
+                zadaniaProductGrid.fill = function(id = 0){	
+                    this.clearAll();					
+                    ajaxGet("api/products/tasks/" + id, '', function(data){                                     
+                        if (data && data.success){
+                            zadaniaProductGrid.parse((data.data), "js");
                         }
-                    });            
-                });   
+                    });                        
+                };  
+                
+                zadaniaProductGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
+                    var thisGrid = zadaniaProductGrid;
+                    var source = thisGrid.getRowData(sId);
+                    var target = thisGrid.getRowData(tId);
+                    var sourcePriority = source.priority;
+                    var targetPriority = target.priority;
 
-                zadaniaGrid.attachFooter(
-                    [_("Ilosc czasu na wykonanie, min: "),"#cspan","#stat_total"],
-                    ["text-align:right;","text-align:center"]
-                );
+                    if (!source.for_group && !target.for_group) {
+                        source.priority = targetPriority;
+                        target.priority = sourcePriority;
+                        thisGrid.edit("api/products/tasks/" + source.product_id +"/" + 
+                                                    source.task_id + "/edit", source);  
+                        thisGrid.edit("api/products/tasks/" + target.product_id +"/" + 
+                                                    target.task_id + "/edit", target); 
+                    } else {
+                        dhtmlx.alert({
+                            title:_("Wiadomość"),
+                            text:_("Nie można zmienić kolejność mędzy zadaniami róźnych produktu i grupy")
+                        });
+                    }              
+                });  
     }
 }
 

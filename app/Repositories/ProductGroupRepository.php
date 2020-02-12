@@ -10,6 +10,11 @@ class ProductGroupRepository extends BaseRepository
         return "App\Models\ProductGroup";
     }
     
+    public function getAll() 
+    {
+        return $this->model::all();        
+    }
+    
     public function get($id) 
     {
         $result = [];

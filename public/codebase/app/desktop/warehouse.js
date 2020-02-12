@@ -18,143 +18,15 @@ function warehouseInit(cell) {
         warehouseLayout.cells("b").setText( _("Produkty"));                
         warehouseLayout.cells("a").setWidth(280);		                
         warehouseLayout.setAutoSize("a", "a;b");
-        
-        var productsTreeToolBar;
-        write ? productsTreeToolBar = warehouseLayout.cells("a").attachToolbar(standartToolbar):
-             productsTreeToolBar = warehouseLayout.cells("a").attachToolbar(emptyToolbar); 
-        
-        var grupyFormAddData = [
-                {type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
-                        {type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),     options: [{text: "None", value: "0"}], inputWidth: 150},                                
-                        {type:"input",  name:"name",    	label:_("Nazwa grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
-                        {type: "block", blockOffset: 0, position: "label-left", list: [
-                            {type: "button", name: "save",   value: _("Zapisz"), offsetTop:18},
-                            {type: "newcolumn"},
-                            {type:"button", name:"cancel", value: _("Anuluj"), offsetTop:18}
-                        ]}
-                ]}
-        ];
-        var grupyFormEditData = [
-                {type:"fieldset",  offsetTop:0, label:_("Grupa"), width:253, list:[                                			
-                        {type:"input",  name:"name",    	label:"Nazwa grupy",     	offsetTop:13, 	labelWidth:80},                                                                				
-                        {type: "block", blockOffset: 0, position: "label-left", list: [
-                            {type: "button", name: "save",   value: _("Zapisz"), offsetTop:18},
-                            {type: "newcolumn"},
-                            {type:"button", name:"cancel", value: _("Anuluj"), offsetTop:18}
-                        ]}
-                ]}
-        ];        
-        productsTreeToolBar.attachEvent("onClick", function(id) {
-            switch (id){
-                case 'Add':{         
-                    var addingWindow = createWindow(_("Grupy produktow"), 300, 250);
-                    var addingForm = createForm(grupyFormAddData, addingWindow);            
-                    var parentGroupsCombo = addingForm.getCombo("parent_id");                    
-                    ajaxGet("api/prodgroups", '', function(data) {                    
-                            parentGroupsCombo.addOption(data.data);
-                    });  
-                    addingForm.attachEvent("onButtonClick", function(name){
-                        switch (name){
-                            case 'save':{                                                           
-                                    ajaxPost("api/prodgroups", addingForm.getFormData(), function(data){                                                            
-                                        productsTree.addItem(data.data.id, data.data.name, data.data.parent_id); // id, text, pId
-                                        productsTree.openItem(data.data.parent_id);
-                                        productsTree.selectItem(data.data.id);
-                                    });
-                            };break;
-                            case 'cancel':{
-                                addingForm.clear();
-                            };break;
-                        }
-                    });
-                };break;
-                case 'Edit':{
-                    var id = productsTree.getSelectedId();                                            
-                    if (id) {                                            
-                        var data = {
-                            id: id,
-                            name: productsTree.getItemText(id)
-                        };
-                        var grupyWindow = createWindow(_("Grupy produktow"), 250, 200);
-                        var grupyForm = createForm(grupyFormEditData, grupyWindow);                                                                                       
-                        grupyForm.setFormData(data);                                                                                                                   
-                        grupyForm.attachEvent("onButtonClick", function(name){
-                            switch (name){
-                                case 'save':{                                                        
-                                    ajaxGet("api/prodgroups/" + id +"/edit", grupyForm.getFormData(), function(data) {                                                                                                        
-                                        if (data.success) {                                                                
-                                            productsTree.setItemText(id, data.data.name);
-                                        }   
-                                    });
-                                };break;
-                                case 'cancel':{                                                            
-                                    grupyForm.setFormData(data);                                                        
-                                };break;
-                            }
-                        });
-                    } else {
-                        dhtmlx.alert({
-                            title:_("Wiadomość"),
-                            type:"alert",
-                            text:_("Wybierz grupe, która chcesz edytować!")
-                        });
-                    }                                 
-                };break;
-                case 'Del': {
-                    var id = productsTree.getSelectedId();
-                                if (id) {
-                                    dhtmlx.confirm({
-                                    title:_("Ostrożność"),                                    
-                                    text:_("Czy na pewno chcesz usunąć grupe?"),
-                                    callback: function(result){
-                                                if (result) {
-                                                    ajaxDelete("api/prodgroups/" + id,'', function(data) {
-                                                        if (data.success) {
-                                                            productsTree.deleteItem(id);                                                    
-                                                        } else {
-                                                            dhtmlx.alert({
-                                                                title:_("Błąd!"),
-                                                                type:"alert-error",
-                                                                text:data.message
-                                                            });
-                                                        }
-                                                    }); 
-                                                }
-                                            }
-                                        });
-                                }  else {
-                                    dhtmlx.alert({
-                                        title:_("Wiadomość"),
-                                        type:"alert",
-                                        text:_("Wybierz grupe, która chcesz usunąć!")
-                                    });
-                                }   
-                };break;
-            }                    
-        });        
+               
         var productsTree = warehouseLayout.cells("a").attachTreeView({
             skin: "dhx_web",    // string, optional, treeview's skin
             iconset: "font_awesome", // string, optional, sets the font-awesome icons
             multiselect: false,           // boolean, optional, enables multiselect
-            checkboxes: true,           // boolean, optional, enables checkboxes
+            //checkboxes: true,           // boolean, optional, enables checkboxes
             dnd: true,           // boolean, optional, enables drag-and-drop
             context_menu: true
-        });  
-        productsTree.enableDragAndDrop(true);                 
-        productsTree.attachEvent("onDrop",function(id){                    
-            var parent_id = arguments[1];
-            parent_id = (parent_id) ? parent_id+'' : 0;
-            var data = {
-                id: id,
-                parent_id: parent_id
-            };                        
-            ajaxGet("api/prodgroups/" + id +"/edit?", data, function(data) {                                                                                                        
-                if (data.success) {                                                                
-                    console.log("success");
-                }   
-            });
-            return true;
-        });                 
+        });                  
         productsTree.attachEvent("onSelect",function(id, mode){  
             if (mode) {
                 var grupy=productsTree.getAllChecked();

@@ -44,12 +44,12 @@ class OperationController extends BaseController
             'message' => 'This user has opened tasks and can`t '
             . 'add new task while opened tasks aren`t closed']);            
         } else {
-            //check does new task for order or it does not have order
-            $position = OrderPosition::find($request->order_position_id);
-            if ($position) {
-                $product = $position->product;
-                $task = $product->tasks()->where("tasks.id", "=", $request->task_id)->get();            
-                $totalDuration = $task[0]->pivot->duration * $request->start_amount;
+            //check does new task for order or it does not have order            
+            if (!$request->not_for_order) {
+                $position = OrderPosition::find($request->order_position_id);
+                $task = $position->product->getTask($request->task_id);
+                $taskDuration = $task->pivot->duration;
+                $totalDuration = $taskDuration * $request->start_amount;
                 $new_day_plus1 = new \DateTime(date('Y-m-d H:i:s'));
                 $new_day_plus1->add(new \DateInterval('PT' . $totalDuration . 'M'));
 
@@ -117,39 +117,73 @@ class OperationController extends BaseController
 
     public function taskchange(Request $request)
     {
-        $amount     = 0;
+        $amount     = 1;
         $success    = true;
         $positionId = $request->order_position_id;
         $taskId     = $request->task_id;
 
         //if task has order
         if ($positionId) {
-            $position  = OrderPosition::find($positionId);
-            $currentTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
-                            ->where("task_id", "=", $taskId)->get();             
-            $changedTasks = DB::table('declared_works')->where("order_position_id", "=", $positionId)
-                    ->where("status", "=", 1)->pluck("task_id");
-            if ($changedTasks) {
-                $previousTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
-                        ->whereIn("task_id", $changedTasks)->where("priority", "<", $currentTask[0]->priority)
-                        ->orderBy('priority', 'desc')->first();                
+            //if task has its own operations
+            $operations = Operation::where("order_position_id", "=", $positionId)
+                    ->where("task_id", "=", $taskId)
+                    ->where("closed", "=", 1)
+                    ->get();
+            $lastOperation = $operations->last();
+            if ($lastOperation) {
+                $amount = $lastOperation->start_amount - $lastOperation->done_amount;
             } else {
-                $previousTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
-                        ->where("priority", "<", $currentTask[0]->priority)
-                        ->orderBy('priority', 'desc')->first();                   
-            }
-            if ($previousTask) {  
-                $previousTaskAvailableAmount = $this->repository->availableAmount($positionId, $previousTask->task_id); 
-                $previousTaskDoneAmount = $this->repository->getDoneAmountByTask($positionId, $previousTask->task_id); 
-                $currentTaskAvailableAmount = $this->repository->availableAmount($positionId, $taskId);
-                if ($previousTaskAvailableAmount) {
-                    $amount = $previousTaskDoneAmount;
+                //if task does not have its own operations, then we watch does 
+                //its have tasks with higest priority
+                $position = OrderPosition::where("id", "=", $positionId)->first();
+                $thisTask = $position->product->getTask($taskId);
+                $taskWithHigestPriority = $position->product->allTasks()->where("priority", "<", $thisTask->priority)->last();                
+                
+                //if it has tasks with higest priority - we list of operations for this task
+                if ($taskWithHigestPriority) {
+                    $operations = Operation::where("order_position_id", "=", $positionId)
+                            ->where("task_id", "=", $taskWithHigestPriority->id)
+                            ->where("closed", "=", 1)
+                            ->get();  
+                    $lastOperation = $operations->last();
+                    if ($lastOperation) {
+                        $amount = $lastOperation->start_amount - $lastOperation->done_amount;
+                    } else {
+                        $amount = "";
+                    }
                 } else {
-                    $amount = $currentTaskAvailableAmount;
-                }
-            } else {
-                $amount = $this->repository->availableAmount($positionId, $taskId);
-            }  
+                    //if it does not have tasks with highest priority then we get 
+                    //amount from order
+                    $amount = OrderPosition::where("id", "=", $positionId)->pluck("amount")[0];
+                }                              
+            }
+            
+//            $position  = OrderPosition::find($positionId);
+//            $currentTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
+//                            ->where("task_id", "=", $taskId)->get();             
+//            $changedTasks = DB::table('declared_works')->where("order_position_id", "=", $positionId)
+//                    ->where("status", "=", 1)->pluck("task_id");
+//            if ($changedTasks) {
+//                $previousTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
+//                        ->whereIn("task_id", $changedTasks)->where("priority", "<", $currentTask[0]->priority)
+//                        ->orderBy('priority', 'desc')->first();                
+//            } else {
+//                $previousTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
+//                        ->where("priority", "<", $currentTask[0]->priority)
+//                        ->orderBy('priority', 'desc')->first();                   
+//            }
+//            if ($previousTask) {  
+//                $previousTaskAvailableAmount = $this->repository->availableAmount($positionId, $previousTask->task_id); 
+//                $previousTaskDoneAmount = $this->repository->getDoneAmountByTask($positionId, $previousTask->task_id); 
+//                $currentTaskAvailableAmount = $this->repository->availableAmount($positionId, $taskId);
+//                if ($previousTaskAvailableAmount) {
+//                    $amount = $previousTaskDoneAmount;
+//                } else {
+//                    $amount = $currentTaskAvailableAmount;
+//                }
+//            } else {
+//                $amount = $this->repository->availableAmount($positionId, $taskId);
+//            }  
         }
         
         return response()->json(['success' => $success, 'data' => $amount]);

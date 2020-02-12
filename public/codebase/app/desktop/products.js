@@ -22,7 +22,9 @@ function productsInit(cell) {
 /**
  * A
  */             
-        var productsGroupsToolBar = getProductsGroupsToolBar(productsLayout.cells("a"), userCanWrite);       
+        var productsGroupsToolBar;
+        userCanWrite ? productsGroupsToolBar = productsLayout.cells("a").attachToolbar(standartToolbar):
+                productsGroupsToolBar = productsLayout.cells("a").attachToolbar(emptyToolbar);
         productsGroupsToolBar.attachEvent("onClick", function(btn) {
             switch (btn){
                     case 'Add':{			                                        
@@ -42,19 +44,8 @@ function productsInit(cell) {
                             deleteNodeFromTree(productsGroupsTree, "api/prodgroups/" + id);
                         }
                     };break;
-                    case 'Tasks':{
-                        var groupId = productsGroupsTree.getSelectedId();
-                        if (groupId) {
-                            tasksModule(groupId);
-                        } else {
-                            dhtmlx.alert({
-                                title:_("Wiadomość"),
-                                text:_("Wybierz grupę!")
-                            });  
-                        }                              
-                    };break;
                     case 'Redo':{
-                        
+                        productsGroupsTree.fill(); 
                     };break;                    
             }
         });
@@ -87,8 +78,7 @@ function productsInit(cell) {
  */        
         var typesProductsGridToolBar;
         userCanWrite ? typesProductsGridToolBar = productsLayout.cells("b").attachToolbar(standartToolbar):
-                typesProductsGridToolBar = productsLayout.cells("b").attachToolbar(emptyToolbar);
-        
+                typesProductsGridToolBar = productsLayout.cells("b").attachToolbar(emptyToolbar);        
         typesProductsGridToolBar.attachEvent("onClick", function(btn) {
             switch (btn){
                     case 'Add':{
@@ -212,16 +202,8 @@ function productsInit(cell) {
                     sort: "str", 
                     align: "left"     
                 }                          
-            ],
-            multiselect: true                    
-        });
-        typesProductsGrid.attachEvent("onRowSelect", function() {
-            var id = typesProductsGrid.getSelectedRowId();
-            if (productsGroupsTree.getSelectedId()) {
-                productsGrid.filterBy(10, productsGroupsTree.getSelectedId());
-            }
-            productsGrid.filterBy(9, id);
-        });        
+            ]                   
+        });       
         typesProductsGrid.fill = function() {    
             this.clearAll();
             ajaxGet("api/prodtypes", "", function(data){
@@ -244,8 +226,6 @@ function productsInit(cell) {
                             {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
                             {type: "separator",   id: "sep3"}, 
                             {id: "Copy", type: "button", text: _("Kopiuj"), img: "fa fa-clone"},
-                            {type: "separator",   id: "sep4"}, 
-                            {id: "Tasks",     text: _("Zadania"),    type: "button", img: "fa fa-file-text-o "},
                             {id: "Components",text: _("Komponenty"), type: "button", img: "fa fa-puzzle-piece "},
                             {type: "separator",   id: "sep2"},                           
                             {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
@@ -286,116 +266,6 @@ function productsInit(cell) {
                         });                         
                     }                                                                
                 };break; 
-                case 'Tasks': {
-                    var productId = productsGrid.getSelectedRowId();
-                    if (productId) {
-                        var tasksWindow = createWindow(_("Zadania"), 500, 500);  
-                        var tasksLayout = tasksWindow.attachLayout("1C");
-                        tasksLayout.cells("a").hideHeader();
-                        var tasksGridToolbar = tasksLayout.cells("a").attachToolbar(standartToolbar);
-                        tasksGridToolbar.attachEvent("onClick", function(name) {
-                            switch(name) {
-                                case "Add": {
-                                    var productId = productsGrid.getSelectedRowId();
-                                    addTaskForProduct(productId, tasksGrid);
-                                };break;
-                                case "Edit": {
-                                    var selectedId = tasksGrid.getSelectedRowId();
-                                    var selectedProductId = productsGrid.getSelectedRowId();
-                                    editTaskForProduct(selectedId, selectedProductId, tasksGrid);                          
-                                };break;                                 
-                                case "Del": {
-                                    var rowData = tasksGrid.getRowData(tasksGrid.getSelectedRowId());
-                                    if (rowData.for_group) {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Te zadanie należe do grupy nie można go tu usunąć!")
-                                        });
-                                    } else {
-                                        var productId = tasksGrid.getSelectedRowId();
-                                        deleteTaskForProduct(productId, tasksGrid);                                         
-                                    }                                                              
-                                };break;
-                                case "Redo": {
-                                    var selectedProductId = productsGrid.getSelectedRowId();
-                                    tasksGrid.fill(selectedProductId);                           
-                                };break;
-                            }
-                        });     
-                        var tasksGrid = tasksLayout.cells("a").attachGrid({
-                            image_path:'codebase/imgs/',
-                            columns: [                        
-                                {label: _("Kod"),width: 100,id: "task_kod", type: "ro", sort: "str", align: "left"},
-                                {label: _("Zadania"),width: 100, id: "task_name", type: "ro", sort: "str", align: "left"},
-                                {label: _("Czasy, min"), width: 100,  id: "duration", type: "ed", sort: "str", align: "left"},
-                                {id: "product_id"},
-                                {id: "task_id"},
-                                {id: "priority"},
-                                {label: _("Kolejnosc"), id: "priority", type: "ro", width: 50, sort: "str", align: "left"},                            
-                                {id: "for_group"}
-                            ]
-                        }); 
-                        tasksGrid.setColumnHidden(3,true);
-                        tasksGrid.setColumnHidden(4,true);
-                        tasksGrid.setColumnHidden(5,true);
-                        tasksGrid.setColumnHidden(7,true);
-                        tasksGrid.enableDragAndDrop(true);
-                        tasksGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
-                            var data = tasksGrid.getRowData(rId);
-                            //task for group
-                            if (data.for_group == 1) {
-                                tasksGrid.setRowColor(rId, "lightgray");
-                            } 
-                        });                         
-                        tasksGrid.attachEvent("onKeyPress", function(code,cFlag,sFlag){
-                            if (code == 13) {
-                                var id = tasksGrid.getSelectedRowId();
-                                if (id) {
-                                    var data = tasksGrid.getRowData(id);
-                                    ajaxGet("api/products/tasks/" + data.product_id + "/" + id + "/edit", data, function(data){ 
-                                        if (data && data.success) {
-                                            console.log(data);
-                                        } else {
-                                            dhtmlx.alert({
-                                                title:_("Wiadomość"),
-                                                text:_("Zmiany nie zostały zapisane. \n\
-                                                        Wprowadź zmiany ponownie!")
-                                            });
-                                        }
-                                    });
-                                }
-                            }                    
-                        });    
-                        tasksGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
-                            var productId = productsGrid.getSelectedRowId();           
-                            ajaxGet("api/products/tasks/changepriority/" + productId + "/" + sId + "/" + tId, "", function(data){ 
-                                if (data && data.success) {
-                                    console.log(data);
-                                } else {
-                                    dhtmlx.alert({
-                                        title:_("Wiadomość"),
-                                        text:_("Zmiany nie zostały zapisane. \n\
-                                                Wprowadź zmiany ponownie!")
-                                    });
-                                }
-                            });            
-                        });                                      
-                        tasksGrid.fill = function(id){	
-                            tasksGrid.clearAll();
-                            ajaxGet("api/products/tasks/" + id, '', function(data){                                     
-                                if (data && data.success){
-                                    tasksGrid.parse((data.data), "js");
-                                }
-                            });                        
-                        };    
-                        tasksGrid.fill(productId);                        
-                    } else {
-                        dhtmlx.alert({
-                            title:_("Wiadomość"),
-                            text:_("Wybierz produkt!")
-                        });  
-                    }                     
-                };break;
                 case 'Components': {
                     var productId = productsGrid.getSelectedRowId();
                     if (productId) { 
@@ -549,12 +419,22 @@ function productsInit(cell) {
                 };break;
                 case 'Add': {  
                     var productWindow = createWindow(_("Produkt"), 550, 400);
-                    var productForm = getProductForm(productWindow);                                              
+                    var productForm = createForm(productFormStruct, productWindow); 
+                    var productTypeCombo = productForm.getCombo("product_type_id");
+                    ajaxGet("api/prodtypes", "", function(data){
+                        productTypeCombo.addOption(data.data);                
+                    });         
+                    var productGroupCombo = productForm.getCombo("product_group_id");
+                    ajaxGet("api/prodgroups", "", function(data){
+                        productGroupCombo.addOption(data.data);        
+                    }); 
                     productForm.attachEvent("onButtonClick", function(name){
-                        if (name === 'save'){
-                            addProduct(productForm.getFormData(), productsGrid);                                
+                        switch(name) {
+                            case "save": {                       
+                                    addProduct(productForm.getFormData(), productsGrid);                                                                                                      
+                            };break;              
                         }
-                    });                    
+                    });                     
                 };break;
                 case 'Edit': {
                     var selectedId = productsGrid.getSelectedRowId();
@@ -654,8 +534,16 @@ function productsInit(cell) {
         productsGrid.zaladuj(0);
 /**
  * D
- */                
-        var productForm = getProductForm(productsLayout.cells("d"));        
+ */                        
+        var productForm = createForm(productFormStruct, productsLayout.cells("d")); 
+        var productTypeCombo = productForm.getCombo("product_type_id");
+        ajaxGet("api/prodtypes", "", function(data){
+            productTypeCombo.addOption(data.data);                
+        });         
+        var productGroupCombo = productForm.getCombo("product_group_id");
+        ajaxGet("api/prodgroups", "", function(data){
+            productGroupCombo.addOption(data.data);        
+        }); 
         productForm.attachEvent("onButtonClick", function(name){
             switch(name) {
                 case "save": {
@@ -670,20 +558,6 @@ function productsInit(cell) {
         if (!userCanWrite) productForm.hideItem('save');
         productForm.bind(productsGrid);                                  
     }
-}
-
-function getProductForm(container) {
-    var productForm = createForm(productFormStruct, container); 
-    var productTypeCombo = productForm.getCombo("product_type_id");
-    ajaxGet("api/prodtypes", "", function(data){
-        productTypeCombo.addOption(data.data);                
-    });         
-    var productGroupCombo = productForm.getCombo("product_group_id");
-    ajaxGet("api/prodgroups", "", function(data){
-        productGroupCombo.addOption(data.data);        
-    });     
-    
-    return productForm;
 }
 
 function addProduct(data, grid) {

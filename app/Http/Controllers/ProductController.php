@@ -85,11 +85,11 @@ class ProductController extends BaseController
         }      
     }
     
-    public function getListTasks($ids)
+    public function getListTasks($id)
     {
         $result = [];
-        $ids    = explode(",", $ids);
-        $result = $this->repository->listTasks($ids);
+        $product = $this->repository->get($id);
+        $result = $product->allTasks();
         
         if ($result) {
             return response()->json(['success' => true, 'data' => $result]);  
@@ -105,14 +105,14 @@ class ProductController extends BaseController
      * @param Request $request
      * @return json response
      */
-    public function addTaskForProduct(Request $request)
+    public function addTask(Request $request)
     {
         $product = [];
         $result = [];
               
         $product = Product::find($request->product_id);        
         if ($product) {
-            $latestTask = $product->allTasks();
+            $latestTask = $product->allTasks()->last();
             
             if ($latestTask) { 
                 $priority = $latestTask->priority + 1;                 
@@ -120,7 +120,11 @@ class ProductController extends BaseController
             $product->tasks()->attach($request->task_id, 
                        ['duration' => $request->duration, 
                         'priority' => $priority]);
-            $result = $product->tasks;
+            $result = $product->tasks()->where("task_id", "=", $request->task_id)->get()[0];
+            $result->duration = $result->pivot->duration;
+            $result->priority = $result->pivot->priority;
+            $result->product_id = $product->id;
+            $result->task_id = $result->id;
         } else {
             return response()->json(['success' => false, 
                 'data' => [], 'message' => 'Product was not found']);     
@@ -137,6 +141,12 @@ class ProductController extends BaseController
             ->where("task_id", "=", $taskId)
             ->update(['priority' => $request['priority'], 
                 'duration' => $request['duration']]);        
+        $product = $this->repository->get($productId); 
+        $result = $product->tasks()->where("task_id", "=", $taskId)->get()[0];
+        $result->duration = $result->pivot->duration;
+        $result->priority = $result->pivot->priority;
+        $result->product_id = $product->id;
+        $result->task_id = $result->id;  
         
         return response()->json(['success' => (boolean)$result, 'data' => $result]);     
     }    

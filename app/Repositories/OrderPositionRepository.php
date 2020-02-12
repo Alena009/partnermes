@@ -32,13 +32,17 @@ class OrderPositionRepository extends BaseRepository
             $date = new \DateTime($position->date_delivery);
             $position->num_week           = $date->format("W");
             $position->summa              = $position->price * $position->amount;                    
-            $position->declared           = $position->product->tasks->count() * $position->amount;         
+            //$position->declared           = $position->product->tasks->count() * $position->amount;         
+            //$position->tasks              = count($position->product->allTasks());
             $position->closed             = false; 
             $position->done_amount        = $this->getDoneAmount($position);
             if ($position->status == 3) {
                 $position->closed = true; 
                 $position->date_closed = $position->date_status; 
-            }                                           
+            }   
+            if ($position->status == 2) {
+                $position->printed = true;                 
+            }             
         }
         
         return $position;        
@@ -46,12 +50,16 @@ class OrderPositionRepository extends BaseRepository
      
     public function getDoneAmount($position) 
     {
-       $product = $position->product;
-       $operations = $position->operations;       
-       $lastTask = $product->getLastTask();       
+        $product = $position->product;
+        $operations = $position->operations;       
+        $lastTask = $product->getLastTask();    
        
-       return $operations->where("task_id", "=", $lastTask->id)
-               ->sum("done_amount");
+        if ($lastTask) {
+            return $operations->where("task_id", "=", $lastTask->id)
+                   ->sum("done_amount");
+        } else {
+            return 0; 
+        }
     }
     
     /**

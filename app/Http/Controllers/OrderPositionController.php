@@ -14,6 +14,7 @@ use App\Models\Component;
 use App\Models\Order;
 use App\Models\OrderHistory;
 use Illuminate\Database\Eloquent\Collection;
+use Exception;
 
 class OrderPositionController extends BaseController
 {
@@ -69,16 +70,26 @@ class OrderPositionController extends BaseController
     public function positionComponents($positionsIds, $locale="pl")
     {   
         $result = [];
-        $result = DB::select(DB::raw("select if(c.component_id, c.component_id, op.product_id) as component_id, 
-            sum(if(c.amount * op.amount, c.amount * op.amount, op.amount)) as amount1, 
+//        $result = DB::select(DB::raw("select if(c.component_id, c.component_id, op.product_id) as component_id, 
+//            sum(if(c.amount * op.amount, c.amount * op.amount, op.amount)) as amount1, 
+//            p.kod, op.id as order_position_id,
+//            (select sum(w.amount) from warehouse w where w.product_id = if(c.component_id, c.component_id, op.product_id)) as available
+//            from orders_positions op
+//            left join components c on op.product_id = c.product_id
+//            left join products p on p.id = if(c.component_id, c.component_id, op.product_id)
+//            where op.id in (" . $positionsIds .")
+//            group by if(c.component_id, c.component_id, op.product_id)"));       
+
+        $result = DB::select(DB::raw("select c.component_id as component_id, 
+            sum(c.amount * op.amount) as amount1, 
             p.kod, op.id as order_position_id,
-            (select sum(w.amount) from warehouse w where w.product_id = if(c.component_id, c.component_id, op.product_id)) as available
+            (select sum(w.amount) from warehouse w where w.product_id = c.component_id) as available
             from orders_positions op
-            left join components c on op.product_id = c.product_id
-            left join products p on p.id = if(c.component_id, c.component_id, op.product_id)
+            right join components c on op.product_id = c.product_id
+            left join products p on p.id = c.component_id
             where op.id in (" . $positionsIds .")
-            group by if(c.component_id, c.component_id, op.product_id)"));
-       
+            group by c.component_id"));           
+        
         return $this->getResponseResult($result);        
     }
     
@@ -142,12 +153,36 @@ class OrderPositionController extends BaseController
      * @return response
      */    
     public function getZlecenia()
-    {            
-        $positionsIds = OrderPosition::leftJoin('orders_history', 'orders_positions.order_id', '=', 'orders_history.order_id')
-                ->where("orders_history.status_id", "<>", 3)
-                ->pluck("orders_positions.id"); 
+    {    
+        $result = [];        
+        $positionsIds = DB::table('orders_positions')
+            ->join('orders_history', 'orders_positions.order_id', '=', 'orders_history.order_id')                            
+            ->select('orders_positions.*')
+            ->where("orders_history.status_id", "<>", 3) 
+            ->pluck("id");
         
-        return $this->getResponseResult($this->repository->getFewWithAdditionals($positionsIds));        
+        $positions = OrderPosition::find($positionsIds);
+        foreach($positions as $position) {            
+            if (count($position->product->allTasks())) {                
+                $product = $position->product;                
+                $position->product_name       = $product->name;
+                $position->product_kod        = $product->kod;
+                $position->order_kod          = $position->order->kod;                                                                            
+                $date = new \DateTime($position->date_delivery);
+                $position->num_week           = $date->format("W");                
+                $position->done_amount        = $this->repository->getDoneAmount($position);
+                if ($position->status == 3) {
+                    $position->closed = true; 
+                    $position->date_closed = $position->date_status; 
+                }   
+                if ($position->status == 2) {
+                    $position->printed = true;                 
+                } 
+                $result[] = $position;                
+            }
+        }
+
+        return response()->json(['data' => $result, 'success' => true]);        
     }      
     
     /**
@@ -208,7 +243,8 @@ class OrderPositionController extends BaseController
         
         if ($orderPosition) {
             $order = $orderPosition->order; 
-            $orderPosition->kod           = $request['kod'] . "." . $order->kod;  ;
+            //$orderPosition->kod           = $request['kod'] . "." . $order->kod;  
+            $orderPosition->kod           = $request->kod;  
             $orderPosition->order_id      = $request['order_id'];
             $orderPosition->product_id    = $request['product_id'];
             $orderPosition->amount        = $request['amount'];
@@ -243,12 +279,23 @@ class OrderPositionController extends BaseController
         }      
     }
     
+    public function dontProduct(Request $request)
+    {
+        $positionsIds = $request->zlecenia;
+        $positions = OrderPosition::find(explode(',', $positionsIds));
+        foreach ($positions as $position) {
+            $position->reOpen();
+        }
+        
+        return response()->json(['data' => $positions, 'success' => true]);   
+    }    
+    
     public function close(Request $request)
     {
         $positionsIds = $request->zlecenia;
         $positions = OrderPosition::find(explode(',', $positionsIds));
         foreach ($positions as $position) {
-            $position->close();
+            $position->setClosed();
         }
         
         return response()->json(['data' => $positions, 'success' => true]);   

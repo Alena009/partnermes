@@ -51,7 +51,7 @@ class ProductGroupController extends BaseController
         $productGroup->save();
         
         //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-        $productGroup->translateOrNew($locale)->name = $request['name'];             
+        $productGroup->translateOrNew($locale)->name = $request->name;             
         //}
 
         $productGroup->save();
@@ -59,12 +59,30 @@ class ProductGroupController extends BaseController
         return $this->getResponseResult($productGroup);
     }
     
-    public function getProductsByGroups($groups, $locale='pl')
-    {        
-        $groups = explode(",", $groups);
-        $groups = $this->getAllChilds($groups);
+    public function getProducts($groups, $locale='pl')
+    {     
+        $result = [];
         
-        return $this->getResponseResult($this->repository->productsByGroups($groups, $locale));
+        if ($groups == 0) {
+            $groups = $this->repository->getAll();
+        } else {
+            $groups = explode(",", $groups);            
+            $groups = $this->repository->get($groups);
+        }
+        if ($groups) {
+            foreach ($groups as $group) {
+                $groupKids = $group->allKids($group);
+                foreach($groupKids as $kidGroup) {
+                    $groupsIds[] = $kidGroup->id;
+                }
+                $groupsIds[] = $group->id;                
+            }
+            $result = $this->repository->productsByGroups($groupsIds, $locale);
+        } else {
+            return response()->json(['success' => false, 'data' => $result, 
+                'message' => 'Groups products were not found']); 
+        }
+        return response()->json(['success' => true, 'data' => $result]);  
     }
         
     public function tasks($id)

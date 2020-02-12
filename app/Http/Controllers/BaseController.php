@@ -223,21 +223,6 @@ class BaseController extends Controller
         return $result;    
     }  
 
-//    public function t($item) 
-//    {
-//        $kids = [];  
-//        $kid = [];
-//
-//        foreach ($item->kids as $arr) {                            
-//            if (count($arr->kids)) {                   
-//                $kid[] = $this->t($arr);
-//            }
-//            $kids[] = $kid;
-//        }
-//
-//        return $kids;    
-//    }    
-
 
     /**
      * Returns result in response format

@@ -47,8 +47,13 @@ class Order extends BaseModel
         
     public function positionsInWork()
     {
-        return $this->hasMany('App\Models\OrderPosition')->where("status", ">", 0)->get();
+        return $this->hasMany('App\Models\OrderPosition')->where("status", "=", 2)->get();
     } 
+    
+    public function closedPositions()
+    {
+        return $this->hasMany('App\Models\OrderPosition')->where("status", "=", 3)->get();
+    }    
     
     public function status()
     {
@@ -66,5 +71,5 @@ class Order extends BaseModel
         }        
         
         return false;
-    }
+    }    
 }

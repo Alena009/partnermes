@@ -8,28 +8,23 @@ function zleceniaInit(cell) {
                 var write;
                 userData.permissions.forEach(function(elem){
                     if (elem.name == 'zlecenia') { write = elem.pivot.value; }
-                });
-                
+                });                
 		var zleceniaLayout = cell.attachLayout("3L");		
 		zleceniaLayout.cells("a").setText(_("Zlecenia"));
                 zleceniaLayout.cells("b").setText(_("Zadania do wybranych zleceń"));
                 zleceniaLayout.cells("c").setText(_("Niezbędne materialy"));        
-                
+/**
+ * A
+ * 
+ */                
                 var zleceniaGridToolBar = getZleceniaGridToolBar(zleceniaLayout.cells("a"), write);                                    
                 zleceniaGridToolBar.attachEvent("onClick", function(btn) {	
 		    switch (btn){  
 		        case 'DontProduct':{
                             var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
-                            selectedZlecenia.split(',').forEach(function(elem){
-                                var data = zleceniaGrid.getRowData(elem);
-                                data.status = 1;
-                                data.date_status = new Date();
-                                ajaxGet("api/positions/" + elem + "/edit", data, function(data){
-                                    if (data.success && data.data) {                            
-                                        zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar); 
-                                    }
-                                });
-                            });                          
+                            var data = {};
+                            data.zlecenia = selectedZlecenia;                                
+                            ajaxGet("api/positions/dontproduct", data, function(data){});                                                         
                         };break;
                         case 'Print': {
                                 var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
@@ -50,16 +45,47 @@ function zleceniaInit(cell) {
                             ajaxGet("api/positions/close", data, function(data){});                               
                         };break;
                     }
-                });                 
-                var zleceniaGrid = getZleceniaGrid(zleceniaLayout.cells("a"));  
+                }); 
+                var zleceniaGrid = zleceniaLayout.cells("a").attachGrid({
+                        image_path:'codebase/imgs/',
+                        columns: [  
+                            {label: "",                    id:'checked',           width: 30,  type: "ch", align: "center"},                        
+                            {label: "Zmówienie Kod",       id:'order_kod',         width: 50,  type: "ro", sort: "str",  align: "center"},                        
+                            {label: "Zlecenie Kod",        id:'kod',               width: 100, type: "ro", sort: "str",  align: "center"},                                              
+                            {label: "Produkt Kod",         id:'product_kod',       width: 100, type: "ro", sort: "str",  align: "left"},
+                            {label: "Imie produktu",       id:'product_name',      width: 200, type: "ro", sort: "str",  align: "left"},                        
+                            {label: "Ilość produktu",      id:'amount',            width: 60,  type: "ro",sort: "str",  align: "right"},                        
+                            {label: "Zrobiona ilość",      id:'done_amount',       width: 60,  type: "ro",sort: "str",  align: "right"},
+                            {label: "Wydrukowane",         id:'printed',            width: 30,  type: "ch", align: "center"},
+                            {label: "Zamknięte",           id:'closed',            width: 30,  type: "ch", align: "center"},
+                            {label: "Data dodania",        id:'created_at',        width: 120, type: "ro", sort: "date", align: "center"},                
+                            {label: "Data zamkniecia",     id:'date_closed',       width: 120, type: "ro", sort: "date", align: "center"},
+                            {label: "Data dostawy",        id:'num_week',          width: 120, type: "ro", align: "center"},                            
+                            //{id: "description", width: 30, label: "description"},
+                            {id: "product_id", width: 30, label: "product_id"},
+                            //{id: "declared", width: 30, label: "declared"},
+                            {id: "countWorks", width: 30, label: "countWorks"},
+                            {id: "status", width: 30, label: "status"},
+                            //{id: "order_id", width: 30, label: "order_id"},
+                            //{id: "price", width: 30, label: "price"},
+                            {id: "tasks", width: 30, label: "tasks"}
+                    ],
+                        multiline: true,
+                        multiselect: true
+                    });
+                zleceniaGrid.attachHeader(",#select_filter,#text_filter,#text_filter,#text_filter,,,#select_filter,#select_filter");
+                zleceniaGrid.setRegFilter(zleceniaGrid, 2);
+                zleceniaGrid.setRegFilter(zleceniaGrid, 3);
+                zleceniaGrid.setRegFilter(zleceniaGrid, 4);                
+                  
                 zleceniaGrid.attachEvent("onRowSelect", function(id,ind) {
-                        componentsGrid.fill(id);
+                        componentsGrid.fill(id);                        
                         tasksGrid.fill(id);
                 });                 
                 zleceniaGrid.attachEvent("onCheck", function(rId,cInd,state){
                     var rowData = zleceniaGrid.getRowData(rId);
                     if (rowData.closed == true) {
-                        zleceniaGrid.cells(rId,0).setValue(false);
+                        zleceniaGrid.cells(rId,0).setValue(false);                        
                     }
                     var ids = zleceniaGrid.getCheckedRows(0);
                     if (ids.length) {
@@ -67,25 +93,15 @@ function zleceniaInit(cell) {
                     }
                 });                 
                 zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar); 
-                
+/**
+ * B
+ * 
+ */                
                 if (write) {
-                    var tasksGridToolBar = zleceniaLayout.cells("b").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-//                                    {id: "Add",  type: "button", text: _("Zapisz zmiany"),   img: "fa fa-save "},                                                                
-//                                    {id: "sep3",     type: "separator"},
-                                    {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
-                            ]
-                    });                     
+                    var tasksGridToolBar = zleceniaLayout.cells("b").attachToolbar(emptyToolbar);                                         
                 } else {
-                    var tasksGridToolBar = zleceniaLayout.cells("b").attachToolbar({
-                            iconset: "awesome",
-                            items: [                                    
-                                    {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
-                            ]
-                    });                     
-                }
-		
+                    var tasksGridToolBar = zleceniaLayout.cells("b").attachToolbar(emptyToolbar);                     
+                }		
 		tasksGridToolBar.attachEvent("onClick", function(btn) {
                     switch (btn){
                             case 'Add':{
@@ -155,7 +171,11 @@ function zleceniaInit(cell) {
                         }
                     });
                 };                 
-                
+/**
+ * C
+ * 
+ */               
+                var componentsGridToolBar;
                 if (write) {
                     componentsGridToolBar = zleceniaLayout.cells("c").attachToolbar({
                         iconset: "awesome",
@@ -185,7 +205,8 @@ function zleceniaInit(cell) {
                                     if (data.success) {
                                         var date = getNowDate();
                                         date = date.replace(/[-]/g, "");
-                                        newOrderForm.setItemValue("kod", "W-" + date + "-" + data.data.id + 1);
+                                        //newOrderForm.setItemValue("kod", "W-" + date + "-" + data.data.id + 1);
+                                        newOrderForm.setItemValue("kod", "W-" + data.data.id + 1);
                                     }
                                 });                                  
                                 newOrderForm.disableItem("client_id");
@@ -193,20 +214,21 @@ function zleceniaInit(cell) {
                                 newOrderForm.attachEvent("onButtonClick", function(name){
                                     switch (name){
                                         case 'save':{                                                  
-                                            var data = newOrderForm.getFormData();
-                                            data.date_start = newOrderForm.getCalendar("date_start").getDate(true);                                         
-                                            ajaxPost("api/orders", data, function(data){
+                                            var orderData = newOrderForm.getFormData();
+                                            orderData.date_start = newOrderForm.getCalendar("date_start").getDate(true);                                         
+                                            ajaxPost("api/orders", orderData, function(data){
                                                 if (data && data.success) {
                                                     var i = 0;
                                                     selectedComponents.split(',').forEach(function(elem){
                                                         i++;
-                                                        var data2 = componentsGrid.getRowData(elem);
-                                                        data2.order_id = data.data.id;
-                                                        data2.price = 0;
-                                                        data2.date_delivery = data.data.date_end;
-                                                        data2.product_id = data2.component_id;
-                                                        data2.kod = data.data.id + "." + i;
-                                                        ajaxPost("api/positions", data2, "");
+                                                        var component = componentsGrid.getRowData(elem);
+                                                        component.order_id = data.data.id;
+                                                        component.price = 0;
+                                                        component.num_week = orderData.num_week;
+                                                        component.product_id = component.component_id;
+                                                        component.kod = i;
+                                                        console.log(component);
+                                                        ajaxPost("api/positions", component, "");
                                                     });
                                                     newOrderWindow.hide(); 
                                                     dhtmlx.alert({

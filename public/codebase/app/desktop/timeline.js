@@ -30,7 +30,7 @@ function timelineInit(cell) {
                     var positionsCombo = operationForm.getCombo("order_position_id");
                     var tasksCombo     = operationForm.getCombo("task_id");                    
                     operationForm.attachEvent("onChange", function(name, value, state){
-                        if (name == 'for_order') {
+                        if (name == 'not_for_order') {
                             if (state) {
                                 operationForm.hideItem("order_position_id");
                                 ajaxGet("api/tasks/notfororder", "", function(data){
@@ -64,14 +64,14 @@ function timelineInit(cell) {
                             if (data.success) {
                                 operationForm.setItemValue("start_amount", data.data);                                
                             } else {
-                                operationForm.setItemValue("start_amount", "0");
+                                operationForm.setItemValue("start_amount", "");
                             }
                         });                                                  
                     });                     
                     operationForm.setItemValue("end_date", new Date());
                     operationForm.attachEvent("onButtonClick", function(name){
                         if (name === 'save'){          
-                            addOperation(operationForm.getFormData(), operationsGrid);                           
+                            addOperation(operationForm.getFormData(), operationsGrid);                                                      
                         }
                     });                                
                 };break;
@@ -213,7 +213,7 @@ var newOperationFormStruct = [
     {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                	    
         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
         {type: "combo",    name: "user_id",           required: true, label: _("Pracownik"), options: []},		
-        {type: "checkbox", name: "for_order",         label: _("Nie ma zlecenia")},		
+        {type: "checkbox", name: "not_for_order",         label: _("Nie ma zlecenia")},		
         {type: "combo", name: "order_position_id", label: _("Zlecenie"), options: []},		
         {type: "combo", name: "task_id",           required: true, label: _("Zadanie"), options: []},		
         {type: "input", name: "start_amount",      required: true, label: _("Zadeklarowana iłość"), readonly: true},

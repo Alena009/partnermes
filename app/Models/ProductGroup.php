@@ -52,6 +52,40 @@ class ProductGroup extends BaseModel
         }                
     }
     
+    public function allKids($group, $kids = []) 
+    {   
+        foreach ($group->kids as $arr) {               
+            $kids[] = $arr;            
+            if (count($arr->kids)) {                   
+                $kids = $this->allKids($arr, $kids);
+            }            
+        }
+        
+        return $kids;      
+    }     
+    
+    public function allProducts() 
+    {
+        $result = [];
+        $thisGroupProducts = $this->products;
+        foreach ($thisGroupProducts as $product) {
+                $result[] = $product;
+        }
+                
+        if ($this->kids) {
+            $kids = $this->allKids($this);
+            foreach ($kids as $kid) {
+                $products = $kid->products;
+                foreach ($products as $product) {
+                    $product->product_type_name = $product->type->name;
+                    $product->product_group_name = $product->group->name;
+                    $result[] = $product;
+                }
+            }
+        }
+        return $result;
+    }
+    
     public function allTasks()
     {
         $result     = [];       

@@ -49,7 +49,7 @@ class Product extends BaseModel
     public function allTasks()
     {
         $group        = $this->group;
-        $groupTasks   = $this->group->allTasks();
+        $groupTasks   = collect($this->group->allTasks());
         $productTasks = $this->tasks;
         $result = $groupTasks->merge($productTasks);
         foreach ($result as $r) {
@@ -69,5 +69,16 @@ class Product extends BaseModel
     {
         $tasks = $this->allTasks();
         return $tasks->last();  
+    }
+    
+    public function getTask($taskId)
+    {
+        $tasks = $this->allTasks();
+        return $tasks->where("id", "=", $taskId)->first();  
+    }    
+    
+    public function available()
+    {
+        return $this->warehouseRecords->sum('amount'); 
     }
 }

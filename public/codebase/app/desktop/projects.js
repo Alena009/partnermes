@@ -1,3 +1,5 @@
+var projectsLayout;
+
 function projectsInit(cell) {
     if (projectsLayout == null) {
             var userData = JSON.parse(localStorage.getItem("userData")); 
@@ -103,7 +105,7 @@ function projectsInit(cell) {
                         } else {
                             dhtmlx.alert({
                                 title:_("Wiadomość"),
-                                text:_("Wybierz zamowienie, które chcesz usunąć!")
+                                text:_("Wybierz zamowienie, które chcesz zmienić!")
                             });
                         }                              
                     };break;                    

@@ -23,8 +23,14 @@ Route::group([
     Route::resource('/language',   'LanguageController');
     Route::resource('/permissions','PermissionController');
     Route::resource('/statuses', 'StatusController');       
-    Route::resource('/history', 'OrderHistoryController');     
-      
+    Route::resource('/history', 'OrderHistoryController');         
+    Route::resource('/toolsoperations', 'ToolOperationController');      
+    Route::resource('/tools', 'ToolController');  
+    
+//    Route::get('/toolsoperations/{tools}', 'ToolController@getOperations'); 
+//    Route::get('/toolsoperations/{operation}/edit', 'ToolOperationController@editOperation');     
+//    Route::post('/toolsoperations', 'ToolOperationController@addOperation'); 
+        
     Route::get('/declaredworks/savework', 'DeclaredWorkController@savework'); 
     Route::resource('/declaredworks', 'DeclaredWorkController'); 
     
@@ -108,7 +114,7 @@ Route::group([
     
     Route::get('/usersroles/del', 'UserRoleController@deleteByRoleAndUserId');
     Route::resource('/usersroles', 'UserRoleController');
-    
+        
     Route::get('/users/freeusers', 'API\UserController@getAllFreeUsers');
     Route::get('/users/avatar/{userId}', 'API\UserController@avatar');
     Route::post('/users/avatar/load/{userId}', 'API\UserController@loadAvatar');

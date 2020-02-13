@@ -60,5 +60,5 @@ class User extends Authenticatable
     public function openedOperations() 
     {
         return $this->hasMany('App\Models\Operation', 'user_id', 'id')->where("closed", "<", 1);
-    }     
+    }   
 }

@@ -20,7 +20,7 @@ var A = {
 
 		app: ["dhtmlx_ext", "init", "settings", "timeline", "zlecenia", 
                     "pracownicy", "clients", "projects", "warehouse", "products", 
-                    "products_tasks", "gantt", 
+                    "products_tasks", "gantt", "tools",
                     "toolBars/zleceniaGridToolBar",
                     "toolBars/productsGroupsToolBar",
                     "toolBars/tasksGridToolBar",

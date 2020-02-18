@@ -27,14 +27,14 @@ Route::group([
     Route::resource('/toolsoperations', 'ToolOperationController');      
     Route::resource('/tools', 'ToolController');  
     
-//    Route::get('/toolsoperations/{tools}', 'ToolController@getOperations'); 
-//    Route::get('/toolsoperations/{operation}/edit', 'ToolOperationController@editOperation');     
-//    Route::post('/toolsoperations', 'ToolOperationController@addOperation'); 
+
+
+
         
-    Route::get('/declaredworks/savework', 'DeclaredWorkController@savework'); 
-    Route::resource('/declaredworks', 'DeclaredWorkController'); 
+//    Route::get('/declaredworks/savework', 'DeclaredWorkController@savework'); 
+//    Route::resource('/declaredworks', 'DeclaredWorkController'); 
     
-    Route::get('/departaments/scheduler', 'DepartamentController@buildScheduler');
+//    Route::get('/departaments/scheduler', 'DepartamentController@buildScheduler');
     Route::get('/departaments/grupytree', 'DepartamentController@buildTree');
     Route::get('/departaments/{departament}/translations', 'DepartamentController@getTranslations');
     Route::resource('/departaments', 'DepartamentController'); 
@@ -53,9 +53,6 @@ Route::group([
     Route::get('/positions/getPrinted', 'OrderPositionController@getPrinted');    
     Route::get('/positions/zlecenia', 'OrderPositionController@getZlecenia');    
     Route::get('/positions/list/components', 'OrderPositionController@getAllComponentsForFreePositions');
-    //Route::get('/positions/list/tasks/{position}', 'OrderPositionController@listTasksForPosition');
-    //Route::get('/positions/list/beguntasks/{position}', 'OrderPositionController@listTasksForPosition');
-    //Route::get('/positions/list/componenttasks', 'OrderPositionController@listTasksForPositionComponent');
     Route::get('/positions/components/{position}', 'OrderPositionController@positionComponents');
     Route::get('/positions/tasks/{position}', 'OrderPositionController@positionsTasks');
     Route::get('/positions/print/{positions}', 'OrderPositionController@print');
@@ -67,26 +64,29 @@ Route::group([
     Route::resource('/prodtypes', 'ProductTypeController');            
     
     Route::get('/prodgroups/tasks/{group}/{task}/edit', 'ProductGroupController@editTask');  
-    Route::get('/prodgroups/products/{groups}/{locale?}', 'ProductGroupController@getProducts');      
+    //Route::get('/prodgroups/products/{groups}/{locale?}', 'ProductGroupController@getProducts');      
     Route::get('/prodgroups/{prodgroup}/translations', 'ProductGroupController@getTranslations');
     Route::get('/prodgroups/grupytree/{locale?}', 'ProductGroupController@buildTree');           
     Route::get('/prodgroups/tasks/{groups}/{locale?}', 'ProductGroupController@tasks');     
     Route::post('/prodgroups/addtask', 'ProductGroupController@addTask'); 
     Route::delete('/prodgroups/deletetask/{group}/{task}', 'ProductGroupController@deleteTask');  
-    //Route::get('/prodgroups/tasks/changepriority/{product}/{stask}/{task}', 'ProductGroupController@changePriorityTask');  
+    
+    Route::get('/prodgroups/{groups}/products/{locale?}', 'ProductGroupController@products');      
     Route::resource('/prodgroups', 'ProductGroupController');
     
+    
     Route::get('/products/{product}/translations', 'ProductController@getTranslations');
-    Route::post('/products/addtask', 'ProductController@addTask');        
-    Route::get('/products/availabletasks/{productId}', 'ProductController@listAvailableTasks');    
-    //Route::get('/products/tasks/{product?}', 'ProductController@listTasksForProduct');       
-    Route::get('/products/list/{taskGroups}', 'ProductController@listProductsByTaskGroup');     
-    Route::get('/products/deleteseveral/{products}', 'ProductController@deleteSeveralProducts');     
-    Route::delete('/products/deletetask/{product}/{task}', 'ProductController@deleteTask');  
-    //Route::get('/products/tasks/changepriority/{product}/{stask}/{task}', 'ProductController@changePriorityTask');  
+    
+    
+    
+    Route::get('/products/deleteseveral/{products}', 'ProductController@deleteSeveralProducts');         
     Route::get('/products/tasks/{product}/{task}/edit', 'ProductController@editTask');  
-    Route::get('/products/components/{product}', 'ProductController@getListComponents');  
-    Route::get('/products/tasks/{product}/{locale?}', 'ProductController@getListTasks');          
+    
+    Route::post('/products/{product}/components/{locale?}', 'ProductController@components');  
+    Route::get('/products/{productsIds}/components/{locale?}', 'ProductController@components');      
+    Route::delete('/products/{product}/tasks/{task}', 'ProductController@deleteTask');      
+    Route::post('/products/{product}/tasks',          'ProductController@addTask');        
+    Route::get('/products/{product}/tasks/{locale?}', 'ProductController@tasks');                  
     Route::resource('/products', 'ProductController');  
  
     
@@ -120,9 +120,8 @@ Route::group([
     Route::post('/users/avatar/load/{userId}', 'API\UserController@loadAvatar');
     Route::resource('/users', 'API\UserController');
     
-    Route::get('/workerslist/{departaments?}', 'DepartamentController@workersList');
-    //Route::get('/workerslist', 'DepartamentController@workersList');     
-    Route::get('/workerdep/del', 'WorkerDepartamentController@deleteRel');
+    Route::get('/workerdep/{departament?}/workers', 'DepartamentController@workersList');   
+    Route::get('/workerdep/{departament}/deleteworker/{worker}', 'WorkerDepartamentController@deleteWorker');
     Route::resource('/workerdep', 'WorkerDepartamentController');
     
     Route::get('/warehouse/amountproduct/{productId}', 'WarehouseController@amountProductInWarehouse');  

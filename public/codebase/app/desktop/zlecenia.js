@@ -53,11 +53,11 @@ function zleceniaInit(cell) {
                             {label: "Zmówienie Kod",       id:'order_kod',         width: 50,  type: "ro", sort: "str",  align: "center"},                        
                             {label: "Zlecenie Kod",        id:'kod',               width: 100, type: "ro", sort: "str",  align: "center"},                                              
                             {label: "Produkt Kod",         id:'product_kod',       width: 100, type: "ro", sort: "str",  align: "left"},
+                            {label: "Wydrukowane",         id:'printed',            width: 30,  type: "ch", align: "center"},
+                            {label: "Zamknięte",           id:'closed',            width: 30,  type: "ch", align: "center"},                            
                             {label: "Imie produktu",       id:'product_name',      width: 200, type: "ro", sort: "str",  align: "left"},                        
                             {label: "Ilość produktu",      id:'amount',            width: 60,  type: "ro",sort: "str",  align: "right"},                        
-                            {label: "Zrobiona ilość",      id:'done_amount',       width: 60,  type: "ro",sort: "str",  align: "right"},
-                            {label: "Wydrukowane",         id:'printed',            width: 30,  type: "ch", align: "center"},
-                            {label: "Zamknięte",           id:'closed',            width: 30,  type: "ch", align: "center"},
+                            {label: "Zrobiona ilość",      id:'done_amount',       width: 60,  type: "ro",sort: "str",  align: "right"},                                                      
                             {label: "Data dodania",        id:'created_at',        width: 120, type: "ro", sort: "date", align: "center"},                
                             {label: "Data zamkniecia",     id:'date_closed',       width: 120, type: "ro", sort: "date", align: "center"},
                             {label: "Data dostawy",        id:'num_week',          width: 120, type: "ro", align: "center"},                            
@@ -73,10 +73,9 @@ function zleceniaInit(cell) {
                         multiline: true,
                         multiselect: true
                     });
-                zleceniaGrid.attachHeader(",#select_filter,#text_filter,#text_filter,#text_filter,,,#select_filter,#select_filter");
+                zleceniaGrid.attachHeader(",#select_filter,#text_filter,#text_filter");
                 zleceniaGrid.setRegFilter(zleceniaGrid, 2);
-                zleceniaGrid.setRegFilter(zleceniaGrid, 3);
-                zleceniaGrid.setRegFilter(zleceniaGrid, 4);                
+                zleceniaGrid.setRegFilter(zleceniaGrid, 3);              
                   
                 zleceniaGrid.attachEvent("onRowSelect", function(id,ind) {
                         componentsGrid.fill(id);                        

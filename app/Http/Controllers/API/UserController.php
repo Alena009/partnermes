@@ -40,7 +40,7 @@ class UserController extends \App\Http\Controllers\BaseController
     }
 
     /**
-     * Register api 
+     * Register  
      * 
      * @return \Illuminate\Http\Response 
      */
@@ -186,15 +186,15 @@ class UserController extends \App\Http\Controllers\BaseController
         return response()->json(['success' => true, 'data' => $imgPath]);
     }
     
-    public function destroy($id, array $parameters = null)
-    {
-        $user = User::find($id);
-        if ($user->delete()) {
-            return ['success' => true,'class'=>__CLASS__,'method' => __METHOD__];
-        }else{
-            return ['success' => false, 'id' => $id,'msg'=>$this->repository->errors(),'class'=>__CLASS__,'method' => __METHOD__];
-        }
-    }
+//    public function destroy($id, array $parameters = null)
+//    {
+//        $user = User::find($id);
+//        if ($user->delete()) {
+//            return ['success' => true,'class'=>__CLASS__,'method' => __METHOD__];
+//        }else{
+//            return ['success' => false, 'id' => $id,'msg'=>$this->repository->errors(),'class'=>__CLASS__,'method' => __METHOD__];
+//        }
+//    }
     
     public function index()
     {

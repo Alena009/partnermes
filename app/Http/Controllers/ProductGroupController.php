@@ -5,18 +5,21 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Repositories\ProductGroupRepository;
-use App\Models\ProductGroup;
 use Illuminate\Support\Facades\DB;
-use App\Models\Task;
+use App\Services\ProductGroupService;
+
 
 class ProductGroupController extends BaseController
 {
     private $rep;
+    private $res;
+    protected $srv;    
     
-    public function __construct(ProductGroupRepository $rep)
+    public function __construct(ProductGroupRepository $rep, ProductGroupService $srv)
     {
         parent:: __construct();
         $this->setRepository($rep);
+        $this->setService($srv);
     }
     
     /**
@@ -24,43 +27,13 @@ class ProductGroupController extends BaseController
      */
     public function index($locale = 'pl')
     {
-        app()->setLocale($locale);
-
-        $productsGroups = ProductGroup::all();
-        foreach ($productsGroups as $group) {
-            $group['label']  = $group->name;
-            $group['text']  = $group->name;
-            $group['value'] = $group->id;
-        }
+        $data = $this->repository->getAllWithAdditionals();
                 
-        return response()->json(['success' => true, 'data' => $productsGroups]);        
+        return response()->json(['success' => true, 'data' => $data]);        
     }
     
-    /**
-     * create new product group with translations
-     */
-    public function store(Request $request)
-    {
-        $productGroup = [];
-        $locale = app()->getLocale();
-        
-        $productGroup = new ProductGroup();
-        if ($request->parent_id) {
-            $productGroup->parent_id = $request->parent_id;        
-        } 
-        $productGroup->save();
-        
-        //foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-        $productGroup->translateOrNew($locale)->name = $request->name;             
-        //}
-
-        $productGroup->save();
-
-        return $this->getResponseResult($productGroup);
-    }
-    
-    public function getProducts($groups, $locale='pl')
-    {     
+    public function products($groups)
+    {            
         $result = [];
         
         if ($groups == 0) {
@@ -71,13 +44,17 @@ class ProductGroupController extends BaseController
         }
         if ($groups) {
             foreach ($groups as $group) {
-                $groupKids = $group->allKids($group);
-                foreach($groupKids as $kidGroup) {
-                    $groupsIds[] = $kidGroup->id;
-                }
-                $groupsIds[] = $group->id;                
+//                $groupKids = $group->allKids($group);
+//                foreach($groupKids as $kidGroup) {
+//                    $groupsIds[] = $kidGroup->id;
+//                }
+//                $groupsIds[] = $group->id;     
+                $products = $group->allProducts();
+                foreach ($products as $product) {
+                    $result[] = $product;
+                } 
             }
-            $result = $this->repository->productsByGroups($groupsIds, $locale);
+            //$result = $this->repository->productsByGroups($groupsIds, $locale);
         } else {
             return response()->json(['success' => false, 'data' => $result, 
                 'message' => 'Groups products were not found']); 

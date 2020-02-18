@@ -15,6 +15,7 @@ class BaseController extends Controller
 
     protected $repository;
     protected $requestName;
+    protected $srv;
     protected $viewName = 'home';
             
     public function __construct()
@@ -26,12 +27,21 @@ class BaseController extends Controller
         $this->repository = $repository;
     }
 
-
     protected function getRepository()
     {
         return $this->repository;
     }
+    
+    protected function setService($srv)
+    {
+        $this->srv = $srv;
+    }
 
+    protected function getService()
+    {
+        return $this->srv;
+    }    
+    
     protected function setRequestName($requestName)
     {
         $this->requestName = $requestName;
@@ -66,6 +76,7 @@ class BaseController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(){
+        
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
         $request = \App::make('App\Http\Requests\\'.$requestName);
 
@@ -78,26 +89,52 @@ class BaseController extends Controller
 
     public function store(Request $request)
     {
+        $locale = app()->getLocale();
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
         $request = \App::make('App\Http\Requests\\'.$requestName);
 
         if ($data = $this->repository->create($request->all())){
-            // $data['success']=true;
-            return ['success' => true, 'data'=>$data,'class'=>__CLASS__,'method' => __METHOD__];
+            if ($this->repository->translatedFields()) {
+                if ($translations = $this->repository->setTranslation($locale, $data, $request)) {
+                    return ['success' => true, 'data' => $data, 
+                        'class'=>__CLASS__,'method' => __METHOD__];
+                } else {
+                    return ['success' => false, 'all'=>$this->repository->errors(),
+                        'class'=>__CLASS__,'method' => __METHOD__];                    
+                }
+            } else {            
+                    return ['success' => true, 'data' => $data, 
+                        'class'=>__CLASS__,'method' => __METHOD__];
+            }
         }else{
-            return ['success' => false, 'all'=>$this->repository->errors(),'class'=>__CLASS__,'method' => __METHOD__];
+            return ['success' => false, 'all'=>$this->repository->errors(),
+                'class'=>__CLASS__,'method' => __METHOD__];
         }
     }
 
     public function edit(Request $request, $id)
     {        
+        $locale = app()->getLocale();
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
         $request = \App::make('App\Http\Requests\\'.$requestName);
 
         if ($data = $this->repository->update($request->all(), $id)) {
-            return ['success' => true, 'data'=>$data,'class'=>__CLASS__,'method' => __METHOD__];
+            if ($this->repository->translatedFields()) {
+                if ($translations = $this->repository->setTranslation($locale, $data, $request)) {
+                    return ['success' => true, 'data' => $data, 
+                        'class'=>__CLASS__,'method' => __METHOD__];
+                } else {
+                    return ['success' => false, 'all'=>$this->repository->errors(),
+                        'class'=>__CLASS__,'method' => __METHOD__];                    
+                }
+            } else {            
+                    return ['success' => true, 'data' => $data, 
+                        'class'=>__CLASS__,'method' => __METHOD__];
+            }          
         }else{
-            return ['success' => false, 'data'=>[], 'id' => $id,'msg'=>$this->repository->errors(),'class'=>__CLASS__,'method' => __METHOD__];
+            return ['success' => false, 'data'=>[], 'id' => $id,
+                'message'=>$this->repository->errors(),
+                'class'=>__CLASS__,'method' => __METHOD__];
         }
     }
 
@@ -112,8 +149,10 @@ class BaseController extends Controller
 
     public function show(Request $request,$id){
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
-        $request = \App::make('App\Http\Requests\\'.$requestName);
+        $request  = \App::make('App\Http\Requests\\'.$requestName); 
         $data = $this->repository->find($id);
+        //$this->resource::withoutWrapping();
+//        $data = new $this->resource($request);
         return ['success'=>$data?true:false,'data'=>$data];
     }
 

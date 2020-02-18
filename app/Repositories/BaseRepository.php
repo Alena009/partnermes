@@ -258,9 +258,16 @@ class BaseRepository
         return $orderBy;
     }
     
+    public function get($id)
+    {
+        $result = [];
+        $result = $this->model::find($id);
+        return $result;
+    }    
+    
     public function getWithAdditionals($id)
     {
-        return $this->model::find($id);
+        return $this->get($id);
     }
     
     public function getFewWithAdditionals($ids)
@@ -277,4 +284,32 @@ class BaseRepository
         return $this->getFewWithAdditionals($this->model::orderBy("id", "asc")
                 ->pluck('id'));        
     }
+    
+    /**
+     * Returns fields for translation
+     * 
+     * @return array
+     */
+    public function translatedFields()
+    {
+        $model = $this->getModel();
+        return $model->translatedAttributes;               
+    }
+
+    /**
+     * Sets translations for model 
+     * 
+     * @param type $locale
+     * @param type $record
+     * @param type $request
+     * @return type
+     */
+    public function setTranslation($locale, $record, $request)
+    {
+        $translatedFields = $this->translatedFields();
+        foreach ($translatedFields as $field) {
+            $record->translateOrNew($locale)->$field = $request->$field;            
+        } 
+        return $record->save();
+    } 
 }

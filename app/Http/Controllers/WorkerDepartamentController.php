@@ -16,12 +16,12 @@ class WorkerDepartamentController extends BaseController
         $this->setRepository($rep);
     }  
     
-    public function deleteRel(Request $request) 
+    public function deleteWorker($departamentId, $workerId) 
     {
         $model = $this->repository->getModel();                      
         
-        if ($model::where('user_id', '=', $request->user_id)
-                ->where('departament_id', '=', $request->departament_id)
+        if ($model::where('user_id', '=', $workerId)
+                ->where('departament_id', '=', $departamentId)
                 ->delete()) {
             $result = ['success' => true];          
         } else {

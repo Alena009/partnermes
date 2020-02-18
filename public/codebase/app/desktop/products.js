@@ -403,7 +403,7 @@ function productsInit(cell) {
                         });                         
                         componentsGrid.fill = function(id){	
                             componentsGrid.clearAll();
-                            ajaxGet("api/products/components/" + id, '', function(data){                                     
+                            ajaxGet("api/products/" + id + "/components/" + localStorage.language, '', function(data){                                     
                                 if (data && data.success){
                                     componentsGrid.parse((data.data), "js");
                                 }
@@ -528,7 +528,7 @@ function productsInit(cell) {
         productsGrid.setRegFilter(productsGrid, 0);    
         productsGrid.setRegFilter(productsGrid, 1);                                 
         productsGrid.zaladuj = (i = 0) => {	              
-            productsGrid.fill("api/prodgroups/products/" + i + "/" + localStorage.language, 
+            productsGrid.fill("api/prodgroups/" + i + "/products/" + localStorage.language, 
                                     productsGridToolBar);
         }; 
         productsGrid.zaladuj(0);

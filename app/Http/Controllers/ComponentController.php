@@ -10,6 +10,7 @@ use App\Models\Warehouse;
 class ComponentController extends BaseController
 {
     private $rep;
+    private $res;
     
     public function __construct(ComponentRepository $rep)
     {

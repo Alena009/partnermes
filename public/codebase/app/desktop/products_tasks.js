@@ -436,7 +436,7 @@ function productsTasksInit(cell) {
                     zadaniaProductGrid.fill(id);     
                 });  
                 productsGrid.zaladuj = (i = 0) => {	              
-                    productsGrid.fill("api/prodgroups/products/" + i + "/" + 
+                    productsGrid.fill("api/prodgroups/"+i+"/products/" + 
                             localStorage.language, null);
                 };                   
 /**
@@ -484,7 +484,7 @@ function productsTasksInit(cell) {
                                     if (name == "save") {
                                         var data = this.getFormData();
                                         data.product_id = productId;
-                                        zadaniaProductGrid.add("api/products/addtask" , data); 
+                                        zadaniaProductGrid.add("api/products/"+productId+"/tasks" , data); 
                                         addTaskToProductForm.clear();
                                     }
                                 });                            							
@@ -576,7 +576,7 @@ function productsTasksInit(cell) {
                 zadaniaProductGrid.enableDragAndDrop(true);     
                 zadaniaProductGrid.fill = function(id = 0){	
                     this.clearAll();					
-                    ajaxGet("api/products/tasks/" + id, '', function(data){                                     
+                    ajaxGet("api/products/"+id+"/tasks", '', function(data){                                     
                         if (data && data.success){
                             zadaniaProductGrid.parse((data.data), "js");
                         }

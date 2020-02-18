@@ -216,7 +216,7 @@ var newOperationFormStruct = [
         {type: "checkbox", name: "not_for_order",         label: _("Nie ma zlecenia")},		
         {type: "combo", name: "order_position_id", label: _("Zlecenie"), options: []},		
         {type: "combo", name: "task_id",           required: true, label: _("Zadanie"), options: []},		
-        {type: "input", name: "start_amount",      required: true, label: _("Zadeklarowana iłość"), readonly: true},
+        {type: "input", name: "start_amount",      required: true, label: _("Zadeklarowana iłość")},
         {type: "input", name: "done_amount",       label: _("Zrobiona iłość")},                                     
         {type: "block", blockOffset: 0, position: "label-left", list: [
             {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            

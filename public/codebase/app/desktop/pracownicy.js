@@ -56,32 +56,19 @@ function pracownicyInit(cell) {
                     if (mode) {
                         var grupy=grupyTree.getAllChecked();                                            
                         grupy[grupy.length]=id;
-			pracownicyGrid.clearAll();
-			pracownicyGrid.zaladuj(grupy);
-                        console.log(id);
+			pracownicyGrid.zaladuj(grupy);                        
 			return true;                        
                     }
 		});
 		grupyTree.attachEvent("onCheck",function(id){
-			var grupy=grupyTree.getAllChecked();                                            
-			pracownicyGrid.clearAll();
+			var grupy=grupyTree.getAllChecked();                                            			
 			pracownicyGrid.zaladuj(grupy);
 			return true;
 		});
                 if (write) {
-                    var grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                    {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
-                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                    {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},                            
-                            ]
-                    });  
+                    var grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar(standartToolbar);  
                 } else {
-                    var grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: []
-                    });
+                    var grupyTreeToolBar = pracownicyLayout.cells("a").attachToolbar(emptyToolbar);
                 }
                 grupyTreeToolBar.attachEvent("onClick", function(id) {                        		
 			switch (id){
@@ -99,7 +86,10 @@ function pracownicyInit(cell) {
                                 if (id) {
                                     deleteNodeFromTree(grupyTree, "api/departaments/" + id);
                                 }
-                            };break;    
+                            };break; 
+                            case 'Redo': {                                
+                                    grupyTree.build();                                
+                            };break;                        
 			}
 		});   
 /**
@@ -110,9 +100,6 @@ function pracownicyInit(cell) {
                     var pracownicyGridToolBar = pracownicyLayout.cells("b").attachToolbar({
                             iconset: "awesome",
                             items: [
-    //				{type: "text", id: "find", text: _("Find:")},				
-    //				{type: "buttonInput", id: "szukaj", text: "", width: 100},
-    //				{type: "separator", id: "sep2"},
                                     {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
                                     {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
                                     {id: "Del",  type: "button", text: _("Usuń"),   img: "fa fa-minus-square"},
@@ -123,25 +110,20 @@ function pracownicyInit(cell) {
                             ]
                     }); 
                 } else {
-                    var pracownicyGridToolBar = pracownicyLayout.cells("b").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                    {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                            ]
-                    });                     
+                    var pracownicyGridToolBar = pracownicyLayout.cells("b").attachToolbar(emptyToolbar);                     
                 }
                 pracownicyGridToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Add':{                            
                             pracownicyForm.clear();  
-                            pracownicyForm.setItemFocus("firstname");
+                            pracownicyForm.setItemFocus("kod");
                             pracownicyForm.fillAvatar(0);
                             pracownicyForm.showItem("buttonblock");
                             pracownicyLayout.cells("c").expand();                              
                         };break;
                         case 'Edit':{
                             pracownicyLayout.cells("c").expand();   
-                            pracownicyForm.setItemFocus("firstname");                                                      
+                            pracownicyForm.setItemFocus("kod");                                                      
                         };break;
                         case 'Del':{                            
                             var id = pracownicyGrid.getSelectedRowId();
@@ -221,16 +203,16 @@ function pracownicyInit(cell) {
                                     if (state) {                                                                            
                                         ajaxPost("api/workerdep", data, '');
                                     } else {
-                                        ajaxGet("api/workerdep/del", data, '');
+                                        ajaxGet("api/workerdep/"+departamentID+"/deleteworker/"+rId, '', '');
                                     }
                                     pracownicyGrid.zaladuj(departamentID);                                   
                                 });
-                                ajaxGet("api/workerslist/", '', function(data){                                     
+                                ajaxGet("api/workerdep/0/workers", '', function(data){                                     
                                     if (data && data.success){ 
                                         //remember array of all workers
                                         var allUsers = data.data;
                                         //asking array of workers for choosen departament
-                                        ajaxGet("api/workerslist/" + departamentID, '', function(data2){
+                                        ajaxGet("api/workerdep/"+departamentID+"/workers", '', function(data2){
                                             //remember array of workers in departament
                                             var departamentUsers = data2.data;
                                             //for every worker from all workers array we are checking:
@@ -288,64 +270,39 @@ function pracownicyInit(cell) {
                             type: "ed", 
                             sort: "str",	
                             align: "left"
-                        },
-                        {
-                            label: _("E-mail"),
-                            id: "email",
-                            width: 100, 
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"
-                        }                        
-                    ],
-			multiselect: true
+                        }                      
+                    ]
                 });        
                 pracownicyGrid.attachHeader("#text_filter,#text_filter,#text_filter");
 		pracownicyGrid.zaladuj = function(i = 0){
                     this.clearAll();
-			var ids = Array();
-			ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;                        
-			var new_data = ajaxGet("api/workerslist/" + ids, '', function(data){                                     
-				if (data && data.success){
-                                    console.log(data);
-                                    pracownicyGrid.parse((data.data), "js");
-                                }
-			});                        
+                    var ids = Array();
+                    ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;                        
+                    var new_data = ajaxGet("api/workerdep/" + ids + "/workers", '', function(data){                                     
+                            if (data && data.success){
+                                pracownicyGrid.parse((data.data), "js");
+                            }
+                    });                     
                 };                
-		var dpPracownicyGrid = new dataProcessor("api/users", "js");                
-                dpPracownicyGrid.init(pracownicyGrid);
-                dpPracownicyGrid.enableDataNames(true);
-                dpPracownicyGrid.setTransactionMode("REST");
-                dpPracownicyGrid.enablePartialDataSend(true);
-                dpPracownicyGrid.enableDebug(true);
-                dpPracownicyGrid.setUpdateMode("row", true);
-                dpPracownicyGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-                    data.id = id;                    
-                    ajaxGet("api/users/" + id + "/edit", data, function(data){                                                            
-                        console.log(data);
-                    });
-                });                                         
-		var grupyFormAddData = [
-			{type:"fieldset",  offsetTop:0, label:_("Nowa grupa"), width:253, list:[                                
-				{type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),     options: [{text: "None", value: "0"}], inputWidth: 150},                                
-				{type:"input",  name:"name",    	label:_("Nazwa grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
-				{type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
-				{type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
-			]}
-		];
-		var grupyFormEditData = [
-			{type:"fieldset",  offsetTop:0, label:_("Grupa"), width:253, list:[                                			
-				{type:"input",  name:"name",    	label:"Nazwa grupy",     	offsetTop:13, 	labelWidth:80},                                                                				
-				{type:"button", name:"save",    	value:"Zapisz",   		offsetTop:18},
-				{type:"button", name:"cancel",     	value:"Anuluj",   		offsetTop:18}
-			]}
-		];                
+//		var dpPracownicyGrid = new dataProcessor("api/users", "js");                
+//                dpPracownicyGrid.init(pracownicyGrid);
+//                dpPracownicyGrid.enableDataNames(true);
+//                dpPracownicyGrid.setTransactionMode("REST");                
+//                dpPracownicyGrid.enableDebug(true);
+//                dpPracownicyGrid.setUpdateMode("row", true);
+//                dpPracownicyGrid.attachEvent("onBeforeDataSending", function(id, state, data){
+//                    data.id = id;                    
+//                    ajaxGet("api/users/" + id + "/edit", data, function(data){                                                            
+//                        console.log(data);
+//                    });
+//                });                    
+                pracownicyGrid.zaladuj(0);            
 /**
  * C 
  * 
  */                
-                if (write) {        
-                    pracownikFormStruct = [         
+
+                var pracownikFormStruct = [         
                             {type: "file",     name: "upload_photo", hidden: true},
                             {type: "container",name: "photo",      label: "",             inputWidth: 160,    inputHeight: 160, offsetTop: 20, offsetLeft: 65},                        //
                             {type: "input",    name: "kod",        label: _("Kod"),       labelAlign: "left", required: true},
@@ -368,28 +325,7 @@ function pracownicyInit(cell) {
                                 {type: "newcolumn"},
                                 {type: "button",   name: "cancel", value:_("Anuluj"), offsetTop:18}
                             ]}                  
-                    ];               
-                } else {
-                    pracownikFormStruct = [         
-                            {type: "file",     name: "upload_photo", hidden: true},
-                            {type: "container",name: "photo",      label: "",             inputWidth: 160,    inputHeight: 160, offsetTop: 20, offsetLeft: 65},                        //
-                            {type: "input",    name: "kod",        label: _("Kod"),       labelAlign: "left", required: true},
-                            {type: "input",    name: "firstname",  label: _("First name"),labelAlign: "left", required: true},
-                            {type: "input",    name: "lastname",   label: _("Last name"), labelAlign: "left", required: true},
-                            {type: "input",    name: "name",       label: _("User name"), labelAlign: "left"},
-                            {type: "input",    name: "login",      label: _("Login"),     labelAlign: "left", required: true},
-                            {type: "password", name: "password",   label: _("Password"),  labelAlign: "left", required: true},
-                            {type: "combo",    name: "country",    label: _("Kraj"),  options:[]},
-                            {type: "combo",    name: "language",   label: _("Język"), options:[]},
-                            {type: "input",    name: "email",      label: _("E-mail"),    labelAlign: "left"},
-                            {type: "input",    name: "phone",      label: _("Phone"),     labelAlign: "left"},
-
-                            {type: "label",                        label: _("Is worker")},
-                            {type: "radio",    name: "is_worker",  label: _("Tak"), value: 1,  checked: true},
-                            {type: "radio",    name: "is_worker",  label: _("Nie"),  value: 0},                        
-                            {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160}                                              
-                    ]; 
-                }
+                    ];                
                 var pracownicyForm = pracownicyLayout.cells("c").attachForm(pracownikFormStruct);               
                 pracownicyForm.bind(pracownicyGrid); 
                 pracownicyForm.attachEvent("onButtonClick", function(name){
@@ -414,9 +350,6 @@ function pracownicyInit(cell) {
                             } else {
                                 userOperation("api/users", data);
                             }
-                        };break;
-                        case 'cancel':{
-                            //pracownicyForm.updateValues();                   
                         };break;
                     }
                 });    
@@ -450,7 +383,6 @@ function pracownicyInit(cell) {
 
                 //Avatar loading for view
                 function onContentClick() {
-                    console.log('click');
                     var input = pracownicyForm.getInput("upload_photo");                    
                     input.onchange = e => { 
                         var file = e.target.files[0]; 
@@ -465,16 +397,6 @@ function pracownicyInit(cell) {
                     };                    
                     input.click();                                         
                 };                   
-
-//                    function saveNewUser(data) {                    
-//                        userOperation("api/users", data);                   
-//                    }
-//
-//                    function updateUser(userId, data) {
-//                        var query = "api/users/" + userId + "/edit";
-//
-//                        userOperation(query, data);                   
-//                    }
 
                 function userOperation(query, data) {
                     var input = pracownicyForm.getInput("upload_photo");                    
@@ -512,27 +434,30 @@ function pracownicyInit(cell) {
                         //console.log(base64Encode(JSON.stringify(grupy)));
                         console.log(args);
                  });
+                 
+                if (!write) { pracownicyForm.hideItem("buttonblock"); }                 
+  
 	}                
 }
 
-function pracownicyFillForm(id) {
-	// update form
-	var data = pracownicyForm.getFormData();
-	for (var a in data) {
-		var index = pracownicyGrid.getColIndexById(a);
-		if (index != null && index >= 0) data[a] = String(pracownicyGrid.cells(id, index).getValue()).replace(/\&amp;?/gi, "&");
-	}
-	pracownicyForm.setFormData(data);
-	// change photo
-	var img = pracownicyGrid.cells(id, pracownicyGrid.getColIndexById("photo")).getValue(); // <img src=....>
-	var src = img.match(/src=\"([^\"]*)\"/)[1];
-	pracownicyForm.getContainer("photo").innerHTML = "<img src='imgs/pracownicy/big/" + src.match(/[^\/]*$/)[0] + "' border='0' class='form_photo'>";
-}
+//function pracownicyFillForm(id) {
+//	// update form
+//	var data = pracownicyForm.getFormData();
+//	for (var a in data) {
+//		var index = pracownicyGrid.getColIndexById(a);
+//		if (index != null && index >= 0) data[a] = String(pracownicyGrid.cells(id, index).getValue()).replace(/\&amp;?/gi, "&");
+//	}
+//	pracownicyForm.setFormData(data);
+//	// change photo
+//	var img = pracownicyGrid.cells(id, pracownicyGrid.getColIndexById("photo")).getValue(); // <img src=....>
+//	var src = img.match(/src=\"([^\"]*)\"/)[1];
+//	pracownicyForm.getContainer("photo").innerHTML = "<img src='imgs/pracownicy/big/" + src.match(/[^\/]*$/)[0] + "' border='0' class='form_photo'>";
+//}
 
-function pracownicyGridBold(r, index) {
-	pracownicyGrid.setCellTextStyle(pracownicyGrid.getRowId(index), pracownicyGrid.getColIndexById("name"), "font-weight:bold;border-left-width:0px;");
-	pracownicyGrid.setCellTextStyle(pracownicyGrid.getRowId(index), pracownicyGrid.getColIndexById("photo"), "border-right-width:0px;");
-}
+//function pracownicyGridBold(r, index) {
+//	pracownicyGrid.setCellTextStyle(pracownicyGrid.getRowId(index), pracownicyGrid.getColIndexById("name"), "font-weight:bold;border-left-width:0px;");
+//	pracownicyGrid.setCellTextStyle(pracownicyGrid.getRowId(index), pracownicyGrid.getColIndexById("photo"), "border-right-width:0px;");
+//}
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {
 	if (id == "pracownicy") {

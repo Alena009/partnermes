@@ -26,15 +26,7 @@ Route::group([
     Route::resource('/history', 'OrderHistoryController');         
     Route::resource('/toolsoperations', 'ToolOperationController');      
     Route::resource('/tools', 'ToolController');  
-    
 
-
-
-        
-//    Route::get('/declaredworks/savework', 'DeclaredWorkController@savework'); 
-//    Route::resource('/declaredworks', 'DeclaredWorkController'); 
-    
-//    Route::get('/departaments/scheduler', 'DepartamentController@buildScheduler');
     Route::get('/departaments/grupytree', 'DepartamentController@buildTree');
     Route::get('/departaments/{departament}/translations', 'DepartamentController@getTranslations');
     Route::resource('/departaments', 'DepartamentController'); 
@@ -44,10 +36,9 @@ Route::group([
     //Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
     Route::resource('/operations', 'OperationController'); 
 
-    
-    Route::get('/orders/history/{orderId}', 'OrderController@history');
-    Route::get('/orders/last', 'OrderController@getLastOrder');
-    Route::resource('/orders', 'OrderController');    
+    Route::get('/orders/{orderId}/close',   'OrderController@closeOrder');    
+    Route::get('/orders/last',              'OrderController@getLastOrder');
+    Route::resource('/orders',              'OrderController');    
     
     Route::get('/positions/byorder/{order}', 'OrderPositionController@getPositionsByOrder');    
     Route::get('/positions/getPrinted', 'OrderPositionController@getPrinted');    

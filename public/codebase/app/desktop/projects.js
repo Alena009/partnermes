@@ -104,7 +104,17 @@ function projectsInit(cell) {
  * 
  */            
             var ordersGridToolBar;
-            userCanWrite ? ordersGridToolBar = orderLayout.cells("b").attachToolbar(standartToolbar):
+            userCanWrite ? ordersGridToolBar = orderLayout.cells("b").attachToolbar({
+                    iconset: "awesome",
+                    items: [
+                            {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
+                            {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
+                            {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
+                            {id: "Close",  type: "button", text: _("Zamknij zamówienie"), img: "fa fa-check-square"},  
+                            {type: "separator", id: "sep3"},
+                            {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
+                    ]
+            }):
                 ordersGridToolBar = orderLayout.cells("b").attachToolbar(emptyToolbar);            
             ordersGridToolBar.attachEvent("onClick", function(id) { 
                 switch (id){
@@ -129,9 +139,17 @@ function projectsInit(cell) {
                     case 'Del': {                                                                                                                                                                                                                                                   
                         var orderId = ordersGrid.getSelectedRowId();                            
                         if (orderId) {
-                            ordersGrid.delete("api/orders/" + orderId, orderId);
-                            clearOrderForm(); 
-                            refreshPositions(null);
+                            var data = ordersGrid.getRowData(orderId);
+                            if (data.positionsInWork || data.closedPositions) {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Zamówienie ma otwarte lub zakończone zlecenia. Nie można usunąć!")
+                                });
+                            } else {
+                                ordersGrid.delete("api/orders/" + orderId, orderId);
+                                clearOrderForm(); 
+                                refreshPositions(null);
+                            }
                         } else {
                             dhtmlx.alert({
                                 title:_("Wiadomość"),
@@ -139,6 +157,29 @@ function projectsInit(cell) {
                             });
                         }                            
                     };break; 
+                    case 'Close': {                                                                                                                                                                                                                                                   
+                        var orderId = ordersGrid.getSelectedRowId();                            
+                        if (orderId) {
+                            ajaxGet('api/orders/'+orderId+'/close', '', function(data){                                                                                                        
+                                if (data && data.success) { 
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        text:_("Zamknięte!")
+                                    });
+                                } else {
+                                    dhtmlx.alert({
+                                        title:_("Wiadomość"),
+                                        text:_("Błąd! Zmiany nie zostały zapisane")
+                                    });
+                                }                                          
+                            });
+                        } else {
+                            dhtmlx.alert({
+                                title:_("Wiadomość"),
+                                text:_("Wybierz zamowienie, które chcesz zamknąć!")
+                            });
+                        }                            
+                    };break;                     
                     case 'Redo': {
                         refreshOrders();  
                         refreshPositions(ordersGrid.getSelectedRowId());
@@ -152,29 +193,23 @@ function projectsInit(cell) {
                     {label: _("Klient"),           id: "client_name", type: "ro",   sort: "str", align: "left", width: 150},                                                                                                
                     {label: _("Termin wykonania"), id: "num_week",    type: "ro",   sort: "str", align: "left", width: 50},                         
                     {id: "client_id"}, 
-                    {id: "hasopenworks"},
                     {id: "date_start"}, 
-                    {id: "description"}                     
+                    {id: "description"},
+                    {label: _("Iłość wydrukowanych zleceń"), id: "positionsInWork", type: "ro",   sort: "str", align: "left", width: 50},
+                    {label: _("Iłość zamkniętych zleceń"),   id: "closedPositions", type: "ro",   sort: "str", align: "left", width: 50}
                 ]
             });            
             ordersGrid.attachHeader('#text_filter,#text_filter,#select_filter');      
             ordersGrid.setColumnHidden(3,true);
-            //ordersGrid.setColumnHidden(4,true);
-            ordersGrid.setColumnHidden(5,true);            
-            ordersGrid.setColumnHidden(6,true);            
+            ordersGrid.setColumnHidden(4,true);
+            ordersGrid.setColumnHidden(5,true);                                              
             ordersGrid.attachEvent("onRowSelect", function() {
                 var id = ordersGrid.getSelectedRowId();
                 var orderData = ordersGrid.getRowData(id);
                 var numWeekCombo = positionForm.getCombo("num_week");
                 numWeekCombo.selectOption(numWeekCombo.getIndexByValue(orderData.num_week));                 
                 positionsGrid.fill(id);                
-            });              
-            ordersGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
-                var data = ordersGrid.getRowData(rId);
-                if (data.hasopenworks != 0) {
-                    ordersGrid.setRowColor(rId,"yellow");
-                }
-            });                 
+            });                             
             ordersGrid.fill("api/orders"); 
 /**
  * Positions

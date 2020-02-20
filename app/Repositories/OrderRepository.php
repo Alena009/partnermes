@@ -15,24 +15,16 @@ class OrderRepository extends BaseRepository
         $order = $this->model::find($id);
         
         if ($order) {
-            $order->client_name  = $order->client->name;               
-            $order->text         = $order->kod;
-            $order->value        = $order->id;
+            $order->client_name     = $order->client->name;               
+            $order->text            = $order->kod;
+            $order->value           = $order->id;
             $date = new \DateTime($order->date_end);
-            $order->num_week     = $date->format("W");
-            $order->hasopenworks = count($order->positionsInWork()); 
+            $order->num_week        = $date->format("W");      
+            $order->positionsInWork = $order->positionsInWork();
+            $order->closedPositions = $order->closedPositions();
         }
         
         return $order;
-    }
-
-    public function getStatus($step)
-    {
-        if ($step == "new") {
-            
-        }
-        
-        return $statusId;
     }
     
     public function lastOrder()

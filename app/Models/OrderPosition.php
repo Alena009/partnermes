@@ -42,9 +42,7 @@ class OrderPosition extends BaseModel
     
     public function setClosed()
     {
-        $this->status = 3;
-        $this->date_status = date("Y-m-d H:i:s");
-        return $this->save();        
+        return $this->status()->attach(2);        
     }
     
     public function reOpen()

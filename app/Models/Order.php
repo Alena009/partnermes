@@ -47,12 +47,12 @@ class Order extends BaseModel
         
     public function positionsInWork()
     {
-        return $this->hasMany('App\Models\OrderPosition')->where("status", "=", 2)->get();
+        return $this->hasMany('App\Models\OrderPosition')->where("status", "=", 2)->count("id");
     } 
     
     public function closedPositions()
     {
-        return $this->hasMany('App\Models\OrderPosition')->where("status", "=", 3)->get();
+        return $this->hasMany('App\Models\OrderPosition')->where("status", "=", 3)->count("id");
     }    
     
     public function status()
@@ -72,4 +72,11 @@ class Order extends BaseModel
         
         return false;
     }    
+    
+    public function close()
+    {
+        $this->status = 3;
+        $this->date_status = date("Y-m-d H:i:s");
+        return $this->save();         
+    }
 }

@@ -254,8 +254,7 @@ class OrderPositionController extends BaseController
         $positions = OrderPosition::find(explode(',', $positionsIds));
         foreach ($positions as $position) {
             $position->setClosed();
-        }
-        
+        }        
         return response()->json(['data' => $positions, 'success' => true]);   
     }
     

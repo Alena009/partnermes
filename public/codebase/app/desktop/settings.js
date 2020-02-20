@@ -1276,36 +1276,6 @@ Date.prototype.getWeekNumber = function(){
     return Math.ceil((((d-new Date(d.getFullYear(),0,1))/8.64e7)+1)/7);
 };   
 
-//dhtmlXGridObject.prototype.deleteMyRecordById = function(url){
-//    const thisGrid = this;
-//    let id = thisGrid.getSelectedRowId();                                       
-//    if (id) {
-//        dhtmlx.confirm({
-//            title: _("Ostrożność"),                                    
-//            text: _("Czy na pewno chcesz usunąć te informacje?"),
-//            callback: function(result){
-//                if (result) {                                     
-//                    ajaxDelete(url + '/' + id,'', function(data){
-//                        if (data && data.success) {
-//                            thisGrid.deleteRow(id);
-//                        } else {
-//                            dhtmlx.alert({
-//                                title:_("Wiadomość"),
-//                                text:_("Nie udało się usunąć informacje!")
-//                            }); 
-//                        }
-//                    }); 
-//                }
-//            }
-//        });                                                  
-//    } else {
-//        dhtmlx.alert({
-//            title:_("Wiadomość"),
-//            text:_("Wybierz co chcesz usunąć!")
-//        });                        
-//    }
-//};
-
 dhtmlXGridObject.prototype.setRegFilter = function(gridObj, colIdx) {
     gridObj.getFilterElement(colIdx)._filter = function (){
         var input = this.value; // gets the text of the filter input

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\OrderRepository;
 use App\Models\Order;
-use Illuminate\Support\MessageBag;
 
 class OrderController extends BaseController
 {    
@@ -107,18 +106,30 @@ class OrderController extends BaseController
     {        
         return $this->getResponseResult($this->repository->lastOrder());
     }
-
-    public function history($orderId)
-    {
-        $order = [];
-        $order = $this->repository->getWithAdditionals($orderId);
-        $history = $order->history;
-        foreach ($history as $rec) {
-            $status = $rec->status;
-            $rec->name = $status->name;
-            $rec->description = $status->description;
-        }        
-        
-        return $this->getResponseResult($history);
-    }    
+    
+    public function closeOrder($orderId)
+    {     
+        $order = $this->repository->get($orderId);
+        if ($order) {
+            $order->status()->attach(3);
+            return response()->json(['data' => $order, 'success' => true]);              
+        } else {
+            return response()->json(['data' => [], 'success' => false, 
+                'message' => 'Order was not found']);  
+        }  
+    }
+//
+//    public function history($orderId)
+//    {
+//        $order = [];
+//        $order = $this->repository->getWithAdditionals($orderId);
+//        $history = $order->history;
+//        foreach ($history as $rec) {
+//            $status = $rec->status;
+//            $rec->name = $status->name;
+//            $rec->description = $status->description;
+//        }        
+//        
+//        return $this->getResponseResult($history);
+//    }    
 }

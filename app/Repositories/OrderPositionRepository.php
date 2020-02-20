@@ -17,7 +17,6 @@ class OrderPositionRepository extends BaseRepository
         
         if ($position) {
             $product                      = $position->product;
-            //$position->text               = $product->name;
             $position->text               = $position->kod;
             $position->value              = $position->id;        
             $position->product_id         = $product->id;
@@ -32,38 +31,47 @@ class OrderPositionRepository extends BaseRepository
             $date = new \DateTime($position->date_delivery);
             $position->num_week           = $date->format("W");
             $position->summa              = $position->price * $position->amount;                    
-            //$position->declared           = $position->product->tasks->count() * $position->amount;         
-            //$position->tasks              = count($position->product->allTasks());
-            $position->closed             = false; 
-            $position->done_amount        = $this->getDoneAmount($position);
-            if ($position->status == 3) {
-                $position->closed = true; 
-                $position->date_closed = $position->date_status; 
-            }   
+            //$position->done_amount        = $this->getDoneAmount($position); 
             if ($position->status == 2) {
                 $position->printed = true;                 
-            }             
+                $position->closed = false;
+            }              
+            if ($position->status == 3) {
+                $position->closed = true; 
+                $position->printed = true;    
+                $position->date_closed = $position->date_status; 
+            }              
         }
         
         return $position;        
     }  
-     
-    public function getDoneAmount($position) 
-    {
-        $product = $position->product;
-        $operations = $position->operations;       
-        $lastTask = $product->getLastTask();    
-       
-        if ($lastTask) {
-            return $operations->where("task_id", "=", $lastTask->id)
-                   ->sum("done_amount");
-        } else {
-            return 0; 
-        }
-    }
     
     /**
      * Returns list of orders positions which does not have zlecenia 
+     * 
+     * @return array
+     */
+    public function getPositionsWithTasks()
+    {
+        $result = [];        
+        $positionsIds = DB::table('orders_positions')
+            ->join('orders_history', 'orders_positions.order_id', '=', 'orders_history.order_id')                            
+            ->select('orders_positions.*')
+            ->where("orders_history.status_id", "<>", 3) 
+            ->pluck("id");
+
+        $positions = $this->model::find($positionsIds);
+        foreach($positions as $position) {            
+            if (count($position->product->allTasks())) {                
+                $position = $this->getWithAdditionals($position->id);
+                $result[] = $position;                
+            }
+        }
+        return $result; 
+    }    
+        
+    /**
+     * Returns list of orders positions which was printed 
      * 
      * @return array
      */
@@ -71,50 +79,7 @@ class OrderPositionRepository extends BaseRepository
     {
         return $this->getFewWithAdditionals($this->model::where("status", "=", 2)->pluck("id"));        
     }     
-    
-    public function isPositionAvailableForCreatingZlecenie($position)
-    {
-        $product     = $position->product;
-        $components  = $product->components;
-
-        if ($components) {
-            foreach ($components as $component) {
-                $availableAmount = Warehouse::where('product_id', '=', $component->component_id)
-                        ->sum('amount');
-                $neededAmount = $position->amount * $component->amount;
-                if ($neededAmount > $availableAmount) {
-                    return 0;
-                }
-            }  
-        }
-        
-        return 1;
-    }  
-    
-    public function get($ids) 
-    { 
-        $positions = [];
-
-        if (count($ids)) {        
-            $positions = $this->model::find($ids);
-        }
-        
-        return $positions;        
-    }
-    
-    public function getTasks($id) 
-    {
-        $result = [];        
-        $position = $this->model::find($id);        
-        if ($position) {
-            $declaredWorks = $position->declaredworks;
-            if ($declaredWorks) {
-                return $declaredWorks;
-            } else {
-                return $position->product->tasks;
-            }
-        }        
-    }
+      
     
     public function getDate($numWeek) 
     {

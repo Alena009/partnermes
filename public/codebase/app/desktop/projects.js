@@ -25,7 +25,12 @@ function projectsInit(cell) {
             positionLayout.cells("a").setWidth(350);
             positionLayout.setAutoSize("a;b");            
             positionLayout.cells("b").setText(_("Pozycje"));
-            
+/**
+ * Orders 
+ * 
+ * A
+ * 
+ */            
             var orderForm = createForm(newProjectFormStruct, orderLayout.cells("a"));   
             var clientsCombo = orderForm.getCombo("client_id");
             ajaxGet("api/clients", "", function(data){
@@ -67,7 +72,12 @@ function projectsInit(cell) {
                     }
                 }
             }); 
-            
+/**
+ * Positions
+ * 
+ * A
+ * 
+ */            
             var positionForm = createForm(orderPositionFormStruct, positionLayout.cells("a"));
             var productsCombo = positionForm.getCombo("product_id");
             ajaxGet("api/products", "", function(data){
@@ -87,7 +97,12 @@ function projectsInit(cell) {
                     }
                 }
             });            
-            
+/**
+ * Orders 
+ * 
+ * B
+ * 
+ */            
             var ordersGridToolBar;
             userCanWrite ? ordersGridToolBar = orderLayout.cells("b").attachToolbar(standartToolbar):
                 ordersGridToolBar = orderLayout.cells("b").attachToolbar(emptyToolbar);            
@@ -95,12 +110,14 @@ function projectsInit(cell) {
                 switch (id){
                     case 'Add':{   
                         clearOrderForm(); 
+                        orderLayout.cells("a").expand();
                         orderForm.setItemFocus("client_id");
-                        ordersGrid.clearSelection();
+                        ordersGrid.clearSelection();                        
                     };break;
                     case 'Edit':{ 
                         var orderId = ordersGrid.getSelectedRowId();                            
                         if (orderId) {
+                            orderLayout.cells("a").expand();
                             orderForm.setItemFocus("client_id");
                         } else {
                             dhtmlx.alert({
@@ -127,8 +144,7 @@ function projectsInit(cell) {
                         refreshPositions(ordersGrid.getSelectedRowId());
                     };break;
                 }
-            });
-            
+            });            
             var ordersGrid = orderLayout.cells("b").attachGrid({
                 image_path:'codebase/imgs/',
                 columns: [
@@ -143,7 +159,7 @@ function projectsInit(cell) {
             });            
             ordersGrid.attachHeader('#text_filter,#text_filter,#select_filter');      
             ordersGrid.setColumnHidden(3,true);
-            ordersGrid.setColumnHidden(4,true);
+            //ordersGrid.setColumnHidden(4,true);
             ordersGrid.setColumnHidden(5,true);            
             ordersGrid.setColumnHidden(6,true);            
             ordersGrid.attachEvent("onRowSelect", function() {
@@ -160,22 +176,15 @@ function projectsInit(cell) {
                 }
             });                 
             ordersGrid.fill("api/orders"); 
-            
+/**
+ * Positions
+ * 
+ * B
+ * 
+ */            
             var positionsGridToolbar;
             if (userCanWrite) {
-                positionsGridToolbar = positionLayout.cells("b").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                            {id:"Add", type:"button",  text: _("Dodaj"),  img: "fa fa-plus-square"},
-                            {id:"Edit", type:"button", text: _("Edytuj"), img: "fa fa-edit"},
-                            {id:"Del",  type:"button",text: _("Usun"),   img: "fa fa-minus-square"},
-                            {type: "separator", id: "sep3"},
-                            {id: "Block",text: _("Blokuj"), type: "button", img: "fa fa-lock"},                            
-                            {id: "UnBlock",text: _("Odblokuj"), type: "button", img: "fa fa-unlock"},                            
-                            {type: "separator", id: "sep2"},
-                            {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                        ]
-                });   
+                positionsGridToolbar = positionLayout.cells("b").attachToolbar(standartToolbar);   
             } else {
                 positionsGridToolbar = positionLayout.cells("b").attachToolbar(emptyToolbar);
             }
@@ -185,7 +194,8 @@ function projectsInit(cell) {
                         var orderId = ordersGrid.getSelectedRowId();                         
                         if (orderId) {
                             var orderData = ordersGrid.getRowData(orderId);
-                            positionForm.setItemFocus("kod");
+                            positionLayout.cells("a").expand();
+                            positionForm.setItemFocus(positionForm.getFirstActive()); 
                             positionsGrid.clearSelection();
                             clearPositionForm(); 
                             var numWeekCombo = positionForm.getCombo("num_week");
@@ -201,6 +211,7 @@ function projectsInit(cell) {
                     case 'Edit': {                               
                         var positionId = positionsGrid.getSelectedRowId();
                         if (positionId) {
+                            positionLayout.cells("a").expand();
                             positionForm.setItemFocus(positionForm.getFirstActive());                                                             
                         } else {
                             dhtmlx.message({
@@ -212,39 +223,24 @@ function projectsInit(cell) {
                     };break;
                     case 'Del': {                               
                         var positionId = positionsGrid.getSelectedRowId();
-                        if (positionId) {                                   
-                            positionsGrid.delete("api/positions/" + positionId, positionId);
-                            clearPositionForm();                                                                                
+                        if (positionId) {    
+                            var data = positionsGrid.getRowData(positionId);
+                            if (data.status > 1) {
+                                dhtmlx.alert({
+                                    title:_("Wiadomość"),
+                                    text:_("Nie wolno usunąć, są wydrukowane zlecenia dla tej pozycji!")
+                                });
+                            } else {
+                                positionsGrid.delete("api/positions/" + positionId, positionId);
+                                clearPositionForm();                                 
+                            }                                                                               
                         } else {
                             dhtmlx.alert({
                                 title:_("Wiadomość"),
                                 text:_("Wybierz pozycje, która chcesz usunąć!")
                             });
                         }                                    
-                    };break;
-                    case 'UnBlock':{
-                        var data = positionsGrid.getRowData(positionsGrid.getSelectedRowId());
-                        data.status = 0;
-                        data.date_status = new Date();
-                        ajaxGet("api/positions/" + data.id + "/edit", data, function(data){
-                            if (data.success && data.data) {                            
-                                //positionsGrid.fill(projectsGrid.getSelectedRowId());
-                                positionsGrid.setRowData(data.data.id, data.data);
-                                positionsGrid.callEvent("onRowCreated", [data.id]);
-                            }
-                        });                                                        
-                    };break;                         
-                    case 'Block':{
-                        var data = positionsGrid.getRowData(positionsGrid.getSelectedRowId());
-                        data.status = 2;
-                        data.date_status = new Date();
-                        ajaxGet("api/positions/" + data.id + "/edit", data, function(data){
-                            if (data.success && data.data) {                            
-                                positionsGrid.setRowData(data.data.id, data.data);
-                                positionsGrid.callEvent("onRowCreated", [data.id]);
-                            }
-                        });                         
-                    };break;                              
+                    };break;                            
                     case 'Redo': {
                         var orderId = ordersGrid.getSelectedRowId();
                         if (orderId) {
@@ -300,18 +296,12 @@ function projectsInit(cell) {
             );                                
             positionsGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
                 var data = positionsGrid.getRowData(rId);
-                //inprogress
-                if (data.countWorks > 0) {
-                    positionsGrid.setRowColor(rId,"yellow");
-                }
-                //blocked task
                 if (data.status == 2) {
-                    positionsGrid.setRowColor(rId,"lightgray");
-                } 
-                //for producting
-                if (data.status == 1) {
-                    positionsGrid.setRowColor(rId,"lightyellow");
-                }                         
+                    positionsGrid.setRowColor(rId,"yellow");
+                }    
+                if (data.status == 3) {
+                    positionsGrid.setRowColor(rId,"lightgreen");
+                }                 
             });                     
             positionsGrid.fill = function(id){
                 positionsGrid.setRegFilter(positionsGrid, 1);

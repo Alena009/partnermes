@@ -41,7 +41,7 @@ Route::group([
     
     Route::get('/operations/save', 'OperationController@save');      
     Route::get('/operations/taskchange', 'OperationController@taskchange');      
-    Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
+    //Route::get('/operations/list/{grupy}', 'OperationController@listOperations');      
     Route::resource('/operations', 'OperationController'); 
 
     
@@ -54,7 +54,7 @@ Route::group([
     Route::get('/positions/zlecenia', 'OrderPositionController@getZlecenia');    
     Route::get('/positions/list/components', 'OrderPositionController@getAllComponentsForFreePositions');
     Route::get('/positions/components/{position}', 'OrderPositionController@positionComponents');
-    Route::get('/positions/tasks/{position}', 'OrderPositionController@positionsTasks');
+    Route::get('/positions/{position}/tasks', 'OrderPositionController@positionsTasks');
     Route::get('/positions/print/{positions}', 'OrderPositionController@print');
     Route::get('/positions/close', 'OrderPositionController@close');
     Route::get('/positions/dontproduct', 'OrderPositionController@dontProduct');
@@ -63,38 +63,39 @@ Route::group([
     Route::get('/prodtypes/{prodtype}/translations', 'ProductTypeController@getTranslations');
     Route::resource('/prodtypes', 'ProductTypeController');            
     
-    Route::get('/prodgroups/tasks/{group}/{task}/edit', 'ProductGroupController@editTask');  
-    //Route::get('/prodgroups/products/{groups}/{locale?}', 'ProductGroupController@getProducts');      
-    Route::get('/prodgroups/{prodgroup}/translations', 'ProductGroupController@getTranslations');
-    Route::get('/prodgroups/grupytree/{locale?}', 'ProductGroupController@buildTree');           
-    Route::get('/prodgroups/tasks/{groups}/{locale?}', 'ProductGroupController@tasks');     
-    Route::post('/prodgroups/addtask', 'ProductGroupController@addTask'); 
-    Route::delete('/prodgroups/deletetask/{group}/{task}', 'ProductGroupController@deleteTask');  
-    
+//    
+//    //Route::get('/prodgroups/products/{groups}/{locale?}', 'ProductGroupController@getProducts');      
+//    Route::get('/prodgroups/{prodgroup}/translations', 'ProductGroupController@getTranslations');
+//    Route::post('/prodgroups/addtask', 'ProductGroupController@addTask'); 
+
+    Route::delete('/prodgroups/{group}/tasks/{task}',     'ProductGroupController@deleteTask'); 
+    Route::get('/prodgroups/{group}/tasks/{task}/edit',   'ProductGroupController@editTask');  
+    Route::post('/prodgroups/{group}/tasks',              'ProductGroupController@addTask'); 
+    Route::get('/prodgroups/{groups}/tasks/{locale?}',    'ProductGroupController@tasks');         
     Route::get('/prodgroups/{groups}/products/{locale?}', 'ProductGroupController@products');      
+    Route::get('/prodgroups/grupytree/{locale?}',         'ProductGroupController@buildTree');               
     Route::resource('/prodgroups', 'ProductGroupController');
     
     
-    Route::get('/products/{product}/translations', 'ProductController@getTranslations');
-    
-    
-    
-    Route::get('/products/deleteseveral/{products}', 'ProductController@deleteSeveralProducts');         
-    Route::get('/products/tasks/{product}/{task}/edit', 'ProductController@editTask');  
-    
-    Route::post('/products/{product}/components/{locale?}', 'ProductController@components');  
-    Route::get('/products/{productsIds}/components/{locale?}', 'ProductController@components');      
-    Route::delete('/products/{product}/tasks/{task}', 'ProductController@deleteTask');      
-    Route::post('/products/{product}/tasks',          'ProductController@addTask');        
-    Route::get('/products/{product}/tasks/{locale?}', 'ProductController@tasks');                  
+//    Route::get('/products/{product}/translations', 'ProductController@getTranslations');    
+//    Route::get('/products/deleteseveral/{products}', 'ProductController@deleteSeveralProducts');         
+
+    Route::delete('/products/{product}/components/{component}', 'ProductController@deleteComponent');      
+    Route::post('/products/{product}/components/{locale?}',     'ProductController@addComponent');  
+    Route::get('/products/{productsIds}/components/{locale?}',  'ProductController@components');      
+    Route::delete('/products/{product}/tasks/{task}',   'ProductController@deleteTask');      
+    Route::post('/products/{product}/tasks/{locale?}',  'ProductController@addTask');  
+    Route::get('/products/{product}/tasks/{task}/edit', 'ProductController@editTask');      
+    Route::get('/products/{product}/tasks/{locale?}',   'ProductController@tasks');                  
     Route::resource('/products', 'ProductController');  
  
     
-    Route::resource('/roles', 'RoleController');
+
     Route::get('/roles', 'RoleController@roles');
     Route::get('/roles/{roleId}/permissions', 'RoleController@listPermissions');
     Route::get('/roles/{roleId}/freepermissions', 'RoleController@listFreePermissions');
     Route::get('/roles/{roleId}/users', 'RoleController@listUsers');
+    Route::resource('/roles', 'RoleController');    
     
     Route::get('/rolespermissions/delete', 'RolePermissionController@deleteByRoleAndPermissionId');        
     Route::get('/rolespermissions/edit', 'RolePermissionController@editByRoleAndPermissionId');        

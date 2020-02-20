@@ -245,11 +245,9 @@ function productsTasksInit(cell) {
  */
                 var productsGroupsTree = productsTasksLayout.cells("a").attachTreeView(treeStruct);                                 
                 productsGroupsTree.attachEvent("onSelect",function(id, mode){  
-                    if (mode) {                        
-                        //productsGrid.filterBy(4, productsGroupsTree.getSelectedId());
+                    if (mode) {                                                
                         productsGrid.zaladuj(productsGroupsTree.getSelectedId());
                         zadaniaGroupGrid.fill(productsGroupsTree.getSelectedId());
-
                     }
                 });    
                 productsGroupsTree.fill = function(i=null){	
@@ -265,25 +263,14 @@ function productsTasksInit(cell) {
  * B
  * 
  */				
-	        if (userCanWrite) {
-                    var zadaniaGroupToolBar = productsTasksLayout.cells("b").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},                                    
-                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},                                    
-                                    {type: "separator", id: "sep3"},
-                                    {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
-                            ]                    
-                    });   
-                } else {
-                    var zadaniaGroupToolBar = productsTasksLayout.cells("b").attachToolbar(emptyToolbar);                      
-                }
+	        var zadaniaGroupToolBar;        
+                userCanWrite ? zadaniaGroupToolBar = productsTasksLayout.cells("b").attachToolbar(standartToolbar):   
+                        zadaniaGroupToolBar = productsTasksLayout.cells("b").attachToolbar(emptyToolbar);                                      
                 zadaniaGroupToolBar.attachEvent("onClick", function(name) {
                     var groupId = productsGroupsTree.getSelectedId();
                     if (groupId) {
                         switch(name) {                
-                            case "Add": { 
+                            case "Add": {                                    
                                 var formStruct = [
                                         {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
                                         {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
@@ -306,7 +293,7 @@ function productsTasksInit(cell) {
                                     if (name == "save") {
                                         var data = this.getFormData();
                                         data.product_group_id = groupId;
-                                        zadaniaGroupGrid.add("api/prodgroups/addtask" , data); 
+                                        zadaniaGroupGrid.add("api/prodgroups/"+groupId+"/tasks" , data); 
                                         addTaskToGroupForm.clear();
                                     }
                                 });                            							
@@ -331,7 +318,7 @@ function productsTasksInit(cell) {
                                         if (name == "save") {
                                             var data = this.getFormData();
                                             data.product_group_id = groupId;
-                                            zadaniaGroupGrid.edit("api/prodgroups/tasks/"+groupId+"/"+taskId+"/edit" , data); 
+                                            zadaniaGroupGrid.edit("api/prodgroups/"+groupId+"/tasks/"+taskId+"/edit" , data); 
                                             addTaskToGroupWindow.close();
                                         }
                                     });   
@@ -345,7 +332,7 @@ function productsTasksInit(cell) {
                             case "Del": {                                      
                                 var taskId = zadaniaGroupGrid.getSelectedRowId();
                                 if (taskId) { 
-                                    zadaniaGroupGrid.delete("api/prodgroups/deletetask/"+groupId+"/"+taskId+"", taskId);				
+                                    zadaniaGroupGrid.delete("api/prodgroups/"+groupId+"/tasks/"+taskId+"", taskId);				
                                 } else {
                                     dhtmlx.alert({
                                             title:_("Wiadomość"),
@@ -374,21 +361,19 @@ function productsTasksInit(cell) {
                         {id: "product_group_id"},
                         {id: "task_id"}
                     ]
-
                 });        
-//                zadaniaGroupGrid.setColumnHidden(4,true);
-//                zadaniaGroupGrid.setColumnHidden(5,true);
+                zadaniaGroupGrid.setColumnHidden(4,true);
+                zadaniaGroupGrid.setColumnHidden(5,true);
                 zadaniaGroupGrid.attachHeader("#select_filter,#select_filter");		                
-                zadaniaGroupGrid.enableDragAndDrop(true);     
+                zadaniaGroupGrid.enableDragAndDrop(true);                
                 zadaniaGroupGrid.fill = function(id = 0){	
                     this.clearAll();					
-                    ajaxGet("api/prodgroups/tasks/" + id, '', function(data){                                     
+                    ajaxGet("api/prodgroups/" + id + "/tasks", '', function(data){                                     
                         if (data && data.success){
                             zadaniaGroupGrid.parse((data.data), "js");
                         }
                     });                        
-                };  
-                
+                };                  
                 zadaniaGroupGrid.attachEvent("onDrop", function(sId,tId,dId,sObj,tObj,sCol,tCol){
                     var thisGrid = zadaniaGroupGrid;
                     var source = thisGrid.getRowData(sId);
@@ -399,9 +384,9 @@ function productsTasksInit(cell) {
                     if (source.product_group_id === target.product_group_id) {
                         source.priority = targetPriority;
                         target.priority = sourcePriority;
-                        thisGrid.edit("api/prodgroups/tasks/" + source.product_group_id +"/" + 
+                        thisGrid.edit("api/prodgroups/" + source.product_group_id +"/tasks/" + 
                                                     source.task_id + "/edit", source);  
-                        thisGrid.edit("api/prodgroups/tasks/" + target.product_group_id +"/" + 
+                        thisGrid.edit("api/prodgroups/" + target.product_group_id +"/tasks/" + 
                                                     target.task_id + "/edit", target); 
                     } else {
                         dhtmlx.alert({
@@ -510,7 +495,7 @@ function productsTasksInit(cell) {
                                             if (name == "save") {
                                                 var data = this.getFormData();
                                                 data.product_id = productId;
-                                                zadaniaProductGrid.edit("api/products/tasks/"+productId+"/"+taskId+"/edit" , data); 
+                                                zadaniaProductGrid.edit("api/products/"+productId+"/tasks/"+taskId+"/edit" , data); 
                                                 addTaskToProductWindow.close();
                                             }
                                         }); 
@@ -531,7 +516,7 @@ function productsTasksInit(cell) {
                                 var taskId = zadaniaProductGrid.getSelectedRowId();
                                 if (taskId) { 
                                     if (!zadaniaProductGrid.getRowData(taskId).for_group) {
-                                        zadaniaProductGrid.delete("api/products/deletetask/"+productId+"/"+taskId+"", taskId);				
+                                        zadaniaProductGrid.delete("api/products/"+productId+"/tasks/"+taskId, taskId);				
                                     } else {
                                         dhtmlx.alert({
                                             title:_("Wiadomość"),
@@ -593,9 +578,9 @@ function productsTasksInit(cell) {
                     if (!source.for_group && !target.for_group) {
                         source.priority = targetPriority;
                         target.priority = sourcePriority;
-                        thisGrid.edit("api/products/tasks/" + source.product_id +"/" + 
+                        thisGrid.edit("api/products/" + source.product_id +"/tasks/" + 
                                                     source.task_id + "/edit", source);  
-                        thisGrid.edit("api/products/tasks/" + target.product_id +"/" + 
+                        thisGrid.edit("api/products/" + target.product_id +"/tasks/" + 
                                                     target.task_id + "/edit", target); 
                     } else {
                         dhtmlx.alert({

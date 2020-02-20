@@ -9,8 +9,6 @@ use App\Models\Operation;
 use App\Models\OrderPosition;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use App\Models\DeclaredWork;
-use App\Models\Warehouse;
 
 class OperationController extends BaseController
 {
@@ -92,23 +90,24 @@ class OperationController extends BaseController
         $operation->start_amount = $request->start_amount;        
         $operation->done_amount  = $request->done_amount;        
         $operation->end_date     = new \DateTime(date('Y-m-d H:i:s'));        
+        $operation->closed = 1;
         
         if ($operation->save()) {
-            $product = $operation->position->product;
-            $lastTask = $product->getLastTask();
-            $currentOrderIsInner = $operation->position->order->isInner();
-            if ($lastTask->id == $request->task_id && $currentOrderIsInner) {                
-                $warehouse = new Warehouse;
-                $warehouse->product_id = $product->id;
-                $warehouse->amount     = $operation->done_amount;
-                if ($warehouse->save()) {
-                    $operation->closed = 1;
-                    $operation->save();
-                }
-            } else {
-                $operation->closed = 1;
-                $operation->save();
-            }
+//            $product = $operation->position->product;
+//            $lastTask = $product->getLastTask();
+//            $currentOrderIsInner = $operation->position->order->isInner();
+//            if ($lastTask->id == $request->task_id && $currentOrderIsInner) {                
+//                $warehouse = new Warehouse;
+//                $warehouse->product_id = $product->id;
+//                $warehouse->amount     = $operation->done_amount;
+//                if ($warehouse->save()) {
+//                    $operation->closed = 1;
+//                    $operation->save();
+//                }
+//            } else {
+//                $operation->closed = 1;
+//                $operation->save();
+//            }
             return response()->json(['success' => true, 'data' => Operation::find($id)]);
         } else {
             return response()->json(['success' => false, 'data' => []]);
@@ -124,110 +123,84 @@ class OperationController extends BaseController
 
         //if task has order
         if ($positionId) {
-            //if task has its own operations
-            $operations = Operation::where("order_position_id", "=", $positionId)
-                    ->where("task_id", "=", $taskId)
-                    ->where("closed", "=", 1)
-                    ->get();
-            $lastOperation = $operations->last();
-            if ($lastOperation) {
-                $amount = $lastOperation->start_amount - $lastOperation->done_amount;
-            } else {
-                //if task does not have its own operations, then we watch does 
-                //its have tasks with higest priority
-                $position = OrderPosition::where("id", "=", $positionId)->first();
-                $thisTask = $position->product->getTask($taskId);
-                $taskWithHigestPriority = $position->product->allTasks()->where("priority", "<", $thisTask->priority)->last();                
-                
-                //if it has tasks with higest priority - we list of operations for this task
-                if ($taskWithHigestPriority) {
-                    $operations = Operation::where("order_position_id", "=", $positionId)
-                            ->where("task_id", "=", $taskWithHigestPriority->id)
-                            ->where("closed", "=", 1)
-                            ->get();  
-                    $lastOperation = $operations->last();
-                    if ($lastOperation) {
-                        $amount = $lastOperation->start_amount - $lastOperation->done_amount;
-                    } else {
-                        $amount = "";
-                    }
-                } else {
-                    //if it does not have tasks with highest priority then we get 
-                    //amount from order
-                    $amount = OrderPosition::where("id", "=", $positionId)->pluck("amount")[0];
-                }                              
-            }
-            
-//            $position  = OrderPosition::find($positionId);
-//            $currentTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
-//                            ->where("task_id", "=", $taskId)->get();             
-//            $changedTasks = DB::table('declared_works')->where("order_position_id", "=", $positionId)
-//                    ->where("status", "=", 1)->pluck("task_id");
-//            if ($changedTasks) {
-//                $previousTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
-//                        ->whereIn("task_id", $changedTasks)->where("priority", "<", $currentTask[0]->priority)
-//                        ->orderBy('priority', 'desc')->first();                
+            $amount = OrderPosition::find($positionId)->pluck("amount");
+//            //if task has its own operations
+//            $operations = Operation::where("order_position_id", "=", $positionId)
+//                    ->where("task_id", "=", $taskId)
+//                    ->where("closed", "=", 1)
+//                    ->get();
+//            $lastOperation = $operations->last();
+//            if ($lastOperation) {
+//                $amount = $lastOperation->start_amount - $lastOperation->done_amount;
 //            } else {
-//                $previousTask = DB::table('product_tasks')->where("product_id", "=", $position->product_id)
-//                        ->where("priority", "<", $currentTask[0]->priority)
-//                        ->orderBy('priority', 'desc')->first();                   
-//            }
-//            if ($previousTask) {  
-//                $previousTaskAvailableAmount = $this->repository->availableAmount($positionId, $previousTask->task_id); 
-//                $previousTaskDoneAmount = $this->repository->getDoneAmountByTask($positionId, $previousTask->task_id); 
-//                $currentTaskAvailableAmount = $this->repository->availableAmount($positionId, $taskId);
-//                if ($previousTaskAvailableAmount) {
-//                    $amount = $previousTaskDoneAmount;
+//                //if task does not have its own operations, then we watch does 
+//                //its have tasks with higest priority
+//                $position = OrderPosition::where("id", "=", $positionId)->first();
+//                $thisTask = $position->product->getTask($taskId);
+//                $taskWithHigestPriority = $position->product->allTasks()->where("priority", "<", $thisTask->priority)->last();                
+//                
+//                //if it has tasks with higest priority - we list of operations for this task
+//                if ($taskWithHigestPriority) {
+//                    $operations = Operation::where("order_position_id", "=", $positionId)
+//                            ->where("task_id", "=", $taskWithHigestPriority->id)
+//                            ->where("closed", "=", 1)
+//                            ->get();  
+//                    $lastOperation = $operations->last();
+//                    if ($lastOperation) {
+//                        $amount = $lastOperation->start_amount - $lastOperation->done_amount;
+//                    } else {
+//                        $amount = "";
+//                    }
 //                } else {
-//                    $amount = $currentTaskAvailableAmount;
-//                }
-//            } else {
-//                $amount = $this->repository->availableAmount($positionId, $taskId);
-//            }  
+//                    //if it does not have tasks with highest priority then we get 
+//                    //amount from order
+//                    $amount = OrderPosition::where("id", "=", $positionId)->pluck("amount")[0];
+//                }                              
+//            }            
         }
         
         return response()->json(['success' => $success, 'data' => $amount]);
     } 
     
-    /**
-     * Get list tasks by groups
-     */
-    public function listOperations($groups = 0)
-    {
-        $operations = [];
-        if ($groups) {  
-            $groupsIds = explode(',', $groups);          
-            
-            $operations = Operation::leftJoin("tasks", "tasks.id", "=", "operations.task_id")                    
-                    ->whereIn("tasks.task_group_id", $groupsIds)
-                    ->orderBy('operations.id', 'desc')
-                    ->get(); 
-        } else {
-            $operations = Operation::orderBy('operations.id', 'desc')->get();             
-        }
-        
-        if ($operations) {
-            foreach ($operations as $operation){
-                $task          = $operation->task;
-                $user          = $operation->user; 
-                $orderPosition = $operation->orderPosition;
-                $order         = $orderPosition->order; 
-                $product       = $orderPosition->product;
-                $taskKod       = $task->kod;   
-                $taskName      = $task->name;   
-                //for frid view
-                $operation['kod']               = $taskKod;        
-                $operation['name']              = $taskName;   
-                $operation['product_name']      = $product->name;                
-                $operation['product_kod']       = $product->kod;   
-                $operation['order_kod']         = $order->kod;
-                $operation['order_description'] = $order->description;                
-                $operation['date_delivery']     = $orderPosition->date_delivery;                
-                //for timeline view
-                $operation['text'] = $taskName;                   
-            }
-        }        
-        return response()->json(['success' => true, 'data' => $operations]);       
-      
-    }           
+//    /**
+//     * Get list tasks by groups
+//     */
+//    public function listOperations($groups = 0)
+//    {
+//        $operations = [];
+//        if ($groups) {  
+//            $groupsIds = explode(',', $groups);          
+//            
+//            $operations = Operation::leftJoin("tasks", "tasks.id", "=", "operations.task_id")                    
+//                    ->whereIn("tasks.task_group_id", $groupsIds)
+//                    ->orderBy('operations.id', 'desc')
+//                    ->get(); 
+//        } else {
+//            $operations = Operation::orderBy('operations.id', 'desc')->get();             
+//        }
+//        
+//        if ($operations) {
+//            foreach ($operations as $operation){
+//                $task          = $operation->task;
+//                $user          = $operation->user; 
+//                $orderPosition = $operation->orderPosition;
+//                $order         = $orderPosition->order; 
+//                $product       = $orderPosition->product;
+//                $taskKod       = $task->kod;   
+//                $taskName      = $task->name;   
+//                //for frid view
+//                $operation['kod']               = $taskKod;        
+//                $operation['name']              = $taskName;   
+//                $operation['product_name']      = $product->name;                
+//                $operation['product_kod']       = $product->kod;   
+//                $operation['order_kod']         = $order->kod;
+//                $operation['order_description'] = $order->description;                
+//                $operation['date_delivery']     = $orderPosition->date_delivery;                
+//                //for timeline view
+//                $operation['text'] = $taskName;                   
+//            }
+//        }        
+//        return response()->json(['success' => true, 'data' => $operations]);       
+//      
+//    }           
 }

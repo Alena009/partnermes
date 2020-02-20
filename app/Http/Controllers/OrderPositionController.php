@@ -111,20 +111,11 @@ class OrderPositionController extends BaseController
                         $task->text        = $task->name;
                         $task->task_id     = $task->id;
                         $task->label       = $task->name;
-                        $task->duration    = $task->pivot->duration;
                         $task->priority    = $task->pivot->priority;
                         $task->done        = $operations->where("task_id", "=", $task->id)
                                 ->sum("done_amount");
                         $task->countWorks  = $operations->where("task_id", "=", $task->id)
                                 ->count("id");  
-                        $task->status     = true;
-                        $wasChangedTask   = DeclaredWork::where("order_position_id", "=", $position->id)
-                            ->where("task_id", "=", $task->id)->get();
-                        if (count($wasChangedTask)) {                            
-                            $task->status   = $wasChangedTask[0]->status;
-                            $task->amount   = $wasChangedTask[0]->declared_amount;
-                            $task->duration = $wasChangedTask[0]->declared_amount * $task->pivot->duration;
-                        }
                         $result[] = $task;
                     }                
                 } 
@@ -138,13 +129,20 @@ class OrderPositionController extends BaseController
     }       
     
     /**
-     * Get list order positions marked as "for manufacturing"
+     * Get list printed positions
      * 
      * @return response
      */    
     public function getPrinted()
-    {        
-        return $this->getResponseResult($this->repository->getPrintedPositions());        
+    {    
+        $result = $this->repository->getPrintedPositions();
+        
+        if ($result) {
+            return response()->json(['data' => $result, 'success' => true]);
+        } else {
+            return response()->json(['data' => [], 'success' => false, 
+                'message' => 'No printed tasks']);
+        }                      
     }   
     
     /**
@@ -154,35 +152,14 @@ class OrderPositionController extends BaseController
      */    
     public function getZlecenia()
     {    
-        $result = [];        
-        $positionsIds = DB::table('orders_positions')
-            ->join('orders_history', 'orders_positions.order_id', '=', 'orders_history.order_id')                            
-            ->select('orders_positions.*')
-            ->where("orders_history.status_id", "<>", 3) 
-            ->pluck("id");
+        $result = $this->repository->getPositionsWithTasks();
         
-        $positions = OrderPosition::find($positionsIds);
-        foreach($positions as $position) {            
-            if (count($position->product->allTasks())) {                
-                $product = $position->product;                
-                $position->product_name       = $product->name;
-                $position->product_kod        = $product->kod;
-                $position->order_kod          = $position->order->kod;                                                                            
-                $date = new \DateTime($position->date_delivery);
-                $position->num_week           = $date->format("W");                
-                $position->done_amount        = $this->repository->getDoneAmount($position);
-                if ($position->status == 3) {
-                    $position->closed = true; 
-                    $position->date_closed = $position->date_status; 
-                }   
-                if ($position->status == 2) {
-                    $position->printed = true;                 
-                } 
-                $result[] = $position;                
-            }
-        }
-
-        return response()->json(['data' => $result, 'success' => true]);        
+        if ($result) {
+            return response()->json(['data' => $result, 'success' => true]);
+        } else {
+            return response()->json(['data' => [], 'success' => false, 
+                'message' => 'No positions with tasks']);
+        }         
     }      
     
     /**
@@ -215,26 +192,7 @@ class OrderPositionController extends BaseController
                 return response()->json(['data' => [], 'success' => false, 
                     'message' => 'Saving new position failed. Order was not found']);
         }
-    }     
-        
-//    public function listTasksForPosition($orderPosition)
-//    {
-//        $position = OrderPosition::find($orderPosition);
-//        $product  = $position->product;
-//        $tasks    = $product->tasks;
-//        
-//        if ($tasks) {
-//            foreach ($tasks as $task) {
-//                $task->text  = $task->name;
-//                $task->value = $task->id;
-//                $task->duration = $task->pivot->duration;
-//                $task->priority = $task->pivot->priority;
-//            }
-//            return response()->json(["success" => true, "data" => $tasks]);                
-//        } else {
-//            return response()->json(["success" => false, "data" => []]);                
-//        }         
-//    }   
+    }      
     
     public function edit(Request $request, $id)
     {  

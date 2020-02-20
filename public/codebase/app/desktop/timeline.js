@@ -51,22 +51,33 @@ function timelineInit(cell) {
                     });   
                     positionsCombo.attachEvent("onClose", function(){
                         var positionId = positionsCombo.getSelectedValue();
-                        ajaxGet("api/positions/tasks/" + positionId, "", function(data){
+                        ajaxGet("api/positions/" + positionId + "/tasks", "", function(data){
                             tasksCombo.clearAll();
+                            tasksCombo.unSelectOption();
                             tasksCombo.addOption(data.data);                            
                         });                           
                     });                    
                     tasksCombo.attachEvent("onClose", function(){
-                        var data = {};
-                        data.order_position_id = positionsCombo.getSelectedValue();
-                        data.task_id = tasksCombo.getSelectedValue();
-                        ajaxGet("api/operations/taskchange", data, function(data){
-                            if (data.success) {
-                                operationForm.setItemValue("start_amount", data.data);                                
-                            } else {
-                                operationForm.setItemValue("start_amount", "");
-                            }
-                        });                                                  
+                        var selectedPosition = positionsCombo.getSelectedValue();
+                        if (selectedPosition) {
+                            ajaxGet("api/positions/" + positionsCombo.getSelectedValue(), "", function(data){
+                                if (data.success) {
+                                    operationForm.setItemValue("start_amount", data.data.amount);                                
+                                }
+                            }); 
+                        } else {
+                            operationForm.setItemValue("start_amount", "1");
+                        }
+//                        var data = {};
+//                        data.order_position_id = positionsCombo.getSelectedValue();                        
+//                        data.task_id = tasksCombo.getSelectedValue();
+//                        ajaxGet("api/operations/taskchange", data, function(data){
+//                            if (data.success) {
+//                                operationForm.setItemValue("start_amount", data.data);                                
+//                            } else {
+//                                operationForm.setItemValue("start_amount", "");
+//                            }
+//                        });                                                  
                     });                     
                     operationForm.setItemValue("end_date", new Date());
                     operationForm.attachEvent("onButtonClick", function(name){
@@ -88,14 +99,14 @@ function timelineInit(cell) {
                             var windowForm     = createWindow(_("Operacja"), 500, 500);
                             var operationForm  = createForm(operationFormStruct, windowForm);                                                                     
                             operationForm.setFormData(operationData);             
-                            var data = {};
-                            data.order_position_id = operationData.order_position_id;
-                            data.task_id = operationData.task_id;
-                            ajaxGet("api/operations/taskchange", data, function(data){
-                                if (data.success) {
-                                    operationForm.setItemValue("start_amount", data.data);                                
-                                }
-                            });  
+//                            var data = {};
+//                            data.order_position_id = operationData.order_position_id;
+//                            data.task_id = operationData.task_id;
+//                            ajaxGet("api/operations/taskchange", data, function(data){
+//                                if (data.success) {
+//                                    operationForm.setItemValue("start_amount", data.data);                                
+//                                }
+//                            });  
                             operationForm.attachEvent("onButtonClick", function(name){
                                 if (name === 'save'){  
                                     editOperation(selectedId, operationForm.getFormData(), operationsGrid);                              

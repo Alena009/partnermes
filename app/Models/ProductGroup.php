@@ -77,8 +77,6 @@ class ProductGroup extends BaseModel
             foreach ($kids as $kid) {
                 $products = $kid->products;
                 foreach ($products as $product) {
-                    $product->product_type_name = $product->type->name;
-                    $product->product_group_name = $product->group->name;
                     $result[] = $product;
                 }
             }

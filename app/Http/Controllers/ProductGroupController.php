@@ -51,6 +51,8 @@ class ProductGroupController extends BaseController
 //                $groupsIds[] = $group->id;     
                 $products = $group->allProducts();
                 foreach ($products as $product) {
+                    $product->product_type_name = $product->type->name;
+                    $product->product_group_name = $product->group->name;                    
                     $result[] = $product;
                 } 
             }

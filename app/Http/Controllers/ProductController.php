@@ -19,6 +19,18 @@ class ProductController extends BaseController
         $this->setService($srv);
     }          
     
+    public function index()
+    {
+        $locale = app()->getLocale();
+        $result = $this->repository->allProducts($locale);
+        if ($result) {
+            return response()->json(['success' => true, 'data' => $result]);  
+        } else {
+            return response()->json(['success' => false, 'data' => $result, 
+                'message' => 'There are no products']);  
+        }
+    }
+    
     public function components($productsIds)
     {        
         $result = $this->repository->components(explode(",", $productsIds));

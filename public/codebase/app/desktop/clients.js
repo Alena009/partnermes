@@ -1,6 +1,6 @@
 var clientsGrid;
 var clientsLayout;
-var clientsForm;
+var clientForm;
 
 function clientsInit(cell) {
     if (clientsLayout == null) {
@@ -24,28 +24,17 @@ function clientsInit(cell) {
                     clientsGridToolBar = clientsLayout.cells("a").attachToolbar(emptyToolbar);                
         clientsGridToolBar.attachEvent("onClick", function(id) {
             switch (id){
-                case 'Add': {
-                    var windowForm = createWindow(_("Nowy klient"), 500, 500);
-                    var clientForm = createForm(clientFormStruct, windowForm);                          
-                    clientForm.attachEvent("onButtonClick", function(name){
-                        if (name === 'save'){          
-                            addClient(clientForm.getFormData(), clientsGrid);                           
-                        }
-                    });                                
+                case 'Add': {                    
+                    clientForm.clear();                             
+                    clientsGrid.clearSelection();
+                    clientsLayout.cells("b").expand(); 
+                    clientForm.setItemFocus(clientForm.getFirstActive());                      
                 };break;
                 case 'Edit': {
                     var selectedClientId = clientsGrid.getSelectedRowId();
                     if (selectedClientId) {
-                        var windowForm = createWindow(_("Klient"), 500, 500);
-                        var clientForm = createForm(clientFormStruct, windowForm); 
-                        var clientData = clientsGrid.getRowData(selectedClientId);
-                        clientForm.setFormData(clientData);                                
-                        clientForm.attachEvent("onButtonClick", function(name){
-                            if (name === 'save'){  
-                                editClient(selectedClientId, clientForm.getFormData(), clientsGrid);                              
-                                windowForm.close();
-                            }
-                        });                         
+                        clientsLayout.cells("b").expand();
+                        clientForm.setItemFocus(clientForm.getFirstActive());                         
                     } else {
                         dhtmlx.alert({
                             title:_("Wiadomość"),
@@ -54,35 +43,12 @@ function clientsInit(cell) {
                     }
                 };break;
                 case 'Del': {                               
-                    var selectedClientId = clientsGrid.getSelectedRowId();
-                    if (selectedClientId) {                                
-                        dhtmlx.confirm({
-                            title: _("Ostrożność"),                                    
-                            text: _("Czy na pewno chcesz usunąć?"),
-                            callback: function(result){
-                                if (result) {                                                                                    
-                                    ajaxDelete("api/clients/" + selectedClientId, "", function(data){
-                                        if (data && data.success){
-                                            clientsGrid.deleteRow(selectedClientId);
-                                        } else {
-                                            dhtmlx.alert({
-                                                title:_("Wiadomość"),
-                                                text:_("Nie udało się usunąć!")
-                                            });
-                                        }
-                                    });   
-                                }
-                            }
-                        });                                     
-                    } else {
-                        dhtmlx.alert({
-                            title:_("Wiadomość"),
-                            text:_("Wybierz klienta, informacje o którym chcesz usunąć!")
-                        });                            
-                    }                                
+                    var selectedClientId = clientsGrid.getSelectedRowId();                               
+                    clientsGrid.delete("api/clients/" + selectedClientId, selectedClientId);                                                                    
                 };break;
                 case 'Redo': {
                     clientsGrid.fill("api/clients");                                                            
+                    clientForm.clear();  
                 };break;                        
             }
         });                 
@@ -101,75 +67,38 @@ function clientsInit(cell) {
 /**
  * B
  * 
- */                  
-        var clientForm = clientsLayout.cells("b").attachForm(clientFormStruct);
+ */          
+        var clientFormStruct = [                    
+                {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},                
+                {type: "input", name: "kod",       required: true, label: _("Kod")},
+                {type: "input", name: "name",      required: true, label: _("Klient"),                           
+                   note: {text: _("Dodaj imie klienta. Jest obowiazkowe.")}},
+                {type: "input", name: "address",required: true, label: _("Opis"), rows: 3,
+                   note: {text: _("Dodaj adrese klienta. Obowiazkowe.")}},
+                {type: "input", name: "country", required: true, label: _("Kraj"), 
+                   note: {text: _("Kraj klienta. Jest obowiazkowe.")}},                        
+                {type: "input", name: "contacts",required: true, label: _("Kontakty"), rows: 3,
+                   note: {text: _("Dodaj numer telefonu, e-mail klienta. Obowiazkowe.")}},                      
+                {type: "block", blockOffset: 0, position: "label-left", list: [
+                    {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            
+                ]}	
+        ];
+        var clientForm = createForm(clientFormStruct, clientsLayout.cells("b"));
         if (!userCanWrite) { clientForm.hideItem('save'); }
         clientForm.bind(clientsGrid);
         clientForm.attachEvent("onButtonClick", function(name){
             if (name === 'save'){
                 var data = clientForm.getFormData();
                 var selectedClient = clientsGrid.getSelectedRowId();
-                if (selectedClient) { 
-                    editClient(selectedClient, data, clientsGrid);
+                if (selectedClient) {                     
+                    clientsGrid.edit("api/clients/" + selectedClient + "/edit", data);
                 } else {                                       
-                    addClient(data, clientsGrid);                              
+                    clientsGrid.add("api/clients", data);                              
                 }
             }
         });                  
     }                
 }
-
-function addClient(data, grid) {
-    ajaxPost("api/clients", data, function(data){                                                                                                        
-        if (data && data.success) {
-            grid.addRow(data.data.id, '');
-            grid.setRowData(data.data.id, data.data);
-            dhtmlx.alert({
-                title:_("Wiadomość"),
-                text:_("Zapisane!")
-            });                                        
-        } else {
-            dhtmlx.alert({
-                title:_("Wiadomość"),
-                text:_("Błąd! Zmiany nie zostały zapisane")
-            });
-        }                                          
-    });    
-}
-
-function editClient(id, data, grid) {
-    ajaxGet("api/clients/" + id + "/edit", data, function(data){                                                                                                        
-        if (data && data.success) { 
-            grid.setRowData(data.data.id, data.data);
-            dhtmlx.alert({
-                title:_("Wiadomość"),
-                text:_("Zapisane!")
-            });
-        } else {
-            dhtmlx.alert({
-                title:_("Wiadomość"),
-                text:_("Błąd! Zmiany nie zostały zapisane")
-            });
-        }                                          
-    });    
-}
-
-var clientFormStruct = [                    
-        {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
-        //{type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
-        {type: "input", name: "kod",       required: true, label: _("Kod")},
-        {type: "input", name: "name",      required: true, label: _("Klient"),                           
-           note: {text: _("Dodaj imie klienta. Jest obowiazkowe.")}},
-        {type: "input", name: "address",required: true, label: _("Opis"), rows: 3,
-           note: {text: _("Dodaj adrese klienta. Obowiazkowe.")}},
-        {type: "input", name: "country", required: true, label: _("Kraj"), 
-           note: {text: _("Kraj klienta. Jest obowiazkowe.")}},                        
-        {type: "input", name: "contacts",required: true, label: _("Kontakty"), rows: 3,
-           note: {text: _("Dodaj numer telefonu, e-mail klienta. Obowiazkowe.")}},                      
-        {type: "block", blockOffset: 0, position: "label-left", list: [
-            {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            
-        ]}	
-];
 
 window.dhx4.attachEvent("onSidebarSelect", function (id, cell) {
 	if (id == "clients") {

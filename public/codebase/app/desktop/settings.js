@@ -1244,6 +1244,7 @@ function createForm(formStruct, windowObj){
         switch (name){  
             case 'save':{
                 myForm.validate();
+                //myForm.clear();
                 myForm.setItemFocus(myForm.getFirstActive());
             };break;            
             case 'cancel':{

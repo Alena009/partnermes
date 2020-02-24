@@ -25,7 +25,7 @@ function timelineInit(cell) {
                     var windowForm     = createWindow(_("Operacja"), 500, 500);
                     var operationForm  = createForm(newOperationFormStruct, windowForm); 
                     operationForm.hideItem("done_amount");
-                    operationForm.setItemValue("done_amount", "0");
+                    operationForm.setItemValue("done_amount", "0");                    
                     var usersCombo     = operationForm.getCombo("user_id");
                     var positionsCombo = operationForm.getCombo("order_position_id");
                     var tasksCombo     = operationForm.getCombo("task_id");                    
@@ -67,22 +67,13 @@ function timelineInit(cell) {
                             }); 
                         } else {
                             operationForm.setItemValue("start_amount", "1");
-                        }
-//                        var data = {};
-//                        data.order_position_id = positionsCombo.getSelectedValue();                        
-//                        data.task_id = tasksCombo.getSelectedValue();
-//                        ajaxGet("api/operations/taskchange", data, function(data){
-//                            if (data.success) {
-//                                operationForm.setItemValue("start_amount", data.data);                                
-//                            } else {
-//                                operationForm.setItemValue("start_amount", "");
-//                            }
-//                        });                                                  
+                        }                                                 
                     });                     
                     operationForm.setItemValue("end_date", new Date());
                     operationForm.attachEvent("onButtonClick", function(name){
                         if (name === 'save'){          
-                            addOperation(operationForm.getFormData(), operationsGrid);                                                      
+                            addOperation(operationForm.getFormData(), operationsGrid);   
+                            windowForm.close();
                         }
                     });                                
                 };break;
@@ -99,14 +90,6 @@ function timelineInit(cell) {
                             var windowForm     = createWindow(_("Operacja"), 500, 500);
                             var operationForm  = createForm(operationFormStruct, windowForm);                                                                     
                             operationForm.setFormData(operationData);             
-//                            var data = {};
-//                            data.order_position_id = operationData.order_position_id;
-//                            data.task_id = operationData.task_id;
-//                            ajaxGet("api/operations/taskchange", data, function(data){
-//                                if (data.success) {
-//                                    operationForm.setItemValue("start_amount", data.data);                                
-//                                }
-//                            });  
                             operationForm.attachEvent("onButtonClick", function(name){
                                 if (name === 'save'){  
                                     editOperation(selectedId, operationForm.getFormData(), operationsGrid);                              
@@ -227,7 +210,7 @@ var newOperationFormStruct = [
         {type: "checkbox", name: "not_for_order",         label: _("Nie ma zlecenia")},		
         {type: "combo", name: "order_position_id", label: _("Zlecenie"), options: []},		
         {type: "combo", name: "task_id",           required: true, label: _("Zadanie"), options: []},		
-        {type: "input", name: "start_amount",      required: true, label: _("Zadeklarowana iłość")},
+        {type: "input", name: "start_amount",      label: _("Zadeklarowana iłość")},
         {type: "input", name: "done_amount",       label: _("Zrobiona iłość")},                                     
         {type: "block", blockOffset: 0, position: "label-left", list: [
             {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            
@@ -236,12 +219,12 @@ var newOperationFormStruct = [
 ];
 
 var operationFormStruct = [        
-    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zamknij"), width:253, list:[                                	    
+    {type:"fieldset",  offsetTop:0, label:_("Zamknij"), width:253, list:[                                	    
         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},
-        {type: "input",    name: "user_name",    required: true, label: _("Pracownik"),           readonly: true},		        
-        {type: "input",    name: "zlecenie",                     label: _("Zlecenie"),            readonly: true},		
-        {type: "input",    name: "task_name",    required: true, label: _("Zadanie"),             readonly: true},		
-        {type: "input",    name: "start_amount", required: true, label: _("Zadeklarowana iłość"), readonly: true},
+//        {type: "input",    name: "user_name",    required: true, label: _("Pracownik"),           readonly: true},		        
+//        {type: "input",    name: "zlecenie",                     label: _("Zlecenie"),            readonly: true},		
+//        {type: "input",    name: "task_name",    required: true, label: _("Zadanie"),             readonly: true},		
+//        {type: "input",    name: "start_amount",  label: _("Zadeklarowana iłość"), readonly: true},
         {type: "input",    name: "done_amount",                  label: _("Zrobiona iłość")},          
         {type: "block", blockOffset: 0, position: "label-left", list: [
             {type: "button", name: "save",   value: "Zamkni", offsetTop:18}                            

@@ -25,6 +25,7 @@ function zleceniaInit(cell) {
                                     {id: "Print",text: _("Wydrukować"), type: "button", img: "fa fa-print"},                                                                                       
                                     {id: "DontProduct",text: _("Nie produkować"), type: "button", img: "fa fa-times"},                                                                                       
                                     {id: "Close",  type: "button", text: _("Zamknij zlecenie"), img: "fa fa-check-square"},                                    
+                                    {id: "Reopen",  type: "button", text: _("Otwórz ponownie"), img: "fa fa-repeat"},                                    
                                     {id: "sep3",     type: "separator"},
                                     {id: "Redo", type: "button", text: _("Odśwież"),img: "fa fa-refresh"}
                                 ]
@@ -42,10 +43,8 @@ function zleceniaInit(cell) {
                                     type:"alert",
                                     text:_("Zaznacz co najmniej jedno zlecenie")
                                 });  
-                            } else {
-                                var data = {};
-                                data.zlecenia = selectedZlecenia;                                
-                                ajaxGet("api/positions/dontproduct", data, function(data){
+                            } else {                             
+                                ajaxGet("api/positions/" + selectedZlecenia + "/dontproduct", '', function(data){
                                     if (data.success) {   
                                         zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar);                                         
                                     }                                    
@@ -53,34 +52,70 @@ function zleceniaInit(cell) {
                             }
                         };break;
                         case 'Print': {
-                                var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
-                                ajaxGet("api/positions/print/" + selectedZlecenia, "", function(data){
-                                    var myWindow=window.open('data:application/pdf,'+data, "_blank", "width=800,height=600,resizable=yes,scrollbars=yes,status=yes");
-                                    myWindow.document.write(data);
-                                    myWindow.focus();
-                                    myWindow.print();
-                                });                                
-                        };break;
-		        case 'Redo':{
-                            zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar); 
-                        };break;
-                        case 'Close': {
                             var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
                             if (!selectedZlecenia) {
                                 dhtmlx.message({
                                     title:_("Wiadomość"),
                                     type:"alert",
-                                    text:_("Zaznacz co najmniej jedno zlecenie dla zamknięcia")
+                                    text:_("Zaznacz co najmniej jedno zlecenie")
+                                });  
+                            } else {                                 
+                                ajaxGet("api/positions/" + selectedZlecenia + "/print", "", function(data){
+                                    var myWindow=window.open('data:application/pdf,'+data, "_blank", "width=800,height=600,resizable=yes,scrollbars=yes,status=yes");
+                                    myWindow.document.write(data);
+                                    myWindow.focus();
+                                    myWindow.print();
+                                    zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar);                                         
+                                });
+                            }
+                        };break;
+		        case 'Redo':{
+                            zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar); 
+                        };break;
+                        case 'Close': {                                   
+                            var selectedZlecenia = zleceniaGrid.getCheckedRows(0);
+                            if (!selectedZlecenia) {                                
+                                dhtmlx.message({
+                                    title:_("Wiadomość"),
+                                    type:"alert",
+                                    text:_("Zaznacz co najmniej jedno zlecenie")
                                 });                                
-                            } else {
-                                var data = {};
-                                data.zlecenia = selectedZlecenia;                                
-                                ajaxGet("api/positions/close", data, function(data){
-                                    if (data.success) { 
-                                        zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar);                                          
-                                    }
+                            } else {                                   
+                                var notClosedoperations = [];
+                                [selectedZlecenia].forEach(function(item){
+                                    var data = zleceniaGrid.getRowData(item);
+                                    if (data.hasOpenWorks) { notClosedoperations.push(item); }
+                                    if (notClosedoperations.length) {
+                                        dhtmlx.message({
+                                            title:_("Wiadomość"),
+                                            type:"alert",
+                                            text:_("Wzbrane zlecenia mają nie zamknięte operacje")
+                                        });                                        
+                                    } else {
+                                        ajaxGet("api/positions/"+selectedZlecenia+"/close", '', function(data){
+                                            if (data.success) {   
+                                                zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar);                                         
+                                            }                                    
+                                        });                                        
+                                    }                                    
                                 });                                 
                             }                              
+                        };break;
+                        case 'Reopen': {
+                            var selectedZlecenia = zleceniaGrid.getSelectedRowId();
+                            if (!selectedZlecenia) {                                
+                                dhtmlx.message({
+                                    title:_("Wiadomość"),
+                                    type:"alert",
+                                    text:_("Wybierz co najmniej jedno zlecenie")
+                                });                                
+                            } else {   
+                                ajaxGet("api/positions/"+selectedZlecenia+"/reopen", '', function(data){
+                                    if (data.success) {   
+                                        zleceniaGrid.fill("api/positions/zlecenia", zleceniaGridToolBar);                                         
+                                    }                                    
+                                });                                 
+                            }                               
                         };break;
                     }
                 }); 
@@ -104,9 +139,12 @@ function zleceniaInit(cell) {
                             //{id: "declared", width: 30, label: "declared"},
                             {id: "countWorks", width: 30, label: "countWorks"},
                             {id: "status", width: 30, label: "status"},
-                            //{id: "order_id", width: 30, label: "order_id"},
-                            //{id: "price", width: 30, label: "price"},
-                            {id: "tasks", width: 30, label: "tasks"}
+                            {id: "order_id", width: 30, label: "order_id"},
+                            {id: "price", width: 30, label: "price"},
+                            {id: "tasks", width: 30, label: "tasks"},
+                            {id: "innerOrder", width: 30},
+                            {id: "hasOpenWorks", width: 30}
+                            
                     ],
                         multiline: true,
                         multiselect: true
@@ -231,28 +269,28 @@ function zleceniaInit(cell) {
 		        case 'Do':{
                             var selectedComponents = componentsGrid.getCheckedRows(0);
                             if (selectedComponents.length) {
-                                var newOrderWindow = createWindow(_("Nowe wewnętrzne zamowienie"), 500, 380);
-                                var newOrderForm = createForm(newProjectFormStruct, newOrderWindow);                                                                
-                                var clientsCombo = newOrderForm.getCombo("client_id");
+                                var newInnerOrderWindow = createWindow(_("Nowe wewnętrzne zamowienie"), 500, 380);
+                                var newInnerOrderForm = createForm(newProjectFormStruct, newInnerOrderWindow);                                                                
+                                var clientsCombo = newInnerOrderForm.getCombo("client_id");
                                 ajaxGet("api/clients", "", function(data){
                                     clientsCombo.addOption(data.data);
                                     clientsCombo.selectOption(0);
                                 });       
                                 ajaxGet("api/orders/last", "", function(data){
                                     if (data.success) {
-                                        var date = getNowDate();
-                                        date = date.replace(/[-]/g, "");
+                                        //var date = getNowDate();
+                                        //date = date.replace(/[-]/g, "");
                                         //newOrderForm.setItemValue("kod", "W-" + date + "-" + data.data.id + 1);
-                                        newOrderForm.setItemValue("kod", "W-" + data.data.id + 1);
+                                        newInnerOrderForm.setItemValue("kod", "W-" + data.data.id + 1);
                                     }
                                 });                                  
-                                newOrderForm.disableItem("client_id");
-                                newOrderForm.disableItem("kod");
-                                newOrderForm.attachEvent("onButtonClick", function(name){
+                                newInnerOrderForm.disableItem("client_id");
+                                newInnerOrderForm.disableItem("kod");
+                                newInnerOrderForm.attachEvent("onButtonClick", function(name){
                                     switch (name){
                                         case 'save':{                                                  
-                                            var orderData = newOrderForm.getFormData();
-                                            orderData.date_start = newOrderForm.getCalendar("date_start").getDate(true);                                         
+                                            var orderData = newInnerOrderForm.getFormData();                                            
+                                            orderData.date_start = newInnerOrderForm.getCalendar("date_start").getDate(true);                                         
                                             ajaxPost("api/orders", orderData, function(data){
                                                 if (data && data.success) {
                                                     var i = 0;
@@ -267,7 +305,7 @@ function zleceniaInit(cell) {
                                                         console.log(component);
                                                         ajaxPost("api/positions", component, "");
                                                     });
-                                                    newOrderWindow.hide(); 
+                                                    newInnerOrderWindow.hide(); 
                                                     dhtmlx.alert({
                                                         title:_("Wiadomość"),
                                                         text:_("Zapisane")

@@ -235,15 +235,7 @@ function toolsInit(cell) {
  * B
  * 
  */        
-        var toolsForm = createForm(newProjectFormStruct = [          
-                    {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},   	                            
-                    {type: "input", name: "kod",  required: true, label: _("Kod")},
-                    {type: "input", name: "name", required: true, label: _("Nazwa")},
-                    {type: "input", name: "description", label: _("Opis"), rows: 3},                                        
-                    {type: "block", blockOffset: 0, position: "label-left", list: [
-                        {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            
-                    ]}	
-            ], toolsListLayout.cells("b")); 
+        var toolsForm = createForm(newToolFormStruct, toolsListLayout.cells("b")); 
         toolsForm.attachEvent("onButtonClick", function(name){
             if (name === 'save'){  
                 var toolData = toolsForm.getFormData();
@@ -255,24 +247,18 @@ function toolsInit(cell) {
             }
         });            
         toolsForm.bind(toolsGrid);
-        
-        
-        
-//        var dpProductsGrid = new dataProcessor("api/warehouse", "js");                
-//        dpProductsGrid.init(productsGrid);
-//        dpProductsGrid.enableDataNames(true);
-//        dpProductsGrid.setTransactionMode("REST");
-//        dpProductsGrid.enablePartialDataSend(true);
-//        dpProductsGrid.enableDebug(true);
-//        dpProductsGrid.setUpdateMode("row", true);
-//        dpProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-//            data.id = id;
-//            ajaxGet("api/warehouse/" + id + "/edit", data, function(data){                                                            
-//                console.log(data);
-//            });
-//        });                               
+                                    
     }	    
 }
+var newToolFormStruct = [          
+                    {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},   	                            
+                    {type: "input", name: "kod",  required: true, label: _("Kod")},
+                    {type: "input", name: "name", required: true, label: _("Nazwa")},
+                    {type: "input", name: "description", label: _("Opis"), rows: 3},                                        
+                    {type: "block", blockOffset: 0, position: "label-left", list: [
+                        {type: "button", name: "save",   value: "Zapisz", offsetTop:18}                            
+                    ]}	
+            ];
 var toolOperationFormStruct = [          
         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},   
         {type: "combo", name: "type_operation", required: true, label: _("Operacja"), 

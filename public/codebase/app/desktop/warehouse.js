@@ -55,16 +55,14 @@ function warehouseInit(cell) {
             productsGridToolBar = warehouseLayout.cells("b").attachToolbar({
                 iconset: "awesome",
                 items: [                              
-                    {id: "Add",  type: "button", text: _("Dodaj"),   img: "fa fa-plus-square "},
+                    {id: "Add",  type: "button", text: _("Dodaj do magazynu"),   img: "fa fa-plus-square "},
+                    {id: "Del",  type: "button", text: _("Zabierz z magazynu"),   img: "fa fa-minus-square "},
                     {type: "separator", id: "sep1"},
                     {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
                 ]
             });
         } else {
-            productsGridToolBar = warehouseLayout.cells("b").attachToolbar({
-                iconset: "awesome",
-                items: []
-            });
+            productsGridToolBar = warehouseLayout.cells("b").attachToolbar(emptyToolbar);
         }
         productsGridToolBar.attachEvent("onClick", function(name){
             switch (name){
@@ -73,10 +71,6 @@ function warehouseInit(cell) {
                     var addingForm = createForm([
                             {type:"fieldset",  offsetTop: 0, offsetBottom: 20, label:_("Informacja"), width:350, list:[                                			
                                 {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},		                
-                                {type: "combo", name: "type_operation",   required: true, label: _("Operacja"), options: [
-                                        {text: _("Dodaj do magazynu"), value: "1"},
-                                        {text: _("Zabierz z magazynu"), value: "-1"}
-                                ]},
                                 {type: "combo", name: "product_group_id", required: true, label: _("Grupa"), options: []},
                                 {type: "combo", name: "product_id",       required: true, label: _("Produkt"), options: []},
                                 {type: "input", name: "available_amount", readonly: true, label: _("Ilość dostępna")},
@@ -92,15 +86,13 @@ function warehouseInit(cell) {
                     ajaxGet("api/prodgroups", '', function(data) {                    
                         productGroupsCombo.addOption(data.data);
                     });  
-                    //occurs when some value has selected in the products groups combobox
                     productGroupsCombo.attachEvent("onChange", function(value, text){
                         var selectedGroupId = productGroupsCombo.getSelectedValue();
                         var productsCombo = addingForm.getCombo("product_id"); 
-                        ajaxGet("api/prodgroups/products/" + selectedGroupId + "/" + localStorage.language, '', function(data) {                    
+                        ajaxGet("api/prodgroups/" + selectedGroupId + "/products/" + localStorage.language, '', function(data) {                    
                             productsCombo.clearAll();
                             productsCombo.addOption(data.data);
                         }); 
-                        //occurs when some value has selected in the products combobox
                         productsCombo.attachEvent("onChange", function(value, text){                                     
                             var selectedProductId = productsCombo.getSelectedValue();
                             ajaxGet("api/warehouse/amountproduct/" + selectedProductId, '', function(data) {                    
@@ -108,7 +100,6 @@ function warehouseInit(cell) {
                             });                            
                         });                                 
                     }); 
-                    //attaching events to the button addingForm
                     addingForm.attachEvent("onButtonClick", function(name){
                         switch(name){
                                 case 'save':{                                                           
@@ -130,11 +121,6 @@ function warehouseInit(cell) {
                                 };break;
                             }
                     });
-                };break;
-                case 'Edit':{
-                    var addingWindow = createWindow(_("Zmien informacje"), 400, 300);
-                    var addingForm = createForm(addingFormStruct, addingWindow);
-                    addingForm.bind(productsGrid);                            
                 };break;
                 case 'Del':{
                     var selectedRow = productsGrid.getSelectedRowId();     
@@ -185,7 +171,14 @@ function warehouseInit(cell) {
                     type: "ro", 
                     sort: "str", 
                     align: "left"
-                }                     
+                },                        
+                {
+                    label: _("Rezerwacja"),
+                    id: "reserved",                    
+                    type: "ro", 
+                    sort: "str", 
+                    align: "left"
+                }                    
             ],
             multiline: true
         });
@@ -199,31 +192,13 @@ function warehouseInit(cell) {
             productsGrid.clearAll();
             var ids = Array();
             ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-            ajaxGet("api/warehouse/list/" + ids, "", function(data){
+            ajaxGet("api/warehouse/products/" + ids, "", function(data){
                 if (data && data.success){
                     productsGrid.parse(data.data, "js");
                 }
             });	                    
         };
-        productsGrid.fill(0);            
-        
-       
-//        var searchElem = productsGridToolBar.getInput('szukaj');
-//        productsGrid.makeFilter(searchElem, 1, true);                                                                  
-//        productsGrid.filterByAll();         
-        var dpProductsGrid = new dataProcessor("api/warehouse", "js");                
-        dpProductsGrid.init(productsGrid);
-        dpProductsGrid.enableDataNames(true);
-        dpProductsGrid.setTransactionMode("REST");
-        dpProductsGrid.enablePartialDataSend(true);
-        dpProductsGrid.enableDebug(true);
-        dpProductsGrid.setUpdateMode("row", true);
-        dpProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-            data.id = id;
-            ajaxGet("api/warehouse/" + id + "/edit", data, function(data){                                                            
-                console.log(data);
-            });
-        });                               
+        productsGrid.fill(0);                                         
     }	    
 }
 

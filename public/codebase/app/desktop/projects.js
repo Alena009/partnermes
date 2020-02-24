@@ -10,10 +10,6 @@ function projectsInit(cell) {
                 }
             });         
             var projectsLayout = cell.attachLayout("2E");  
-//            projectsLayout.cells("a").setHeight(450);
-//            projectsLayout.cells("b").setHeight(550);
-//            projectsLayout.cells("b").setWidth(330);
-//            projectsLayout.cells("c").setHeight(350);
             projectsLayout.setAutoSize("a;b");            
             var orderLayout = projectsLayout.cells("a").attachLayout("2U");
             orderLayout.cells("a").setText(_("Informacja"));
@@ -43,7 +39,7 @@ function projectsInit(cell) {
                         if (data.success) {
                             var date = getNowDate();
                             date = date.replace(/[-]/g, "");
-                            orderForm.setItemValue("kod", "W-" + date + "-" + data.data.id + 1);
+                            orderForm.setItemValue("kod", "W-" + data.data.id + 1);
                             orderForm.disableItem("kod");
                         }
                     }); 
@@ -92,6 +88,7 @@ function projectsInit(cell) {
                         var orderId = ordersGrid.getSelectedRowId();    
                         if (orderId) {
                             positionData.order_id = orderId;
+                            positionData.status = 1;
                             positionsGrid.add("api/positions", positionData);
                         }
                     }
@@ -140,7 +137,8 @@ function projectsInit(cell) {
                         var orderId = ordersGrid.getSelectedRowId();                            
                         if (orderId) {
                             var data = ordersGrid.getRowData(orderId);
-                            if (data.positionsInWork || data.closedPositions) {
+                            if (+data.positionsInWork || +data.closedPositions) {
+                                console.log(data);
                                 dhtmlx.alert({
                                     title:_("Wiadomość"),
                                     text:_("Zamówienie ma otwarte lub zakończone zlecenia. Nie można usunąć!")
@@ -843,7 +841,7 @@ window.dhx4.attachEvent("onSidebarSelect", function(id, cell){
 //}
 var nowDate = getNowDate();
 
-newProjectFormStruct = [          
+var newProjectFormStruct = [          
         {type: "settings", position: "label-left", labelWidth: 110, inputWidth: 160},   	        
         {type: "combo", name: "client_id", required: true, label: _("Klient"), options: []},		
         {type: "input", name: "kod",       required: true, label: _("Kod zamowienia")},

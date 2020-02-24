@@ -42,13 +42,46 @@ class OrderPosition extends BaseModel
     
     public function setClosed()
     {
-        return $this->status()->attach(2);        
+        $this->status = 3;
+        $this->date_status = date("Y-m-d H:i:s");
+        return $this->save();         
     }
     
-    public function reOpen()
+    public function setLikeNew()
     {
         $this->status = 1;
         $this->date_status = date("Y-m-d H:i:s");
         return $this->save();        
+    }    
+    
+    public function reOpen()
+    {
+        $this->status = 2;
+        $this->date_status = date("Y-m-d H:i:s");
+        return $this->save();        
+    } 
+
+    public function isNew()
+    {
+        if ($this->status == 1) {
+            return true;
+        }
+        return false;        
+    }    
+    
+    public function wasPrinted()
+    {
+        if ($this->status == 2) {
+            return true;
+        }
+        return false;        
+    }
+    
+    public function wasClosed()
+    {
+        if ($this->status == 3) {
+            return true;
+        }
+        return false;
     }    
 }

@@ -75,8 +75,6 @@ class Order extends BaseModel
     
     public function close()
     {
-        $this->status = 3;
-        $this->date_status = date("Y-m-d H:i:s");
-        return $this->save();         
+        return $this->status()->attach(3);          
     }
 }

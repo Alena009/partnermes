@@ -27,11 +27,12 @@ class OrderPositionRepository extends BaseRepository
             $position->order_position_id  = $position->id;      
             $position->order_position_kod = $position->kod;                
             $position->key                = $position->id;
-            $position->label              = $position->kod;
+            $position->label              = $position->kod;            
             $date = new \DateTime($position->date_delivery);
             $position->num_week           = $date->format("W");
-            $position->summa              = $position->price * $position->amount;                    
-            //$position->done_amount        = $this->getDoneAmount($position); 
+            $position->summa              = $position->price * $position->amount;   
+            $position->innerOrder         = $position->order->isInner();   
+            $position->hasOpenWorks       = $position->operations; 
             if ($position->status == 2) {
                 $position->printed = true;                 
                 $position->closed = false;

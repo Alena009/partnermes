@@ -36,7 +36,7 @@ class ProductGroup extends BaseModel
     {
         return $this->belongsToMany('App\Models\Task', 'product_groups_tasks', 
                 'product_group_id', 'task_id')
-                ->withPivot('duration', 'priority')
+                ->withPivot('duration', 'priority', 'required')
                 ->withTimestamps()
                 ->orderBy("priority", "asc");        
     }       
@@ -95,16 +95,18 @@ class ProductGroup extends BaseModel
                 $result[] = $task; 
             }
         }         
-        $groupTasks = $this->tasks;  
-        foreach ($groupTasks as $task) {
-            $task->product_group_id = $this->id;
-            $result[] = $task; 
-        }             
+//        $groupTasks = $this->tasks;  
+//        foreach ($groupTasks as $task) {
+//            $task->product_group_id = $this->id;
+//            $result[] = $task; 
+//        }             
         
         foreach ($result as $r) {
             $r->duration         = $r->pivot->duration;
             $r->priority         = $r->pivot->priority;            
-            $r->task_id          = $r->id;            
+            $r->task_id          = $r->id; 
+            $r->required         = $r->pivot->required;
+            $r->for_group        = 1;
         }
         
         return $result;       

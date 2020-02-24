@@ -92,10 +92,12 @@ class ProductGroupController extends BaseController
             if ($latestTask) { $priority = $latestTask->priority + 1; } else { $priority = 1; }
             $group->tasks()->attach($request->task_id, 
                        ['duration' => $request->duration, 
+                        'required' => $request->required, 
                         'priority' => $priority]);    
             $result = $group->tasks()->where("task_id", "=", $request->task_id)->get()[0];
             $result->duration = $result->pivot->duration;
             $result->priority = $result->pivot->priority;
+            $result->required = $result->pivot->required;
             $result->product_group_id = $group->id;
             $result->task_id = $result->id;
         } else {
@@ -113,11 +115,13 @@ class ProductGroupController extends BaseController
             ->where("product_group_id", "=", $groupId)
             ->where("task_id", "=", $taskId)
             ->update(['priority' => $request['priority'], 
-                'duration' => $request['duration']]); 
+                'duration' => $request['duration'],
+                'required' => $request['required']]); 
         $group = $this->repository->get($groupId); 
         $result = $group->tasks()->where("task_id", "=", $taskId)->get()[0];
         $result->duration = $result->pivot->duration;
         $result->priority = $result->pivot->priority;
+        $result->required = $result->pivot->required;
         $result->product_group_id = $group->id;
         $result->task_id = $result->id;        
         

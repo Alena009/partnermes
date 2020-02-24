@@ -274,7 +274,8 @@ function productsTasksInit(cell) {
                                 var formStruct = [
                                         {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
                                         {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
-                                        {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},                                                                    
+                                        {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")}, 
+                                        {type: "checkbox", name: "required", label: _("Obowiązkowe: ")},                                                                    
                                         {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                                             {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
                                             {type: "newcolumn"},
@@ -304,6 +305,7 @@ function productsTasksInit(cell) {
                                     var formStruct = [
                                         {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                                    
                                         {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},                                                                    
+                                        {type: "checkbox", name: "required", label: _("Obowiązkowe: ")},                                                                    
                                         {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                                             {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
                                             {type: "newcolumn"},
@@ -358,12 +360,13 @@ function productsTasksInit(cell) {
                         {label: _("Zadanie"),   id: "name",     type: "ro", width: 150, sort: "str", align: "left"},
                         {label: _("Czas, min"), id: "duration", type: "ro", width: 50,  sort: "str", align: "left"},
                         {label: _("Kolejnosc"), id: "priority", type: "ro", width: 50,  sort: "str", align: "left"},
+                        {label: _("Obowiązkowe"), id: "required", type: "ch", width: 30,  sort: "str", align: "left"},
                         {id: "product_group_id"},
                         {id: "task_id"}
                     ]
                 });        
-                zadaniaGroupGrid.setColumnHidden(4,true);
                 zadaniaGroupGrid.setColumnHidden(5,true);
+                zadaniaGroupGrid.setColumnHidden(6,true);
                 zadaniaGroupGrid.attachHeader("#select_filter,#select_filter");		                
                 zadaniaGroupGrid.enableDragAndDrop(true);                
                 zadaniaGroupGrid.fill = function(id = 0){	
@@ -428,8 +431,9 @@ function productsTasksInit(cell) {
  * D
  * 
  */				
-	        if (userCanWrite) {
-                    var zadaniaProductToolBar = productsTasksLayout.cells("d").attachToolbar({
+  	        var zadaniaProductToolBar;        
+                if (userCanWrite) {
+                    zadaniaProductToolBar = productsTasksLayout.cells("d").attachToolbar({
                             iconset: "awesome",
                             items: [
                                     {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},                                    
@@ -440,7 +444,7 @@ function productsTasksInit(cell) {
                             ]                    
                     });   
                 } else {
-                    var zadaniaProductToolBar = productsTasksLayout.cells("d").attachToolbar(emptyToolbar);                      
+                    zadaniaProductToolBar = productsTasksLayout.cells("d").attachToolbar(emptyToolbar);                      
                 }
                 zadaniaProductToolBar.attachEvent("onClick", function(name) {
                     var productId = productsGrid.getSelectedRowId();
@@ -450,7 +454,8 @@ function productsTasksInit(cell) {
                                 var formStruct = [
                                         {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
                                         {type: "combo", name: "task_id",  required: true, label: _("Zadanie"), options: []},		
-                                        {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},                                                                    
+                                        {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")}, 
+                                        {type: "checkbox", name: "required", label: _("Obowiązkowe: ")},                                                                    
                                         {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                                             {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
                                             {type: "newcolumn"},
@@ -480,7 +485,8 @@ function productsTasksInit(cell) {
                                     if (!zadaniaProductGrid.getRowData(taskId).for_group) {
                                         var formStruct = [
                                             {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},                                    
-                                            {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},                                                                    
+                                            {type: "input", name: "duration", required: true, label: _("Czas na wykonanie, min: ")},  
+                                            {type: "checkbox", name: "required", label: _("Obowiązkowe: ")},                                                                    
                                             {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                                                 {type: "button", name: "save", value: "Zapisz", offsetTop:18},                                        
                                                 {type: "newcolumn"},
@@ -548,17 +554,24 @@ function productsTasksInit(cell) {
                         {label: _("Zadanie"),   id: "name",     type: "ro", width: 150, sort: "str", align: "left"},
                         {label: _("Czas, min"), id: "duration", type: "ro", width: 50,  sort: "str", align: "left"},
                         {label: _("Kolejnosc"), id: "priority", type: "ro", width: 50,  sort: "str", align: "left"},
+                        {label: _("Obowiązkowe"), id: "required", type: "ch", width: 30,  sort: "str", align: "left"},
                         {id: "product_id"},
                         {id: "task_id"}, 
                         {id: "for_group"}
                     ]
 
                 });        
-                zadaniaProductGrid.setColumnHidden(4,true);
                 zadaniaProductGrid.setColumnHidden(5,true);
                 zadaniaProductGrid.setColumnHidden(6,true);
+                zadaniaProductGrid.setColumnHidden(7,true);
                 zadaniaProductGrid.attachHeader("#select_filter,#select_filter");		                
-                zadaniaProductGrid.enableDragAndDrop(true);     
+                zadaniaProductGrid.enableDragAndDrop(true); 
+                zadaniaProductGrid.attachEvent("onRowCreated", function(rId,rObj,rXml){
+                    var data = zadaniaProductGrid.getRowData(rId);
+                    if (data.for_group) {
+                        zadaniaProductGrid.setRowColor(rId,"lightgrey");
+                    }
+                });                  
                 zadaniaProductGrid.fill = function(id = 0){	
                     this.clearAll();					
                     ajaxGet("api/products/"+id+"/tasks", '', function(data){                                     

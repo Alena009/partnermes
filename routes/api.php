@@ -40,15 +40,16 @@ Route::group([
     Route::get('/orders/last',              'OrderController@getLastOrder');
     Route::resource('/orders',              'OrderController');    
     
-    Route::get('/positions/byorder/{order}', 'OrderPositionController@getPositionsByOrder');    
-    Route::get('/positions/getPrinted', 'OrderPositionController@getPrinted');    
-    Route::get('/positions/zlecenia', 'OrderPositionController@getZlecenia');    
-    Route::get('/positions/list/components', 'OrderPositionController@getAllComponentsForFreePositions');
-    Route::get('/positions/components/{position}', 'OrderPositionController@positionComponents');
-    Route::get('/positions/{position}/tasks', 'OrderPositionController@positionsTasks');
-    Route::get('/positions/print/{positions}', 'OrderPositionController@print');
-    Route::get('/positions/close', 'OrderPositionController@close');
-    Route::get('/positions/dontproduct', 'OrderPositionController@dontProduct');
+    Route::get('/positions/byorder/{order}',         'OrderPositionController@getPositionsByOrder');    
+    Route::get('/positions/getPrinted',              'OrderPositionController@getPrinted');    
+    Route::get('/positions/zlecenia',                'OrderPositionController@getZlecenia');    
+    //Route::get('/positions/list/components', 'OrderPositionController@getAllComponentsForFreePositions');
+    Route::get('/positions/components/{position}',   'OrderPositionController@positionComponents');
+    Route::get('/positions/{position}/tasks',        'OrderPositionController@positionsTasks');
+    Route::get('/positions/{positions}/print',       'OrderPositionController@print');
+    Route::get('/positions/{positions}/close',       'OrderPositionController@close');
+    Route::get('/positions/{positions}/dontproduct', 'OrderPositionController@dontProduct');
+    Route::get('/positions/{positions}/reopen',      'OrderPositionController@reOpen');
     Route::resource('/positions', 'OrderPositionController');      
     
     Route::get('/prodtypes/{prodtype}/translations', 'ProductTypeController@getTranslations');
@@ -117,7 +118,7 @@ Route::group([
     Route::resource('/workerdep', 'WorkerDepartamentController');
     
     Route::get('/warehouse/amountproduct/{productId}', 'WarehouseController@amountProductInWarehouse');  
-    Route::get('/warehouse/list/{grupy?}', 'WarehouseController@listProducts');  
+    Route::get('/warehouse/products/{grupy?}', 'WarehouseController@products');  
     Route::resource('/warehouse', 'WarehouseController'); 
  
     Route::get('/gantt', 'OperationController@buildGantt');   

@@ -43,7 +43,6 @@ Route::group([
     Route::get('/positions/byorder/{order}',         'OrderPositionController@getPositionsByOrder');    
     Route::get('/positions/getPrinted',              'OrderPositionController@getPrinted');    
     Route::get('/positions/zlecenia',                'OrderPositionController@getZlecenia');    
-    //Route::get('/positions/list/components', 'OrderPositionController@getAllComponentsForFreePositions');
     Route::get('/positions/components/{position}',   'OrderPositionController@positionComponents');
     Route::get('/positions/{position}/tasks',        'OrderPositionController@positionsTasks');
     Route::get('/positions/{positions}/print',       'OrderPositionController@print');

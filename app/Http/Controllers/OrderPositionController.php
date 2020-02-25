@@ -71,7 +71,7 @@ class OrderPositionController extends BaseController
             foreach ($positions as $position) {
                 $product    = $position->product;
                 $operations = $position->operations;
-                $tasks      = $product->allTasks();
+                $tasks      = $product->allTasks()->unique('id');
                 if ($tasks) {                
                     foreach ($tasks as $task) { 
                         $task->amount      = $position->amount;

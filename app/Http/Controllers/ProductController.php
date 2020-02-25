@@ -43,6 +43,18 @@ class ProductController extends BaseController
         }      
     }
     
+    public function freeTasks($productId)
+    {
+        $product = $this->repository->get($productId);
+                
+        if ($result = $this->srv->getFreeTasksForProduct($product)) {
+            return response()->json(['success' => true, 'data' => $result]);  
+        } else {
+            return response()->json(['success' => false, 'data' => $result, 
+                'message' => 'There is no tasks for this product']);  
+        }                
+    }    
+    
     public function tasks($productId)
     {
         $product = $this->repository->get($productId);

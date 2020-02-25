@@ -465,7 +465,7 @@ function productsTasksInit(cell) {
                                 var addTaskToProductWindow = createWindow(_("Zadanie"), 300, 300);
                                 var addTaskToProductForm = createForm(formStruct, addTaskToProductWindow);
                                 var tasksCombo = addTaskToProductForm.getCombo("task_id");
-                                ajaxGet("api/tasks", "", function(data){
+                                ajaxGet("api/products/"+productId+"/freetasks/" + localStorage.language, "", function(data){
                                     if (data && data.success) {
                                         tasksCombo.addOption(data.data);
                                     }

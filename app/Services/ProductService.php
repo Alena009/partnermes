@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services;
+use App\Models\Task;
 
 class ProductService 
 {
@@ -46,6 +47,20 @@ class ProductService
         $result->task_id = $result->id;     
         
         return $result;
-    }    
+    }  
+    
+    public function getFreeTasksForProduct($product)
+    {
+        $result = [];
+        $productTasks = $product->allTasks();
+        $allTasks = Task::all();
+        $result = $allTasks->diff($productTasks);
+        foreach ($result as $r) {
+            $r->value = $r->id;
+            $r->text = $r->name;
+        }
+        
+        return $result;
+    }
 }
 

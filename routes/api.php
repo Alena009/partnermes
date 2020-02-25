@@ -62,13 +62,14 @@ Route::group([
     Route::get('/prodgroups/grupytree/{locale?}',         'ProductGroupController@buildTree');               
     Route::resource('/prodgroups', 'ProductGroupController');     
 
-    Route::delete('/products/{product}/components/{component}', 'ProductController@deleteComponent');      
-    Route::post('/products/{product}/components/{locale?}',     'ProductController@addComponent');  
-    Route::get('/products/{productsIds}/components/{locale?}',  'ProductController@components');      
-    Route::delete('/products/{product}/tasks/{task}',   'ProductController@deleteTask');      
-    Route::post('/products/{product}/tasks/{locale?}',  'ProductController@addTask');  
-    Route::get('/products/{product}/tasks/{task}/edit', 'ProductController@editTask');      
-    Route::get('/products/{product}/tasks/{locale?}',   'ProductController@tasks');                  
+    Route::delete(  '/products/{product}/components/{component}', 'ProductController@deleteComponent');      
+    Route::post(    '/products/{product}/components/{locale?}',   'ProductController@addComponent');  
+    Route::get(     '/products/{products}/components/{locale?}',  'ProductController@components');      
+    Route::delete(  '/products/{product}/tasks/{task}',        'ProductController@deleteTask');      
+    Route::post(    '/products/{product}/tasks/{locale?}',     'ProductController@addTask');  
+    Route::get(     '/products/{product}/tasks/{task}/edit',   'ProductController@editTask');      
+    Route::get(     '/products/{product}/tasks/{locale?}',     'ProductController@tasks');                  
+    Route::get(     '/products/{product}/freetasks/{locale?}', 'ProductController@freeTasks');                  
     Route::resource('/products', 'ProductController');  
  
     

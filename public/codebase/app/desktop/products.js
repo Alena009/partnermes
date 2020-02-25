@@ -1,6 +1,6 @@
 var productsGrid;
 var productsLayout;
-var productsForm;
+var productForm;
 var products;
 
 function productsInit(cell) {
@@ -80,10 +80,7 @@ function productsInit(cell) {
         userCanWrite ? typesProductsGridToolBar = productsLayout.cells("b").attachToolbar(standartToolbar):
                 typesProductsGridToolBar = productsLayout.cells("b").attachToolbar(emptyToolbar);        
         typesProductsGridToolBar.attachEvent("onClick", function(btn) {
-            switch (btn){
-                    case 'Add':{
-                        var addingWindow = createWindow(_("Dodaj typ produktu"), 300, 300);
-                        var addingForm = createForm([
+            var formStruct = [
                             {type:"fieldset",  offsetTop:0, label:_("Nowy typ produktu"), width:250, list:[                                                                          
                                     {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
                                     {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
@@ -93,19 +90,14 @@ function productsInit(cell) {
                                         {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
                                     ]}
                             ]}                                    
-                        ], addingWindow);
+                        ];
+            switch (btn){
+                    case 'Add':{
+                        var addingWindow = createWindow(_("Dodaj typ produktu"), 300, 300);
+                        var addingForm = createForm(formStruct, addingWindow);
                         addingForm.attachEvent("onButtonClick", function(name){
                             if (name == 'save') {
-                                ajaxPost("api/prodtypes", addingForm.getFormData(), function(data){
-                                    if (data && data.success) {
-                                        typesProductsGrid.addRow(data.data.id, [data.data.name, data.data.description]);   
-                                    } else {
-                                        dhtmlx.alert({
-                                            title:_("Wiadomość"),
-                                            text:_("Błąd! Zmiany nie zostały zapisane")
-                                        });
-                                    }
-                                });
+                                typesProductsGrid.add("api/prodtypes", addingForm.getFormData());
                             }
                         });                                
                     };break;
@@ -113,32 +105,12 @@ function productsInit(cell) {
                         var id = typesProductsGrid.getSelectedRowId();
                         if (id) {
                             var addingWindow = createWindow(_("Edytuj typ produktu"), 300, 300);
-                            var addingForm = createForm([
-                                {type:"fieldset",  offsetTop:0, label:_("Edytuj typ produktu"), width:250, list:[                                                                          
-                                        {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
-                                        {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
-                                        {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                                            {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
-                                            {type: "newcolumn"},
-                                            {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
-                                        ]}
-                                ]}                                    
-                            ], addingWindow);
+                            var addingForm = createForm(formStruct, addingWindow);
                             var rowData = typesProductsGrid.getRowData(typesProductsGrid.getSelectedRowId());
                             addingForm.setFormData(rowData);
                             addingForm.attachEvent("onButtonClick", function(name){
                                 if (name == 'save') {
-                                    ajaxGet("api/prodtypes/" + typesProductsGrid.getSelectedRowId() + "/edit", addingForm.getFormData(), function(data){
-                                        if (data && data.success) {                                            
-                                            typesProductsGrid.setRowData(data.data.id, data.data);
-                                            addingWindow.close();
-                                        } else {
-                                            dhtmlx.alert({
-                                                title:_("Wiadomość"),
-                                                text:_("Błąd! Zmiany nie zostały zapisane")
-                                            });
-                                        }
-                                    });
+                                    typesProductsGrid.edit("api/prodtypes/" + typesProductsGrid.getSelectedRowId() + "/edit", addingForm.getFormData());
                                 }
                             });  
                         } else {
@@ -152,24 +124,7 @@ function productsInit(cell) {
                     case 'Del':{
                         var id = typesProductsGrid.getSelectedRowId();
                         if (id) {
-                            dhtmlx.confirm({
-                            title:_("Ostrożność"),                                    
-                            text:_("Czy na pewno chcesz usunąć typ?"),
-                            callback: function(result){
-                                        if (result) {
-                                            ajaxDelete("api/prodtypes/" + id, "", function(data){
-                                                if (data && data.success){
-                                                    typesProductsGrid.deleteRow(id);
-                                                } else {
-                                                    dhtmlx.alert({
-                                                        title:_("Wiadomość"),
-                                                        text:_("Błąd! Zmiany nie zostały zapisane")
-                                                    });                                            
-                                                }
-                                            }); 
-                                        }
-                                    }
-                                });                                
+                            typesProductsGrid.delete("api/prodtypes/" + id, id);                               
                         } else {
                             dhtmlx.message({
                                 title:_("Wiadomość"),
@@ -238,27 +193,12 @@ function productsInit(cell) {
             switch (name){
                 case 'Copy': {
                     var selectedId = productsGrid.getSelectedRowId();
-                    if (selectedId) {                        
-                        var productWindow = createWindow(_("Produkt"), 550, 400);                                                
-                        var productForm   = createForm(productFormStruct, productWindow);  
-                        var rowData       = productsGrid.getRowData(selectedId);
+                    if (selectedId) {  
+                        var rowData = productsGrid.getRowData(selectedId);
+                        productsGrid.clearSelection();
                         productForm.setFormData(rowData);
-                        var productTypeCombo = productForm.getCombo("product_type_id");
-                        ajaxGet("api/prodtypes", "", function(data){
-                            productTypeCombo.addOption(data.data);        
-                            productTypeCombo.selectOption(productTypeCombo.getIndexByValue(rowData.product_type_id));        
-                        });         
-                        var productGroupCombo = productForm.getCombo("product_group_id");
-                        ajaxGet("api/prodgroups", "", function(data){
-                            productGroupCombo.addOption(data.data);
-                            productGroupCombo.selectOption(productGroupCombo.getIndexByValue(rowData.product_group_id));        
-                        });                                                                                                                        
-                        productForm.setItemValue("kod", "");    
-                        productForm.attachEvent("onButtonClick", function(name){
-                            if (name === 'save'){                                  
-                                addProduct(productForm.getFormData(), productsGrid);                                                                           
-                            }
-                        });
+                        productsLayout.cells("d").expand(); 
+                        productForm.setItemValue("kod", "");
                     } else {
                         dhtmlx.alert({
                             title:_("Wiadomość"),
@@ -275,8 +215,7 @@ function productsInit(cell) {
                         componentsGridToolbar = componentsLayout.cells("a").attachToolbar({
                             iconset: "awesome",
                             items: [
-                                {id:"Add", type:"button", text: _("Dodaj"),  img: "fa fa-plus-square"},
-                                //{id:"Edit",type:"button", text: _("Edytuj"), img: "fa fa-edit"},
+                                {id:"Add", type:"button", text: _("Dodaj"),  img: "fa fa-plus-square"},                                
                                 {id:"Del", type:"button", text: _("Usun"),   img: "fa fa-minus-square"}
                             ]                    
                         });    
@@ -377,7 +316,6 @@ function productsInit(cell) {
                         dpComponentsGrid.init(componentsGrid);
                         dpComponentsGrid.enableDataNames(true);
                         dpComponentsGrid.setTransactionMode("REST");
-                        //dpComponentsGrid.enablePartialDataSend(true);
                         dpComponentsGrid.enableDebug(true);
                         dpComponentsGrid.setUpdateMode("row", true);
                         dpComponentsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
@@ -418,47 +356,16 @@ function productsInit(cell) {
                     }                        
                 };break;
                 case 'Add': {  
-                    var productWindow = createWindow(_("Produkt"), 550, 400);
-                    var productForm = createForm(productFormStruct, productWindow); 
-                    var productTypeCombo = productForm.getCombo("product_type_id");
-                    ajaxGet("api/prodtypes", "", function(data){
-                        productTypeCombo.addOption(data.data);                
-                    });         
-                    var productGroupCombo = productForm.getCombo("product_group_id");
-                    ajaxGet("api/prodgroups", "", function(data){
-                        productGroupCombo.addOption(data.data);        
-                    }); 
-                    productForm.attachEvent("onButtonClick", function(name){
-                        switch(name) {
-                            case "save": {                       
-                                    addProduct(productForm.getFormData(), productsGrid);                                                                                                      
-                            };break;              
-                        }
-                    });                     
+                    productForm.clear();                             
+                    productsGrid.clearSelection();
+                    productsLayout.cells("d").expand(); 
+                    productForm.setItemFocus(productForm.getFirstActive());                                              
                 };break;
                 case 'Edit': {
                     var selectedId = productsGrid.getSelectedRowId();
-                    if (selectedId) {                        
-                        var productWindow = createWindow(_("Produkt"), 550, 400);                                                
-                        var productForm   = createForm(productFormStruct, productWindow);  
-                        var rowData       = productsGrid.getRowData(selectedId);
-                        productForm.setFormData(rowData);
-                        var productTypeCombo = productForm.getCombo("product_type_id");
-                        ajaxGet("api/prodtypes", "", function(data){
-                            productTypeCombo.addOption(data.data);        
-                            productTypeCombo.selectOption(productTypeCombo.getIndexByValue(rowData.product_type_id));        
-                        });         
-                        var productGroupCombo = productForm.getCombo("product_group_id");
-                        ajaxGet("api/prodgroups", "", function(data){
-                            productGroupCombo.addOption(data.data);
-                            productGroupCombo.selectOption(productGroupCombo.getIndexByValue(rowData.product_group_id));        
-                        });  
-                        productForm.attachEvent("onButtonClick", function(name){
-                            if (name === 'save'){
-                                editProduct(productForm.getFormData(), selectedId, productsGrid); 
-                                productWindow.close();
-                            }
-                        });
+                    if (selectedId) {    
+                        productsLayout.cells("d").expand();
+                        productForm.setItemFocus(productForm.getFirstActive()); 
                     } else {
                         dhtmlx.alert({
                             title:_("Wiadomość"),
@@ -468,25 +375,8 @@ function productsInit(cell) {
                 };break;
                 case 'Del': {
                         var productId = productsGrid.getSelectedRowId();                            
-                        if (productId) {                           
-                            dhtmlx.confirm({
-                                title: _("Ostrożność"),                                    
-                                text: _("Czy na pewno chcesz usunąć?"),
-                                callback: function(result){
-                                    if (result) {                                                                                    
-                                        ajaxDelete("api/products/" + productId, "", function(data){
-                                            if (data && data.success){                                                    
-                                                productsGrid.deleteRow(productId);
-                                            } else {
-                                                dhtmlx.alert({
-                                                    title:_("Wiadomość"),
-                                                    text:_("Nie udało się usunąć!")
-                                                });
-                                            }
-                                        });   
-                                    }
-                                }
-                            });                                                                                            
+                        if (productId) {
+                            productsGrid.delete("api/products/" + productId, productId);                                                                                            
                         } else {
                             dhtmlx.alert({
                                 title:_("Wiadomość"),
@@ -504,7 +394,6 @@ function productsInit(cell) {
         var productsGrid = productsLayout.cells("c").attachGrid({
             image_path:'codebase/imgs/',
             columns: [  
-                //{id: "checked", type:"ch", width: 25},
                 {label: _("Kod"), width: 100,id: "kod",type: "ed",sort: "str",  align: "left"},
                 {label: _("Imie produktu"),width: 100,id: "name",type: "ed", sort: "str", align: "left"},                
                 {label: _("Opakowanie"), width: 100, id: "pack", type: "ed", sort: "str", align: "left"}, 
@@ -547,11 +436,12 @@ function productsInit(cell) {
         productForm.attachEvent("onButtonClick", function(name){
             switch(name) {
                 case "save": {
-                    if (productsGrid.getSelectedRowId()){                        
-                        editProduct(productForm.getFormData(), productsGrid.getSelectedRowId(), productsGrid);
+                    var id = productsGrid.getSelectedRowId();
+                    if (id){                        
+                        productsGrid.edit("api/products/" + id + "/edit", productForm.getFormData());
                     } else {                        
-                        addProduct(productForm.getFormData(), productsGrid);                                                                      
-                    }
+                        productsGrid.add("api/products", productForm.getFormData());                                                                      
+                    }                    
                 };break;              
             }
         });   
@@ -560,56 +450,13 @@ function productsInit(cell) {
     }
 }
 
-function addProduct(data, grid) {
-    ajaxPost("api/products", data, function(data) {
-        if (data && data.success) {
-            grid.addRow(data.data.id, '');
-            grid.setRowData(data.data.id, data.data);                                         
-        } else {
-            dhtmlx.alert({
-                title:_("Wiadomość"),
-                text:_("Zmiany nie zostały zapisane. \n\
-                        Wprowadź ponownie!")
-            });                                         
-        }
-    });     
-}
-
-function editProduct(data, id, grid) {
-    ajaxGet("api/products/" + id + "/edit", data, function(data){
-        if (data && data.success) {
-            grid.setRowData(data.data.id, data.data);
-            dhtmlx.alert({
-                title:_("Wiadomość"),
-                text:_("Zapisane!")
-            });  
-        } else {
-            dhtmlx.alert({
-                title:_("Wiadomość"),
-                text:_("Zmiany nie zostały zapisane. \n\
-                        Wprowadź ponownie!")
-            }); 
-        }
-    });     
-}
-
 function addTaskForProduct(productId, tasksGrid) {    
     var addingForm = addTask(productId);
     addingForm.attachEvent("onButtonClick", function(name){
         var data = this.getFormData();
         data.product_id = productId;
         if (name == "save") {
-            ajaxPost("api/products/addtask", data, function(data){
-                if(data && data.success){
-                    tasksGrid.fill(productId);                                                        
-                } else {
-                    dhtmlx.alert({
-                        title:_("Wiadomość"),
-                        text:_("Zmiany nie zostały zapisane. \n\
-                                Wprowadź zmiany ponownie!")
-                    });                                                         
-                }
-            });
+            tasksGrid.add("api/products/addtask", data);
         }
     });
 }

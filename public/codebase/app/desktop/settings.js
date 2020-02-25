@@ -1379,11 +1379,11 @@ dhtmlXGridObject.prototype.add = function(url, data) {
     ajaxPost(url, data, function(data){                                                                                                        
         if (data && data.success) {
             grid.addRow(data.data.id, '');
-            grid.setRowData(data.data.id, data.data);
-//            dhtmlx.alert({
-//                title:_("Wiadomość"),
-//                text:_("Zapisane!")
-//            });                     
+            grid.setRowData(data.data.id, data.data);            
+            dhtmlx.alert({
+                title:_("Wiadomość"),
+                text:_("Zapisane!")
+            });                     
             grid.callEvent("onGridReconstructed", []);
         } else {
             dhtmlx.alert({

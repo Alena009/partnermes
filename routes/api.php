@@ -54,11 +54,6 @@ Route::group([
     
     Route::get('/prodtypes/{prodtype}/translations', 'ProductTypeController@getTranslations');
     Route::resource('/prodtypes', 'ProductTypeController');            
-    
-//    
-//    //Route::get('/prodgroups/products/{groups}/{locale?}', 'ProductGroupController@getProducts');      
-//    Route::get('/prodgroups/{prodgroup}/translations', 'ProductGroupController@getTranslations');
-//    Route::post('/prodgroups/addtask', 'ProductGroupController@addTask'); 
 
     Route::delete('/prodgroups/{group}/tasks/{task}',     'ProductGroupController@deleteTask'); 
     Route::get('/prodgroups/{group}/tasks/{task}/edit',   'ProductGroupController@editTask');  
@@ -66,11 +61,7 @@ Route::group([
     Route::get('/prodgroups/{groups}/tasks/{locale?}',    'ProductGroupController@tasks');         
     Route::get('/prodgroups/{groups}/products/{locale?}', 'ProductGroupController@products');      
     Route::get('/prodgroups/grupytree/{locale?}',         'ProductGroupController@buildTree');               
-    Route::resource('/prodgroups', 'ProductGroupController');
-    
-    
-//    Route::get('/products/{product}/translations', 'ProductController@getTranslations');    
-//    Route::get('/products/deleteseveral/{products}', 'ProductController@deleteSeveralProducts');         
+    Route::resource('/prodgroups', 'ProductGroupController');     
 
     Route::delete('/products/{product}/components/{component}', 'ProductController@deleteComponent');      
     Route::post('/products/{product}/components/{locale?}',     'ProductController@addComponent');  
@@ -82,7 +73,6 @@ Route::group([
     Route::resource('/products', 'ProductController');  
  
     
-
     Route::get('/roles', 'RoleController@roles');
     Route::get('/roles/{roleId}/permissions', 'RoleController@listPermissions');
     Route::get('/roles/{roleId}/freepermissions', 'RoleController@listFreePermissions');

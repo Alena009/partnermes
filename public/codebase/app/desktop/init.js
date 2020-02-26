@@ -5,16 +5,18 @@ var w1;
 window.dhx_globalImgPath = 'codebase/imgs/dhxtree_web/';
 
 function appInit() {            
-        var userData = JSON.parse(localStorage.getItem("userData"));        
-        userData.permissions.forEach(function(elem){
-            elem.id = elem.name;
-            elem.text = elem.description;
-        });        
+        var userData = JSON.parse(localStorage.getItem("userData"));  
+        if (userData.permissions) {
+            userData.permissions.forEach(function(elem){
+                elem.id = elem.name;
+                elem.text = elem.description;
+            });       
+        }
 	mainSidebar = new dhtmlXSideBar({
 		parent: document.body,
 		icons_path: "imgs/sidebar/",
 		width: 140,
-		template: "tiles",
+		template: "tiles",        
                 items: userData.permissions
 	});
 
@@ -77,7 +79,7 @@ function loginFormShow(callback2={}){
 			left:10,
 			top:10,
 			width:320,
-			height:160,
+			height:180,
 			center:true,
 			caption:_('Logowanie')
 		});
@@ -89,15 +91,16 @@ function loginFormShow(callback2={}){
 		w1.show();
 		w1.centerOnScreen();
 		var loginFormData = [
-			{type: "settings", position: "label-left", labelWidth: 75, inputWidth: 150},
-			{type: "block", blockOffset: 30, offsetTop: 5, width: "auto", list: [
+			{type: "settings", position: "label-left", labelWidth: 95, inputWidth: 150},
+			{type: "block", blockOffset: 30, offsetTop: 5, width: "auto", list: [                                
+                                {type: "checkbox", label: _("Wejść jako gość"), name: "isguest", value: "", offsetTop: 5},
 				{type: "input", label: "Login", name: "login", value: "", offsetTop: 5},
 				{type: "password", label: "Hasło", name: "password", value: ""},
 				{type: "button", name: "submit", value: "Zaloguj", offsetTop: 5, offsetLeft: 72}
 			]}
 		];
 
-		var loginForm = w1.attachForm(loginFormData);
+		var loginForm = w1.attachForm(loginFormData);                
 		var loginFormDP = new dataProcessor("login");    //inits dataProcessor
 		loginFormDP.init(loginForm);
 		loginForm.callback = callback2;
@@ -142,6 +145,21 @@ function loginFormShow(callback2={}){
 				loginForm.weryfikuj();
 			}
 		});
+		loginForm.attachEvent("onChange", function (name, value, state){
+                    if (name === "isguest") {
+                        if (state) {
+                            this.setItemValue("login", "guest");
+                            this.setItemValue("password", "guest");
+                            this.disableItem("login");
+                            this.disableItem("password");
+                        } else {
+                            this.setItemValue("login", "");
+                            this.setItemValue("password", ""); 
+                            this.enableItem("login");
+                            this.enableItem("password");                            
+                        }
+                    }
+                });            
 	}
 }
 

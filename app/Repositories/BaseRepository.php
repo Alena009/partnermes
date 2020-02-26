@@ -265,6 +265,13 @@ class BaseRepository
         return $result;
     }    
     
+    public function getAll()
+    {
+        $result = [];
+        $result = $this->model::all();
+        return $result;
+    }     
+    
     public function getWithAdditionals($id)
     {
         return $this->get($id);

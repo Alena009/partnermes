@@ -30,8 +30,10 @@ class UserController extends \App\Http\Controllers\BaseController
     public function login() 
     {
         if (Auth::attempt(['login' => request('login'), 'password' => request('password')])) {
-            $user = Auth::user();
-            $user->permissions = $user->role[0]->permissions;
+            $user = Auth::user();            
+            if ($user->role->first()) {
+                $user->permissions = $user->role->first()->permissions;            
+            }
             $token = $user->createToken('MyApp')->accessToken;
             return response()->json(['success' => true, 'token' => $token, 'user' => $user], $this->successStatus);
         } else {

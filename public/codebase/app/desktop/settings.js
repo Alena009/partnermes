@@ -30,61 +30,44 @@ function settingsInit(cell) {
  * Roles tab
  * 
  */
-                var rolesToolBar = rolesLayout.cells("a").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                        ]
-                });
-                rolesToolBar.attachEvent("onClick", function(id) { 
+/**
+ * A
+ * 
+ */
+                var rolesToolBar = rolesLayout.cells("a").attachToolbar(standartToolbar);
+                rolesToolBar.attachEvent("onClick", function(id) {
+                    var roleForm = [
+                            {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
+                                    {type:"input",  name:"name",   label:_("Nazwa"), offsetTop:13, labelWidth:80}, 
+                                    {type: "block", blockOffset: 0, position: "label-left", list: [
+                                        {type:"button", name:"save",   value:_("Zapisz"),     offsetTop:18}
+                                    ]}
+                            ]}
+                        ]; 
                     switch (id){
                         case 'Add':{
                             var windowForm = createWindow(_("Role"), 300, 300);
-                            var form = createForm(roleForm, windowForm);
+                            var form = createForm(roleForm, windowForm);                            
                             form.attachEvent("onButtonClick", function(name){
                                 switch (name){
                                     case 'save':{                                                           
-                                        ajaxPost("api/roles", form.getFormData(), function(data){ 
-                                            if (data.success) {
-                                                ajaxPost("api/rolespermissions/fillRole/" + data.data.id, '', '');                                                   
-                                                rolesTree.addItem(data.data.id, data.data.name);
-                                                windowForm.close();
-                                            } else {
-                                                dhtmlx.message({
-                                                    title:_("Wiadomość"),
-                                                    type:"alert",
-                                                    text:_("Błąd dodawania rekordu do bazy danych!")
-                                                });
-                                            }
-                                        });
+                                        rolesGrid.add("api/roles", form.getFormData());
                                     };break;
                                 }
                             });
                         };break;
                         case 'Edit':{                            
-                            var roleId = rolesTree.getSelectedId();
+                            var roleId = rolesGrid.getSelectedId();
                             if (roleId) {
                                 var windowForm = createWindow(_("Role"), 300, 300);
                                 var form = createForm(roleForm, windowForm);
-                                var data = {
-                                    id: roleId,
-                                    name: rolesTree.getItemText(roleId)
-                                };
+                                var data = rolesGrid.getRowData(roleId);
                                 form.setFormData(data); 
                                 form.attachEvent("onButtonClick", function(name){
                                     switch (name){
-                                        case 'save':{                                                           
-                                            ajaxGet("api/roles/" + roleId + "/edit", form.getFormData(), function(data){                                                            
-                                                if (data.success) {                                                 
-                                                    rolesTree.setItemText(roleId, data.data.name);
-                                                } 
-                                            });
-                                        };break;
-                                        case 'cancel':{
-                                            form.setFormData(data); 
-                                        };break;
+                                        case 'save':{ 
+                                            rolesGrid.edit("api/roles/" + roleId + "/edit", form.getFormData());
+                                        };break;                                        
                                     }
                                 });                                
                             } else {
@@ -96,29 +79,9 @@ function settingsInit(cell) {
                             }
                         };break;  
                         case 'Del':{
-                            var roleId = rolesTree.getSelectedId();
+                            var roleId = rolesGrid.getSelectedRowId();
                             if (roleId) {
-                                dhtmlx.confirm({
-                                    title:_("Ostrożność"),                                    
-                                    text:_("Czy na pewno chcesz usunąć rolę?"),
-                                    callback: function(result){
-                                        if (result) {
-                                            ajaxDelete("api/roles/" + roleId,'', function(data) {
-                                                if (data.success) {
-                                                    rolesTree.deleteItem(roleId);
-                                                    usersGrid.fill(0);
-                                                    permissionsGrid.fill(0);
-                                                } else {
-                                                    dhtmlx.alert({
-                                                        title:_("Błąd!"),
-                                                        type:"alert-error",
-                                                        text:data.message
-                                                    });
-                                                }
-                                            });                                              
-                                        }
-                                    }
-                                });   
+                                rolesGrid.delete("api/roles/" + roleId, roleId);  
                             } else {
                                 dhtmlx.alert({
                                     title:_("Wiadomość"),
@@ -126,36 +89,38 @@ function settingsInit(cell) {
                                     text:_("Wybierz rolę, którą chcesz usunąć!")
                                 });
                             }
-
                         };break;  
+                        case 'Redo':{
+                                rolesGrid.fill();
+                                usersGrid.clearAll();
+                                permissionsGrid.clearAll();
+                        };break;
                     };
+                });                
+                var rolesGrid = rolesLayout.cells("a").attachGrid({
+                    image_path:'codebase/imgs/',
+                    columns: [
+                        {
+                            label: _("Imie"),
+                            id: "name",
+                            width: 100,
+                            type: "ed", 
+                            sort: "str", 
+                            align: "left"     
+                        }                          
+                    ]                   
                 }); 
-                var roleForm = [
-                    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			
-                            {type:"input",  name:"name",   label:_("Nazwa"), offsetTop:13, labelWidth:80}, 
-                            {type: "block", blockOffset: 0, position: "label-left", list: [
-                                {type:"button", name:"save",   value:_("Zapisz"),     offsetTop:18},
-                                {type: "newcolumn"},
-                                {type:"button", name:"cancel", value:_("Anuluj"),     offsetTop:18}
-                            ]}
-                    ]}
-                ]; 
-                var rolesTree = rolesLayout.cells("a").attachTreeView({
-                    skin: "dhx_skyblue",    // string, optional, treeview's skin
-                        iconset: "font_awesome", // string, optional, sets the font-awesome icons
-                        multiselect: false,           // boolean, optional, enables multiselect                                 
-                        dnd: true,           // boolean, optional, enables drag-and-drop
-                        context_menu: true,  
-                }); 
-                rolesTree.load = function(){ 
-                    ajaxGet("api/roles", '', function(data) {                    
-                        if (data && data.success){                            
-                            rolesTree.loadStruct(data.data);                           
-                        }                    
-                    });
-                }; 
-                rolesTree.attachEvent("onSelect",function(id, mode){  
-                    if (mode) {
+                rolesGrid.fill = function() {    
+                    this.clearAll();
+                    ajaxGet("api/roles", "", function(data){
+                        if (data && data.success){                    
+                            rolesGrid.parse(data.data, "js");
+                        }
+                    });	                    
+                };   
+                rolesGrid.attachEvent("onRowSelect",function(){  
+                    var id = this.getSelectedRowId();
+                    if (id) {
                         usersGrid.clearAll();
                         permissionsGrid.clearAll();			
                         usersGrid.fill(id);
@@ -163,31 +128,26 @@ function settingsInit(cell) {
                         return true;                        
                     }
                 });
-                rolesTree.load();                                 
-                var permissionsToolBar = rolesLayout.cells("b").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                                {type: "separator", id: "sep3"},
-                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                        ]
-                });
-                var permissionForm = [
-                    {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			                            
-                            {type:"combo",  name:"permission_id", label:_("Sekcja"), options:[], offsetTop:13, inputWidth: 150},                                                                				                            
-                            {type: "block",    name: "buttonblock",inputWidth: 200,    className: "myBlock", list:[
-                            {type: "button",   name: "save",   value:_("Zapisz"), offsetTop:18},
-                            {type: "newcolumn"},
-			    {type: "button",   name: "cancel", value:_("Anuluj"), offsetTop:18}
-                        ]} 
-                    ]}
-                ];                
-                permissionsToolBar.attachEvent("onClick", function(id) { 
+                rolesGrid.fill(); 
+/**
+ * B
+ * 
+ */                
+                var permissionsToolBar = rolesLayout.cells("b").attachToolbar(standartToolbar);                
+                permissionsToolBar.attachEvent("onClick", function(id) {
+                    var permissionForm = [
+                        {type:"fieldset",  offsetTop:0, label:_("Dodaj lub zmien"), width:253, list:[                                			                            
+                                {type:"combo",  name:"permission_id", label:_("Sekcja"), options:[], offsetTop:13, inputWidth: 150},                                                                				                            
+                                {type: "block",    name: "buttonblock",inputWidth: 200,    className: "myBlock", list:[
+                                {type: "button",   name: "save",   value:_("Zapisz"), offsetTop:18},
+                                {type: "newcolumn"},
+                                {type: "button",   name: "cancel", value:_("Anuluj"), offsetTop:18}
+                            ]} 
+                        ]}
+                    ];
                     switch (id){
                         case 'Add':{
-                            var roleId = rolesTree.getSelectedId();
+                            var roleId = rolesGrid.getSelectedRowId();
                             if (roleId) {
                                 var windowForm = createWindow(_("Permission"), 300, 300);
                                 var form = createForm(permissionForm, windowForm);
@@ -220,43 +180,10 @@ function settingsInit(cell) {
                                     });
                             }
                         };break;
-//                        case 'Edit':{                                
-//                                var permissionId = permissionsGrid.getSelectedRowId();                                
-//                                if (permissionId) {  
-//                                    var windowForm = createWindow(_("Permission"), 300, 300);
-//                                    var form = createForm(permissionForm, windowForm);
-//                                    var data = {
-//                                        id: permissionId,
-//                                        name: permissionsGrid.cells(permissionId, 0).getValue(),
-//                                        description: permissionsGrid.cells(permissionId, 2).getValue()
-//                                    };
-//                                    form.setFormData(data); 
-//                                    form.attachEvent("onButtonClick", function(name){
-//                                        switch (name){
-//                                            case 'save':{                                                           
-//                                                ajaxGet("api/permissions/" + permissionId + "/edit", form.getFormData(), function(data){ 
-//                                                    if (data.success) {                                                           
-//                                                        permissionsGrid.fill(0);
-//                                                    } 
-//                                                });
-//                                            };break;
-//                                            case 'cancel':{
-//                                                form.setFormData(data); 
-//                                            };break;
-//                                        }
-//                                    });                                
-//                                } else {
-//                                    dhtmlx.alert({
-//                                        title:_("Wiadomość"),
-//                                        type:"alert",
-//                                        text:_("Wybierz uprawnienie, które chcesz edytować!")
-//                                    });
-//                                }                               
-//                        };break;
                         case 'Del':{
                                 var permissionId = permissionsGrid.getSelectedRowId();                                
                                 if (permissionId) {
-                                    var roleId = rolesTree.getSelectedId();
+                                    var roleId = rolesGrid.getSelectedRowId();
                                     dhtmlx.confirm({
                                         title:_("Ostrożność"),                                    
                                         text:_("Czy na pewno chcesz usunąć uprawnienie?"),
@@ -283,10 +210,8 @@ function settingsInit(cell) {
                                 }
                         };break;
                         case 'Redo':{
-                                var roleId = rolesTree.getSelectedId();
-                                rolesTree.unselectItem(roleId);
-                                usersGrid.fill(0);
-                                permissionsGrid.fill(0);
+                            var roleId = rolesGrid.getSelectedRowId();
+                            roleId ? permissionsGrid.fill(roleId) : permissionsGrid.fill(0);                            
                         };break;
                     }
                 });                
@@ -316,7 +241,7 @@ function settingsInit(cell) {
                     });
                 };
                 permissionsGrid.attachEvent("onCheck", function(rId,cInd,state){
-                    var roleId = rolesTree.getSelectedId();
+                    var roleId = rolesGrid.getSelectedRowId();
                     if (roleId) {
                         var data = {
                                 role_id: roleId,
@@ -329,7 +254,11 @@ function settingsInit(cell) {
                             }
                         });                       
                     }                                 
-                });                
+                });  
+/**
+ * C
+ * 
+ */                
                 var usersToolBar = rolesLayout.cells("c").attachToolbar({
                         iconset: "awesome",
                         items: [                                
@@ -341,23 +270,10 @@ function settingsInit(cell) {
                 usersToolBar.attachEvent("onClick", function(id) { 
                     switch (id){
                         case 'Cog':{                                
-                            var roleId = rolesTree.getSelectedId();
+                            var roleId = rolesGrid.getSelectedRowId();
                             if (roleId) {
-                                var dhxWins = new dhtmlXWindows();
-                                w1 = dhxWins.createWindow({
-                                        id:"w1",
-                                        left:20,
-                                        top:30,
-                                        width: 500,
-                                        height: 500,
-                                        center:true,
-                                        caption: _("Dolanczyc pracownikow do roli"),
-                                        header: true,                                        
-                                        onClose:function(){
-
-                                        }
-                                });                               
-                                var addUsersGrid = dhxWins.window("w1").attachGrid({
+                                var window = createWindow(_("Dolanczyc pracownikow do roli"), 500, 500);                                                            
+                                var addUsersGrid = window.attachGrid({
                                     image_path:'codebase/imgs/',
                                     columns: [
                                         {
@@ -394,15 +310,13 @@ function settingsInit(cell) {
                                     ]                                       
                                 }); 
                                 addUsersGrid.attachEvent("onCheck", function(rId,cInd,state){
+                                    console.log(rId);
                                     var data = {
                                             role_id: roleId,
                                             user_id: rId
                                         };
-                                    if (state) {                                                                            
-                                        ajaxPost("api/usersroles", data, '');
-                                    } else {
-                                        ajaxGet("api/usersroles/del", data, '');
-                                    }
+                                    state ? ajaxPost("api/usersroles", data, ''): 
+                                            ajaxGet("api/usersroles/del", data, '');                                    
                                     usersGrid.fill(roleId);                                   
                                 });
                                 ajaxGet("api/roles/0/users", '', function(data){                                     
@@ -428,10 +342,8 @@ function settingsInit(cell) {
                             }                           
                         };break;
                         case 'Redo':{
-                                var roleId = rolesTree.getSelectedId();
-                                rolesTree.unselectItem(roleId);
-                                usersGrid.fill(0);
-                                permissionsGrid.fill(0);
+                                var roleId = rolesGrid.getSelectedRowId();
+                                roleId ? usersGrid.fill(roleId) : usersGrid.fill(0);                                 
                         };break; 
                     }
                 });
@@ -474,178 +386,134 @@ function settingsInit(cell) {
                     });
                 };                
                 usersGrid.fill(0);                                                                                                        
+///**
+// * Statuses
+// */                
+//                var statusesGridToolBar = statusesLayout.cells("a").attachToolbar(standartToolbar);
+//                statusesGridToolBar.attachEvent("onClick", function(btn) {
+//                    var formStruct = [
+//                                    {type:"fieldset",  offsetTop:0, label:_("Nowy status"), width:250, list:[                                                                          
+//                                            {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
+//                                            {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
+//                                            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+//                                                {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+//                                                {type: "newcolumn"},
+//                                                {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+//                                            ]}
+//                                    ]}                                    
+//                                ];
+//                    switch (btn){
+//                            case 'Add':{
+//                                var addingWindow = createWindow(_("Dodaj status"), 300, 300);
+//                                var addingForm = createForm(formStruct, addingWindow);
+//                                addingForm.attachEvent("onButtonClick", function(name){
+//                                    if (name == 'save') {
+//                                        ajaxPost("api/statuses", addingForm.getFormData(), function(data){
+//                                            if (data && data.success) {
+//                                                statusesGrid.addRow(data.data.id, [data.data.name, data.data.description]);  
+//                                                addingWindow.close();
+//                                            }
+//                                        });
+//                                    }
+//                                });                                
+//                            };break;
+//                            case 'Edit': {
+//                                var id = statusesGrid.getSelectedRowId();
+//                                if (id) {
+//                                    var addingWindow = createWindow(_("Edytuj status"), 300, 300);
+//                                    var addingForm = createForm(formStruct, addingWindow);
+//                                    var rowData = statusesGrid.getRowData(id);
+//                                    addingForm.setFormData(rowData);
+//                                    addingForm.attachEvent("onButtonClick", function(name){
+//                                        if (name == 'save') {
+//                                            ajaxGet("api/statuses/" + statusesGrid.getSelectedRowId() + "/edit", addingForm.getFormData(), function(data){
+//                                                if (data && data.success) {
+//                                                    statusesGrid.fill();
+//                                                    addingWindow.close();
+//                                                }
+//                                            });
+//                                        }
+//                                    });
+//                                } else {
+//                                    dhtmlx.alert({
+//                                        title:_("Wiadomość"),
+//                                        text:_("Wybierz status który chcesz edytować!")
+//                                    });
+//                                }
+//                            };break; 
+////                            case 'Del':{
+////                                var id = statusesGrid.getSelectedRowId();
+////                                if (id) {
+////                                    ajaxDelete("api/statuses/" + id, "", function(data){
+////                                        if (data && data.success){
+////                                            statusesGrid.deleteRow(id);
+////                                        }
+////                                    });    
+////                                } else {
+////                                    dhtmlx.alert({
+////                                        title:_("Wiadomość"),
+////                                        text:_("Wybierz status który chcesz usunąć!")
+////                                    });
+////                                }
+////                            };break;
+//                            case 'Redo': {
+//                                    statusesGrid.fill();
+//                            } 
+//                    }
+//                });               
+//                var statusesGrid = statusesLayout.cells("a").attachGrid({
+//                    image_path:'codebase/imgs/',
+//                    columns: [
+//                        {
+//                            label: _("Imie"),
+//                            id: "name",
+//                            width: 100,
+//                            type: "ro", 
+//                            sort: "str", 
+//                            align: "left"     
+//                        },                                                
+//                        {
+//                            label: _("Opis"),
+//                            id: "description",
+//                            width: 300,
+//                            type: "txt", 
+//                            sort: "str", 
+//                            align: "left"     
+//                        }                          
+//                    ]                   
+//                });
+//                statusesGrid.fill = function() {   
+//                    this.clearAll();
+//                    ajaxGet("api/statuses", "", function(data){
+//                        if (data && data.success){                    
+//                            statusesGrid.parse(data.data, "js");
+//                        }
+//                    });	                    
+//                };                  
+//                statusesGrid.fill();                
 /**
- * Statuses
- */                
-                statusesGridToolBar = statusesLayout.cells("a").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                                {type: "separator",   id: "sep4"}, 
-                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                        ]
-                });
-                statusesGridToolBar.attachEvent("onClick", function(btn) {
-                    switch (btn){
-                            case 'Add':{
-                                var addingWindow = createWindow(_("Dodaj status"), 300, 300);
-                                var addingForm = createForm([
-                                    {type:"fieldset",  offsetTop:0, label:_("Nowy status"), width:250, list:[                                                                          
-                                            {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
-                                            {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
-                                            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                                                {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
-                                                {type: "newcolumn"},
-                                                {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
-                                            ]}
-                                    ]}                                    
-                                ], addingWindow);
-                                addingForm.attachEvent("onButtonClick", function(name){
-                                    if (name == 'save') {
-                                        ajaxPost("api/statuses", addingForm.getFormData(), function(data){
-                                            if (data && data.success) {
-                                                statusesGrid.addRow(data.data.id, [data.data.name, data.data.description]);  
-                                                addingWindow.close();
-                                            }
-                                        });
-                                    }
-                                });                                
-                            };break;
-                            case 'Edit': {
-                                var id = statusesGrid.getSelectedRowId();
-                                if (id) {
-                                    var addingWindow = createWindow(_("Edytuj status"), 300, 300);
-                                    var addingForm = createForm([
-                                        {type:"fieldset",  offsetTop:0, label:_("Status"), width:250, list:[                                                                          
-                                                {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
-                                                {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
-                                                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                                                    {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
-                                                    {type: "newcolumn"},
-                                                    {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
-                                                ]}
-                                        ]}                                    
-                                    ], addingWindow);
-                                    var rowData = statusesGrid.getRowData(id);
-                                    addingForm.setFormData(rowData);
-                                    addingForm.attachEvent("onButtonClick", function(name){
-                                        if (name == 'save') {
-                                            ajaxGet("api/statuses/" + statusesGrid.getSelectedRowId() + "/edit", addingForm.getFormData(), function(data){
-                                                if (data && data.success) {
-                                                    statusesGrid.fill();
-                                                    addingWindow.close();
-                                                }
-                                            });
-                                        }
-                                    });
-                                } else {
-                                    dhtmlx.alert({
-                                        title:_("Wiadomość"),
-                                        text:_("Wybierz status który chcesz edytować!")
-                                    });
-                                }
-                            };break; 
-                            case 'Del':{
-                                var id = statusesGrid.getSelectedRowId();
-                                if (id) {
-                                    ajaxDelete("api/statuses/" + id, "", function(data){
-                                        if (data && data.success){
-                                            statusesGrid.deleteRow(id);
-                                        }
-                                    });    
-                                } else {
-                                    dhtmlx.alert({
-                                        title:_("Wiadomość"),
-                                        text:_("Wybierz status który chcesz usunąć!")
-                                    });
-                                }
-                            };break;
-                            case 'Redo': {
-                                    statusesGrid.fill();
-                            } 
-                    }
-                });               
-                var statusesGrid = statusesLayout.cells("a").attachGrid({
-                    image_path:'codebase/imgs/',
-                    columns: [
-                        {
-                            label: _("Imie"),
-                            id: "name",
-                            width: 100,
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"     
-                        },                                                
-                        {
-                            label: _("Opis"),
-                            id: "description",
-                            width: 300,
-                            type: "txt", 
-                            sort: "str", 
-                            align: "left"     
-                        }                          
-                    ],
-                    multiselect: true                    
-                });
-                statusesGrid.fill = function() {   
-                    this.clearAll();
-                    ajaxGet("api/statuses", "", function(data){
-                        if (data && data.success){                    
-                            statusesGrid.parse(data.data, "js");
-                        }
-                    });	                    
-                };                  
-                statusesGrid.fill();
-                var dpStatusesProductsGrid = new dataProcessor("api/statuses", "js");                
-                dpStatusesProductsGrid.init(statusesGrid);
-                dpStatusesProductsGrid.enableDataNames(true);
-                dpStatusesProductsGrid.setTransactionMode("REST");
-                dpStatusesProductsGrid.enablePartialDataSend(true);
-                dpStatusesProductsGrid.enableDebug(true);
-                dpStatusesProductsGrid.setUpdateMode("row", true);
-                dpStatusesProductsGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-                    data.id = id;
-                    ajaxGet("api/statuses/" + id + "/edit", data, function(data){                                                            
-                        
-                    });
-                });                 
-/**
- * Countries, Languages
+ * Countries
+ * 
  */
-                countriesGridToolBar = countriesLayout.cells("a").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                                {type: "separator",   id: "sep4"}, 
-                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                        ]
-                });
+                var countriesGridToolBar = countriesLayout.cells("a").attachToolbar(standartToolbar);
                 countriesGridToolBar.attachEvent("onClick", function(btn) {
+                    var formStruct = [
+                        {type:"fieldset",  offsetTop:0, label:_("Kraj"), width:250, list:[                                                                          
+                                {type:"input",  name:"name",        label:_("Imie"), offsetTop:13, labelWidth:80},                                                                				                                                
+                                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                    {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                                    {type: "newcolumn"},
+                                    {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                                ]}
+                        ]}                                    
+                    ];
                     switch (btn){
                             case 'Add':{
                                 var addingWindow = createWindow(_("Dodaj kraj"), 300, 300);
-                                var addingForm = createForm([
-                                    {type:"fieldset",  offsetTop:0, label:_("Nowy status"), width:250, list:[                                                                          
-                                            {type:"input",  name:"name",  label:_("Imie"),          offsetTop:13, labelWidth:80},                                                                				                                            
-                                            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                                                {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
-                                                {type: "newcolumn"},
-                                                {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
-                                            ]}
-                                    ]}                                    
-                                ], addingWindow);
+                                var addingForm = createForm(formStruct, addingWindow);
                                 addingForm.attachEvent("onButtonClick", function(name){
                                     if (name == 'save') {
-                                        ajaxPost("api/country", addingForm.getFormData(), function(data){
-                                            if (data && data.success) {
-                                                countriesGrid.addRow(data.data.id, [data.data.name]);  
-                                                addingWindow.close();
-                                            }
-                                        });
+                                        countriesGrid.add("api/country", addingForm.getFormData());                                        
                                     }
                                 });                                
                             };break;
@@ -653,26 +521,12 @@ function settingsInit(cell) {
                                 var id = countriesGrid.getSelectedRowId();
                                 if (id) {
                                     var addingWindow = createWindow(_("Edytuj kraj"), 300, 300);
-                                    var addingForm = createForm([
-                                        {type:"fieldset",  offsetTop:0, label:_("Kraj"), width:250, list:[                                                                          
-                                                {type:"input",  name:"name",        label:_("Imie"), offsetTop:13, labelWidth:80},                                                                				                                                
-                                                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                                                    {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
-                                                    {type: "newcolumn"},
-                                                    {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
-                                                ]}
-                                        ]}                                    
-                                    ], addingWindow);
+                                    var addingForm = createForm(formStruct, addingWindow);
                                     var rowData = countriesGrid.getRowData(id);
                                     addingForm.setFormData(rowData);
                                     addingForm.attachEvent("onButtonClick", function(name){
                                         if (name == 'save') {
-                                            ajaxGet("api/country/" + countriesGrid.getSelectedRowId() + "/edit", addingForm.getFormData(), function(data){
-                                                if (data && data.success) {
-                                                    countriesGrid.fill();
-                                                    addingWindow.close();
-                                                }
-                                            });
+                                            countriesGrid.edit("api/country/" + id + "/edit", addingForm.getFormData());
                                         }
                                     });
                                 } else {
@@ -685,11 +539,7 @@ function settingsInit(cell) {
                             case 'Del':{
                                 var id = countriesGrid.getSelectedRowId();
                                 if (id) {
-                                    ajaxDelete("api/country/" + id, "", function(data){
-                                        if (data && data.success){
-                                            countriesGrid.deleteRow(id);
-                                        }
-                                    });    
+                                    countriesGrid.delete("api/country/" + id, id);   
                                 } else {
                                     dhtmlx.alert({
                                         title:_("Wiadomość"),
@@ -705,7 +555,7 @@ function settingsInit(cell) {
                 var countriesGrid = countriesLayout.cells("a").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [
-                        {label: _("Imie"), id: "name", width: 100, type: "ed",  sort: "str", align: "left"},                                                                         
+                        {label: _("Imie"), id: "name", width: 100, type: "ro",  sort: "str", align: "left"},                                                                         
                     ]                  
                 });
                 countriesGrid.fill = function() {   
@@ -716,31 +566,12 @@ function settingsInit(cell) {
                         }
                     });	                    
                 };                  
-                countriesGrid.fill();
-                var dpCountriesGrid = new dataProcessor("api/country", "js");                
-                dpCountriesGrid.init(countriesGrid);
-                dpCountriesGrid.enableDataNames(true);
-                dpCountriesGrid.setTransactionMode("REST");
-                dpCountriesGrid.enablePartialDataSend(true);
-                dpCountriesGrid.enableDebug(true);
-                dpCountriesGrid.setUpdateMode("row", true);
-                dpCountriesGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-                    data.id = id;
-                    ajaxGet("api/country/" + id + "/edit", data, function(data){                                                            
-                        
-                    });
-                });  
-                
-                languagesGridToolBar = countriesLayout.cells("b").attachToolbar({
-                        iconset: "awesome",
-                        items: [
-                                {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                                {type: "separator",   id: "sep4"}, 
-                                {id: "Redo", type: "button", text: _("Odśwież"), img: "fa fa-refresh"}
-                        ]
-                });
+                countriesGrid.fill();  
+/**
+ * Languages
+ * 
+ */                
+                var languagesGridToolBar = countriesLayout.cells("b").attachToolbar(standartToolbar);
                 languagesGridToolBar.attachEvent("onClick", function(btn) {
                     switch (btn){
                             case 'Add':{

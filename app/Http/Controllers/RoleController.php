@@ -142,7 +142,7 @@ class RoleController extends BaseController
         if (!$roleId) {
             $data = \App\Models\User::all();
         } else {
-            $role = $this->repository->getModel()::find($roleId);        
+            $role = $this->repository->get($roleId);        
             $data = $role->users;
         }
         

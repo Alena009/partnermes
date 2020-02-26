@@ -109,9 +109,7 @@ Route::group([
     
     Route::get('/warehouse/amountproduct/{productId}', 'WarehouseController@amountProductInWarehouse');  
     Route::get('/warehouse/products/{grupy?}', 'WarehouseController@products');  
-    Route::resource('/warehouse', 'WarehouseController'); 
- 
-    Route::get('/gantt', 'OperationController@buildGantt');   
+    Route::resource('/warehouse', 'WarehouseController');  
 });
 
 Route::post('login', 'API\UserController@login');

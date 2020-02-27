@@ -212,13 +212,7 @@ function productsInit(cell) {
                         var componentsWindow = createWindow(_("Komponenty"), 500, 500);  
                         var componentsLayout = componentsWindow.attachLayout("1C");
                         componentsLayout.cells("a").hideHeader();
-                        componentsGridToolbar = componentsLayout.cells("a").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                {id:"Add", type:"button", text: _("Dodaj"),  img: "fa fa-plus-square"},                                
-                                {id:"Del", type:"button", text: _("Usun"),   img: "fa fa-minus-square"}
-                            ]                    
-                        });    
+                        componentsGridToolbar = componentsLayout.cells("a").attachToolbar(standartToolbar);    
                         componentsGridToolbar.attachEvent("onClick", function(id) {
                             var formStruct = [
                                             {type: "settings", position: "label-left", labelWidth: 115, inputWidth: 160},
@@ -265,13 +259,18 @@ function productsInit(cell) {
                                     if (selectedComponentId) {
                                         var addingWindow = createWindow(_("Componenty"), 300, 300);
                                         var addingForm = createForm(formStruct, addingWindow);  
-                                        var rowData = componentsGrid.getRowData(componentsGrid.getSelectedRowId());
+                                        var rowData = componentsGrid.getRowData(componentsGrid.getSelectedRowId());                                                            
                                         var productCombo = addingForm.getCombo("component_id");                        
                                         ajaxGet("api/products", '', function(data){
                                             productCombo.addOption(data.data);
                                             productCombo.selectOption(productCombo.getIndexByValue(rowData.component_id));
-                                        });                        
+                                        });
                                         addingForm.setFormData(rowData);
+                                        addingForm.attachEvent("onButtonClick", function(name){
+                                            if (name == "save") {
+                                                componentsGrid.edit("api/components/" + selectedComponentId + "/edit", this.getFormData());
+                                            }
+                                        });                                              
                                     } else {
                                         dhtmlx.alert({
                                             title:_("Wiadomość"),
@@ -282,11 +281,7 @@ function productsInit(cell) {
                                 case "Del": {
                                     var selectedComponentId = componentsGrid.getSelectedRowId();
                                     if (selectedComponentId) {
-                                        ajaxDelete("api/components/" + selectedComponentId, "", function(data){
-                                            if (data && data.success) {
-                                                componentsGrid.deleteRow(selectedComponentId);
-                                            }
-                                        });    
+                                        componentsGrid.delete("api/components/" + selectedComponentId, selectedComponentId);                                           
                                     } else {
                                         dhtmlx.alert({
                                             title:_("Wiadomość"),

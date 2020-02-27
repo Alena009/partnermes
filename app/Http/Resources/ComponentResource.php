@@ -17,6 +17,7 @@ class ComponentResource extends JsonResource
         $product = $this->product;
         
         return [
+            'id'                 => $this->id,
             'kod'                => $product->kod,            
             'name'               => $product->name,
             'product_type_name'  => $product->type->name,

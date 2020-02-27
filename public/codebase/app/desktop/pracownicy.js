@@ -128,19 +128,7 @@ function pracownicyInit(cell) {
                         case 'Del':{                            
                             var id = pracownicyGrid.getSelectedRowId();
                             if (id) {
-                                dhtmlx.confirm({
-                                    title:_("Ostrożność"),                                    
-                                    text:_("Czy na pewno chcesz usunąć pracownika?"),
-                                    callback: function(result){
-                                        if (result) {                                
-                                            ajaxDelete("api/users/" + id, '', function(data) {
-                                                if (data.success) {
-                                                    pracownicyGrid.deleteSelectedRows();
-                                                }
-                                            });
-                                        }
-                                    }
-                                });
+                                pracownicyGrid.delete("api/users/" + id, id);
                             } else {
                                 dhtmlx.alert({
                                     title:_("Wiadomość"),

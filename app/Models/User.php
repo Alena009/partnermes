@@ -61,4 +61,8 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Models\Operation', 'user_id', 'id')->where("closed", "<", 1);
     }   
+    
+    public function getRelationships(){
+        return $this->relationships;
+    }    
 }

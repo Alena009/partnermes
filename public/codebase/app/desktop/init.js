@@ -11,7 +11,7 @@ function appInit() {
                 elem.id = elem.name;
                 elem.text = elem.description;
             });       
-        }
+        }        
 	mainSidebar = new dhtmlXSideBar({
 		parent: document.body,
 		icons_path: "imgs/sidebar/",
@@ -31,25 +31,33 @@ function appInit() {
 		icons_path: "imgs/toolbar/",
 		items: [
 			{type: "text", id: "title", text: "&nbsp;"},
-			{type: "spacer"},
-                        {type: "text",   id: "user",     text: ""},	
-                        {type: "text",   id: "language", text: ""},	
-			{type: "button", id: "logoout", img: "logout.png"}
+			{type: "spacer"},	
+                        {type: "text",   id: "user",     text: ""},  
+                        {type: "text",   id: "langLabel",text: "Language: "},	                        
+			{type: "button", id: "logout", img: "logout.png"}
 		]
-	});
-
+	});   
+        ajaxGet("api/language", "", function(data){
+            if (data.data && data.success) {
+                data.data.forEach(function(item){                    
+                    mainToolbar.addButton("language-"+item.short, 3, item.short, null, null);
+                });                        
+                mainToolbar.disableItem("language-"+localStorage.getItem("language"));
+            }
+        }); 
 	mainSidebar.attachEvent("onSelect", function(id){
 		mainToolbar.setItemText("title", window.dhx4.template("<span style='font-weight: bold; font-size: 14px;'>#text#</span>", {text:mainSidebar.cells(id).getText().text}));
-                mainToolbar.setItemText("user", JSON.parse(localStorage.getItem("userData")).name);
-                mainToolbar.setItemText("language", JSON.parse(localStorage.getItem("userData")).language);
-		window.dhx4.callEvent("onSidebarSelect", [id, this.cells(id)]);
+                mainToolbar.setItemText("user", JSON.parse(localStorage.getItem("userData")).name);                
+		window.dhx4.callEvent("onSidebarSelect", [id, this.cells(id)]);                               
 	});
-	mainToolbar.attachEvent("onClick", function(id) {
+	mainToolbar.attachEvent("onClick", function(id) {            
 		console.log('mainToolbar.onClick',arguments);
-		if (id='logoout'){
-			ajaxPost('api/logout','',function(){
-                            location.reload();
-			});
+                if (id.indexOf('language-')>-1) {
+                    localStorage.setItem("language", mainToolbar.getItemText(id));
+                    location.reload();
+                }
+		if (id=='logout'){
+                    ajaxPost('api/logout','',function(){ location.reload(); });
 		}
 	});
 	mainSidebar.cells("zlecenia").setActive(true);
@@ -91,9 +99,9 @@ function loginFormShow(callback2={}){
 		w1.show();
 		w1.centerOnScreen();
 		var loginFormData = [
-			{type: "settings", position: "label-left", labelWidth: 95, inputWidth: 150},
+			{type: "settings", position: "label-left", labelWidth: 75, inputWidth: 150},
 			{type: "block", blockOffset: 30, offsetTop: 5, width: "auto", list: [                                
-                                {type: "checkbox", label: _("Wejść jako gość"), name: "isguest", value: "", offsetTop: 5},
+                                {type: "checkbox", label: _("Gość"), name: "isguest", value: "", offsetTop: 5},
 				{type: "input", label: "Login", name: "login", value: "", offsetTop: 5},
 				{type: "password", label: "Hasło", name: "password", value: ""},
 				{type: "button", name: "submit", value: "Zaloguj", offsetTop: 5, offsetLeft: 72}
@@ -112,7 +120,7 @@ function loginFormShow(callback2={}){
                                     localStorage.setItem('userData', JSON.stringify(data.user));                                    
                                     localStorage.setItem('token',data.token);   
                                     localStorage.setItem("user", JSON.parse(localStorage.getItem("userData")).name);
-                                    localStorage.setItem("language",  JSON.parse(localStorage.getItem("userData")).language?  JSON.parse(localStorage.getItem("userData")).language:'pl');
+                                    localStorage.setItem("language",  JSON.parse(localStorage.getItem("userData")).language?JSON.parse(localStorage.getItem("userData")).language:'pl');
 					w1.hide();
 					if (loginForm.callback.success && isFunction(loginForm.callback.success)){
 						loginForm.callback['success']();
@@ -165,7 +173,8 @@ function loginFormShow(callback2={}){
 
 function logged(){    	
         ajaxPost("api/logged",'',function(data){
-		//var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? JSON.parse(r.xmlDoc.responseText):false;
+		//var data = (r && r.xmlDoc && r.xmlDoc.status && r.xmlDoc.status==200 && r.xmlDoc.responseText) ? 
+                //JSON.parse(r.xmlDoc.responseText):false;
 		if (data.success===true){                        
 			appInit();                        
 			//window.dhx4.attachEvent("onload", loginFormShow);

@@ -83,15 +83,18 @@ Route::group([
     Route::get('/rolespermissions/edit', 'RolePermissionController@editByRoleAndPermissionId');        
     Route::resource('/rolespermissions', 'RolePermissionController');          
     
-    Route::get('/tasks/notfororder', 'TaskController@notForOrder');
-    Route::get('/tasks/{task}/translations', 'TaskController@getTranslations');
+    Route::delete('/tasks/{task}/translations/{locale}',      'TaskController@delTranslation');
+    Route::post(  '/tasks/{task}/translations',               'TaskController@addTranslation');
+    Route::get(   '/tasks/{task}/translations/{translation}', 'TaskController@editTranslation');
+    Route::get(   '/tasks/{task}/translations',               'TaskController@getTranslations');
+    Route::get('/tasks/notfororder',            'TaskController@notForOrder');    
     Route::get('/tasks/listbygroups/{groups?}', 'TaskController@listByGroups');    
     Route::resource('/tasks', 'TaskController');    
     
-    Route::get('/taskgroups/{taskgroup}/{translation}/translations/del', 
-            'TaskGroupController@delTranslation');
-    Route::get('/taskgroups/{taskgroup}/translations/add', 'TaskGroupController@addTranslation');
-    Route::get('/taskgroups/{taskgroup}/translations', 'TaskGroupController@getTranslations');
+    Route::delete('/taskgroups/{taskgroup}/translations/{locale}',      'TaskGroupController@delTranslation');
+    Route::post(  '/taskgroups/{taskgroup}/translations',               'TaskGroupController@addTranslation');
+    Route::get(   '/taskgroups/{taskgroup}/translations/{translation}', 'TaskGroupController@editTranslation');
+    Route::get(   '/taskgroups/{taskgroup}/translations',               'TaskGroupController@getTranslations');
     Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
     Route::resource('/taskgroups', 'TaskGroupController');    
     

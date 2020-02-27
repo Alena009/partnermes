@@ -316,8 +316,17 @@ class BaseController extends Controller
         }
     }
     
-    public function delTranslation($id, $translationId)
+    public function delTranslation($id, $locale)
     {
+        $record = [];
+        $record = $this->repository->getModel()::find($id);
         
+        if ($record) {
+            $record->deleteTranslations($locale);
+            return response()->json(['data' => $record, 'success' => true]);              
+        } else {
+            return response()->json(['data' => [], 'success' => false, 
+                "message" => "Record was not found"]);        
+        }        
     }    
 }

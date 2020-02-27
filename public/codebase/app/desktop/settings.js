@@ -23,8 +23,8 @@ function settingsInit(cell) {
                 var countriesLayout = mainTabbar.tabs("a3").attachLayout("2U");
                     countriesLayout.cells("a").setText(_("Kraj"));                    
                     countriesLayout.cells("b").setText(_("Język"));
-                var translationsLayout = mainTabbar.tabs("a4").attachLayout("1C");
-                    translationsLayout.cells("a").hideHeader();                      
+                var translationsLayout = mainTabbar.tabs("a4").attachLayout("1C");                    
+                    translationsLayout.cells("a").setText(_("Tłumaczenia"));                      
 /**
  * 
  * Roles tab
@@ -385,114 +385,13 @@ function settingsInit(cell) {
                         }
                     });
                 };                
-                usersGrid.fill(0);                                                                                                        
-///**
-// * Statuses
-// */                
-//                var statusesGridToolBar = statusesLayout.cells("a").attachToolbar(standartToolbar);
-//                statusesGridToolBar.attachEvent("onClick", function(btn) {
-//                    var formStruct = [
-//                                    {type:"fieldset",  offsetTop:0, label:_("Nowy status"), width:250, list:[                                                                          
-//                                            {type:"input",  name:"name",        label:_("Nazwa"), offsetTop:13, labelWidth:80},                                                                				
-//                                            {type:"input",  name:"description", label:_("Opis"),  offsetTop:13, labelWidth:80, rows: 3},                                                                				
-//                                            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-//                                                {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
-//                                                {type: "newcolumn"},
-//                                                {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
-//                                            ]}
-//                                    ]}                                    
-//                                ];
-//                    switch (btn){
-//                            case 'Add':{
-//                                var addingWindow = createWindow(_("Dodaj status"), 300, 300);
-//                                var addingForm = createForm(formStruct, addingWindow);
-//                                addingForm.attachEvent("onButtonClick", function(name){
-//                                    if (name == 'save') {
-//                                        ajaxPost("api/statuses", addingForm.getFormData(), function(data){
-//                                            if (data && data.success) {
-//                                                statusesGrid.addRow(data.data.id, [data.data.name, data.data.description]);  
-//                                                addingWindow.close();
-//                                            }
-//                                        });
-//                                    }
-//                                });                                
-//                            };break;
-//                            case 'Edit': {
-//                                var id = statusesGrid.getSelectedRowId();
-//                                if (id) {
-//                                    var addingWindow = createWindow(_("Edytuj status"), 300, 300);
-//                                    var addingForm = createForm(formStruct, addingWindow);
-//                                    var rowData = statusesGrid.getRowData(id);
-//                                    addingForm.setFormData(rowData);
-//                                    addingForm.attachEvent("onButtonClick", function(name){
-//                                        if (name == 'save') {
-//                                            ajaxGet("api/statuses/" + statusesGrid.getSelectedRowId() + "/edit", addingForm.getFormData(), function(data){
-//                                                if (data && data.success) {
-//                                                    statusesGrid.fill();
-//                                                    addingWindow.close();
-//                                                }
-//                                            });
-//                                        }
-//                                    });
-//                                } else {
-//                                    dhtmlx.alert({
-//                                        title:_("Wiadomość"),
-//                                        text:_("Wybierz status który chcesz edytować!")
-//                                    });
-//                                }
-//                            };break; 
-////                            case 'Del':{
-////                                var id = statusesGrid.getSelectedRowId();
-////                                if (id) {
-////                                    ajaxDelete("api/statuses/" + id, "", function(data){
-////                                        if (data && data.success){
-////                                            statusesGrid.deleteRow(id);
-////                                        }
-////                                    });    
-////                                } else {
-////                                    dhtmlx.alert({
-////                                        title:_("Wiadomość"),
-////                                        text:_("Wybierz status który chcesz usunąć!")
-////                                    });
-////                                }
-////                            };break;
-//                            case 'Redo': {
-//                                    statusesGrid.fill();
-//                            } 
-//                    }
-//                });               
-//                var statusesGrid = statusesLayout.cells("a").attachGrid({
-//                    image_path:'codebase/imgs/',
-//                    columns: [
-//                        {
-//                            label: _("Imie"),
-//                            id: "name",
-//                            width: 100,
-//                            type: "ro", 
-//                            sort: "str", 
-//                            align: "left"     
-//                        },                                                
-//                        {
-//                            label: _("Opis"),
-//                            id: "description",
-//                            width: 300,
-//                            type: "txt", 
-//                            sort: "str", 
-//                            align: "left"     
-//                        }                          
-//                    ]                   
-//                });
-//                statusesGrid.fill = function() {   
-//                    this.clearAll();
-//                    ajaxGet("api/statuses", "", function(data){
-//                        if (data && data.success){                    
-//                            statusesGrid.parse(data.data, "js");
-//                        }
-//                    });	                    
-//                };                  
-//                statusesGrid.fill();                
+                usersGrid.fill(0);                                                                                                                      
 /**
- * Countries
+ * Countries, languages Tab
+ * 
+ */
+/**
+ * A
  * 
  */
                 var countriesGridToolBar = countriesLayout.cells("a").attachToolbar(standartToolbar);
@@ -568,33 +467,30 @@ function settingsInit(cell) {
                 };                  
                 countriesGrid.fill();  
 /**
- * Languages
+ * B
  * 
  */                
                 var languagesGridToolBar = countriesLayout.cells("b").attachToolbar(standartToolbar);
                 languagesGridToolBar.attachEvent("onClick", function(btn) {
+                    var addingFormStruct = [
+                        {type:"fieldset",  offsetTop:0, label:_("Nowy język"), width:250, list:[                                                                          
+                                {type:"input",  name:"name",  label:_("Nazwa"),         offsetTop:13, labelWidth:80},                                                                				
+                                {type:"input",  name:"short", label:_("Krótkie imię"),  offsetTop:13, labelWidth:80},                                                                				
+                                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
+                                    {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
+                                    {type: "newcolumn"},
+                                    {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
+                                ]}
+                        ]}                                    
+                    ];
                     switch (btn){
                             case 'Add':{
                                 var addingWindow = createWindow(_("Dodaj język"), 300, 300);
-                                var addingForm = createForm([
-                                    {type:"fieldset",  offsetTop:0, label:_("Nowy język"), width:250, list:[                                                                          
-                                            {type:"input",  name:"name",  label:_("Nazwa"),         offsetTop:13, labelWidth:80},                                                                				
-                                            {type:"input",  name:"short", label:_("Krótkie imię"),  offsetTop:13, labelWidth:80},                                                                				
-                                            {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                                                {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
-                                                {type: "newcolumn"},
-                                                {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
-                                            ]}
-                                    ]}                                    
-                                ], addingWindow);
+                                var addingForm = createForm(addingFormStruct, addingWindow);
                                 addingForm.attachEvent("onButtonClick", function(name){
                                     if (name == 'save') {
-                                        ajaxPost("api/language", addingForm.getFormData(), function(data){
-                                            if (data && data.success) {
-                                                languagesGrid.addRow(data.data.id, [data.data.name, data.data.short]);  
-                                                addingWindow.close();
-                                            }
-                                        });
+                                        languagesGrid.add("api/language", addingForm.getFormData());
+                                        addingWindow.close();
                                     }
                                 });                                
                             };break;
@@ -602,27 +498,13 @@ function settingsInit(cell) {
                                 var id = languagesGrid.getSelectedRowId();
                                 if (id) {
                                     var addingWindow = createWindow(_("Edytuj język"), 300, 300);
-                                    var addingForm = createForm([
-                                        {type:"fieldset",  offsetTop:0, label:_("Status"), width:250, list:[                                                                          
-                                                {type:"input",  name:"name",  label:_("Nazwa"),         offsetTop:13, labelWidth:80},                                                                				
-                                                {type:"input",  name:"short", label:_("Krótkie imię"),  offsetTop:13, labelWidth:80},                                                                				
-                                                {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
-                                                    {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},
-                                                    {type: "newcolumn"},
-                                                    {type:"button", name:"cancel",     	value:_("Anuluj"),   		offsetTop:18}
-                                                ]}
-                                        ]}                                    
-                                    ], addingWindow);
+                                    var addingForm = createForm(addingFormStruct, addingWindow);
                                     var rowData = languagesGrid.getRowData(id);
                                     addingForm.setFormData(rowData);
                                     addingForm.attachEvent("onButtonClick", function(name){
                                         if (name == 'save') {
-                                            ajaxGet("api/language/" + languagesGrid.getSelectedRowId() + "/edit", addingForm.getFormData(), function(data){
-                                                if (data && data.success) {
-                                                    languagesGrid.fill();
-                                                    addingWindow.close();
-                                                }
-                                            });
+                                            languagesGrid.edit("api/language/" + id + "/edit", addingForm.getFormData());
+                                            addingWindow.close();
                                         }
                                     });
                                 } else {
@@ -635,11 +517,7 @@ function settingsInit(cell) {
                             case 'Del':{
                                 var id = languagesGrid.getSelectedRowId();
                                 if (id) {
-                                    ajaxDelete("api/language/" + id, "", function(data){
-                                        if (data && data.success){
-                                            languagesGrid.deleteRow(id);
-                                        }
-                                    });    
+                                    languagesGrid.delete("api/language/" + id, id);   
                                 } else {
                                     dhtmlx.alert({
                                         title:_("Wiadomość"),
@@ -648,29 +526,15 @@ function settingsInit(cell) {
                                 }
                             };break;
                             case 'Redo': {
-                                    languagesGrid.fill();
+                                languagesGrid.fill();
                             } 
                     }
                 });               
                 var languagesGrid = countriesLayout.cells("b").attachGrid({
                     image_path:'codebase/imgs/',
                     columns: [
-                        {
-                            label: _("Imie"),
-                            id: "name",
-                            width: 100,
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"     
-                        },                                                
-                        {
-                            label: _("Krótkie imię"),
-                            id: "short",
-                            width: 50,
-                            type: "ed", 
-                            sort: "str", 
-                            align: "left"     
-                        }                          
+                        {label: _("Imie"),         id: "name",  width: 100, type: "ro", sort: "str", align: "left"},                                                
+                        {label: _("Krótkie imię"), id: "short", width: 50,  type: "ro", sort: "str", align: "left"}                          
                     ]                   
                 });
                 languagesGrid.fill = function() {   
@@ -681,20 +545,7 @@ function settingsInit(cell) {
                         }
                     });	                    
                 };                  
-                languagesGrid.fill();
-                var dpLanguagesGrid = new dataProcessor("api/language", "js");                
-                dpLanguagesGrid.init(languagesGrid);
-                dpLanguagesGrid.enableDataNames(true);
-                dpLanguagesGrid.setTransactionMode("REST");
-                dpLanguagesGrid.enablePartialDataSend(true);
-                dpLanguagesGrid.enableDebug(true);
-                dpLanguagesGrid.setUpdateMode("row", true);
-                dpLanguagesGrid.attachEvent("onBeforeDataSending", function(id, state, data){
-                    data.id = id;
-                    ajaxGet("api/language/" + id + "/edit", data, function(data){                                                            
-                        
-                    });
-                });                  
+                languagesGrid.fill();                 
 /**
  * Tlumaczenia
  * 
@@ -710,37 +561,20 @@ function settingsInit(cell) {
                     ]
                 });
                 translationsSidebar.attachEvent("onSelect", function(id, lastId){
-                    var translationsLayout = translationsSidebar.cells(id).attachLayout("2U");
-                    translationsLayout.cells("a").setText(_("Wpisy"));
-                    translationsLayout.cells("b").setText(_("Tłumaczenia"));
-                    recordsGridToolBar = translationsLayout.cells("a").attachToolbar(emptyToolbar);                    
-                    var recordsGrid = translationsLayout.cells("a").attachGrid({
+                    var layout = translationsSidebar.cells(id).attachLayout("2U");
+                    layout.cells("a").setText(_("Wpisy"));
+                    layout.cells("b").setText(_("Tłumaczenia"));                  
+                    var recordsGrid = layout.cells("a").attachGrid({
                         image_path:'codebase/imgs/',
                         columns: [
-                            {
-                                label: _("Imie"),
-                                id: "name",
-                                width: 150,
-                                type: "ro", 
-                                sort: "str", 
-                                align: "left"     
-                            }                         
+                            {label: _("Imie"), id: "name", width: 150, type: "ro", sort: "str", align: "left"}                         
                         ] 
                     });
                     recordsGrid.fill("api/" + id);
                     recordsGrid.attachEvent("onRowSelect", function(rId) {
                         translationsGrid.fill("api/" + id + "/" + rId + "/translations"); 
                     }); 
-                    translationsGridToolBar = translationsLayout.cells("b").attachToolbar({
-                            iconset: "awesome",
-                            items: [
-                                    {id: "Add",  type: "button", text: _("Dodaj"), img: "fa fa-plus-square "},
-                                    {id: "Edit", type: "button", text: _("Edytuj"), img: "fa fa-edit"},
-                                    {id: "Del",  type: "button", text: _("Usuń"), img: "fa fa-minus-square"},
-                                    {type: "separator", id: "sep3"},
-                                    {id: "Redo", type: "button",text: _("Odśwież"), img: "fa fa-refresh"}
-                            ]
-                    });
+                    var translationsGridToolBar = layout.cells("b").attachToolbar(standartToolbar);
                     translationsGridToolBar.attachEvent("onClick", function(btn) {
                         switch (btn){
                             case 'Add':{
@@ -771,15 +605,13 @@ function settingsInit(cell) {
                                         switch (name){
                                             case 'save': {                                    
                                                 var data = addingForm.getFormData(); 
-                                                data.locale = localeCombo.getComboText();
-                                                ajaxGet("api/" + id + "/" + selectedRecordId + "/translations/add", data, function(data){
+                                                data.locale = localeCombo.getComboText();                                                
+                                                ajaxPost("api/" + id + "/" + selectedRecordId + "/translations", data, function(data){
                                                     if (data && data.success) {
-                                                        dhtmlx.alert({
-                                                            title:_("Wiadomość"),
-                                                            text:_("Zapisane!")
-                                                        });  
+                                                        translationsGrid.fill("api/" + id + "/" + selectedRecordId + "/translations");
                                                     }
-                                                });                                                                
+                                                });
+                                                addingWindow.close();
                                             };break;
                                         }
                                     });
@@ -796,14 +628,9 @@ function settingsInit(cell) {
                                 if (selectedRecordId) {
                                     var translationId = translationsGrid.getSelectedRowId();
                                     if (translationId) {
-                                        ajaxGet("api/" + id + "/" + selectedRecordId + "/" + translationId + "/translations/del", "", function(data){
-                                            if (data && data.success) {
-                                                dhtmlx.alert({
-                                                    title:_("Wiadomość"),
-                                                    text:_("Usunięte!")
-                                                });  
-                                            }
-                                        });                                     
+                                        var locale = translationsGrid.getRowData(translationId).locale;
+                                        translationsGrid.delete("api/" + id + "/" + selectedRecordId + "/translations/" + locale, translationId);                                                                             
+                                        translationsGrid.fill("api/" + id + "/" + selectedRecordId + "/translations");
                                     } else {
                                         dhtmlx.alert({
                                             title:_("Wiadomość"),
@@ -830,46 +657,17 @@ function settingsInit(cell) {
                             };break;
                         }
                     });
-                    var translationsGrid = translationsLayout.cells("b").attachGrid({
+                    var translationsGrid = layout.cells("b").attachGrid({
                         image_path:'codebase/imgs/',
                         columns: [
-                            {
-                                label: _("Imie"),
-                                id: "name",
-                                width: 100,
-                                type: "ed", 
-                                sort: "str", 
-                                align: "left"     
-                            },       
-                            {
-                                label: _("Opis"),
-                                id: "description",
-                                width: 100,
-                                type: "ed", 
-                                sort: "str", 
-                                align: "left"     
-                            }, 
-                            {
-                                label: _("Opakowanie"),
-                                id: "pack",
-                                width: 100,
-                                type: "ed", 
-                                sort: "str", 
-                                align: "left"     
-                            },
-                            {
-                                label: _("Język"),
-                                id: "locale",
-                                width: 50,
-                                type: "ro", 
-                                sort: "str", 
-                                align: "left"     
-                            }                          
+                            {label: _("Imie"),       id: "name",        width: 100, type: "ed", sort: "str", align: "left"},       
+                            {label: _("Opis"),       id: "description", width: 100, type: "ed", sort: "str", align: "left"}, 
+                            {label: _("Opakowanie"), id: "pack",        width: 100, type: "ed", sort: "str", align: "left"},
+                            {label: _("Język"),      id: "locale",      width: 50,  type: "ro", sort: "str", align: "left"}                          
                         ] 
                     });                   
                 });
-	}
-	
+	}	
 }
 
 var groupFormStruct = [

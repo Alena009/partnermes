@@ -32,31 +32,25 @@ class ProductGroupController extends BaseController
         return response()->json(['success' => true, 'data' => $data]);        
     }
     
-    public function products($groups)
+    public function products($groups, $locale = 'pl')
     {            
         $result = [];
         
         if ($groups == 0) {
             $groups = $this->repository->getAll();
-        } else {
-            $groups = explode(",", $groups);            
-            $groups = $this->repository->get($groups);
+        } else {         
+            $groups = $this->repository->get(explode(",", $groups));
         }
+        
         if ($groups) {
             foreach ($groups as $group) {
-//                $groupKids = $group->allKids($group);
-//                foreach($groupKids as $kidGroup) {
-//                    $groupsIds[] = $kidGroup->id;
-//                }
-//                $groupsIds[] = $group->id;     
-                $products = $group->allProducts();
-                foreach ($products as $product) {
-                    $product->product_type_name = $product->type->name;
-                    $product->product_group_name = $product->group->name;                    
-                    $result[] = $product;
-                } 
+                $groupKids = $group->allKids($group);
+                foreach($groupKids as $kidGroup) {
+                    $groupsIds[] = $kidGroup->id;
+                }
+                $groupsIds[] = $group->id; 
             }
-            //$result = $this->repository->productsByGroups($groupsIds, $locale);
+            $result = $this->repository->productsByGroups($groupsIds, $locale);
         } else {
             return response()->json(['success' => false, 'data' => $result, 
                 'message' => 'Groups products were not found']); 

@@ -11,6 +11,16 @@ class ProductGroupRepository extends BaseRepository
         return "App\Models\ProductGroup";
     }
     
+    public function getWithAdditionals($id) 
+    {
+        $result = parent::getWithAdditionals($id);
+        if ($result) {
+            $result->text  = $result->name;
+            $result->value = $result->id;
+        }
+        return $result;
+    }
+    
 //    public function productsByGroups($groups, $locale = 'pl')
 //    {
 //        $productGroup = $this->get($id);

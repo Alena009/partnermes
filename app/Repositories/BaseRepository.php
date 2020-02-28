@@ -315,7 +315,9 @@ class BaseRepository
     {
         $translatedFields = $this->translatedFields();
         foreach ($translatedFields as $field) {
-            $record->translateOrNew($locale)->$field = $request->$field;            
+            if ($request->$field) {
+                $record->translateOrNew($locale)->$field = $request->$field;
+            }            
         } 
         return $record->save();
     } 

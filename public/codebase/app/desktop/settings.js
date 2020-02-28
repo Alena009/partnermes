@@ -672,7 +672,7 @@ function settingsInit(cell) {
 
 var groupFormStruct = [
         {type:"fieldset",  offsetTop:0, label:_("Grupa"), width:253, list:[                                
-                {type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),        options: [{text: "None", value: "0"}], inputWidth: 150},                                
+                {type:"combo",  name:"parent_id",       label:_("Grupa nadrzędna"),        options: [{text: "None", value: ""}], inputWidth: 150},                                
                 {type:"input",  name:"name",    	label:_("Imie grupy"),     	offsetTop:13, 	labelWidth:80},                                                                				
                 {type: "block", name: "block", blockOffset: 0, position: "label-left", list: [
                     {type:"button", name:"save",    	value:_("Zapisz"),   		offsetTop:18},

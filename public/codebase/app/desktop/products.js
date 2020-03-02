@@ -22,57 +22,12 @@ function productsInit(cell) {
 /**
  * A
  */             
-        var productsGroupsToolBar;
-        userCanWrite ? productsGroupsToolBar = productsLayout.cells("a").attachToolbar(standartToolbar):
-                productsGroupsToolBar = productsLayout.cells("a").attachToolbar(emptyToolbar);
-        productsGroupsToolBar.attachEvent("onClick", function(btn) {
-            switch (btn){
-                    case 'Add':{			                                        
-                            createAddEditGroupWindow("api/prodgroups", 
-                                "api/prodgroups", productsGroupsTree, 0);                            
-                    };break;
-                    case 'Edit':{
-                        var id = productsGroupsTree.getSelectedId();
-                        if (id) {                                        
-                            createAddEditGroupWindow("api/prodgroups", 
-                                "api/prodgroups/" + id + "/edit", productsGroupsTree, id);                         
-                        }
-                    };break;
-                    case 'Del':{
-                        var id = productsGroupsTree.getSelectedId();
-                        if (id) {
-                            deleteNodeFromTree(productsGroupsTree, "api/prodgroups/" + id);
-                        }
-                    };break;
-                    case 'Redo':{
-                        productsGroupsTree.fill(); 
-                    };break;                    
-            }
-        });
-        var productsGroupsTree = productsLayout.cells("a").attachTreeView(treeStruct);                 
-        productsGroupsTree.attachEvent("onDrop",function(id){			
-                var parent_id = arguments[1];
-                parent_id = (parent_id) ? parent_id + '' : '';
-                var data = {
-                    id: id,
-                    parent_id: parent_id
-                };                        
-                ajaxGet("api/prodgroups/" + id + "/edit?", data, ''); 
-        });  
+        var productsGroupsTree = buildTree(productsLayout.cells("a"), "api/prodgroups");
         productsGroupsTree.attachEvent("onSelect",function(id, mode){  
-            if (mode) {
-                productsGrid.zaladuj(id);                              
-            }
-        });    
-        productsGroupsTree.fill = function(i=null){	
-            ajaxGet("api/prodgroups/grupytree/" + localStorage.language, '', function(data) {                    
-                if (data && data.success){      
-                    productsGroupsTree.clearAll();                            
-                    productsGroupsTree.loadStruct(data.data);                           
-                }                    
-            });
-        };
+            if (mode) { productsGrid.zaladuj(id); }
+        });            
         productsGroupsTree.fill();  
+        buildTreeToolbar(productsLayout.cells("a"), userCanWrite, "api/prodgroups", productsGroupsTree);
 /**
  * B
  */        

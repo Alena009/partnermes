@@ -34,47 +34,8 @@ function productsTasksInit(cell) {
 /**
  * A
  * 
- */
-                var tasksGroupsToolBar;
-                userCanWrite ? tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar(standartToolbar):
-                        tasksGroupsToolBar = tasksGroupsLayout.cells("a").attachToolbar(emptyToolbar);
-                tasksGroupsToolBar.attachEvent("onClick", function(btn) {
-                    switch (btn){
-                            case 'Add':{			                                        
-                                    createAddEditGroupWindow("api/taskgroups", "api/taskgroups", tasksGroupsTree, 0);
-                            };break;
-                            case 'Edit':{
-                                var id = tasksGroupsTree.getSelectedId();
-                                if (id) {                                        
-                                    createAddEditGroupWindow("api/taskgroups", "api/taskgroups/" + id + "/edit", tasksGroupsTree, id);
-                                }
-                            };break;
-                            case 'Del':{
-                                var id = tasksGroupsTree.getSelectedId();
-                                if (id) {
-                                    deleteNodeFromTree(tasksGroupsTree, "api/taskgroups/" + id);
-                                }
-                            };break;
-                    }
-                });
-                var tasksGroupsTree = tasksGroupsLayout.cells("a").attachTreeView({
-                        skin: "dhx_web",    // string, optional, treeview's skin
-                        iconset: "font_awesome", // string, optional, sets the font-awesome icons
-                        multiselect: false,           // boolean, optional, enables multiselect
-                        checkboxes: true,           // boolean, optional, enables checkboxes
-                        dnd: true,           // boolean, optional, enables drag-and-drop
-                        context_menu: true           // boolean, optional, enables context menu			
-                });                 
-                tasksGroupsTree.attachEvent("onDrop",function(id){			
-                        var parent_id = arguments[1];
-                        parent_id = (parent_id) ? parent_id+'' : 0;
-                        var data = {
-                            id: id,
-                            parent_id: parent_id
-                        };                        
-                        ajaxGet("api/taskgroups/" + id + "/edit?", data, ''); 
-                        return true;
-                });  
+ */                
+                var tasksGroupsTree = buildTree(tasksGroupsLayout.cells("a"), "api/taskgroups");                                                  
                 tasksGroupsTree.attachEvent("onSelect",function(id, mode){  
                     if (mode) {
                         var grupy=tasksGroupsTree.getAllChecked();
@@ -89,16 +50,9 @@ function productsTasksInit(cell) {
                         tasksGrid.clearAll();
                         tasksGrid.fill(grupy);                        
                         return true;
-                });   
-                tasksGroupsTree.fill = function(){	
-                    ajaxGet("api/taskgroups/grupytree", '', function(data) {                    
-                        if (data && data.success){      
-                            tasksGroupsTree.clearAll();                            
-                            tasksGroupsTree.loadStruct(data.data);                           
-                        }                    
-                    });
-                };
+                });                  
                 tasksGroupsTree.fill();                
+                buildTreeToolbar(tasksGroupsLayout.cells("a"), userCanWrite, "api/taskgroups", tasksGroupsTree);                
 /**
  * B
  * 
@@ -242,22 +196,14 @@ function productsTasksInit(cell) {
 /**
  * A
  * 
- */
-                var productsGroupsTree = productsTasksLayout.cells("a").attachTreeView(treeStruct);                                 
+ */               
+                var productsGroupsTree = buildTree(productsTasksLayout.cells("a"), "api/prodgroups");
                 productsGroupsTree.attachEvent("onSelect",function(id, mode){  
                     if (mode) {                                                
                         productsGrid.zaladuj(productsGroupsTree.getSelectedId());
                         zadaniaGroupGrid.fill(productsGroupsTree.getSelectedId());
                     }
-                });    
-                productsGroupsTree.fill = function(i=null){	
-                    ajaxGet("api/prodgroups/grupytree/" + localStorage.language, '', function(data) {                    
-                        if (data && data.success){      
-                            productsGroupsTree.clearAll();                            
-                            productsGroupsTree.loadStruct(data.data);                           
-                        }                    
-                    });
-                };
+                });                    
                 productsGroupsTree.fill();
 /**
  * B

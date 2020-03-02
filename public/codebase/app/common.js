@@ -20,14 +20,8 @@ var A = {
 
 		app: ["dhtmlx_ext", "init", "settings", "timeline", "zlecenia", 
                     "pracownicy", "clients", "projects", "warehouse", "products", 
-                    "products_tasks", "gantt", "tools",
-                    "toolBars/zleceniaGridToolBar",
-                    "toolBars/productsGroupsToolBar",
-                    "toolBars/tasksGridToolBar",
-                    "forms/addEditTaskForm",
-                    "modules/tasks",
-                    "grids/zleceniaGrid",
-                    "grids/tasksGrid"],
+                    "products_tasks", "gantt", "tools","components/tree",
+                "components/treeToolbar"],
 		common: ["settings_forms","base64ArrayBuffer"]
 	}
 };

@@ -95,7 +95,7 @@ Route::group([
     Route::post(  '/taskgroups/{taskgroup}/translations',               'TaskGroupController@addTranslation');
     Route::get(   '/taskgroups/{taskgroup}/translations/{translation}', 'TaskGroupController@editTranslation');
     Route::get(   '/taskgroups/{taskgroup}/translations',               'TaskGroupController@getTranslations');
-    Route::get('/taskgroups/grupytree', 'TaskGroupController@buildTree');    
+    Route::get(   '/taskgroups/grupytree/{locale?}',                    'TaskGroupController@buildTree');    
     Route::resource('/taskgroups', 'TaskGroupController');    
     
     Route::get('/usersroles/del', 'UserRoleController@deleteByRoleAndUserId');

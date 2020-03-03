@@ -27,6 +27,7 @@ class ProductGroupController extends BaseController
      */
     public function index($locale = 'pl')
     {
+        app()->setLocale($locale);
         $data = $this->repository->getAllWithAdditionals();
                 
         return response()->json(['success' => true, 'data' => $data]);        

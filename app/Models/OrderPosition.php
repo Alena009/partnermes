@@ -28,10 +28,22 @@ class OrderPosition extends BaseModel
         return $this->hasMany('App\Models\Operation', "order_position_id", "id");
     }  
     
-    public function declaredworks()
-    {        
-        return $this->hasMany('App\Models\DeclaredWork', "order_position_id", "id");
-    } 
+//    public function declaredworks()
+//    {        
+//        return $this->hasMany('App\Models\DeclaredWork', "order_position_id", "id");
+//    } 
+//    
+//    public function innerOrderPositions()
+//    {        
+//        return $this->belongsToMany('App\Models\OrderPosition', 'inner_outer_orders', 'outer_order_position_id', 'inner_order_position_id')                
+//                ->withTimestamps(); 
+//    }     
+//    
+//    public function outerOrderPositions()
+//    {        
+//        return $this->belongsToMany('App\Models\OrderPosition', 'inner_outer_orders', 'inner_order_position_id', 'outer_order_position_id')                
+//                ->withTimestamps(); 
+//    }     
     
     public function setPrinted()
     {

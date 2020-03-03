@@ -52,8 +52,10 @@ class OrderPositionController extends BaseController
 
         $result = DB::select(DB::raw("select c.component_id as component_id, 
             sum(c.amount * op.amount) as amount1, 
-            p.kod, op.id as order_position_id,
-            (select sum(w.amount) from warehouse w where w.product_id = c.component_id) as available
+            p.kod, GROUP_CONCAT(DISTINCT op.id SEPARATOR ',') as order_position_id,
+            (select sum(w.amount) from warehouse w where w.product_id = c.component_id) as available,
+            (select sum(op.amount) from orders_positions op 
+                   where op.product_id = c.component_id and (op.status <> 3 or op.status is null)) as in_product
             from orders_positions op
             right join components c on op.product_id = c.product_id
             left join products p on p.id = c.component_id
@@ -139,7 +141,7 @@ class OrderPositionController extends BaseController
     {     
         $orderPosition = [];
         $order = [];
-
+        
         $order = \App\Models\Order::find($request->order_id);
         if ($order) {
             $orderPosition                = new OrderPosition();
@@ -150,8 +152,9 @@ class OrderPositionController extends BaseController
             $orderPosition->price         = $request['price'];
             $orderPosition->description   = $request['description'];
             $orderPosition->date_delivery = $this->repository->getDate($request['num_week']);
+            $orderPosition->status        = 1;            
 
-            if ($orderPosition->save()) {
+            if ($orderPosition->save()) {               
                 return response()->json(['data' => $this->repository->getWithAdditionals($orderPosition->id),
                     'success' => true]);
             } else {
@@ -170,8 +173,7 @@ class OrderPositionController extends BaseController
         $orderPosition = OrderPosition::find($id);
         
         if ($orderPosition) {
-            $order = $orderPosition->order; 
-            //$orderPosition->kod           = $request['kod'] . "." . $order->kod;  
+            $order = $orderPosition->order;             
             $orderPosition->kod           = $request->kod;  
             $orderPosition->order_id      = $request['order_id'];
             $orderPosition->product_id    = $request['product_id'];

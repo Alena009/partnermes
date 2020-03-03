@@ -911,10 +911,10 @@ dhtmlXGridObject.prototype.edit = function(url, data) {
     ajaxGet(url, data, function(data){                                                                                                        
         if (data && data.success) { 
             grid.setRowData(data.data.id, data.data);
-//            dhtmlx.alert({
-//                title:_("Wiadomość"),
-//                text:_("Zapisane!")
-//            });
+            dhtmlx.alert({
+                title:_("Wiadomość"),
+                text:_("Zapisane!")
+            });
             grid.callEvent("onGridReconstructed", []);
         } else {
             dhtmlx.alert({

@@ -75,8 +75,7 @@ class BaseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(){
-        $locale = app()->getLocale();
+    public function index(){        
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
         $request = \App::make('App\Http\Requests\\'.$requestName);
 

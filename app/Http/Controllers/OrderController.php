@@ -52,7 +52,7 @@ class OrderController extends BaseController
         
         $order = new Order();
         $order->kod        = $request->kod;   
-        $order->client_id  = $request->client_id; 
+        $order->client_id  = $request->client_id?$request->client_id:0; 
         $order->date_start = $request->date_start;
         $order->date_end   = $date_end;
         

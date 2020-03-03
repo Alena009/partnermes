@@ -67,7 +67,7 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
             }
         });        
     };
-    grupyForm.editRecord = () => {
+    grupyForm.editRecord = (id) => {
         ajaxGet(urlForSaveButton, grupyForm.getFormData(), function(data){  
             if (data && data.success) {                             
                 treeObj.setItemText(id, data.data.name);
@@ -83,7 +83,7 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
         });        
     };
     grupyForm.saveEvent = (id = 0) => {
-        id ? grupyForm.editRecord() : grupyForm.addRecord();
+        id ? grupyForm.editRecord(id) : grupyForm.addRecord();
     };    
     grupyForm.attachEvent("onKeyUp",function(inp, ev, name, value){
         if (name == 'name') {

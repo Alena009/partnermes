@@ -435,8 +435,8 @@ class OrderPositionService
                 <tr style=\'mso-yfti-irow:6;height:30.25pt\'>
                   <td width=633 nowrap colspan=3 rowspan=1 valign=top style=\'width:474.9pt;  border:solid windowtext 1.0pt;border-right:solid black 1.0pt;mso-border-alt:  solid windowtext .5pt;mso-border-right-alt:solid black .5pt;padding:0cm 3.5pt 0cm 3.5pt;  height:30.25pt\'>
                     <p class=MsoNormal>
-                      <span style=\'font-family:"Calibri",sans-serif;mso-fareast-font-family:  "Times New Roman";color:black\'>UWAGI:
-                        <o:p>{uwagi}</o:p>
+                      <span style=\'font-family:"Calibri",sans-serif;mso-fareast-font-family:  "Times New Roman";color:black\'>OPIS:
+                        <o:p>{description}</o:p>
                       </span>
                     </p>
                   </td>
@@ -477,7 +477,7 @@ class OrderPositionService
                 } 
                 $position->setPrinted(); 
                 $copyAmount = 3;        
-                if ($position->order->client->id) { $copyAmount = 6; }
+                //if ($position->order->client->id) { $copyAmount = 3; }
                 for ($i = 1; $i <= $copyAmount; $i++) {
                     $current = $obiegowka;
                     $barcode = $this->code39($position->kod);

@@ -192,7 +192,7 @@ function warehouseInit(cell) {
             productsGrid.clearAll();
             var ids = Array();
             ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-            ajaxGet("api/warehouse/products/" + ids, "", function(data){
+            ajaxGet("api/warehouse/"+ids+"/products/" + localStorage.language, "", function(data){
                 if (data && data.success){
                     productsGrid.parse(data.data, "js");
                 }

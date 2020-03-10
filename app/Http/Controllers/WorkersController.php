@@ -15,5 +15,4 @@ class WorkersController extends BaseController
         parent:: __construct();
         $this->setRepository($rep);
     }
-
 }

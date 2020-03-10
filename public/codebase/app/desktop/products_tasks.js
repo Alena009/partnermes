@@ -66,14 +66,14 @@ function productsTasksInit(cell) {
                             var windowForm = createWindow(_("Zadanie"), 300, 300);
                             var form = createForm(taskFormStruct, windowForm);
                             var groupsCombo = form.getCombo("task_group_id");
-                            ajaxGet("api/taskgroups", "", function(data){                                                            
+                            ajaxGet("api/taskgroups/" + localStorage.language, "", function(data){                                                            
                                 if (data.success && data.data) {
                                     groupsCombo.addOption(data.data);
                                 }
                             });                                  
                             form.attachEvent("onButtonClick", function(name){
                                 if (name === 'save'){                                    
-                                    ajaxPost("api/tasks", form.getFormData(), function(data){                                                                                                        
+                                    ajaxPost("api/tasks/store/" + localStorage.language, form.getFormData(), function(data){                                                                                                        
                                         if (data && data.success) {                                            
                                             tasksGrid.addRow(data.data.id, '');
                                             tasksGrid.setRowData(data.data.id, data.data);
@@ -88,17 +88,18 @@ function productsTasksInit(cell) {
                             if (taskId) {
                                 var windowForm = createWindow(_("Zadanie"), 300, 300);
                                 var form = createForm(taskFormStruct, windowForm);
-                                var groupsCombo = form.getCombo("task_group_id");
-                                ajaxGet("api/taskgroups", "", function(data){                                                            
-                                    if (data.success && data.data) {
-                                        groupsCombo.addOption(data.data);
-                                    }
-                                });                               
                                 var taskData = tasksGrid.getRowData(taskId);                                                          
                                 form.setFormData(taskData);                                
+                                var groupsCombo = form.getCombo("task_group_id");
+                                ajaxGet("api/taskgroups/" + localStorage.language, "", function(data){                                                            
+                                    if (data.success && data.data) {
+                                        groupsCombo.addOption(data.data);
+                                        groupsCombo.selectOption(groupsCombo.getIndexByValue(taskData.task_group_id));
+                                    }
+                                });                                                                                               
                                 form.attachEvent("onButtonClick", function(name){
                                     if (name === 'save') {                                         
-                                        ajaxGet("api/tasks/" + taskId + "/edit", form.getFormData(), function(data){                                                                                                        
+                                        ajaxGet("api/tasks/" + taskId + "/edit/" + localStorage.language, form.getFormData(), function(data){                                                                                                        
                                             if (data && data.success) {
                                                 tasksGrid.setRowData(data.data.id, data.data);  
                                                 dhtmlx.alert({
@@ -171,7 +172,7 @@ function productsTasksInit(cell) {
                 dpTasksGrid.setUpdateMode("row", true);
                 dpTasksGrid.attachEvent("onBeforeDataSending", function(id, state, data){
                     data.id = id;                      
-                    ajaxGet("api/tasks/" + id + "/edit", data, function(data){ 
+                    ajaxGet("api/tasks/" + id + "/edit/" + localStorage.language, data, function(data){ 
                         if (data.success) {
                             dpTasksGrid.setUpdated(id);
                         }
@@ -182,7 +183,7 @@ function productsTasksInit(cell) {
                     this.clearAll();
                     var ids = Array();
                     ids = (typeof i === 'string' || typeof i === 'number')  ? [i] : i;
-                    ajaxGet("api/tasks/listbygroups/" + ids, "", function(data){
+                    ajaxGet("api/taskgroups/" + ids + "/tasks/" + localStorage.language, "", function(data){
                         if (data && data.success){                    
                             tasksGrid.parse(data.data, "js");
                         }
@@ -231,7 +232,7 @@ function productsTasksInit(cell) {
                                 var addTaskToGroupWindow = createWindow(_("Zadanie"), 300, 300);
                                 var addTaskToGroupForm = createForm(formStruct, addTaskToGroupWindow);
                                 var tasksCombo = addTaskToGroupForm.getCombo("task_id");
-                                ajaxGet("api/tasks", "", function(data){
+                                ajaxGet("api/tasks/" + localStorage.language, "", function(data){
                                     if (data && data.success) {
                                         tasksCombo.addOption(data.data);
                                     }

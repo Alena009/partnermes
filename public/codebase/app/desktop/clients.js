@@ -47,7 +47,7 @@ function clientsInit(cell) {
                     clientsGrid.delete("api/clients/" + selectedClientId, selectedClientId);                                                                    
                 };break;
                 case 'Redo': {
-                    clientsGrid.fill("api/clients");                                                            
+                    clientsGrid.fill("api/clients/" + localStorage.language);                                                            
                     clientForm.clear();  
                 };break;                        
             }
@@ -63,7 +63,7 @@ function clientsInit(cell) {
             ]                   
         });
         clientsGrid.attachHeader("#text_filter,#text_filter,,#select_filter");             
-        clientsGrid.fill("api/clients");               
+        clientsGrid.fill("api/clients/" + localStorage.language);               
 /**
  * B
  * 
@@ -73,7 +73,7 @@ function clientsInit(cell) {
                 {type: "input", name: "kod",       required: true, label: _("Kod")},
                 {type: "input", name: "name",      required: true, label: _("Klient"),                           
                    note: {text: _("Dodaj imie klienta. Jest obowiazkowe.")}},
-                {type: "input", name: "address",required: true, label: _("Opis"), rows: 3,
+                {type: "input", name: "address",required: true, label: _("Adresa"), rows: 3,
                    note: {text: _("Dodaj adrese klienta. Obowiazkowe.")}},
                 {type: "input", name: "country", required: true, label: _("Kraj"), 
                    note: {text: _("Kraj klienta. Jest obowiazkowe.")}},                        
@@ -91,9 +91,9 @@ function clientsInit(cell) {
                 var data = clientForm.getFormData();
                 var selectedClient = clientsGrid.getSelectedRowId();
                 if (selectedClient) {                     
-                    clientsGrid.edit("api/clients/" + selectedClient + "/edit", data);
+                    clientsGrid.edit("api/clients/" + selectedClient + "/edit/" + localStorage.language, data);
                 } else {                                       
-                    clientsGrid.add("api/clients", data);                              
+                    clientsGrid.add("api/clients/store/" + localStorage.language, data);                              
                 }
             }
         });                  

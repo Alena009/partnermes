@@ -10,20 +10,17 @@ function settingsInit(cell) {
                 settingsLayout.cells("a").hideHeader();
             var mainTabbar = settingsLayout.cells("a").attachTabbar();
                 mainTabbar.addTab("a1", _("Role"), null, null, true);               
-                mainTabbar.addTab("a2", _("Statusy zamówień"));
-                mainTabbar.addTab("a3", _("Kraj, język"));
-                mainTabbar.addTab("a4", _("Tłumaczenia"));
+                mainTabbar.addTab("a2", _("Kraj, język"));
+                mainTabbar.addTab("a3", _("Tłumaczenia"));
                 var rolesLayout = mainTabbar.tabs("a1").attachLayout("3U");
                     rolesLayout.cells("a").setText(_("Role"));                    
                     rolesLayout.cells("b").setText(_("Uprawnienia"));                    
                     rolesLayout.cells("c").setText("Użytkownik");                     
-                    rolesLayout.setAutoSize("a", "a;b;c");                                                 
-                var statusesLayout = mainTabbar.tabs("a2").attachLayout("1C");
-                    statusesLayout.cells("a").hideHeader();       
-                var countriesLayout = mainTabbar.tabs("a3").attachLayout("2U");
+                    rolesLayout.setAutoSize("a", "a;b;c");                                                     
+                var countriesLayout = mainTabbar.tabs("a2").attachLayout("2U");
                     countriesLayout.cells("a").setText(_("Kraj"));                    
                     countriesLayout.cells("b").setText(_("Język"));
-                var translationsLayout = mainTabbar.tabs("a4").attachLayout("1C");                    
+                var translationsLayout = mainTabbar.tabs("a3").attachLayout("1C");                    
                     translationsLayout.cells("a").setText(_("Tłumaczenia"));                      
 /**
  * 
@@ -112,7 +109,7 @@ function settingsInit(cell) {
                 }); 
                 rolesGrid.fill = function() {    
                     this.clearAll();
-                    ajaxGet("api/roles", "", function(data){
+                    ajaxGet("api/roles/" + localStorage.language, "", function(data){
                         if (data && data.success){                    
                             rolesGrid.parse(data.data, "js");
                         }
@@ -412,7 +409,7 @@ function settingsInit(cell) {
                                 var addingForm = createForm(formStruct, addingWindow);
                                 addingForm.attachEvent("onButtonClick", function(name){
                                     if (name == 'save') {
-                                        countriesGrid.add("api/country", addingForm.getFormData());                                        
+                                        countriesGrid.add("api/country/store/" + localStorage.language, addingForm.getFormData());                                        
                                     }
                                 });                                
                             };break;
@@ -425,7 +422,7 @@ function settingsInit(cell) {
                                     addingForm.setFormData(rowData);
                                     addingForm.attachEvent("onButtonClick", function(name){
                                         if (name == 'save') {
-                                            countriesGrid.edit("api/country/" + id + "/edit", addingForm.getFormData());
+                                            countriesGrid.edit("api/country/" + id + "/edit/" + localStorage.language, addingForm.getFormData());
                                         }
                                     });
                                 } else {
@@ -459,7 +456,7 @@ function settingsInit(cell) {
                 });
                 countriesGrid.fill = function() {   
                     this.clearAll();
-                    ajaxGet("api/country", "", function(data){
+                    ajaxGet("api/country/" + localStorage.language, "", function(data){
                         if (data && data.success){                    
                             countriesGrid.parse(data.data, "js");
                         }
@@ -489,7 +486,7 @@ function settingsInit(cell) {
                                 var addingForm = createForm(addingFormStruct, addingWindow);
                                 addingForm.attachEvent("onButtonClick", function(name){
                                     if (name == 'save') {
-                                        languagesGrid.add("api/language", addingForm.getFormData());
+                                        languagesGrid.add("api/language/store/" + localStorage.language, addingForm.getFormData());
                                         addingWindow.close();
                                     }
                                 });                                
@@ -503,7 +500,7 @@ function settingsInit(cell) {
                                     addingForm.setFormData(rowData);
                                     addingForm.attachEvent("onButtonClick", function(name){
                                         if (name == 'save') {
-                                            languagesGrid.edit("api/language/" + id + "/edit", addingForm.getFormData());
+                                            languagesGrid.edit("api/language/" + id + "/edit/" + localStorage.language, addingForm.getFormData());
                                             addingWindow.close();
                                         }
                                     });
@@ -539,7 +536,7 @@ function settingsInit(cell) {
                 });
                 languagesGrid.fill = function() {   
                     this.clearAll();
-                    ajaxGet("api/language", "", function(data){
+                    ajaxGet("api/language/" + localStorage.language, "", function(data){
                         if (data && data.success){                    
                             languagesGrid.parse(data.data, "js");
                         }
@@ -557,7 +554,8 @@ function settingsInit(cell) {
                         {id: "prodgroups",      text: _("Grupy produktów"),   icon: "a1.png"},
                         {id: "prodtypes",       text: _("Typy produktów"),    icon: "a1.png"},                         
                         {id: "products",        text: _("Produkty"),          icon: "a1.png"},     
-                        {id: "departaments",    text: _("Grupy pracowników"), icon: "a1.png"},                         
+                        {id: "departaments",    text: _("Grupy pracowników"), icon: "a1.png"},
+                        {id: "country",         text: _("Kraje"),             icon: "a1.png"},
                     ]
                 });
                 translationsSidebar.attachEvent("onSelect", function(id, lastId){
@@ -570,7 +568,7 @@ function settingsInit(cell) {
                             {label: _("Imie"), id: "name", width: 150, type: "ro", sort: "str", align: "left"}                         
                         ] 
                     });
-                    recordsGrid.fill("api/" + id);
+                    recordsGrid.fill("api/" + id + "/" + localStorage.language);
                     recordsGrid.attachEvent("onRowSelect", function(rId) {
                         translationsGrid.fill("api/" + id + "/" + rId + "/translations"); 
                     }); 
@@ -596,7 +594,7 @@ function settingsInit(cell) {
                                         ]}                                    
                                     ], addingWindow);
                                     var localeCombo = addingForm.getCombo("locale");
-                                    ajaxGet("api/language", "", function(data){
+                                    ajaxGet("api/language/" + localStorage.language, "", function(data){
                                         if (data && data.success) {
                                             localeCombo.addOption(data.data);
                                         }
@@ -605,13 +603,12 @@ function settingsInit(cell) {
                                         switch (name){
                                             case 'save': {                                    
                                                 var data = addingForm.getFormData(); 
-                                                data.locale = localeCombo.getComboText();                                                
-                                                ajaxPost("api/" + id + "/" + selectedRecordId + "/translations", data, function(data){
+                                                //data.locale = localeCombo.getComboText();                                                
+                                                ajaxPost("api/" + id + "/" + selectedRecordId + "/translations/" + localeCombo.getComboText(), data, function(data){
                                                     if (data && data.success) {
                                                         translationsGrid.fill("api/" + id + "/" + selectedRecordId + "/translations");
                                                     }
                                                 });
-                                                addingWindow.close();
                                             };break;
                                         }
                                     });
@@ -630,7 +627,7 @@ function settingsInit(cell) {
                                     if (translationId) {
                                         var locale = translationsGrid.getRowData(translationId).locale;
                                         translationsGrid.delete("api/" + id + "/" + selectedRecordId + "/translations/" + locale, translationId);                                                                             
-                                        translationsGrid.fill("api/" + id + "/" + selectedRecordId + "/translations");
+                                        //translationsGrid.fill("api/" + id + "/" + selectedRecordId + "/translations");
                                     } else {
                                         dhtmlx.alert({
                                             title:_("Wiadomość"),
@@ -886,7 +883,7 @@ function getPermission(paragraph) {
     });
 }
 
-dhtmlXGridObject.prototype.add = function(url, data) {
+dhtmlXGridObject.prototype.add = function(url, data, dataStore = null) {
     var grid = this;
     ajaxPost(url, data, function(data){                                                                                                        
         if (data && data.success) {

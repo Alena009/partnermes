@@ -11,8 +11,8 @@ class Product extends BaseModel
     protected $table = "products";
     
     protected $fillable = [
-        'kod', 'product_type_id', 'weight', 'product_group_id', 'area', 'height',
-        'width', 'length'
+        'kod', 'name', 'description', 'pack', 'product_type_id', 'weight', 
+        'product_group_id', 'area', 'height', 'width', 'length'
     ];
     
     /* fields for translating */    

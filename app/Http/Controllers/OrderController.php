@@ -17,28 +17,10 @@ class OrderController extends BaseController
     }   
     
     /**
-     * Get orders list with translations
-     */
-    public function index($locale = 'pl')
-    {
-        app()->setLocale($locale);
-
-        $orders = $this->repository->getAllWithAdditionals();                
-        if ($orders) {          
-            return response()->json(['data' => $orders, 'success' => true]);        
-        } else {
-            return response()->json(['data' => [], 'success' => false, 
-                'message' => 'Orders were not found']);        
-        }        
-    }
-    
-    /**
      * create new order
      */
-    public function store(Request $request)
+    public function store(Request $request, $locale = 'pl')
     {
-        $locale = app()->getLocale();
-        
         $currentWeekNum = date("W");
         $currentYear    = date("Y");
         if ($request->num_week < $currentWeekNum) {
@@ -68,7 +50,7 @@ class OrderController extends BaseController
         }        
     } 
     
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id, $locale = 'pl')
     {
         $order = [];
         $locale = app()->getLocale();       
@@ -104,7 +86,7 @@ class OrderController extends BaseController
     
     public function getLastOrder()
     {        
-        return $this->getResponseResult($this->repository->lastOrder());
+        return $this->getResponse($this->repository->lastOrder());
     }
     
     public function closeOrder($orderId)
@@ -117,19 +99,5 @@ class OrderController extends BaseController
             return response()->json(['data' => [], 'success' => false, 
                 'message' => 'Order was not found']);  
         }  
-    }
-//
-//    public function history($orderId)
-//    {
-//        $order = [];
-//        $order = $this->repository->getWithAdditionals($orderId);
-//        $history = $order->history;
-//        foreach ($history as $rec) {
-//            $status = $rec->status;
-//            $rec->name = $status->name;
-//            $rec->description = $status->description;
-//        }        
-//        
-//        return $this->getResponseResult($history);
-//    }    
+    }  
 }

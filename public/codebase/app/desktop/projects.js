@@ -29,7 +29,7 @@ function projectsInit(cell) {
  */            
             var orderForm = createForm(newProjectFormStruct, orderLayout.cells("a"));   
             var clientsCombo = orderForm.getCombo("client_id");
-            ajaxGet("api/clients", "", function(data){
+            ajaxGet("api/clients/" + localStorage.language, "", function(data){
                 clientsCombo.addOption(data.data);
             });
             clientsCombo.attachEvent("onClose", function(){
@@ -61,10 +61,10 @@ function projectsInit(cell) {
                     var orderData = orderForm.getFormData();
                     if (ordersGrid.getSelectedRowId()) { 
                         orderData.date_start = orderForm.getCalendar("date_start").getDate(true);                                
-                        ordersGrid.edit("api/orders/" + orderData.id + "/edit", orderData);                        
+                        ordersGrid.edit("api/orders/" + orderData.id + "/edit/" + localStorage.language, orderData);                        
                     } else {
                         orderData.date_start = orderForm.getCalendar("date_start").getDate(true);                                
-                        ordersGrid.add("api/orders", orderData);                                          
+                        ordersGrid.add("api/orders/store/" + localStorage.language, orderData);                                          
                     }
                 }
             }); 

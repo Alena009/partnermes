@@ -15,57 +15,8 @@ class RoleController extends BaseController
         parent:: __construct();
         $this->setRepository($rep);
     }   
-    
-    /**
-     * Get roles list with translations
-     */
-    public function roles($locale = 'pl')
-    {
-        app()->setLocale($locale);
-        
-        $roles = [];
-        $result = [];
 
-        $roles = $this->repository->getModel()::all();               
-        
-        foreach ($roles as $role) {             
-            $item = [               
-                'id' => $role['id'], 
-                'text' => $role['name'], 
-                'value' => $role['id']
-            ];
-            $result[] = $item;
-        }              
-        
-        $result = ['data' => $result, 'success' => true];
-        
-        return response()->json($result);      
-    }
-
-    /**
-     * create new role with translations
-     */
-    public function store(Request $request)
-    {
-        $result = [];
-        
-        $role = new \App\Models\Role();
-        $locale = app()->getLocale();
-        $role->save();
-        
-        $role->translateOrNew($locale)->name = $request['name'];            
-        $success = $role->save();
-        
-        $result = ['data' => $role, 'success' => $success];
-        
-//        foreach (['en', 'nl', 'fr', 'de'] as $locale) {
-//            $role->translateOrNew($locale)->name = "Title {$locale}";                        
-//        }    
-
-        return response()->json($result);
-    }  
-
-    public function show(Request $request, $id)
+    public function show(Request $request, $id, $locale = 'pl')
     {
         $permissions = [];
         

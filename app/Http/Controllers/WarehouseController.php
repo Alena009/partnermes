@@ -6,10 +6,6 @@ use Illuminate\Http\Request;
 
 use App\Repositories\WarehouseRepository;
 use App\Services\WarehouseService;
-use App\Models\Warehouse;
-
-use App\Models\ProductGroup;
-use App\Models\Product;
 
 class WarehouseController extends BaseController
 {
@@ -26,9 +22,9 @@ class WarehouseController extends BaseController
     /**
      * Get list products by groups
      */
-    public function products($groups = 0)
+    public function products($groups = 0, $locale = 'pl')
     {       
-        $result = $this->srv->allProductsAtWarehouse();
+        $result = $this->srv->allProductsAtWarehouse($groups = 0, $locale = 'pl');
         if ($result) {
             return response()->json(['success' => true, 'data' => $result]);         
         } else {

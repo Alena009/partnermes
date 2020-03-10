@@ -19,36 +19,11 @@ class OrderPositionController extends BaseController
         parent:: __construct();
         $this->setRepository($rep);
         $this->setService($srv);
-    } 
-    
-    /**
-     * Get orders positions list 
-     * 
-     * @return response
-     */
-    public function index()
-    {
-        $all = $this->repository->getAllWithAdditionals();
-        
-        if ($all) {
-            return response()->json(['data' => $all, 'success' => true]); 
-        } else {
-            return response()->json(['data' => [], 'success' => false]);
-        }  
-    }  
+    }       
     
     public function positionComponents($positionsIds, $locale="pl")
     {   
         $result = [];
-//        $result = DB::select(DB::raw("select if(c.component_id, c.component_id, op.product_id) as component_id, 
-//            sum(if(c.amount * op.amount, c.amount * op.amount, op.amount)) as amount1, 
-//            p.kod, op.id as order_position_id,
-//            (select sum(w.amount) from warehouse w where w.product_id = if(c.component_id, c.component_id, op.product_id)) as available
-//            from orders_positions op
-//            left join components c on op.product_id = c.product_id
-//            left join products p on p.id = if(c.component_id, c.component_id, op.product_id)
-//            where op.id in (" . $positionsIds .")
-//            group by if(c.component_id, c.component_id, op.product_id)"));       
 
         $result = DB::select(DB::raw("select c.component_id as component_id, 
             sum(c.amount * op.amount) as amount1, 
@@ -62,7 +37,7 @@ class OrderPositionController extends BaseController
             where op.id in (" . $positionsIds .")
             group by c.component_id"));           
         
-        return $this->getResponseResult($result);        
+        return $this->getResponse($result);        
     }
     
     public function positionsTasks($positionsIds)
@@ -97,7 +72,7 @@ class OrderPositionController extends BaseController
                 'message' => 'positions not found']); 
         }                 
             
-        return $this->getResponseResult($result);
+        return $this->getResponse($result);
     }       
     
     /**
@@ -108,13 +83,7 @@ class OrderPositionController extends BaseController
     public function getPrinted()
     {    
         $result = $this->repository->getPrintedPositions();
-        
-        if ($result) {
-            return response()->json(['data' => $result, 'success' => true]);
-        } else {
-            return response()->json(['data' => [], 'success' => false, 
-                'message' => 'No printed tasks']);
-        }                      
+        return $this->getResponse($result, '', 'No printed tasks');                     
     }   
     
     /**
@@ -125,19 +94,13 @@ class OrderPositionController extends BaseController
     public function getZlecenia()
     {    
         $result = $this->repository->getPositionsWithTasks();
-        
-        if ($result) {
-            return response()->json(['data' => $result, 'success' => true]);
-        } else {
-            return response()->json(['data' => [], 'success' => false, 
-                'message' => 'No positions with tasks']);
-        }         
+        return $this->getResponse($result, '', 'No positions with tasks');                             
     }      
     
     /**
      * create new order position
      */
-    public function store(Request $request)
+    public function store(Request $request, $locale = 'pl')
     {     
         $orderPosition = [];
         $order = [];
@@ -167,7 +130,7 @@ class OrderPositionController extends BaseController
         }
     }      
     
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id, $locale = 'pl')
     {  
         $orderPosition = [];
         $orderPosition = OrderPosition::find($id);
@@ -200,13 +163,7 @@ class OrderPositionController extends BaseController
     public function getPositionsByOrder($orderId)
     {    
         $positions = $this->repository->getFewWithAdditionals(OrderPosition::where("order_id", "=", $orderId)->pluck("id"));
-        
-        if ($positions) {
-            return response()->json(['data' => $positions, 'success' => true]);  
-        } else {
-            return response()->json(['data' => $positions, 'success' => false, 
-                'message' => 'Failed']);             
-        }      
+        return $this->getResponse($positions, '', 'Failed');       
     }
     
     
@@ -219,12 +176,8 @@ class OrderPositionController extends BaseController
     public function dontProduct($positionsIds)
     {
         $positions = $this->repository->get(explode(',', $positionsIds));  
-        if ($result = $this->srv->dontProductPositions($positions)) {
-            return response()->json(['data' => $result, 'success' => true]);   
-        } else {
-            return response()->json(['data' => $result, 'success' => false, 
-                'message' => 'Positions was not found']);   
-        }   
+        $result = $this->srv->dontProductPositions($positions);
+        return $this->getResponse($result, '', 'Positions was not found');   
     }    
     
     /**
@@ -236,12 +189,8 @@ class OrderPositionController extends BaseController
     public function close($positionsIds)
     {
         $positions = $this->repository->get(explode(',', $positionsIds));  
-        if ($result = $this->srv->closePositions($positions)) {
-            return response()->json(['data' => $result, 'success' => true]);   
-        } else {
-            return response()->json(['data' => $result, 'success' => false, 
-                'message' => 'Positions was not found']);   
-        }
+        $result = $this->srv->closePositions($positions);
+        return $this->getResponse($result, '', 'Positions was not found'); 
     }
     
     /**
@@ -252,13 +201,9 @@ class OrderPositionController extends BaseController
      */
     public function reOpen($positionsIds)
     {
-        $positions = $this->repository->get(explode(',', $positionsIds));  
-        if ($result = $this->srv->reOpenPositions($positions)) {
-            return response()->json(['data' => $result, 'success' => true]);   
-        } else {
-            return response()->json(['data' => $result, 'success' => false, 
-                'message' => 'Positions was not found']);   
-        }
+        $positions = $this->repository->get(explode(',', $positionsIds)); 
+        $result = $this->srv->reOpenPositions($positions);
+        return $this->getResponse($result, '', 'Positions was not found');
     }    
     
     /**
@@ -267,9 +212,9 @@ class OrderPositionController extends BaseController
      * @param string $positionsIds
      * @return boolean
      */
-    public function print($positionsIds)
+    public function print($positionsIds, $locale = 'pl')
     {                        
         $positions = $this->repository->get(explode(',', $positionsIds));
-        return $this->srv->printPositions($positions);                     
+        return $this->srv->printPositions($positions, $locale);                     
     }       
 }

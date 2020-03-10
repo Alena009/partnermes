@@ -11,7 +11,7 @@ class ProductType extends BaseModel
     protected $table = "product_types";
     
     protected $fillable = [
-        'name'
+        'name', 'description'
     ];
     
     /* fields for translating */    

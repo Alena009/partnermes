@@ -169,7 +169,7 @@ function timelineInit(cell) {
 }
 
 function addOperation(data, grid) {
-    ajaxPost("api/operations", data, function(data){                                                                                                        
+    ajaxPost("api/operations/store/" + localStorage.language, data, function(data){                                                                                                        
         if (data && data.success) {
             grid.addRow(data.data.id, '');
             grid.setRowData(data.data.id, data.data);
@@ -187,7 +187,7 @@ function addOperation(data, grid) {
 }
 
 function editOperation(id, data, grid) {
-    ajaxGet("api/operations/" + id + "/edit", data, function(data){                                                                                                        
+    ajaxGet("api/operations/" + id + "/edit/" + localStorage.language, data, function(data){                                                                                                        
         if (data && data.success) { 
             grid.setRowData(data.data.id, data.data);
             dhtmlx.alert({

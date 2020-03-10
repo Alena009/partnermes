@@ -43,6 +43,8 @@ function appInit() {
                     mainToolbar.addButton("language-"+item.short, 3, item.short, null, null);
                 });                        
                 mainToolbar.disableItem("language-"+localStorage.getItem("language"));
+            } else {
+                location.reload();
             }
         }); 
 	mainSidebar.attachEvent("onSelect", function(id){

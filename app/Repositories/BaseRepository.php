@@ -265,7 +265,7 @@ class BaseRepository
         return $result;
     }    
     
-    public function getAll()
+    public function getAll($locale = 'pl')
     {
         $result = [];
         $result = $this->model::all();
@@ -297,11 +297,11 @@ class BaseRepository
      * 
      * @return array
      */
-    public function translatedFields()
-    {
-        $model = $this->getModel();
-        return $model->translatedAttributes;               
-    }
+//    public function translatedFields()
+//    {
+//        $model = $this->getModel();
+//        return $model->translatedAttributes;               
+//    }
 
     /**
      * Sets translations for model 
@@ -311,14 +311,14 @@ class BaseRepository
      * @param type $request
      * @return type
      */
-    public function setTranslation($locale, $record, $request)
-    {
-        $translatedFields = $this->translatedFields();
-        foreach ($translatedFields as $field) {
-            if ($request->$field) {
-                $record->translateOrNew($locale)->$field = $request->$field;
-            }            
-        } 
-        return $record->save();
-    } 
+//    public function setTranslation($locale, $record, $request)
+//    {
+//        $translatedFields = $this->translatedFields();
+//        foreach ($translatedFields as $field) {
+//            if ($request->$field) {
+//                $record->translateOrNew($locale)->$field = $request->$field;
+//            }            
+//        } 
+//        return $record->save();
+//    } 
 }

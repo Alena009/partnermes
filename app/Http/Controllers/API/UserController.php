@@ -46,7 +46,7 @@ class UserController extends \App\Http\Controllers\BaseController
      * 
      * @return \Illuminate\Http\Response 
      */
-    public function store(Request $request) 
+    public function store(Request $request, $locale = 'pl') 
     {              
         $validator = Validator::make($request->all(), [
                     'name' => 'required',
@@ -73,7 +73,7 @@ class UserController extends \App\Http\Controllers\BaseController
     /**
      * Editing information about user
      */
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id, $locale = 'pl')
     {        
         $validator = Validator::make($request->all(), [
                     'name' => 'required',
@@ -198,7 +198,7 @@ class UserController extends \App\Http\Controllers\BaseController
 //        }
 //    }
     
-    public function index()
+    public function index($locale = 'pl')
     {
         $users = [];
         $users = $this->repository->getAllWithAdditionals();

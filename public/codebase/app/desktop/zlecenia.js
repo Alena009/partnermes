@@ -60,7 +60,7 @@ function zleceniaInit(cell) {
                                     text:_("Zaznacz co najmniej jedno zlecenie")
                                 });  
                             } else {                                 
-                                ajaxGet("api/positions/" + selectedZlecenia + "/print", "", function(data){
+                                ajaxGet("api/positions/" + selectedZlecenia + "/print/" + localStorage.language, "", function(data){
                                     var myWindow=window.open('data:application/pdf,'+data, "_blank", "width=800,height=600,resizable=yes,scrollbars=yes,status=yes");
                                     myWindow.document.write(data);
                                     myWindow.focus();

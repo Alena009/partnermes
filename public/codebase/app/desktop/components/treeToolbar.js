@@ -4,12 +4,12 @@ const buildTreeToolbar = (container, write, url, tree) => {
     treeToolbar.attachEvent("onClick", function(btn) {
         switch (btn){
                 case 'Add':{			                                        
-                        createAddEditGroupWindow(url, url, tree, 0);                            
+                        createAddEditGroupWindow(url, url + "/store/" + localStorage.language, tree, 0);                            
                 };break;
                 case 'Edit':{
                     var id = tree.getSelectedId();
                     if (id) {                                        
-                        createAddEditGroupWindow(url, url + "/" + id + "/edit", tree, id);                         
+                        createAddEditGroupWindow(url, url + "/" + id + "/edit/" + localStorage.language, tree, id);                         
                     }
                 };break;
                 case 'Del':{
@@ -48,7 +48,7 @@ function createAddEditGroupWindow(urlForParentCombo, urlForSaveButton, treeObj, 
         grupyForm.setItemValue("name", treeObj.getItemText(id));
     } else {
         var dhxCombo = grupyForm.getCombo("parent_id");                             
-        ajaxGet(urlForParentCombo, '', function(data) {                    
+        ajaxGet(urlForParentCombo + "/" + localStorage.language, '', function(data) {                    
                 dhxCombo.addOption(data.data);
         });  
     }   

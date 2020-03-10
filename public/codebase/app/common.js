@@ -20,8 +20,11 @@ var A = {
 
 		app: ["dhtmlx_ext", "init", "settings", "timeline", "zlecenia", 
                     "pracownicy", "clients", "projects", "warehouse", "products", 
-                    "products_tasks", "gantt", "tools","components/tree",
-                "components/treeToolbar", "blocks/newOrder", "blocks/newInnerOrder"],
+                    "products_tasks", "gantt", "tools", "sendings",
+                    "components/tree", 
+                    "components/treeToolbar", 
+                    "blocks/newOrder", 
+                    "blocks/newInnerOrder"],
 		common: ["settings_forms","base64ArrayBuffer"]
 	}
 };

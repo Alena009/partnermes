@@ -52,7 +52,7 @@ function productsInit(cell) {
                         var addingForm = createForm(formStruct, addingWindow);
                         addingForm.attachEvent("onButtonClick", function(name){
                             if (name == 'save') {
-                                typesProductsGrid.add("api/prodtypes", addingForm.getFormData());
+                                typesProductsGrid.add("api/prodtypes/store/" + localStorage.language, addingForm.getFormData());
                             }
                         });                                
                     };break;
@@ -65,7 +65,7 @@ function productsInit(cell) {
                             addingForm.setFormData(rowData);
                             addingForm.attachEvent("onButtonClick", function(name){
                                 if (name == 'save') {
-                                    typesProductsGrid.edit("api/prodtypes/" + typesProductsGrid.getSelectedRowId() + "/edit", addingForm.getFormData());
+                                    typesProductsGrid.edit("api/prodtypes/" + typesProductsGrid.getSelectedRowId() + "/edit/" + localStorage.language, addingForm.getFormData());
                                 }
                             });  
                         } else {
@@ -116,7 +116,7 @@ function productsInit(cell) {
         });       
         typesProductsGrid.fill = function() {    
             this.clearAll();
-            ajaxGet("api/prodtypes", "", function(data){
+            ajaxGet("api/prodtypes/" + localStorage.language, "", function(data){
                 if (data && data.success){                    
                     typesProductsGrid.parse(data.data, "js");
                 }
@@ -376,11 +376,11 @@ function productsInit(cell) {
  */                        
         var productForm = createForm(productFormStruct, productsLayout.cells("d")); 
         var productTypeCombo = productForm.getCombo("product_type_id");
-        ajaxGet("api/prodtypes", "", function(data){
+        ajaxGet("api/prodtypes/" + localStorage.language, "", function(data){            
             productTypeCombo.addOption(data.data);                
         });         
         var productGroupCombo = productForm.getCombo("product_group_id");
-        ajaxGet("api/prodgroups", "", function(data){
+        ajaxGet("api/prodgroups/" + localStorage.language, "", function(data){
             productGroupCombo.addOption(data.data);        
         }); 
         productForm.attachEvent("onButtonClick", function(name){
@@ -388,9 +388,9 @@ function productsInit(cell) {
                 case "save": {
                     var id = productsGrid.getSelectedRowId();
                     if (id){                        
-                        productsGrid.edit("api/products/" + id + "/edit", productForm.getFormData());
+                        productsGrid.edit("api/products/" + id + "/edit/" + localStorage.language, productForm.getFormData());
                     } else {                        
-                        productsGrid.add("api/products", productForm.getFormData());                                                                      
+                        productsGrid.add("api/products/store/" + localStorage.language, productForm.getFormData());                                                                      
                     }                    
                 };break;              
             }

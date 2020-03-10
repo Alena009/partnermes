@@ -11,25 +11,24 @@ class ProductGroupRepository extends BaseRepository
         return "App\Models\ProductGroup";
     }
     
-    public function getWithAdditionals($id) 
+    public function getWithAdditionals($id, $locale = 'pl') 
     {
-        $result = parent::getWithAdditionals($id);
-        if ($result) {
-            $result->text  = $result->name;
-            $result->value = $result->id;
-        }
-        return $result;
-    }
+        $record = parent::getWithAdditionals($id);
+        
+        if ($record) {
+            if (!$record->hasTranslation($locale)) {
+                $locale = 'pl';
+            }
+            $record->text  = $record->translate($locale)->name;  
+            $record->value = (string)$record->id;
+            $record->label = $record->translate($locale)->name;
+            $record->key   = $record->id;            
+        }  
+        
+        return $record;
+    }      
     
-//    public function productsByGroups($groups, $locale = 'pl')
-//    {
-//        $productGroup = $this->get($id);
-//        ProductGroupResource::withoutWrapping();        
-//        return new ProductGroupResource($productGroup);      
-//    }   
- 
-    
-    public function productsByGroups($groups, $locale = 'pl')
+    public function childRecordsByGroups($groups, $locale = 'pl')
     {
         $result = [];
         if ($groups) {

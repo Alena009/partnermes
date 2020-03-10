@@ -9,7 +9,7 @@ class OrderRepository extends BaseRepository
         return "App\Models\Order";
     }
     
-    public function getWithAdditionals($id) 
+    public function getWithAdditionals($id, $locale = 'pl') 
     {
         $order = [];
         $order = $this->model::find($id);
@@ -25,7 +25,7 @@ class OrderRepository extends BaseRepository
         }
         
         return $order;
-    }
+    }  
     
     public function lastOrder()
     {

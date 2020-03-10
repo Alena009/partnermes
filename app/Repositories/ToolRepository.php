@@ -9,27 +9,20 @@ class ToolRepository extends BaseRepository
         return "App\Models\Tool";
     }  
     
-    public function get($tools)
+    public function getWithAdditionals($id, $locale = 'pl') 
     {
-        $result = [];
-        $result = $this->model::find($tools);
-        return $result;        
-    }
-    
-    public function getAll()
-    {
-        return $this->model::all();
-    }
-    
-    public function getWithAdditionals($id) 
-    {
-        $tool = $this->get($id);
-        if ($tool) {
-            $tool->text  = $tool->kod;
-            $tool->value = $tool->id;
-            $tool->label = $tool->name;
-        }
+        $record = parent::getWithAdditionals($id);
         
-        return $tool;
-    }
+        if ($record) {
+            if (!$record->hasTranslation($locale)) {
+                $locale = 'pl';
+            }
+            $record->text  = $record->translate($locale)->name;  
+            $record->value = (string)$record->id;
+            $record->label = $record->translate($locale)->name;
+            $record->key   = $record->id;            
+        }  
+        
+        return $record;
+    }     
 }

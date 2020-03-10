@@ -12,12 +12,25 @@ class ProductRepository extends BaseRepository
         return "App\Models\Product";
     }
         
-    public function getWithAdditionals($id)
+    public function getWithAdditionals($id, $locale = 'pl')
     {
-        $product = $this->get($id);
-        ProductResource::withoutWrapping();        
-        return new ProductResource($product);      
-    }
+        $result = parent::getWithAdditionals($id, $locale);
+        if ($result) {
+            if (!$result->hasTranslation($locale)) {
+                $locale = 'pl';
+            }
+        }
+        $result->text  = $result->translate($locale)->name;  
+        $result->value = (string)$result->id;
+        $result->label = $result->translate($locale)->name;
+        $result->key   = $result->id;        
+        $result->product_name       = $result->translate($locale)->name;
+        $result->product_kod        = $result->kod;
+        $result->product_type_name  = $result->type->translate($locale)->name;
+        $result->product_group_name = $result->group->translate($locale)->name; 
+        
+        return $result;
+    }   
     
     public function allProducts($locale = 'pl')
     {

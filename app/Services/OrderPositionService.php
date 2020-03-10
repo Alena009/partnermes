@@ -116,7 +116,7 @@ class OrderPositionService
         }
     }    
 
-    public function printPositions($positions)
+    public function printPositions($positions, $locale = 'pl')
     {
         if ($positions) {           
             $head = '<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"
@@ -451,18 +451,6 @@ class OrderPositionService
                     <![endif]>
                   </span>
                 </tr>
-                <tr style=\'mso-yfti-irow:8;height:26.85pt\'>
-                  <td width=633 colspan=3 style=\'width:474.9pt;border:none;mso-border-top-alt:  solid windowtext .5pt;padding:0cm 3.5pt 0cm 3.5pt;height:26.85pt\'>
-                    <p class=MsoNormal>
-                      <span style=\'font-family:"Calibri",sans-serif;mso-fareast-font-family:  "Times New Roman";color:black\'>
-                        <o:p>&nbsp;</o:p>
-                      </span>
-                    </p>
-                  </td>
-                  <![if !supportMisalignedRows]>
-                  <td style=\'height:26.85pt;border:none\' width=0 height=36></td>
-                  <![endif]>
-                </tr>
                 </table>
                 ';
             $foot = '</div></div></body></html>';  
@@ -472,6 +460,9 @@ class OrderPositionService
             $allTasks = ''; 
             foreach ($positions as $position) { 
                 //if poosition was not printed before
+                if (!$position->product->hasTranslation($locale)) {
+                    $locale = 'pl';
+                }
                 if ($position->status == 1) {
                     $this->reserveComponentsForPosition($position);
                 } 
@@ -482,13 +473,14 @@ class OrderPositionService
                     $current = $obiegowka;
                     $barcode = $this->code39($position->kod);
                     $current = str_replace('{dzisiaj}', $today, $current);
-                    $current = str_replace('{zlecenie}', $position->product->name, $current);
+                    $current = str_replace('{zlecenie}', $position->product->translate($locale)->name, $current);
                     $current = str_replace('{szt}', $position->amount, $current);
                     $current = str_replace('{material}', $position->product->kod, $current);
                     $current = str_replace('{kod}', $position->kod, $current);
                     $current = str_replace('|kod|', $barcode, $current);
                     $current = str_replace('{uwagi}', $position->description, $current);                
                     $current = str_replace('{obszar}', $i, $current);
+                    $current = str_replace('{description}', $position->product->translate($locale)->description, $current);
                     $allTasks = $allTasks . $current;                    
                 }
             }
@@ -523,9 +515,7 @@ class OrderPositionService
             $html.='<SPAN style="BORDER-LEFT: white 0.02in solid; DISPLAY: inline-block; HEIGHT: 0.4in;"></SPAN>';
           }
         }
-
         //$html.='</div><div style="float:left; width:100%;" align=center >'.$text.'</div></div>';
-
         return $html;
     }    
 }

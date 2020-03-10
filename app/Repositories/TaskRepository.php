@@ -9,13 +9,11 @@ class TaskRepository extends BaseRepository
         return "App\Models\Task";
     }
     
-    public function getWithAdditionals($id)
+    public function getWithAdditionals($id, $locale = 'pl')
     {        
-        $task = $this->model::find($id);
+        $task = parent::getWithAdditionals($id, $locale);
         
         $task->task_group_name = $task->group->name;        
-        $task->text            = $task->name;  
-        $task->value           = (string)$task->id;
         $task->key             = $task->id;
         $task->label           = $task->name; 
         $task->task_kod        = $task->kod;

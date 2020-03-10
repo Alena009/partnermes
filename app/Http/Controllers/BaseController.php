@@ -75,61 +75,40 @@ class BaseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(){        
+    public function index($locale = 'pl'){  
+        app()->setLocale($locale);
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
         $request = \App::make('App\Http\Requests\\'.$requestName);
-
-        // return $this->repository
-        // ->pushAppliedFilters($this->getAppliedFilters())
-        // ->setOrderBy($this->getAppliedOrderBy())
-        // ->paginate();
-        return $this->repository->all($request);
+        
+        //$model = $this->repository->getModel();
+        $data = $this->repository->getAllWithAdditionals($locale);
+        return ['data' => $data, 'success' => true];
     }
 
-    public function store(Request $request)
-    {
-        $locale = app()->getLocale();
+    public function store(Request $request, $locale = 'pl')
+    {        
+        app()->setLocale($locale);
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
         $request = \App::make('App\Http\Requests\\'.$requestName);
 
         if ($data = $this->repository->create($request->all())){
-            if ($this->repository->translatedFields()) {
-                if ($translations = $this->repository->setTranslation($locale, $data, $request)) {
-                    return ['success' => true, 'data' => $data, 
-                        'class'=>__CLASS__,'method' => __METHOD__];
-                } else {
-                    return ['success' => false, 'all'=>$this->repository->errors(),
-                        'class'=>__CLASS__,'method' => __METHOD__];                    
-                }
-            } else {            
-                    return ['success' => true, 'data' => $data, 
-                        'class'=>__CLASS__,'method' => __METHOD__];
-            }
+            return ['success' => true, 'data' => $data, 
+                        'class'=>__CLASS__,'method' => __METHOD__];            
         }else{
             return ['success' => false, 'all'=>$this->repository->errors(),
                 'class'=>__CLASS__,'method' => __METHOD__];
         }
     }
 
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id, $locale = 'pl')
     {        
-        $locale = app()->getLocale();
+        app()->setLocale($locale);
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
         $request = \App::make('App\Http\Requests\\'.$requestName);
 
-        if ($data = $this->repository->update($request->all(), $id)) {
-            if ($this->repository->translatedFields()) {
-                if ($translations = $this->repository->setTranslation($locale, $data, $request)) {
-                    return ['success' => true, 'data' => $data, 
-                        'class'=>__CLASS__,'method' => __METHOD__];
-                } else {
-                    return ['success' => false, 'all'=>$this->repository->errors(),
-                        'class'=>__CLASS__,'method' => __METHOD__];                    
-                }
-            } else {            
-                    return ['success' => true, 'data' => $data, 
-                        'class'=>__CLASS__,'method' => __METHOD__];
-            }          
+        if ($data = $this->repository->update($request->all(), $id)) {         
+            return ['success' => true, 'data' => $data, 
+                'class'=>__CLASS__,'method' => __METHOD__];                     
         }else{
             return ['success' => false, 'data'=>[], 'id' => $id,
                 'message'=>$this->repository->errors(),
@@ -150,8 +129,6 @@ class BaseController extends Controller
         $requestName = $this->requestName ? $this->requestName : 'BaseRequest';
         $request  = \App::make('App\Http\Requests\\'.$requestName); 
         $data = $this->repository->find($id);
-        //$this->resource::withoutWrapping();
-//        $data = new $this->resource($request);
         return ['success'=>$data?true:false,'data'=>$data];
     }
 
@@ -174,9 +151,8 @@ class BaseController extends Controller
     }
     
     public function buildTree($locale = 'pl')
-    {
-        $data = $this->tree(0, $locale);           
-        return $this->getResponseResult($data);
+    {        
+        return $this->getResponse($this->tree(0, $locale));
     }
 
     /**
@@ -268,64 +244,85 @@ class BaseController extends Controller
      * @param array $data
      * @return response
      */
-    public function getResponseResult($data)
+    public function getResponse($data = [], $successMessage = '', $falseMessage = '')
     {
-        return response()->json(['success'=>$data?true:false,'data'=>$data]);       
+        if ($data) {
+            return response()->json(['success' => true, 'data' => $data, 
+                'message' => $successMessage]);  
+        } else {
+            return response()->json(['success' => false, 'data' => $data, 
+                'message' => $falseMessage]);  
+        }                
     }  
     
-    public function getTranslations($id) 
-    {
-        $result = [];
+    public function getTranslations($id)
+    {   
         $record = [];
         $record = $this->repository->getModel()::find($id);
-        
         if ($record) {
-            $translations = $record->translations;
-            foreach ($translations as $translation) {
-                $result[] = $translation;
-            }            
+            return $this->getResponse($record->translations);       
         }
-        
-        if ($result) {
-            return response()->json(['data' => $result, 'success' => true]);        
-        } else {
-            return response()->json(['data' => [], 'success' => false, 
-                "message" => "There are no variants of translation for this record"]);       
-        }      
+        return $this->getResponse($record);        
     } 
     
-    public function addTranslation($id, Request $request)
+    public function addTranslation(Request $request, $id, $locale = 'pl')
     {
         $record = [];
-        $record = $this->repository->getModel()::find($id);
+        $model = $this->repository->getModel();
+        $record = $model::find($id);
+        if ($record) {
+            $record->translateOrNew($locale)->name = $request->name;          
+            if ($request->description) {
+                $record->translateOrNew($locale)->description = $request->description;  
+            }
+            if ($request->pack) {
+                $record->translateOrNew($locale)->pack = $request->pack;  
+            } 
+            return $this->getResponse($record->save());
+        }
         
-        $record->translateOrNew($request->locale)->name = $request->name;  
-        if ($request->description) {
-            $record->translateOrNew($request->locale)->description = $request->description;  
-        }
-        if ($request->pack) {
-            $record->translateOrNew($request->locale)->pack = $request->pack;  
-        }
-        
-        if ($record->save()) {
-            return response()->json(['data' => $record, 'success' => true]);        
-        } else {
-            return response()->json(['data' => [], 'success' => false, 
-                "message" => "Translation was not added"]);        
-        }
+        return $this->getResponse($record);       
     }
     
-    public function delTranslation($id, $locale)
+    public function deleteTranslation($id, $locale)
     {
         $record = [];
-        $record = $this->repository->getModel()::find($id);
+        $model = $this->repository->getModel();
+        $record = $model::find($id);
         
         if ($record) {
-            $record->deleteTranslations($locale);
-            return response()->json(['data' => $record, 'success' => true]);              
+            if ($record->deleteTranslations($locale)) {
+                return $this->getResponse($record->translations);
+            }
+        } 
+        
+        return $this->getResponse($record);        
+    }
+        
+    public function listByGroups($groups, $locale = 'pl')
+    {
+        $result = [];
+        
+        if ($groups == 0) {
+            $groups = $this->repository->getAll();
+        } else {         
+            $groups = $this->repository->get(explode(",", $groups));
+        }
+        
+        if ($groups) {
+            foreach ($groups as $group) {
+                $groupKids = $group->allKids($group);
+                foreach($groupKids as $kidGroup) {
+                    $groupsIds[] = $kidGroup->id;
+                }
+                $groupsIds[] = $group->id; 
+            }
+            $result = $this->repository->childRecordsByGroups($groupsIds, $locale);
         } else {
-            return response()->json(['data' => [], 'success' => false, 
-                "message" => "Record was not found"]);        
-        }        
-    }    
+            return response()->json(['success' => false, 'data' => $result, 
+                'message' => 'Groups products were not found']); 
+        }
+        
+        return response()->json(['success' => true, 'data' => $result]);         
+    }
 }

@@ -9,6 +9,23 @@ class DepartamentRepository extends BaseRepository
         return "App\Models\Departament";
     }
     
+    public function getWithAdditionals($id, $locale = 'pl') 
+    {
+        $record = parent::getWithAdditionals($id);
+        
+        if ($record) {
+            if (!$record->hasTranslation($locale)) {
+                $locale = 'pl';
+            }
+            $record->text  = $record->translate($locale)->name;  
+            $record->value = (string)$record->id;
+            $record->label = $record->translate($locale)->name;
+            $record->key   = $record->id;            
+        }  
+        
+        return $record;
+    }    
+    
     /**
      * Return list of departaments, which are root nodes 
      * (don`t have parent nodes)

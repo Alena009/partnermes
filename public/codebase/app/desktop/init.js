@@ -43,9 +43,10 @@ function appInit() {
                     mainToolbar.addButton("language-"+item.short, 3, item.short, null, null);
                 });                        
                 mainToolbar.disableItem("language-"+localStorage.getItem("language"));
-            } else {
-                location.reload();
-            }
+            } 
+            //else {
+//                location.reload();
+//            }
         }); 
 	mainSidebar.attachEvent("onSelect", function(id){
 		mainToolbar.setItemText("title", window.dhx4.template("<span style='font-weight: bold; font-size: 14px;'>#text#</span>", {text:mainSidebar.cells(id).getText().text}));

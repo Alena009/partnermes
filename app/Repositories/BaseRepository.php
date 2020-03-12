@@ -274,7 +274,12 @@ class BaseRepository
     
     public function getWithAdditionals($id)
     {
-        return $this->get($id);
+        $record = $this->get($id);
+        if ($record) {
+            $record->text  = $record->name;
+            $record->value = $record->id;
+        }
+        return $record;
     }
     
     public function getFewWithAdditionals($ids)

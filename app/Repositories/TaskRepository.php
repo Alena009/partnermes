@@ -13,7 +13,9 @@ class TaskRepository extends BaseRepository
     {        
         $task = parent::getWithAdditionals($id, $locale);
         
-        $task->task_group_name = $task->group->name;        
+        $task->task_group_name = $task->group->name;  
+        $task->value           = $task->id;
+        $task->text            = $task->name;         
         $task->key             = $task->id;
         $task->label           = $task->name; 
         $task->task_kod        = $task->kod;

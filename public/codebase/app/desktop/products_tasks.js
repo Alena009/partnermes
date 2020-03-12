@@ -318,7 +318,7 @@ function productsTasksInit(cell) {
                 zadaniaGroupGrid.enableDragAndDrop(true);                
                 zadaniaGroupGrid.fill = function(id = 0){	
                     this.clearAll();					
-                    ajaxGet("api/prodgroups/" + id + "/tasks", '', function(data){                                     
+                    ajaxGet("api/prodgroups/" + id + "/tasks/" + localStorage.language, '', function(data){                                     
                         if (data && data.success){
                             zadaniaGroupGrid.parse((data.data), "js");
                         }
@@ -521,7 +521,7 @@ function productsTasksInit(cell) {
                 });                  
                 zadaniaProductGrid.fill = function(id = 0){	
                     this.clearAll();					
-                    ajaxGet("api/products/"+id+"/tasks", '', function(data){                                     
+                    ajaxGet("api/products/"+id+"/tasks/" + localStorage.language, '', function(data){                                     
                         if (data && data.success){
                             zadaniaProductGrid.parse((data.data), "js");
                         }
